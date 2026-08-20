@@ -12,3 +12,16 @@ if ! grep -qE '^(feat|fix|docs|chore|refactor|perf|test|build|ci)(\(.+\))?: .+' 
   echo "Example: docs(agents): add data quality review agent"
   exit 1
 fi
+
+# Authorship: an AI co-author trailer attributes the work to an agent. The
+# identity check in pre-commit catches the author field; this catches the
+# trailer, which is a separate claim and survives an author change.
+if grep -qE '^[[:space:]]*Co-[Aa]uthored-[Bb]y:.*(Claude|Codex|ChatGPT|Copilot|anthropic\.com|openai\.com)|^[[:space:]]*(Claude|Codex)-Session:|Generated with \[(Claude Code|Codex)\]' "$commit_msg_file"; then
+  echo "Refusing to commit: message carries an AI co-author trailer."
+  echo
+  grep -nE '^[[:space:]]*Co-[Aa]uthored-[Bb]y:.*(Claude|Codex|ChatGPT|Copilot|anthropic\.com|openai\.com)|^[[:space:]]*(Claude|Codex)-Session:|Generated with \[(Claude Code|Codex)\]' "$commit_msg_file" | sed 's/^/  /'
+  echo
+  echo "Remove those lines. Commits here are attributed to the human"
+  echo "accountable for them."
+  exit 1
+fi

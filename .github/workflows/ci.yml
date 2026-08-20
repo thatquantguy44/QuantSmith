@@ -59,6 +59,12 @@ jobs:
           BASE="${{ github.event.pull_request.base.sha }}"
           [ -n "$BASE" ] || BASE="$(git rev-parse HEAD~1 2>/dev/null || true)"
           QF_STAGE_ENFORCE=1 QF_DIFF_BASE="$BASE" sh hooks/stages/run-stage.sh secret-scan
+      - name: Enforce commit authorship (no AI agent as author or co-author)
+        run: |
+          BASE="${{ github.event.pull_request.base.sha }}"
+          if [ -n "$BASE" ]; then RANGE="$BASE..HEAD"; else RANGE="HEAD~1..HEAD"; fi
+          QF_STAGE_ENFORCE=1 QF_ATTRIB_RANGE="$RANGE" \
+            sh hooks/stages/run-stage.sh agent-attribution
       - name: Enforce role-context safety (role_context.yml must never be tracked)
         run: |
           QF_STAGE_ENFORCE=1 sh hooks/stages/run-stage.sh role-context
