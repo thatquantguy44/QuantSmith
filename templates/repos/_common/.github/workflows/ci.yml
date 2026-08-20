@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+# Inbound-only. This repository is never started by another repository's
+# events: no `repository_dispatch` trigger is declared. If you adopt an
+# upstream release notification, add it as its OWN workflow file so the
+# inbound surface stays one obvious place.
+
+jobs:
+  gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }   # gates diff against the base commit
+
+      - name: Shell syntax
+        run: for f in hooks/stages/*.sh scripts/*.sh .githooks/*; do sh -n "$f"; done
+
+      # Blocking gates -- the invariants this repo will not ship without.
+      # Tune this list in quantsmith.conf; see docs/conformance.md.
+      - name: Enforce blocking gates
+        run: |
+          . ./quantsmith.conf
+          QF_STAGE_ENFORCE=1 sh hooks/stages/run-stage.sh $QF_GATES_BLOCKING
+
+      # Advisory gates -- reported, never fail the build. Graduate them to
+      # blocking as the repo's discipline matures.
+      - name: Advisory gates
+        run: |
+          . ./quantsmith.conf
+          sh hooks/stages/run-stage.sh $QF_GATES_ADVISORY || true
+
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install -e ".[dev]"
+      - run: pytest -q

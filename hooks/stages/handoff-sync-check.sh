@@ -31,7 +31,16 @@ DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 qf_stage_header handoff-sync "Handoff roadmap sync check"
 cd "$QF_ROOT"
 
+# The roadmap's filename is per-repo: this SDK calls it docs/handoff.md, a
+# scaffolded repo calls it docs/roadmap.md. Read the declared path when the
+# repo ships a quantsmith.conf, and fall back to this repo's own name so
+# nothing changes here.
 HANDOFF="docs/handoff.md"
+if [ -f quantsmith.conf ]; then
+  # shellcheck disable=SC1091
+  . ./quantsmith.conf
+  [ -n "${QF_DOC_ROADMAP:-}" ] && HANDOFF="$QF_DOC_ROADMAP"
+fi
 
 if [ ! -s "$HANDOFF" ]; then
   qf_warn "$HANDOFF is missing or empty -- the roadmap a new owner reads first."

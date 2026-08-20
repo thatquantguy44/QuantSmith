@@ -584,6 +584,50 @@ by the `knowledge` gate.
     whether retrieval changes anyone's behaviour, before investing further in
     machinery.
 
+16. **Repository shapes — pre-canned skeletons for multi-repo adoption.**
+    `templates/repos/` ships scaffolds a team picks from rather than assembling
+    a repo by hand: `quant-research`, `quant-models`, `data-pipelines`. Each
+    carries the full root structure (`.agents/`, `.copilot/`, `.githooks/`,
+    `.github/`, `config/`, `docs/`, `hooks/stages/`, `instructions/`,
+    `memory/`, `scripts/`, `specs/`, `src/`, `tests/`, `templates/`) plus
+    `CLAUDE.md`, `CONTRIBUTING.md`, `CHANGELOG.md`, `pyproject.toml`, and a
+    **pre-filled `quantsmith.conf`** — so the adopter configures nothing.
+
+    `scaffold-repo.sh --shape <name> --into <dir>` copies the shared base,
+    overlays the shape, and pulls in the SDK's gate scripts and templates, so
+    a scaffolded repo runs its own gates immediately. All three shapes
+    currently scaffold to ~90 files and pass their declared blocking gates on
+    a fresh tree, verified.
+
+    **The gate selection per shape is the substance, not the directories.**
+    `quant-research` keeps `spec` advisory — demanding a spec per experiment
+    stops people experimenting, which is the entire value of that shape.
+    `quant-models` blocks on `backtest` and `leakage`, because a look-ahead bug
+    there is a bad trade rather than a bad report. `data-pipelines` blocks on
+    `data-contract`/`pipeline-contract`, since a silent schema change reaching
+    a model months later is that shape's characteristic failure. Each shape's
+    `README.md` argues its selection rather than listing it.
+
+    This also **reverses the sequencing** previously planned for the
+    portability work: shipping the shapes first means the config format is
+    *derived* from three real configs rather than guessed at, so the gate
+    parameterization has something concrete to be validated against.
+    - **Done:** the three shapes, the scaffolder, the shared base, and
+      `handoff-sync` reading `QF_DOC_ROADMAP` (a down-payment on the gate
+      parameterization — a scaffolded repo names its roadmap
+      `docs/roadmap.md`, and the gate now honours that).
+    - **Next (`0050`):** parameterize the remaining doc gates against
+      `quantsmith.conf`; collapse `agent-catalog`+`spec-index` into one
+      `catalog-sync`, since both are "entities under a root must appear in an
+      index".
+    - **Then (`0051`):** conformance levels. `docs/conformance.md` and
+      `QF_CONFORMANCE_LEVEL` ship in the skeletons already, declared but not
+      yet verified by any gate — adoption is currently a claim, not a check.
+    - **Known gap:** `doc-counts` and `repro` are advisory in the shapes
+      because a fresh repo has no counts to drift and no run to reproduce.
+      Both should be promoted once a repo has content; the shapes say so
+      inline rather than leaving it silent.
+
 ## Open Questions For The Owner
 
 - Copyable scaffold, Python package, or CLI/copier? (Directionally answered in

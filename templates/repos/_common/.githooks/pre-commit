@@ -1,0 +1,21 @@
+#!/bin/sh
+set -e
+ROOT=$(git rev-parse --show-toplevel); cd "$ROOT"
+
+git diff --cached --name-only --diff-filter=ACMR | grep -Eq '(^|/)\.DS_Store$' && {
+  echo "Remove .DS_Store before committing."; exit 1; }
+
+# Authorship: commits are attributed to the human accountable for them.
+author="$(git config user.name || true) <$(git config user.email || true)>"
+if printf '%s' "$author" | grep -qiE '(^|[^a-z])claude([^a-z]|$)|anthropic\.com|(^|[^a-z])codex([^a-z]|$)|openai\.com|chatgpt|copilot\[bot\]'; then
+  echo "Refusing to commit: git identity is an AI agent -- $author"
+  echo "  git config user.name  'Your Name'"
+  echo "  git config user.email 'you@users.noreply.github.com'"
+  exit 1
+fi
+
+[ -x hooks/stages/handoff-sync-check.sh ] && {
+  QF_STAGE_ENFORCE=1 sh hooks/stages/handoff-sync-check.sh || {
+    echo "Commit blocked: the roadmap is out of sync."; exit 1; }; }
+
+echo "pre-commit checks passed."
