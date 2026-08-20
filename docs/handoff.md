@@ -512,12 +512,84 @@ by the `knowledge` gate.
       Track which agents, workflows, gates, and domain patterns are used by which
       teams; failure rates, completion times, and handoff quality. Informs next
       iterations and prioritization.
+15. **Company knowledge over time — one initiative, phased across specs.**
+    The goal: a workflow arrives already knowing a dataset's kinks, a
+    researcher does not re-derive what a colleague established last quarter,
+    and both can say where the knowledge came from and who vouched for it.
+    Phased like the role-operations roster (item 4) — small, shippable
+    specs rather than one large one, because the read path is useful before
+    a write path exists, and the write path should not be designed until
+    retrieval has shown what is worth capturing.
+
+    **Two distinct systems, easily conflated.** `instructions/workflow_memory.md`
+    governs `memory/` — structured records about databases, datasets, schemas,
+    fields, and their quirks. `instructions/knowledge_base.md` governs
+    `agents/knowledge/` reading a company's *unstructured* institutional
+    knowledge from external sources declared in `knowledge_sources.yml`. The
+    same four `knowledge/` agents serve both. Only the first has a runtime.
+
+    - **Scaffold — done** (spec `0002`): the `memory/` two-axis layout, the
+      record vocabulary (`type`/`confidence`/`corroboration`/`pit_scope`/
+      `status`), `manifest.yaml`, and the `memory` gate. Records were
+      committed but nothing ever read them *as records* — the gate greps for
+      the string `first_seen`, which proves a field name appears in a file
+      and nothing more.
+    - **Runtime, read path — partial** (spec `0048`): `workflow_memory.py`.
+      Built: a dependency-free subset YAML parser that raises rather than
+      guessing (`T-001`), a **type-aware point-in-time filter** (`T-003`),
+      and structural validation replacing the string grep (`T-005`), plus
+      list-form `evidence` with a derived corroboration count (`T-013`).
+      The PIT rule is the substantive idea: a memory store is *itself*
+      look-ahead, so mechanical facts (`schema`/`quirk`/`pitfall`) are
+      timeless while claims about what worked (`pattern`/`metric`/
+      `performance`) are bounded by `last_confirmed` — corroboration is
+      where the future enters a record.
+      **Outstanding:** `query` (`T-002`), `render_context` (`T-004` — until
+      this lands nothing can feed an agent prompt), decay (`T-006`), author
+      handles (`T-007`), `store_version` (`T-008`), the CLI and gate
+      rewiring (`T-009`/`T-010`), supersession and contradiction validation
+      (`T-014`–`T-016`). 11 of 23 `AC-*` verified.
+    - **Write path — planned** (spec `0049`, not yet written). Capture belongs
+      at the **runtime boundary, not the gate boundary**: a gate finding names
+      a source file (`"negative .shift()"`), while a record needs a dataset
+      scope (`field:close_adj`), and gates emit prose with no structured
+      output. `validate_ingestion` (`0039`) already returns findings carrying
+      a column and a quality rule — it looked at real rows and found something
+      about a real field. Same for `walk_forward` (`0046`, `performance`),
+      `fred_point_in_time` (`0045`, vintages), `factor_risk_model` (`0038`,
+      `metric`). Proposed shape: `propose_records()` in `workflow_memory.py`,
+      a **committed** `memory/inbox/` staging area so pull-request review *is*
+      the approval workflow, and `promote()` stamping `author`/`first_seen` on
+      acceptance. `templates/docs/run_card.md` gains a "Memory proposed"
+      section beside its existing "Memory version used".
+    - **Retrieval logging — not specced.** Nothing measures whether retrieval
+      helps, which leaves this initiative's own premise unevidenced. It also
+      gates pruning: without it the store only grows, and eventually costs
+      more to search than it saves. Cheapest version is recording which record
+      ids were served to a run, in the run-card slot that already exists.
+    - **Knowledge-base half — unspecced.** `agents/knowledge/` has four agent
+      contracts (`knowledge_ingestion`, `knowledge_curation`,
+      `knowledge_retrieval`, `institutional_memory`) and **zero Python files**;
+      the `knowledge` gate checks that configured source paths exist and
+      nothing else. Open question below on whether it gets a runtime.
+
+    **Honest status.** The store holds **5 records, all reference examples** —
+    no real institutional knowledge has been captured yet. The read path is
+    being built ahead of demand. The fastest test of whether this earns its
+    keep is capturing 20–30 real records from actual CRSP/FRED work and seeing
+    whether retrieval changes anyone's behaviour, before investing further in
+    machinery.
 
 ## Open Questions For The Owner
 
 - Copyable scaffold, Python package, or CLI/copier? (Directionally answered in
   `docs/packaging.md`; revisit its criteria if audience or update cadence changes.)
 - Which agent runtime is the primary target (local, general LLM, both)?
+- Does the knowledge-base half (item 15) get a runtime, or stay a pointer to
+  wherever the company's unstructured knowledge already lives (Confluence,
+  Notion, a docs repo)? Building a second store is only worth it if grounding,
+  access control, and provenance are things the existing system cannot do —
+  otherwise `agents/knowledge/` should retrieve from it, not replace it.
 - Which gates should graduate from advisory to enforced, and when?
 - Should downstream repos pin a version of the SDK, and how are updates delivered?
 

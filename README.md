@@ -427,6 +427,7 @@ the [spec index](specs/README.md).
 | [`0001`](specs/0001-daily-momentum-signal/) | Daily cross-sectional momentum signal *(reference)* | `momentum_signal.py` |
 | [`0006`](specs/0006-ml-return-forecasting/) | Cross-sectional short-horizon return forecasting | `return_forecasting.py` |
 | [`0041`](specs/0041-ranking-forecast/) | Cross-sectional ranking forecast — a pairwise (RankNet-style) ranking-loss variant of `0006`, composing its labels/features/folds/evaluation unmodified | `ranking_forecast.py` |
+| [`0048`](specs/0048-workflow-memory-runtime/) | Workflow memory runtime — makes `0002`'s committed store machine-readable: typed records, a type-aware point-in-time filter (mechanical facts timeless, claims about what worked bounded by `last_confirmed`), and structural validation replacing the string grep | `workflow_memory.py` |
 | [`0047`](specs/0047-downstream-contract/) | Downstream consumer contract — `DashboardSpec.schema_version` + compatibility check, release-notify workflow, and a copyable `quantsmith-version` gate for a separate consuming repository | `dashboard_spec.py` *(extended)* |
 | [`0046`](specs/0046-walk-forward/) | Walk-forward harness — purged/embargoed folds from `0006` refit per fold through `0044`'s engine; reports the out-of-sample fold distribution | `walk_forward.py` |
 | [`0045`](specs/0045-fred-point-in-time/) | FRED point-in-time panel adapter — vintage-correct reads of `gold_fred_point_in_time`, so a later revision cannot leak backwards | `fred_point_in_time.py` |

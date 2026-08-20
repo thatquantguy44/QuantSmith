@@ -586,3 +586,24 @@ Tests: `tests/test_financing_cost_analysis.py` (one test per acceptance criterio
 ```sh
 PYTHONPATH=src python3 -m pytest tests/test_financing_cost_analysis.py -q
 ```
+
+## `workflow_memory.py` — spec `0048`
+
+Makes spec `0002`'s committed `memory/` store machine-readable. `load_records`
+parses the YAML into typed `Record` objects with a dependency-free subset parser
+that raises `MemoryParseError(file, line, reason)` rather than guessing;
+`point_in_time_filter` enforces the P4 firewall; `validate` replaces the string
+grep the `memory` gate has always used.
+
+The point-in-time rule depends on record `type`, because a memory store is
+itself look-ahead: mechanical facts (`schema`/`quirk`/`pitfall`) are timeless,
+claims about what worked (`pattern`/`metric`/`performance`) are bounded by
+`last_confirmed` — corroboration is where the future enters a record — and
+`decision` is bounded by `first_seen`. The `pit_scope` rule applies
+independently and both must pass.
+
+Tests: `tests/test_workflow_memory.py` (one test per acceptance criterion).
+
+```sh
+PYTHONPATH=src python3 -m pytest tests/test_workflow_memory.py -q
+```
