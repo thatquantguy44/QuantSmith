@@ -4,7 +4,7 @@
 
 The SDK has a working v1: a **spec-driven engineering framework** over the six
 software-development stages, **161 agents** in `agents/`,
-**28 quality gates**, **33 instruction standards**, and CI that
+**29 quality gates**, **33 instruction standards**, and CI that
 enforces the deterministic gates. It remains primarily a scaffold to be copied
 into quant repos, with `src/quantsmith/pipelines/` holding runnable, dependency-free
 reference pipelines for most specs (see `specs/README.md`'s index for the current
@@ -43,7 +43,7 @@ as the live count, not the number here)** — all on the four-file contract
   `formulaic_alphas/` — see `agents/README.md` for per-group membership and
   counts, which change more often than this file is refreshed.
 
-**Gates (28)** in `hooks/stages/`, driven by `run-stage.sh`; advisory by default,
+**Gates (29)** in `hooks/stages/`, driven by `run-stage.sh`; advisory by default,
 `QF_STAGE_ENFORCE=1` blocks:
 
 - Cross-cutting: `spec`. Per stage: `planning`, `design`, `implementation`,
@@ -52,7 +52,7 @@ as the live count, not the number here)** — all on the four-file contract
   `repro`, `data-contract`, `pipeline-contract`, `alert-contract`,
   `monitoring-coverage`, `data-provenance`.
 - Repo: `secret-scan`, `docs-link`, `agent-catalog`, `spec-index`, `readme-sync`,
-  `doc-counts`, `quantsmith-version`, `agent-attribution`, `knowledge`, `memory`, `role-context`,
+  `doc-counts`, `quantsmith-version`, `agent-attribution`, `handoff-sync`, `knowledge`, `memory`, `role-context`,
   `model-plugin`, `source-catalog`.
 
 **Instructions (33)** — constitution, SDD method, point-in-time, and the domain
@@ -114,11 +114,15 @@ by the `knowledge` gate.
    models via `agents/optimization/model_plugin_registration/`, spec `0026`,
    rather than the SDK
    owning the optimization logic itself — see item 5.)
-2. **Machine-learning and deep-learning workflow expansion** — the first runtime
-   workflow is shipped as `specs/0006-ml-return-forecasting/` (ML build chain end to
-   end with a DL challenger, plus a runnable reference pipeline and tests). Next: add
-   more ML/DL worked examples (ranking, RL, forecasting variants) as the desk needs
-   them.
+2. **Machine-learning and deep-learning workflow expansion** — the agent roster
+   is specified by `specs/0004-optimizer-ml-dl-agent-expansion/` (the
+   `optimization/`, `machine_learning/`, and `deep_learning/` groups as agent
+   contracts, verified by the catalog/docs gates rather than a runtime). The
+   first runtime workflow is shipped as `specs/0006-ml-return-forecasting/` (ML
+   build chain end to end with a DL challenger, plus a runnable reference
+   pipeline and tests), with `specs/0041-ranking-forecast/` as its ranking-loss
+   variant. Next: add more ML/DL worked examples (RL, forecasting variants) as
+   the desk needs them.
 3. **Data-engineering & data-analyst spec + runtime coverage** — closing the biggest
    structural gap, role by role.
    - **Data Analyst — analysis + communication layers shipped.** Governed analysis:

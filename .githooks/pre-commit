@@ -49,4 +49,18 @@ if printf '%s' "$author" | grep -qiE '(^|[^a-z])claude([^a-z]|$)|anthropic\.com|
   exit 1
 fi
 
+# Roadmap: a new spec must not be committed without its handoff entry.
+# Blocking, because the whole failure mode is silence -- an advisory warning
+# here is one the author scrolls past, and the drift is only noticed months
+# later by someone who cannot find the work.
+if [ -x hooks/stages/handoff-sync-check.sh ]; then
+  QF_STAGE_ENFORCE=1 sh hooks/stages/handoff-sync-check.sh || {
+    echo
+    echo "Commit blocked: docs/handoff.md is out of sync."
+    echo "Add the spec's roadmap entry, or run with --no-verify if this is"
+    echo "deliberately a partial commit."
+    exit 1
+  }
+fi
+
 echo "QuantSmith pre-commit checks passed."
