@@ -6,7 +6,7 @@ set -e
 ROOT_DIR=$(git rev-parse --show-toplevel)
 cd "$ROOT_DIR"
 
-for file in README.md agentic_dictionary.md docs/sdk_plan.md docs/handoff.md; do
+for file in README.md agentic_dictionary.md docs/sdk_plan.md docs/handoff.md PERSISTENT_KNOWLEDGE.md; do
   if [ ! -s "$file" ]; then
     echo "Required SDK document missing or empty: $file"
     exit 1

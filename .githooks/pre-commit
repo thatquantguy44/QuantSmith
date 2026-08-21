@@ -11,7 +11,7 @@ if git diff --cached --name-only --diff-filter=ACMR | grep -Eq '(^|/)\.DS_Store$
   exit 1
 fi
 
-for file in README.md agentic_dictionary.md docs/sdk_plan.md docs/handoff.md; do
+for file in README.md agentic_dictionary.md docs/sdk_plan.md docs/handoff.md PERSISTENT_KNOWLEDGE.md; do
   if [ ! -f "$file" ]; then
     echo "Required SDK document missing: $file"
     exit 1
