@@ -21,6 +21,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
+from quantsmith.pipelines import access_control
 from quantsmith.pipelines import workflow_memory as wm
 
 SOURCE_TYPES = ("user_note", "firm_research", "fund_manager", "sell_side", "generated", "email_tagged")
@@ -201,15 +202,29 @@ def _item_view(it: ResearchItem, as_of: datetime.date) -> Dict:
 
 
 def build_research_model(store: ResearchStore, *, as_of: Optional[datetime.date] = None,
-                         generated_at: Optional[str] = None) -> Dict:
+                         generated_at: Optional[str] = None,
+                         viewer_clearance: Optional[str] = None) -> Dict:
     """Deterministic JSON view-model over the research/ store.
 
     Mirrors the shape of ``model.build_model``: counts, item detail, and a
     visible/hidden split driven by ``review_status`` (quarantined/deleted items
     are flagged, never silently dropped from the payload — the terminal decides
     what to show, this module only tells the truth about what exists).
+
+    ``viewer_clearance`` is ``None`` by default (see everything). When set,
+    items above that clearance are dropped before counts/items are computed
+    (spec 0058 REQ-011) — same pattern, same guarantee, as ``model.build_model``.
     """
     as_of = as_of or datetime.date.today()
+    items = store.items
+    if viewer_clearance is not None:
+        items = tuple(
+            it for it in items
+            if access_control.access_level_allows(it.access_level, viewer_clearance)
+        )
+        store = ResearchStore(items=items, default_freshness_days=store.default_freshness_days,
+                              root=store.root)
+
     items_view = [_item_view(it, as_of) for it in store.items]
     items_view.sort(key=lambda d: d["id"])
 
@@ -239,6 +254,17 @@ def build_research_model(store: ResearchStore, *, as_of: Optional[datetime.date]
 
 def build_research_model_from_root(root: str | os.PathLike = "research", *,
                                    as_of: Optional[datetime.date] = None,
-                                   generated_at: Optional[str] = None) -> Dict:
+                                   generated_at: Optional[str] = None,
+                                   viewer_override: Optional[str] = None) -> Dict:
+    """Load the research/ tree, resolve the viewer's clearance, build its model.
+
+    Same repo-root inference and opt-in behavior as
+    ``model.build_model_from_root`` (spec 0058) — see its docstring.
+    """
     store = load_research_store(root)
-    return build_research_model(store, as_of=as_of, generated_at=generated_at)
+    root_path = Path(root)
+    access_root = root_path.parent if root_path.name else root_path
+    viewer_clearance = access_control.resolve_viewer_clearance(
+        override=viewer_override, root=access_root)
+    return build_research_model(store, as_of=as_of, generated_at=generated_at,
+                                viewer_clearance=viewer_clearance)

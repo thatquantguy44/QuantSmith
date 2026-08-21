@@ -23,7 +23,6 @@ from quantsmith.pipelines.ingestion_data_contract import (
     validate_ingestion,
 )
 from quantsmith.pipelines.workflow_memory import (
-    Candidate,
     CandidateSpec,
     MemoryWriteError,
     derive_handle,
@@ -85,11 +84,13 @@ def test_different_identities_derive_different_handles_AC_003():
 # --- AC-004: no identity resolves to None without raising ----------------------
 
 def test_no_identity_resolves_to_none_without_raising_AC_004(monkeypatch, tmp_path):
+    # _git_identity/_os_identity relocated to access_control.py (spec 0058);
+    # workflow_memory.resolve_author is a re-export of the same function object.
     monkeypatch.delenv("QF_MEMORY_AUTHOR", raising=False)
     monkeypatch.setattr(
-        "quantsmith.pipelines.workflow_memory._git_identity", lambda: None)
+        "quantsmith.pipelines.access_control._git_identity", lambda: None)
     monkeypatch.setattr(
-        "quantsmith.pipelines.workflow_memory._os_identity", lambda: None)
+        "quantsmith.pipelines.access_control._os_identity", lambda: None)
     assert resolve_author(root=str(tmp_path)) is None
 
 

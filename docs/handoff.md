@@ -4,7 +4,7 @@
 
 The SDK has a working v1: a **spec-driven engineering framework** over the six
 software-development stages, **161 agents** in `agents/`,
-**32 quality gates**, **33 instruction standards**, and CI that
+**33 quality gates**, **33 instruction standards**, and CI that
 enforces the deterministic gates. It remains primarily a scaffold to be copied
 into quant repos, with `src/quantsmith/pipelines/` holding runnable, dependency-free
 reference pipelines for most specs (see `specs/README.md`'s index for the current
@@ -43,7 +43,7 @@ as the live count, not the number here)** — all on the four-file contract
   `formulaic_alphas/` — see `agents/README.md` for per-group membership and
   counts, which change more often than this file is refreshed.
 
-**Gates (32)** in `hooks/stages/`, driven by `run-stage.sh`; advisory by default,
+**Gates (33)** in `hooks/stages/`, driven by `run-stage.sh`; advisory by default,
 `QF_STAGE_ENFORCE=1` blocks:
 
 - Cross-cutting: `spec`. Per stage: `planning`, `design`, `implementation`,
@@ -52,7 +52,7 @@ as the live count, not the number here)** — all on the four-file contract
   `repro`, `data-contract`, `pipeline-contract`, `alert-contract`,
   `monitoring-coverage`, `data-provenance`.
 - Repo: `secret-scan`, `docs-link`, `agent-catalog`, `spec-index`, `readme-sync`,
-  `doc-counts`, `quantsmith-version`, `agent-attribution`, `handoff-sync`, `upstream-drift`, `ownership`, `persistent-knowledge`, `knowledge`, `memory`, `role-context`,
+  `doc-counts`, `quantsmith-version`, `agent-attribution`, `handoff-sync`, `upstream-drift`, `ownership`, `persistent-knowledge`, `knowledge`, `memory`, `access`, `role-context`,
   `model-plugin`, `source-catalog`.
 
 **Instructions (33)** — constitution, SDD method, point-in-time, and the domain
@@ -116,7 +116,7 @@ nobody noticed.
 | `0053` | **MCP memory-graph server** — tools over `0048`'s store, with `as_of` honouring the type-aware point-in-time rule | `0048` `T-002`/`T-004`; ideally `0049` | item 17 |
 | `0054` | **MCP RAG server** — vector search with per-access-tier indexes and cited passages | `0052` contract | item 17 |
 
-**Next free spec number: `0057`.** Reserving a number here does not create the
+**Next free spec number: `0059`.** Reserving a number here does not create the
 directory; run `./scripts/new-spec.sh` (or copy `templates/spec/`) when the work
 actually starts.
 
@@ -523,8 +523,8 @@ then adapters can deploy to cron/GitHub Actions/Airflow/Dagster/Prefect.
     as real sources come into use.
 
 14. **P1 Generalization & Team Onboarding — making QuantSmith self-serve across
-    domains.** QuantSmith is now a comprehensive framework (161 agents, 50 specs,
-    32 gates, 33 standards); the next phase is reducing discovery friction and
+    domains.** QuantSmith is now a comprehensive framework (161 agents, 51 specs,
+    33 gates, 33 standards); the next phase is reducing discovery friction and
     enabling team-intuitive adoption without deep codebase reading.
     - **P0 Phase 1a: Role profiles** (`roles/{portfolio_manager,risk_manager,quant_researcher,data_engineer,compliance_officer}.md`):
       Define personas with their workflows, agents, specs, and handoff points. A
@@ -636,6 +636,34 @@ then adapters can deploy to cron/GitHub Actions/Airflow/Dagster/Prefect.
       each a thin translator against the same `CandidateSpec` contract —
       not blocked on anything here. `templates/docs/run_card.md` gained the
       "Memory proposed" field beside its existing "Memory version used".
+    - **Per-person viewer access control — built** (spec
+      `0058-viewer-access-control`): `access_control.py`. Activates
+      `access_level`, the field `0048`'s own spec named and explicitly
+      deferred enforcing "until a caller exists that has a level to enforce
+      against" — `0057` built two. A committed, opt-in `access/roster.yml`
+      maps a resolved pseudonymous handle (reusing `0049`'s `resolve_author`/
+      `derive_handle` unchanged, moved rather than duplicated to avoid a
+      circular import) to a `public`/`internal`/`restricted` clearance.
+      Enforcement is inactive with no roster or an empty one — identical to
+      today's unfiltered behavior — and activates for *every* viewer, not
+      only listed ones, the moment the roster names its first person; an
+      unlisted or unresolvable identity falls back to the roster's declared
+      `default_clearance`, never full access by omission. Filtering happens
+      once, at the read boundary — `workflow_memory.query(...,
+      viewer_clearance=...)` and both `0057` view-model builders
+      (`knowledge_console.model`/`knowledge_console.research`, covering the
+      `0056` research store too) — as a plain optional parameter on otherwise
+      pure functions, so nothing downstream (rendering, the graph, the
+      review queue, an exported snapshot) can see what was already filtered
+      out, and every pre-existing caller that omits it is unaffected
+      (NFR-004, all 290 pre-`0058` tests pass unmodified bar one mechanical
+      monkeypatch-target fix). A `whoami` CLI command and a `preview-access`
+      command make onboarding and roster-change review a copy-paste, not a
+      source-code read; a new `access-check.sh` gate validates the roster
+      the same way `memory-check.sh` validates `memory/`. Explicitly not
+      authentication — pseudonymous, local-per-person, same trust model
+      `0049` already established for write attribution; a shared/
+      multi-tenant deployment needs the `0052`–`0054` MCP-server work first.
     - **Retrieval logging — not specced.** Nothing measures whether retrieval
       helps, which leaves this initiative's own premise unevidenced. It also
       gates pruning: without it the store only grows, and eventually costs
