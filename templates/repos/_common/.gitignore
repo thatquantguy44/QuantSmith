@@ -27,3 +27,6 @@ htmlcov/
 *.parquet
 data/raw/
 data/interim/
+
+# Local gate usage telemetry -- see scripts/usage-report.sh
+.qf-usage.tsv

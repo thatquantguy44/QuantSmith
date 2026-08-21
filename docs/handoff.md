@@ -4,7 +4,7 @@
 
 The SDK has a working v1: a **spec-driven engineering framework** over the six
 software-development stages, **161 agents** in `agents/`,
-**29 quality gates**, **33 instruction standards**, and CI that
+**31 quality gates**, **33 instruction standards**, and CI that
 enforces the deterministic gates. It remains primarily a scaffold to be copied
 into quant repos, with `src/quantsmith/pipelines/` holding runnable, dependency-free
 reference pipelines for most specs (see `specs/README.md`'s index for the current
@@ -43,7 +43,7 @@ as the live count, not the number here)** — all on the four-file contract
   `formulaic_alphas/` — see `agents/README.md` for per-group membership and
   counts, which change more often than this file is refreshed.
 
-**Gates (29)** in `hooks/stages/`, driven by `run-stage.sh`; advisory by default,
+**Gates (31)** in `hooks/stages/`, driven by `run-stage.sh`; advisory by default,
 `QF_STAGE_ENFORCE=1` blocks:
 
 - Cross-cutting: `spec`. Per stage: `planning`, `design`, `implementation`,
@@ -52,7 +52,7 @@ as the live count, not the number here)** — all on the four-file contract
   `repro`, `data-contract`, `pipeline-contract`, `alert-contract`,
   `monitoring-coverage`, `data-provenance`.
 - Repo: `secret-scan`, `docs-link`, `agent-catalog`, `spec-index`, `readme-sync`,
-  `doc-counts`, `quantsmith-version`, `agent-attribution`, `handoff-sync`, `knowledge`, `memory`, `role-context`,
+  `doc-counts`, `quantsmith-version`, `agent-attribution`, `handoff-sync`, `upstream-drift`, `ownership`, `knowledge`, `memory`, `role-context`,
   `model-plugin`, `source-catalog`.
 
 **Instructions (33)** — constitution, SDD method, point-in-time, and the domain
@@ -701,6 +701,64 @@ actually starts.
 
     Related: item 15 (what the knowledge is), item 16 (how repos adopt it).
     This item is how a team *reaches* it.
+
+18. **Firmwide readiness — distribution, ownership, and usage signal.**
+    Three of the five gaps between "a good SDK" and "infrastructure a firm
+    runs on". Built as gates rather than documents, because the failure in
+    each case is silence.
+
+    - **Distribution that does not drift** — `upstream-drift` (gate 30) plus
+      `scripts/sync-upstream.sh`. Adoption is copy-and-own, so ten repos
+      copying one gate and each tuning it a little is not a risk, it is a
+      certainty. You cannot prevent that and should not try: adopters SHOULD
+      tune gates to their repo. What you can do is make divergence **visible**.
+      Each shape now pins `QF_UPSTREAM_REF`; the gate reports every copied file
+      that differs from it, and the sync script either refreshes the copies or
+      moves the pin. Dry-run by default, since a sync that silently overwrote
+      local tuning would destroy the thing the model is built around.
+      Offline-tolerant: an unreachable upstream reports and exits clean,
+      because a gate that goes red when GitHub is slow is one people learn to
+      ignore.
+
+    - **Ownership and a support path** — `ownership` (gate 31), plus
+      `docs/ownership.md` and `docs/gate_runbook.md` in this repo and every
+      shape. The gate's substance is **placeholder detection**: a scaffold
+      ships `@OWNER` and `<@handle>` deliberately, and those are precisely the
+      strings that survive to production if nothing looks for them. An unfilled
+      template reads as governed while owning nothing. It is blocking in every
+      shape — unlike a run manifest, ownership can be filled in on day one, and
+      a fresh scaffold goes from blocked to passing in about thirty seconds.
+      Found the gap **here** on its first run: this repository had no
+      CODEOWNERS, no ownership document, and no runbook. All three now exist.
+      `docs/ownership.md` states the single-maintainer risk plainly rather than
+      hiding it — every surface has one owner and no backup, which is the first
+      thing that breaks at firm scale.
+
+    - **A usage signal** — `QF_USAGE_LOG` in `common.sh` plus
+      `scripts/usage-report.sh`. Off unless the path is set; records only
+      timestamp, gate, finding count, and enforce flag. No paths, no finding
+      text, no identity, and it never leaves the machine — a usage log carrying
+      findings would carry company data, and this has to stay safe to enable
+      anywhere. It answers what nobody could answer before: which gates ever
+      fire, which never do, which deserve promoting to blocking.
+      **Its first run was already informative** — `repro`, `doc-counts`, and
+      `data-provenance` fire on 100% of runs in this repo, which by the
+      report's own guidance means "a known finding people have learned to
+      ignore." That is an accurate description of how they have been treated.
+
+    **The two gaps deliberately NOT closed here**, because neither is buildable
+    from inside this repository:
+    - **One real workflow on real data.** Every shipped result is synthetic and
+      says so. The real run remains blocked on `fred_local.db`, which only the
+      operator can produce. This is the highest-value next action in the whole
+      backlog — it converts every worked example from argument to evidence, and
+      it is the thing that would make the memory write path concrete rather
+      than speculative.
+    - **`access_level` enforced rather than declared.** It exists in the record
+      schema, in `knowledge_sources.yml`, and in `instructions/knowledge_base.md`
+      — and `query()` cannot filter on it. For a firm with information barriers
+      that is a blocker, not a gap. Belongs with the MCP work (item 17), where
+      caller clearance has to be a parameter rather than an assumption.
 
 ## Open Questions For The Owner
 
