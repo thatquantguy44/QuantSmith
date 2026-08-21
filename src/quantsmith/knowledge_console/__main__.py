@@ -15,7 +15,10 @@ import argparse
 import datetime
 import sys
 
+import json
+
 from . import model as model_mod
+from . import query as query_mod
 from . import server as server_mod
 
 
@@ -42,7 +45,19 @@ def main(argv=None) -> int:
     p_print = sub.add_parser("print", help="print the view-model to stdout")
     p_print.add_argument("--root", default="memory")
 
+    p_query = sub.add_parser("query", help="answer a question, print JSON to stdout")
+    p_query.add_argument("--root", default="memory")
+    p_query.add_argument("--question", required=True)
+    p_query.add_argument("--k", type=int, default=5)
+
     args = parser.parse_args(argv)
+
+    if args.command == "query":
+        store = model_mod.load_store(args.root)
+        records = [lr.record for lr in store.records]
+        answer = query_mod.resolve_engine().answer(args.question, records, k=args.k)
+        print(json.dumps(answer.to_dict(), ensure_ascii=False))
+        return 0
 
     if args.command == "serve":
         static = args.static or None
