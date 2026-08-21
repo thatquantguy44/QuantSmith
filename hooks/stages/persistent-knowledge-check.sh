@@ -1,18 +1,22 @@
 #!/bin/sh
 # Repo gate - Persistent knowledge guide sync check.
 #
-# PERSISTENT_KNOWLEDGE.md at the repo root is the guide to the workflow-memory
-# system: what is built, what is planned, and a live status table (record
-# count, spec 0048 task/AC progress). Like every narrative doc in this repo, it
-# drifts the moment nobody depends on it -- and a knowledge-system guide with
-# stale knowledge-system numbers undermines the very thing it is explaining.
+# PERSISTENT_KNOWLEDGE.md at the repo root is the guide to the institutional-
+# knowledge system as a whole: workflow memory's store and its live status
+# table (record count, spec 0048 task/AC progress), the write path (0049), the
+# read-only front ends over it (0057's console and terminal), and the
+# market-research reference store (0056). Like every narrative doc in this
+# repo, it drifts the moment nobody depends on it -- and a knowledge-system
+# guide with stale knowledge-system numbers undermines the very thing it is
+# explaining.
 #
 # WHAT THIS CAN AND CANNOT CHECK -- stated plainly, same limit handoff-sync and
 # doc-counts name about themselves:
 #
 #   CAN   the four numbers in the status table (records, 0048 tasks done/total,
 #         ACs verified) against what the filesystem actually shows, and that a
-#         change to the memory system arrives with an edit to this file.
+#         change to the memory system, its write path, its front ends, or the
+#         market-research reference store arrives with an edit to this file.
 #   CANNOT  whether the prose elsewhere in the guide is accurate. That still
 #         needs a human.
 #
@@ -79,26 +83,39 @@ else
   qf_info "Truth: $true_records record(s), $true_tasks_done/$true_tasks_total spec-0048 task(s) done, $true_acs_done/$true_acs_total AC(s) verified. Checked $checked claim(s)."
 fi
 
-# --- 2. Co-change: a memory-system change should arrive with a guide edit --
+# --- 2. Co-change: a knowledge-system change should arrive with a guide edit --
 # Deliberately narrow to the files that change the numbers or the shape of the
-# system this guide describes -- not every repo change, which would nag and
-# train people to make token edits to silence it.
+# systems this guide describes -- not every repo change, which would nag and
+# train people to make token edits to silence it. Covers workflow memory and
+# its write path (0048/0049), the read-only front ends over it (0057's
+# web/ console and apps/knowledge-console/ terminal), and the market-research
+# reference store (0056) -- four systems, one guide.
 changed=$(qf_changed_files)
 if [ -n "$changed" ]; then
   guide_touched=0
   printf '%s\n' "$changed" | grep -qx "$GUIDE" && guide_touched=1
 
   memory_touched=0
+  what_changed=""
   for f in $changed; do
     case "$f" in
-      src/quantsmith/pipelines/workflow_memory.py) memory_touched=1 ;;
-      memory/*.yaml|memory/*/*.yaml|memory/*/*/*.yaml|memory/*/*/*/*.yaml) memory_touched=1 ;;
-      "$TASKS") memory_touched=1 ;;
+      src/quantsmith/pipelines/workflow_memory.py|src/quantsmith/pipelines/workflow_memory_cli.py)
+        memory_touched=1; what_changed="$what_changed workflow_memory" ;;
+      memory/*.yaml|memory/*/*.yaml|memory/*/*/*.yaml|memory/*/*/*/*.yaml)
+        memory_touched=1; what_changed="$what_changed a memory/ record" ;;
+      "$TASKS")
+        memory_touched=1; what_changed="$what_changed 0048's tasks.md" ;;
+      src/quantsmith/knowledge_console/*|web/src/*)
+        memory_touched=1; what_changed="$what_changed the knowledge console" ;;
+      apps/knowledge-console/src/*)
+        memory_touched=1; what_changed="$what_changed the terminal" ;;
+      research/*.yaml|research/manifest.yaml)
+        memory_touched=1; what_changed="$what_changed the research/ reference store" ;;
     esac
   done
 
   if [ "$memory_touched" -eq 1 ] && [ "$guide_touched" -eq 0 ]; then
-    qf_warn "workflow_memory.py, a memory/ record, or 0048's tasks.md changed, but $GUIDE was not touched -- its status table may now be stale."
+    qf_warn "changed:$what_changed -- but $GUIDE was not touched; its status table or front-end/research sections may now be stale."
   fi
 fi
 
