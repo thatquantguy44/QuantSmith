@@ -102,6 +102,15 @@ class Record:
     Field order matters: everything spec ``0002`` committed comes first, and
     every field ``0048`` adds is appended with a default, so the files ``0002``
     wrote parse unchanged (spec NFR-003).
+
+    ``depends_on`` names records this one's statement relies on being true —
+    e.g. a ``pattern`` that depends on a ``quirk`` it assumes. It is not
+    validated yet (no cycle/dangling check, unlike ``superseded_by``); the
+    field exists so a real record can carry the relation from the day it is
+    written, rather than the relation being lost because nowhere to put it. Do
+    not confuse it with ``coexists``, which silences the contradiction check
+    for two records that legitimately both hold — ``depends_on`` says one
+    record is only true *because* another is.
     """
 
     id: str
@@ -120,6 +129,7 @@ class Record:
     author: Optional[str] = None
     superseded_by: Optional[str] = None
     coexists: Tuple[str, ...] = ()
+    depends_on: Tuple[str, ...] = ()
     # --- provenance for findings; not part of the record vocabulary -------
     source_file: str = ""
     source_line: int = 0
@@ -324,6 +334,9 @@ def build_record(raw: Mapping, file: str = "", line: int = 0,
     coexists = raw.get("coexists") or ()
     if isinstance(coexists, str):
         coexists = (coexists,)
+    depends_on = raw.get("depends_on") or ()
+    if isinstance(depends_on, str):
+        depends_on = (depends_on,)
     return Record(
         id=str(raw["id"]),
         scope=str(raw["scope"]),
@@ -340,6 +353,7 @@ def build_record(raw: Mapping, file: str = "", line: int = 0,
         author=(str(raw["author"]) if raw.get("author") else None),
         superseded_by=(str(raw["superseded_by"]) if raw.get("superseded_by") else None),
         coexists=tuple(str(c) for c in coexists),
+        depends_on=tuple(str(d) for d in depends_on),
         source_file=file,
         source_line=line,
     )
