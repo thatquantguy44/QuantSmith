@@ -34,4 +34,33 @@ for hook in .githooks/*; do
   sh -n "$hook"
 done
 
+# Authorship: refuse to create a commit under an AI agent identity. This is the
+# only place the check is cheap -- once the commit exists, fixing it means
+# rewriting history. Blocking here regardless of QF_STAGE_ENFORCE, because an
+# advisory warning at commit time is one the author has already scrolled past.
+author="$(git config user.name || true) <$(git config user.email || true)>"
+if printf '%s' "$author" | grep -qiE '(^|[^a-z])claude([^a-z]|$)|anthropic\.com|(^|[^a-z])codex([^a-z]|$)|openai\.com|chatgpt|copilot\[bot\]'; then
+  echo "Refusing to commit: git identity is an AI agent -- $author"
+  echo
+  echo "Commits here are attributed to the human accountable for them."
+  echo "Set a human identity:"
+  echo "  git config user.name  'Your Name'"
+  echo "  git config user.email 'you@users.noreply.github.com'"
+  exit 1
+fi
+
+# Roadmap: a new spec must not be committed without its handoff entry.
+# Blocking, because the whole failure mode is silence -- an advisory warning
+# here is one the author scrolls past, and the drift is only noticed months
+# later by someone who cannot find the work.
+if [ -x hooks/stages/handoff-sync-check.sh ]; then
+  QF_STAGE_ENFORCE=1 sh hooks/stages/handoff-sync-check.sh || {
+    echo
+    echo "Commit blocked: docs/handoff.md is out of sync."
+    echo "Add the spec's roadmap entry, or run with --no-verify if this is"
+    echo "deliberately a partial commit."
+    exit 1
+  }
+fi
+
 echo "QuantSmith pre-commit checks passed."

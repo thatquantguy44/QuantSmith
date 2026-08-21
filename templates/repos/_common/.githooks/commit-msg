@@ -1,0 +1,10 @@
+#!/bin/sh
+msg="$1"
+[ -s "$msg" ] || { echo "Empty commit message not allowed."; exit 1; }
+
+grep -qE '^(feat|fix|docs|chore|refactor|perf|test|build|ci)(\(.+\))?: .+' "$msg" || {
+  echo "Use Conventional Commits: type(scope?): description"; exit 1; }
+
+grep -qE '^[[:space:]]*Co-[Aa]uthored-[Bb]y:.*(Claude|Codex|ChatGPT|Copilot|anthropic\.com|openai\.com)|^[[:space:]]*(Claude|Codex)-Session:|Generated with \[(Claude Code|Codex)\]' "$msg" && {
+  echo "Refusing to commit: message carries an AI co-author trailer."; exit 1; }
+exit 0

@@ -1,0 +1,5 @@
+# Pinned dependencies. Exact pins (==), not ranges: the repro gate treats an
+# unpinned environment as a finding, because "it worked last quarter" is not a
+# result anyone can reproduce.
+#
+# Regenerate with:  pip freeze > requirements.txt

@@ -4,7 +4,7 @@
 
 The SDK has a working v1: a **spec-driven engineering framework** over the six
 software-development stages, **161 agents** in `agents/`,
-**27 quality gates**, **33 instruction standards**, and CI that
+**29 quality gates**, **33 instruction standards**, and CI that
 enforces the deterministic gates. It remains primarily a scaffold to be copied
 into quant repos, with `src/quantsmith/pipelines/` holding runnable, dependency-free
 reference pipelines for most specs (see `specs/README.md`'s index for the current
@@ -43,7 +43,7 @@ as the live count, not the number here)** — all on the four-file contract
   `formulaic_alphas/` — see `agents/README.md` for per-group membership and
   counts, which change more often than this file is refreshed.
 
-**Gates (27)** in `hooks/stages/`, driven by `run-stage.sh`; advisory by default,
+**Gates (29)** in `hooks/stages/`, driven by `run-stage.sh`; advisory by default,
 `QF_STAGE_ENFORCE=1` blocks:
 
 - Cross-cutting: `spec`. Per stage: `planning`, `design`, `implementation`,
@@ -52,7 +52,7 @@ as the live count, not the number here)** — all on the four-file contract
   `repro`, `data-contract`, `pipeline-contract`, `alert-contract`,
   `monitoring-coverage`, `data-provenance`.
 - Repo: `secret-scan`, `docs-link`, `agent-catalog`, `spec-index`, `readme-sync`,
-  `doc-counts`, `quantsmith-version`, `knowledge`, `memory`, `role-context`,
+  `doc-counts`, `quantsmith-version`, `agent-attribution`, `handoff-sync`, `knowledge`, `memory`, `role-context`,
   `model-plugin`, `source-catalog`.
 
 **Instructions (33)** — constitution, SDD method, point-in-time, and the domain
@@ -91,6 +91,29 @@ by the `knowledge` gate.
 
 ## What's Next (prioritized)
 
+### Planned specs (reserved, not yet written)
+
+The one place to see committed-to work that has no spec directory yet. The
+`handoff-sync` gate cannot protect these: it checks that every spec *directory*
+is referenced here, so work that exists only as an intention is invisible to it.
+This table is the manual counterpart — if a number below never becomes a
+directory, that should be a deliberate decision recorded here, not a thing
+nobody noticed.
+
+| Spec | What | Depends on | Tracked in |
+| --- | --- | --- | --- |
+| `0049` | Workflow memory **write path** — `propose_records()` at the runtime boundary, committed `memory/inbox/` staging, `promote()` on human review | `0048` read path (`T-002`/`T-004`) | item 15 |
+| `0050` | **Portable doc-integrity gates** — parameterize against `quantsmith.conf`; collapse `agent-catalog`+`spec-index` into one `catalog-sync` | the three shapes (done, item 16) | item 16 |
+| `0051` | **Conformance levels** — make `QF_CONFORMANCE_LEVEL` verified rather than declared | `0050` config contract | item 16 |
+| `0052` | **MCP adapter contract + resources server** — `adapters/mcp_servers/`, serving `knowledge_sources.yml` over the resources primitive | none (reuses the existing manifest) | item 17 |
+| `0053` | **MCP memory-graph server** — tools over `0048`'s store, with `as_of` honouring the type-aware point-in-time rule | `0048` `T-002`/`T-004`; ideally `0049` | item 17 |
+| `0054` | **MCP RAG server** — vector search with per-access-tier indexes and cited passages | `0052` contract | item 17 |
+
+**Next free spec number: `0055`.** Reserving a number here does not create the
+directory; run `./scripts/new-spec.sh` (or copy `templates/spec/`) when the work
+actually starts.
+
+
 1. **P0 optimizer-agent workflow expansion — every `0013` solver now has a shipped
    application.** The optimization group has runtimes for the core mathematical
    forms plus five applications: convex QP (`specs/0007-portfolio-construction/`),
@@ -114,11 +137,15 @@ by the `knowledge` gate.
    models via `agents/optimization/model_plugin_registration/`, spec `0026`,
    rather than the SDK
    owning the optimization logic itself — see item 5.)
-2. **Machine-learning and deep-learning workflow expansion** — the first runtime
-   workflow is shipped as `specs/0006-ml-return-forecasting/` (ML build chain end to
-   end with a DL challenger, plus a runnable reference pipeline and tests). Next: add
-   more ML/DL worked examples (ranking, RL, forecasting variants) as the desk needs
-   them.
+2. **Machine-learning and deep-learning workflow expansion** — the agent roster
+   is specified by `specs/0004-optimizer-ml-dl-agent-expansion/` (the
+   `optimization/`, `machine_learning/`, and `deep_learning/` groups as agent
+   contracts, verified by the catalog/docs gates rather than a runtime). The
+   first runtime workflow is shipped as `specs/0006-ml-return-forecasting/` (ML
+   build chain end to end with a DL challenger, plus a runnable reference
+   pipeline and tests), with `specs/0041-ranking-forecast/` as its ranking-loss
+   variant. Next: add more ML/DL worked examples (RL, forecasting variants) as
+   the desk needs them.
 3. **Data-engineering & data-analyst spec + runtime coverage** — closing the biggest
    structural gap, role by role.
    - **Data Analyst — analysis + communication layers shipped.** Governed analysis:
@@ -512,12 +539,179 @@ by the `knowledge` gate.
       Track which agents, workflows, gates, and domain patterns are used by which
       teams; failure rates, completion times, and handoff quality. Informs next
       iterations and prioritization.
+15. **Company knowledge over time — one initiative, phased across specs.**
+    *(Related: item 16 ships the repo shapes that adopt it; item 17 exposes it
+    to a team over MCP.)*
+    The goal: a workflow arrives already knowing a dataset's kinks, a
+    researcher does not re-derive what a colleague established last quarter,
+    and both can say where the knowledge came from and who vouched for it.
+    Phased like the role-operations roster (item 4) — small, shippable
+    specs rather than one large one, because the read path is useful before
+    a write path exists, and the write path should not be designed until
+    retrieval has shown what is worth capturing.
+
+    **Two distinct systems, easily conflated.** `instructions/workflow_memory.md`
+    governs `memory/` — structured records about databases, datasets, schemas,
+    fields, and their quirks. `instructions/knowledge_base.md` governs
+    `agents/knowledge/` reading a company's *unstructured* institutional
+    knowledge from external sources declared in `knowledge_sources.yml`. The
+    same four `knowledge/` agents serve both. Only the first has a runtime.
+
+    - **Scaffold — done** (spec `0002`): the `memory/` two-axis layout, the
+      record vocabulary (`type`/`confidence`/`corroboration`/`pit_scope`/
+      `status`), `manifest.yaml`, and the `memory` gate. Records were
+      committed but nothing ever read them *as records* — the gate greps for
+      the string `first_seen`, which proves a field name appears in a file
+      and nothing more.
+    - **Runtime, read path — partial** (spec `0048`): `workflow_memory.py`.
+      Built: a dependency-free subset YAML parser that raises rather than
+      guessing (`T-001`), a **type-aware point-in-time filter** (`T-003`),
+      and structural validation replacing the string grep (`T-005`), plus
+      list-form `evidence` with a derived corroboration count (`T-013`).
+      The PIT rule is the substantive idea: a memory store is *itself*
+      look-ahead, so mechanical facts (`schema`/`quirk`/`pitfall`) are
+      timeless while claims about what worked (`pattern`/`metric`/
+      `performance`) are bounded by `last_confirmed` — corroboration is
+      where the future enters a record.
+      **Outstanding:** `query` (`T-002`), `render_context` (`T-004` — until
+      this lands nothing can feed an agent prompt), decay (`T-006`), author
+      handles (`T-007`), `store_version` (`T-008`), the CLI and gate
+      rewiring (`T-009`/`T-010`), supersession and contradiction validation
+      (`T-014`–`T-016`). 11 of 23 `AC-*` verified.
+    - **Write path — planned** (spec `0049`, not yet written). Capture belongs
+      at the **runtime boundary, not the gate boundary**: a gate finding names
+      a source file (`"negative .shift()"`), while a record needs a dataset
+      scope (`field:close_adj`), and gates emit prose with no structured
+      output. `validate_ingestion` (`0039`) already returns findings carrying
+      a column and a quality rule — it looked at real rows and found something
+      about a real field. Same for `walk_forward` (`0046`, `performance`),
+      `fred_point_in_time` (`0045`, vintages), `factor_risk_model` (`0038`,
+      `metric`). Proposed shape: `propose_records()` in `workflow_memory.py`,
+      a **committed** `memory/inbox/` staging area so pull-request review *is*
+      the approval workflow, and `promote()` stamping `author`/`first_seen` on
+      acceptance. `templates/docs/run_card.md` gains a "Memory proposed"
+      section beside its existing "Memory version used".
+    - **Retrieval logging — not specced.** Nothing measures whether retrieval
+      helps, which leaves this initiative's own premise unevidenced. It also
+      gates pruning: without it the store only grows, and eventually costs
+      more to search than it saves. Cheapest version is recording which record
+      ids were served to a run, in the run-card slot that already exists.
+    - **Knowledge-base half — unspecced.** `agents/knowledge/` has four agent
+      contracts (`knowledge_ingestion`, `knowledge_curation`,
+      `knowledge_retrieval`, `institutional_memory`) and **zero Python files**;
+      the `knowledge` gate checks that configured source paths exist and
+      nothing else. Open question below on whether it gets a runtime.
+
+    **Honest status.** The store holds **5 records, all reference examples** —
+    no real institutional knowledge has been captured yet. The read path is
+    being built ahead of demand. The fastest test of whether this earns its
+    keep is capturing 20–30 real records from actual CRSP/FRED work and seeing
+    whether retrieval changes anyone's behaviour, before investing further in
+    machinery.
+
+16. **Repository shapes — pre-canned skeletons for multi-repo adoption.**
+    *(Related: item 15 is the knowledge these repos accumulate; item 17 is how
+    a team reaches it.)*
+    `templates/repos/` ships scaffolds a team picks from rather than assembling
+    a repo by hand: `quant-research`, `quant-models`, `data-pipelines`. Each
+    carries the full root structure (`.agents/`, `.copilot/`, `.githooks/`,
+    `.github/`, `config/`, `docs/`, `hooks/stages/`, `instructions/`,
+    `memory/`, `scripts/`, `specs/`, `src/`, `tests/`, `templates/`) plus
+    `CLAUDE.md`, `CONTRIBUTING.md`, `CHANGELOG.md`, `pyproject.toml`, and a
+    **pre-filled `quantsmith.conf`** — so the adopter configures nothing.
+
+    `scaffold-repo.sh --shape <name> --into <dir>` copies the shared base,
+    overlays the shape, and pulls in the SDK's gate scripts and templates, so
+    a scaffolded repo runs its own gates immediately. All three shapes
+    currently scaffold to ~90 files and pass their declared blocking gates on
+    a fresh tree, verified.
+
+    **The gate selection per shape is the substance, not the directories.**
+    `quant-research` keeps `spec` advisory — demanding a spec per experiment
+    stops people experimenting, which is the entire value of that shape.
+    `quant-models` blocks on `backtest` and `leakage`, because a look-ahead bug
+    there is a bad trade rather than a bad report. `data-pipelines` blocks on
+    `data-contract`/`pipeline-contract`, since a silent schema change reaching
+    a model months later is that shape's characteristic failure. Each shape's
+    `README.md` argues its selection rather than listing it.
+
+    This also **reverses the sequencing** previously planned for the
+    portability work: shipping the shapes first means the config format is
+    *derived* from three real configs rather than guessed at, so the gate
+    parameterization has something concrete to be validated against.
+    - **Done:** the three shapes, the scaffolder, the shared base, and
+      `handoff-sync` reading `QF_DOC_ROADMAP` (a down-payment on the gate
+      parameterization — a scaffolded repo names its roadmap
+      `docs/roadmap.md`, and the gate now honours that).
+    - **Next (`0050`):** parameterize the remaining doc gates against
+      `quantsmith.conf`; collapse `agent-catalog`+`spec-index` into one
+      `catalog-sync`, since both are "entities under a root must appear in an
+      index".
+    - **Then (`0051`):** conformance levels. `docs/conformance.md` and
+      `QF_CONFORMANCE_LEVEL` ship in the skeletons already, declared but not
+      yet verified by any gate — adoption is currently a claim, not a check.
+    - **Known gap:** `doc-counts` and `repro` are advisory in the shapes
+      because a fresh repo has no counts to drift and no run to reproduce.
+      Both should be promoted once a repo has content; the shapes say so
+      inline rather than leaving it silent.
+
+17. **MCP servers over the shared knowledge base — exposing it to a team.**
+    A centralized knowledge-base repository is only useful if agents across the
+    team can reach it. `adapters/` is already the right seam: its own README
+    defines an adapter as "the boundary between agent decisions and external
+    systems... agents decide, adapters translate an approved payload into a
+    provider-specific action." An MCP server is exactly that, so this becomes an
+    **eighth adapter group**, `adapters/mcp_servers/`, following `llm_runtime/`'s
+    shape (README + `adapter_contract.md` + one file per provider).
+
+    Two existing pieces do most of the work:
+    - **`templates/knowledge/knowledge_sources.yml` is already a server
+      manifest** — `path`, `access_level`, `include`/`exclude`, `freshness_days`,
+      `domains_from_subfolders`. Written for the `knowledge` gate; it happens to
+      be exactly what a resources server needs.
+    - **`0048`'s runtime is the graph server's backing store** — typed records,
+      validation, and the type-aware point-in-time filter.
+
+    Three servers, sequenced by dependency (see the Planned specs table):
+    - **`0052` resources primitive** — read-only, serves declared Markdown/text
+      under a `knowledge://<source>/<domain>/<path>` scheme. Build first: it
+      needs no new storage and it validates the adapter contract.
+    - **`0053` memory/knowledge graph** — `memory_query(scope, type, as_of)` over
+      `0048`. The `as_of` parameter is the differentiator: a generic memory MCP
+      server will serve 2026 knowledge to a 2020 backtest, and this one will not,
+      because mechanical facts are timeless while claims about what worked are
+      bounded by `last_confirmed`. For a quant team that is the difference
+      between a memory server and a leakage vector. Graph edges already exist as
+      fields (`superseded_by`, `coexists`).
+    - **`0054` vector/RAG** — `search(query, domain, access_level, as_of)`
+      returning cited passages, never bare prose, since
+      `instructions/knowledge_base.md` already requires grounded, cited answers.
+
+    **The team-scale hazard, recorded because it is easy to miss.** MCP servers
+    run with the *server's* credentials, not the caller's — so a shared
+    knowledge-base server reachable by the whole team will serve `restricted`
+    content to anyone who can open a connection unless designed against. Two
+    rules belong in the contract: the caller's clearance is a **parameter**,
+    never an assumption about who can reach the endpoint; and for RAG, filter at
+    **index** time with one index per access tier, not at query time.
+    Post-retrieval filtering still leaks — nearest-neighbour distances reveal
+    that a restricted document exists and roughly what it concerns, even when it
+    is never returned. For an MNPI-adjacent shop that is the difference between
+    a compliance story and a compliance incident.
+
+    Related: item 15 (what the knowledge is), item 16 (how repos adopt it).
+    This item is how a team *reaches* it.
 
 ## Open Questions For The Owner
 
 - Copyable scaffold, Python package, or CLI/copier? (Directionally answered in
   `docs/packaging.md`; revisit its criteria if audience or update cadence changes.)
 - Which agent runtime is the primary target (local, general LLM, both)?
+- Does the knowledge-base half (item 15) get a runtime, or stay a pointer to
+  wherever the company's unstructured knowledge already lives (Confluence,
+  Notion, a docs repo)? Building a second store is only worth it if grounding,
+  access control, and provenance are things the existing system cannot do —
+  otherwise `agents/knowledge/` should retrieve from it, not replace it.
 - Which gates should graduate from advisory to enforced, and when?
 - Should downstream repos pin a version of the SDK, and how are updates delivered?
 
