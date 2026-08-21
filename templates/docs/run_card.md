@@ -43,6 +43,8 @@ One or two sentences: the hypothesis, model, or job this run executed.
 
 - Memory version / snapshot used: (so the run is reproducible as memory evolves)
 - Point-in-time scope applied to primed records: (research/backtest runs only)
+- Memory proposed: (candidate id(s) this run staged to `memory/inbox/`, if any —
+  see `specs/0049-workflow-memory-write-path/`; none proposed is a valid answer)
 
 ## Results
 

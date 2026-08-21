@@ -523,7 +523,7 @@ then adapters can deploy to cron/GitHub Actions/Airflow/Dagster/Prefect.
     as real sources come into use.
 
 14. **P1 Generalization & Team Onboarding — making QuantSmith self-serve across
-    domains.** QuantSmith is now a comprehensive framework (161 agents, 49 specs,
+    domains.** QuantSmith is now a comprehensive framework (161 agents, 50 specs,
     32 gates, 33 standards); the next phase is reducing discovery friction and
     enabling team-intuitive adoption without deep codebase reading.
     - **P0 Phase 1a: Role profiles** (`roles/{portfolio_manager,risk_manager,quant_researcher,data_engineer,compliance_officer}.md`):
@@ -607,21 +607,35 @@ then adapters can deploy to cron/GitHub Actions/Airflow/Dagster/Prefect.
       **pluggable natural-language query seam** (`QueryEngine` protocol +
       grounded keyword default via `resolve_engine`) so a real LLM engine can
       answer questions over the store later without a UI or API change. It is
-      deliberately read-only: the approval *action* (write-back) stays with the
+      deliberately read-only: the approval *action* (write-back) is the
       `0049` write path below.
-    - **Write path — planned** (spec `0049`, not yet written). Capture belongs
-      at the **runtime boundary, not the gate boundary**: a gate finding names
-      a source file (`"negative .shift()"`), while a record needs a dataset
-      scope (`field:close_adj`), and gates emit prose with no structured
-      output. `validate_ingestion` (`0039`) already returns findings carrying
-      a column and a quality rule — it looked at real rows and found something
-      about a real field. Same for `walk_forward` (`0046`, `performance`),
-      `fred_point_in_time` (`0045`, vintages), `factor_risk_model` (`0038`,
-      `metric`). Proposed shape: `propose_records()` in `workflow_memory.py`,
-      a **committed** `memory/inbox/` staging area so pull-request review *is*
-      the approval workflow, and `promote()` stamping `author`/`first_seen` on
-      acceptance. `templates/docs/run_card.md` gains a "Memory proposed"
-      section beside its existing "Memory version used".
+    - **Write path — built** (spec `0049-workflow-memory-write-path`):
+      extends `workflow_memory.py`. Capture happens at the **runtime
+      boundary, not the gate boundary** — `propose_records()` takes a small,
+      generic `CandidateSpec` (any pipeline can build one without importing
+      memory-module internals), `stage_candidates()` writes it to a
+      **committed** `memory/inbox/<workflow>/<source_run>.yaml`, so a pull
+      request touching that path *is* the approval workflow, and `promote()`
+      is the one deliberate, human-invoked action that assigns an id,
+      stamps `author`/`first_seen`/`last_confirmed`, and appends the record
+      to its live catalog — refusing (never silently promoting) on a missing
+      field or id collision, and warning (never blocking) on a same-scope/
+      same-type contradiction. `discard()` removes a candidate without
+      promoting it; the removal commit is the audit trail. Also finishes
+      `0048`'s outstanding author resolution (`resolve_author`/
+      `derive_handle`: env → local `identity.yml` → git → OS user → `None`,
+      never storing a raw email/username). One worked producer integration:
+      `ingestion_data_contract.candidates_from_validation()` turns `0039`'s
+      real schema violations and failed quality rules into candidates,
+      proving the runtime-boundary thesis against an actual runtime rather
+      than a synthetic example. A stdlib CLI
+      (`workflow_memory_cli.py` / `quantsmith-memory`) exposes propose,
+      list-inbox, promote, and discard. `walk_forward` (`0046`,
+      `performance`), `fred_point_in_time` (`0045`, vintages), and
+      `factor_risk_model` (`0038`, `metric`) are named next producers,
+      each a thin translator against the same `CandidateSpec` contract —
+      not blocked on anything here. `templates/docs/run_card.md` gained the
+      "Memory proposed" field beside its existing "Memory version used".
     - **Retrieval logging — not specced.** Nothing measures whether retrieval
       helps, which leaves this initiative's own premise unevidenced. It also
       gates pruning: without it the store only grows, and eventually costs

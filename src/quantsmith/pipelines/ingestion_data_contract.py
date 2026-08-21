@@ -17,8 +17,11 @@ over data beyond what was checked.
 from __future__ import annotations
 
 import datetime
+from collections import Counter
 from dataclasses import dataclass, field
 from typing import Callable, Dict, List, Optional, Sequence
+
+from quantsmith.pipelines.workflow_memory import CandidateSpec
 
 
 @dataclass(frozen=True)
@@ -164,6 +167,54 @@ def validate_ingestion(
         missingness_by_column=missingness_by_column,
         rule_results=rule_results,
     )
+
+
+def candidates_from_validation(
+    result: IngestionValidationResult, *, dataset_scope: str, source_run: str,
+    target_catalog: str,
+) -> List[CandidateSpec]:
+    """Turn what ``validate_ingestion`` actually found into memory candidates.
+
+    Spec ``0049`` REQ-012 — the worked proof that capture belongs at the
+    runtime boundary: this looked at real rows and found a real column and a
+    real rule, not a gate finding naming a source file. One candidate per
+    distinct schema-violation shape (column, reason) — grouped so ten rows
+    breaking the same way become one observation, not ten — and one per
+    failed quality rule. Every statement names what was found "in the
+    validated sample", matching this module's own disclosure convention
+    (never an unqualified guarantee about data beyond what was checked).
+
+    Returns candidates only; nothing is proposed, staged, or promoted here —
+    that decision belongs to this function's caller (spec RISK-004).
+    """
+    specs: List[CandidateSpec] = []
+    evidence = ({"source_run": source_run},)
+
+    violation_counts = Counter(
+        (v.column, v.reason) for v in result.schema_violations)
+    for (column, reason), count in sorted(violation_counts.items()):
+        specs.append(CandidateSpec(
+            scope=f"field:{column}", type="pitfall",
+            statement=(f"{count} row(s) in the validated sample ({source_run}) "
+                       f"violated: {reason}."),
+            confidence="low", pit_scope="<= run date", evidence=evidence,
+            target_catalog=target_catalog,
+        ))
+
+    for rr in result.rule_results:
+        if rr.passed:
+            continue
+        scope = f"field:{rr.rule.column}" if rr.rule.column else f"dataset:{dataset_scope}"
+        specs.append(CandidateSpec(
+            scope=scope, type="pitfall",
+            statement=(f"Quality rule {rr.rule.name!r} failed in the validated "
+                       f"sample ({source_run}): {rr.observed} "
+                       f"(threshold {rr.rule.threshold})."),
+            confidence="low", pit_scope="<= run date", evidence=evidence,
+            target_catalog=target_catalog,
+        ))
+
+    return specs
 
 
 def render_data_contract(

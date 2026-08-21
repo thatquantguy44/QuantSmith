@@ -28,7 +28,7 @@ that story trustworthy rather than a wiki page nobody keeps current.
 | Standard | [`instructions/workflow_memory.md`](instructions/workflow_memory.md) | [`instructions/knowledge_base.md`](instructions/knowledge_base.md) |
 | Holds | Structured facts about *databases, datasets, schemas, fields, and their quirks* | A company's *unstructured* institutional knowledge (docs, memos, wiki pages) |
 | Store | [`memory/`](memory/) — typed YAML, committed | External sources declared in `knowledge_sources.yml` |
-| Spec | `0002`, extended by `0048` | none yet |
+| Spec | `0002` (store), `0048` (read path), `0049` (write path) | none yet |
 | Runtime | [`src/quantsmith/pipelines/workflow_memory.py`](src/quantsmith/pipelines/workflow_memory.py) | none |
 | Gate | `memory` | `knowledge` |
 
@@ -50,9 +50,10 @@ table if it drifts.)*
 | Runtime functions | `load_records`, `query`, `point_in_time_filter`, `render_context`, `validate` — the full read path |
 
 The honest summary: **the machinery is more mature than the content.** The
-read path is built and tested; the store itself is five examples. Populating
-it with real findings is the highest-leverage next step, ahead of any further
-machinery.
+read path and, as of `0049`, the write path are both built and tested; the
+store itself is still five examples. Populating it with real findings —
+now genuinely actionable via `propose`/`promote` rather than only aspirational
+— is the highest-leverage next step, ahead of any further machinery.
 
 ## Quickstart — using the store today
 
@@ -111,19 +112,46 @@ and its neighbors.
 
 ## How new knowledge gets added — today
 
-There is no automated write path yet (see Roadmap). Today, adding a record
-means hand-editing a `records:` list in the appropriate file:
+There is a real write path now (spec `0049`): **propose → stage → promote**,
+never automatic.
 
-- **Facts about a shared dataset** → `memory/_shared/datasets/<name>/provenance.yaml`
-- **A workflow's own findings on a dataset** → `memory/<workflow>/index.yaml` or `memory/<workflow>/datasets/<name>/*.yaml`
+```sh
+python -m quantsmith.pipelines.workflow_memory_cli propose \
+  --root memory --workflow quant_researcher --source-run run-2026-08-21-x \
+  --scope field:close_adj --type quirk \
+  --statement "Adjusted close is restated after the fact." \
+  --confidence low --pit-scope "<= run date" \
+  --target-catalog _shared/datasets/example_prices/provenance.yaml \
+  --evidence-run run-2026-08-21-x
+# -> stages memory/inbox/quant_researcher/run-2026-08-21-x.yaml (committed)
 
-Every record needs: `id`, `scope`, `type`, `statement`, `confidence`,
-`first_seen`, `last_confirmed`, `status`, `pit_scope`. See
-[`instructions/workflow_memory.md`](instructions/workflow_memory.md) for the
-full vocabulary and `memory/_shared/datasets/example_prices/provenance.yaml`
-for a worked example. Run `sh hooks/stages/memory-check.sh` before committing —
-it still validates by string-matching (`T-010` will rewire it to the typed
-runtime) but it is the check today.
+python -m quantsmith.pipelines.workflow_memory_cli list-inbox --root memory
+python -m quantsmith.pipelines.workflow_memory_cli promote --root memory \
+  --candidate-id quant_researcher/run-2026-08-21-x/001
+# -> assigns an id, stamps author + first_seen/last_confirmed, appends to
+#    the target catalog, removes the candidate from the inbox
+```
+
+Staging is committed, so **a pull request touching `memory/inbox/` is the
+approval workflow** — reviewed and merged like any other change, with git's
+own history as the audit trail. `promote` is always a deliberate, human-run
+command; nothing calls it automatically, no matter how confident a proposing
+run was. `discard` removes a candidate without promoting it.
+
+One producer is wired end to end today:
+`ingestion_data_contract.candidates_from_validation()` turns `0039`'s real
+schema violations and failed quality rules into candidates. `walk_forward`,
+`fred_point_in_time`, and `factor_risk_model` are next, each a thin
+translator against the same generic `CandidateSpec` — see
+`specs/0049-workflow-memory-write-path/`'s Follow-ups.
+
+Hand-editing a `records:` list directly still works too (every record needs
+`id`, `scope`, `type`, `statement`, `confidence`, `first_seen`,
+`last_confirmed`, `status`, `pit_scope` — see
+[`instructions/workflow_memory.md`](instructions/workflow_memory.md) and
+`memory/_shared/datasets/example_prices/provenance.yaml` for a worked
+example) — `promote` is the recommended path because it stamps authorship and
+a real id for you and validates before writing anything.
 
 ## Roadmap — what's next
 
@@ -133,7 +161,7 @@ and the *Planned specs* table. Summary:
 | | Status |
 | --- | --- |
 | **`0048` read path** | Parser, point-in-time filter, `query`, `render_context`, structural validation — **done**. Decay checking (`T-006`), author attribution (`T-007`), the CLI + gate rewiring (`T-009`/`T-010`), contradiction and supersession validation (`T-014`–`T-016`) — **not yet built**. |
-| **`0049` write path** | *Planned, not written.* `propose_records()` at the runtime boundary, a committed `memory/inbox/` staging area so pull-request review *is* the approval workflow, `promote()` on human review. Deliberately last — capturing knowledge nobody retrieves is the failure mode to avoid. |
+| **`0049` write path** | **Done.** `propose_records()`/`stage_candidates()` at the runtime boundary, a committed `memory/inbox/` staging area so pull-request review *is* the approval workflow, `promote()`/`discard()` on human action, author resolution (`resolve_author`), one worked producer (`0039`'s `candidates_from_validation`), a CLI. Built after the read path on purpose — capturing knowledge nobody retrieves would have been the failure mode. |
 | **`0052`–`0054` MCP servers** | *Planned, not written.* Exposing this store (and the knowledge-base half) to a team over MCP: a resources server, a memory-graph server with `as_of` honoring the point-in-time rule, a RAG server with per-access-tier indexes. See item 17. |
 | **`access_level` enforcement** | Parsed and stored on every record; **`query()` does not filter on it yet.** For a firm with real information barriers this is a blocker before any shared deployment, not a nice-to-have. Belongs with the MCP work, where caller clearance has to be a parameter rather than an assumption. |
 
