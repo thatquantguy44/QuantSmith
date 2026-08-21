@@ -1,7 +1,7 @@
 # Plan: Workflow scheduling operations
 
 - **Spec:** 0055-workflow-scheduling-operations (`spec.md`)
-- **Status:** Draft
+- **Status:** Approved
 - **Author:** QuantSmith
 - **Last updated:** 2026-08-21
 
@@ -15,8 +15,8 @@ deploy the provider schedule; a dispatcher invokes scripts, Python modules, pipe
 runtimes, or agentic workflows; a ledger records what happened; and a daily report
 turns the ledger plus manual task queue into an owner-facing operating summary.
 
-The first implementation should be local and dependency-free: YAML/Markdown
-registry, JSONL or SQLite ledger, deterministic report generation, dry-run schedule
+The first implementation is local and dependency-free: dataclass/Markdown
+registry, JSONL or in-memory ledger, deterministic report generation, dry-run schedule
 validation, and shell/Python dispatch wrappers. Later implementations can swap in
 Airflow, Dagster, Prefect, GitHub Actions, database-backed ledgers, and delivery
 providers through adapters.
@@ -149,7 +149,7 @@ Sections:
 | Decision | Chosen | Rejected alternative | Why |
 | --- | --- | --- | --- |
 | Scheduler ownership | Adapter-backed control plane | Hard-code cron only | Keeps local cron simple but allows migration to Airflow/Prefect/GitHub Actions. |
-| First ledger store | Local append-only file or SQLite | Provider logs only | Provider logs are fragmented; QuantSmith needs one reportable status model. |
+| First ledger store | Local append-only JSONL or in-memory test store | Provider logs only | Provider logs are fragmented; QuantSmith needs one reportable status model. |
 | Manual work | First-class queue | Free-text notes in report | Manual completion is part of the workflow and must be tracked like a run. |
 | Report cadence | Daily report with owner rollups | Only real-time alerts | Daily reporting catches non-critical misses, manual carry-forward, and status drift. |
 | Memory updates | Candidate handoff | Auto-write all failures to memory | Prevents noisy or low-confidence operational notes from polluting durable knowledge. |
@@ -182,6 +182,5 @@ auditable.
 
 ## Open Questions
 
-- Choose JSONL vs SQLite for the first local ledger.
 - Decide whether provider schedule writes require an explicit approval gate.
 - Decide whether daily reports should be Markdown-only first or also emit HTML/PDF.

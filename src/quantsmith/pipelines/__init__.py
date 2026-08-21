@@ -148,6 +148,26 @@ from .return_forecasting import (
     train_baseline,
     train_challenger,
 )
+from .workflow_scheduling import (
+    BackfillPolicy,
+    ExecutionLedger,
+    ManualFollowup,
+    ManualTask,
+    ManualTaskQueue,
+    MemoryCandidate,
+    RetryPolicy,
+    Schedule,
+    ScheduleJob,
+    SchedulerDryRun,
+    Target,
+    Trigger,
+    alert_handoffs,
+    dispatch_job,
+    dry_run_schedule,
+    memory_candidates_from_failures,
+    render_daily_operations_report,
+    validate_registry,
+)
 
 __all__ = [
     # 0001 — momentum signal
@@ -268,4 +288,23 @@ __all__ = [
     "flag_understated_backtest",
     "position_from_borrow_rate",
     "spread_sensitivity",
+    # 0055 — workflow scheduling operations
+    "BackfillPolicy",
+    "ExecutionLedger",
+    "ManualFollowup",
+    "ManualTask",
+    "ManualTaskQueue",
+    "MemoryCandidate",
+    "RetryPolicy",
+    "Schedule",
+    "ScheduleJob",
+    "SchedulerDryRun",
+    "Target",
+    "Trigger",
+    "alert_handoffs",
+    "dispatch_job",
+    "dry_run_schedule",
+    "memory_candidates_from_failures",
+    "render_daily_operations_report",
+    "validate_registry",
 ]

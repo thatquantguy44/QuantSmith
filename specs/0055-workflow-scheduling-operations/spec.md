@@ -1,9 +1,9 @@
 # Spec: Workflow scheduling operations
 
 - **ID:** 0055-workflow-scheduling-operations
-- **Status:** Draft
+- **Status:** Approved
 - **Author:** QuantSmith
-- **Approver:** Pending
+- **Approver:** QuantSmith
 - **Last updated:** 2026-08-21
 
 > WHAT and WHY only. Implementation lives in `plan.md`.
@@ -92,7 +92,7 @@ operational workflows deployable, observable, and accountable.
 - Pipeline observability: `specs/0019-pipeline-observability/`.
 - Workflow memory and institutional knowledge: `specs/0002-workflow-memory/`,
   `instructions/workflow_memory.md`, and `agents/knowledge/`.
-- Candidate runtime location: `src/quantsmith/pipelines/workflow_scheduling.py`.
+- Runtime: `src/quantsmith/pipelines/workflow_scheduling.py`.
 - Candidate templates: `templates/data/schedule_registry.md`,
   `templates/docs/daily_operations_report.md`, and runbook links.
 
