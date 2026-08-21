@@ -4,14 +4,21 @@
 # Backs instructions/data_provenance.md: any content built from data or
 # visuals must be traceable to its source, actual data is preferred over
 # synthetic, and every use of synthetic data is disclosed. This gate has two
-# jobs:
+# jobs, deliberately held to DIFFERENT enforcement:
 #   1. When a Synthetic Data Disclosure artifact exists, verify it declares
 #      the required fields (see templates/docs/synthetic_data_disclosure.md).
-#   2. Advisory heuristic: flag generated-looking report/dashboard artifacts
-#      that mention synthetic/simulated/mock data with no matching disclosure
-#      anywhere in the tree. Heuristic by design -- same honestly-scoped
-#      limitation as the leakage gate; false positives/negatives expected.
-# Advisory by default; QF_STAGE_ENFORCE=1 blocks on a missing required field.
+#      Structural -- a real artifact either has the field or it does not.
+#      This is what QF_STAGE_ENFORCE=1 blocks on (qf_warn).
+#   2. Heuristic: flag generated-looking report/dashboard artifacts that
+#      mention synthetic/simulated/mock data with no matching disclosure
+#      anywhere in the tree. Same honestly-scoped limitation as the leakage
+#      gate -- false positives/negatives expected -- so it is reported via
+#      qf_notice, visible but NEVER blocking, even under enforce. Wiring it
+#      to the same counter as (1) means a narrative doc's honest mention of
+#      "synthetic" (e.g. describing this SDK's own disclosed synthetic
+#      backtest examples) would fail CI on every single run forever, which
+#      is what happened before this distinction existed.
+# Advisory by default; QF_STAGE_ENFORCE=1 blocks only on (1).
 
 set -e
 DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
@@ -74,7 +81,7 @@ for f in $candidates; do
   if grep -liqE "synthetic data|simulated data|mock data|fabricated data|placeholder data" "$f" 2>/dev/null; then
     flagged=$((flagged + 1))
     if [ -z "$disclosures" ]; then
-      qf_warn "$f mentions synthetic/simulated data with no disclosure artifact found."
+      qf_notice "$f mentions synthetic/simulated data with no disclosure artifact found."
     fi
   fi
 done

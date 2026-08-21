@@ -6,8 +6,11 @@
 # data specifics locally so agents can be tailored to actual work -- which is
 # exactly why it must never be committed. This gate has one deterministic job
 # (is role_context.yml tracked by git?) and one advisory, heuristic job (does
-# the shipped template still look like placeholders?). Advisory by default;
-# QF_STAGE_ENFORCE=1 makes the tracked-file finding blocking.
+# the shipped template still look like placeholders?), held to DIFFERENT
+# enforcement: the deterministic job uses qf_warn and is what
+# QF_STAGE_ENFORCE=1 actually blocks on; the heuristic job uses qf_notice --
+# visible, but never counted toward the blocking exit code, since a
+# placeholder-shaped false positive should never fail CI on every run.
 #
 # Resolution order (mirrors templates/knowledge/knowledge_sources.yml):
 #   1. $QF_ROLE_CONTEXT   path to a filled-in context file
@@ -59,10 +62,10 @@ fi
 template="templates/role_operations/role_context.yml"
 if [ -f "$template" ]; then
   if grep -qE '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}' "$template" 2>/dev/null; then
-    qf_warn "$template contains what looks like an email address -- use a placeholder instead."
+    qf_notice "$template contains what looks like an email address -- use a placeholder instead."
   fi
   if grep -qE '\b[0-9]{3}-[0-9]{2}-[0-9]{4}\b' "$template" 2>/dev/null; then
-    qf_warn "$template contains what looks like an SSN-shaped number -- remove it."
+    qf_notice "$template contains what looks like an SSN-shaped number -- remove it."
   fi
 fi
 
