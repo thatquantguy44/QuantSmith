@@ -187,6 +187,28 @@ Each criterion is testable and maps to a requirement.
 - Open question: Should email recipients be stored, hashed, omitted, or stored
   only for approved distribution-list/source attribution cases?
 
+## Reference implementation (not a satisfied requirement)
+
+A small, fictional-content-only reference store exists at `research/`
+(`research/manifest.yaml`, `research/market_research/index.yaml`,
+`research/README.md`), read by
+`src/quantsmith/knowledge_console/research.py` and rendered by a Research view
+in `apps/knowledge-console` (the terminal app from `specs/0057`). It exists so
+that front end has real, filterable, citable data — asset class, source type,
+access level, review status, provenance, supersession — to render while this
+spec is Draft.
+
+**It does not satisfy this spec's requirements** and no `REQ-*`/`AC-*` above
+should be read as covered by it. Specifically absent: the knowledge-base MCP
+interface / `knowledge://market_research/...` namespace (REQ-002/003),
+entitlement and information-barrier enforcement before retrieval
+(REQ-006, NFR-001, NFR-008), real secret/PII/MNPI quarantine detection
+(REQ-011 — `review_status: quarantined` items are hand-labeled, not detected),
+an email connector (REQ-016–019), and audit logging (REQ-012, NFR-007). Every
+item in the store is fictional; real firm, client, fund-manager, MNPI, or
+licensed content must never be committed there, per this spec's own Non-Goals.
+Status remains **Draft**.
+
 ## Exceptions
 
 None.

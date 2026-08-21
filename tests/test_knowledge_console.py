@@ -10,6 +10,8 @@ from __future__ import annotations
 import datetime
 import http.client
 import json
+import subprocess
+import sys
 import threading
 from pathlib import Path
 
@@ -222,6 +224,31 @@ def test_unknown_path_404_and_traversal_guard_AC_014(running_server):
     assert status == 404
     status, _ = _get(port, "/../../../etc/passwd")
     assert status == 404
+
+
+# --- CLI bridge: `print` and `query` subcommands (used by the terminal app) ---
+
+def _cli(*args):
+    return subprocess.run(
+        [sys.executable, "-m", "quantsmith.knowledge_console", *args],
+        cwd=str(REPO_ROOT), capture_output=True, text=True,
+        env={"PYTHONPATH": str(REPO_ROOT / "src"), "PATH": __import__("os").environ.get("PATH", "")},
+    )
+
+
+def test_cli_print_emits_model_json():
+    r = _cli("print", "--root", MEMORY)
+    assert r.returncode == 0, r.stderr
+    model = json.loads(r.stdout)
+    assert model["counts"]["total"] == len(m.load_store(MEMORY).records)
+
+
+def test_cli_query_emits_grounded_answer():
+    r = _cli("query", "--root", MEMORY, "--question", "why not use adjusted close")
+    assert r.returncode == 0, r.stderr
+    ans = json.loads(r.stdout)
+    assert "MEM-0002" in ans["citations"]
+    assert ans["mode"] == "keyword" and ans["matched"] is True
 
 
 # --- AC-015: an empty/missing store yields a well-formed empty model ----------

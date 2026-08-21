@@ -1,0 +1,80 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    @apply bg-term-bg text-term-text font-mono antialiased;
+    font-feature-settings: "tnum" 1, "cv01" 1;
+  }
+  ::selection {
+    background: rgba(255, 140, 0, 0.3);
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #0a0a0a;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #26262b;
+    border-radius: 0;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #33333a;
+  }
+}
+
+@layer components {
+  .panel {
+    @apply border border-term-border bg-term-panel;
+  }
+  .panel-header {
+    @apply flex items-center justify-between border-b border-term-border bg-term-panel-2 px-3 py-1.5;
+  }
+  .panel-title {
+    @apply text-2xs font-semibold uppercase tracking-widest text-term-dim;
+  }
+  .panel-body {
+    @apply p-3;
+  }
+  .label {
+    @apply text-3xs uppercase tracking-widest text-term-muted;
+  }
+  .stat {
+    @apply font-mono tabular-nums;
+  }
+  .chip {
+    @apply inline-flex items-center gap-1 border px-1.5 py-0.5 text-3xs font-semibold uppercase tracking-wider;
+  }
+  .kbd {
+    @apply border border-term-border-2 bg-term-panel-2 px-1 text-3xs text-term-dim;
+  }
+  .navkey {
+    @apply flex items-center gap-2 border-l-2 border-transparent px-3 py-2 text-xs uppercase tracking-wide text-term-dim transition-colors;
+  }
+  .navkey:hover {
+    @apply bg-term-panel-2 text-term-text;
+  }
+  .navkey-active {
+    @apply border-l-term-amber bg-term-panel-2 text-term-amber;
+  }
+  .row-hover:hover {
+    @apply bg-term-panel-2;
+  }
+  .term-input {
+    @apply w-full border border-term-border-2 bg-term-bg px-3 py-2 text-sm text-term-text placeholder:text-term-muted focus:border-term-amber focus:outline-none;
+  }
+  .btn-amber {
+    @apply border border-term-amber bg-term-amber/10 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-term-amber hover:bg-term-amber/20 disabled:opacity-40;
+  }
+}

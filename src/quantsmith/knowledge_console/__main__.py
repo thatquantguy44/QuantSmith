@@ -3,6 +3,8 @@
     python -m quantsmith.knowledge_console serve    [--root memory] [--port 8765] [--static web/dist]
     python -m quantsmith.knowledge_console snapshot  [--root memory] [--out model.json]
     python -m quantsmith.knowledge_console print     [--root memory]   # model to stdout
+    python -m quantsmith.knowledge_console query     --question "..." [--root memory]
+    python -m quantsmith.knowledge_console research  [--root research]  # research model to stdout
 
 Spec ``0057-knowledge-console`` (T-006, T-010). ``serve`` runs the API + static
 front end; ``snapshot`` writes the current view-model as JSON for the
@@ -15,7 +17,11 @@ import argparse
 import datetime
 import sys
 
+import json
+
 from . import model as model_mod
+from . import query as query_mod
+from . import research as research_mod
 from . import server as server_mod
 
 
@@ -42,7 +48,27 @@ def main(argv=None) -> int:
     p_print = sub.add_parser("print", help="print the view-model to stdout")
     p_print.add_argument("--root", default="memory")
 
+    p_query = sub.add_parser("query", help="answer a question, print JSON to stdout")
+    p_query.add_argument("--root", default="memory")
+    p_query.add_argument("--question", required=True)
+    p_query.add_argument("--k", type=int, default=5)
+
+    p_research = sub.add_parser("research", help="print the research-store model to stdout")
+    p_research.add_argument("--root", default="research")
+
     args = parser.parse_args(argv)
+
+    if args.command == "research":
+        model = research_mod.build_research_model_from_root(args.root, generated_at=_utc_now_iso())
+        print(json.dumps(model, ensure_ascii=False, sort_keys=True))
+        return 0
+
+    if args.command == "query":
+        store = model_mod.load_store(args.root)
+        records = [lr.record for lr in store.records]
+        answer = query_mod.resolve_engine().answer(args.question, records, k=args.k)
+        print(json.dumps(answer.to_dict(), ensure_ascii=False))
+        return 0
 
     if args.command == "serve":
         static = args.static or None

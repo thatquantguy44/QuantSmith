@@ -1,0 +1,149 @@
+# Market Research Reference Store — market_research domain.
+#
+# Reference example only. Every item below is fictional (fake entities, fake
+# authors, fake tickers) — see research/manifest.yaml and specs/0056's
+# Non-Goals. Structurally mirrors the metadata REQ-004/REQ-005/REQ-010/REQ-017
+# of specs/0056-market-research-knowledge-base/ (Draft) describe, so the
+# Research view has real, filterable, citable data to render.
+#
+# Field notes:
+#   source_type    user_note | firm_research | fund_manager | sell_side |
+#                  generated | email_tagged
+#   access_level   public | internal | restricted
+#   review_status  draft | pending_review | approved | quarantined |
+#                  restricted | superseded | deprecated | deleted
+#   entitlement_class  free-text license/entitlement label (0056 REQ-004/008)
+#   superseded_by  id of the record that replaced this one (required when
+#                  review_status is 'superseded')
+
+access_level: internal
+
+items:
+  - id: RES-0001
+    title: "Example note: cloud-software growth screen, Q3"
+    source_type: user_note
+    author_or_publisher: "J. Rivera (Quant Research)"
+    asset_class: equities
+    strategy_theme: growth
+    geography: "US"
+    access_level: internal
+    entitlement_class: firm-internal
+    publication_date: 2026-07-14
+    ingestion_date: 2026-07-14
+    review_status: approved
+    freshness_days: 45
+    summary: "Example cloud-software names screening cheap on FY forward revenue multiples versus their 3-year median; flagged for a follow-up factor check, not a recommendation."
+    citation: "Internal research note, J. Rivera, 2026-07-14"
+
+  - id: RES-0002
+    title: "Example firm note: IG credit spreads vs. macro backdrop"
+    source_type: firm_research
+    author_or_publisher: "Example Credit Strategy Desk"
+    asset_class: credit
+    strategy_theme: "investment grade"
+    geography: "US"
+    access_level: internal
+    entitlement_class: firm-internal
+    publication_date: 2026-07-20
+    ingestion_date: 2026-07-21
+    review_status: approved
+    freshness_days: 30
+    summary: "Example desk view that IG spreads look tight relative to the example macro-surprise index; frames a hedging discussion rather than a directional call."
+    citation: "Example Credit Strategy Desk note, 2026-07-20"
+
+  - id: RES-0003
+    title: "Example fund-manager letter: global macro positioning"
+    source_type: fund_manager
+    author_or_publisher: "Example Macro Partners LP (fictional)"
+    asset_class: macro
+    strategy_theme: "global macro"
+    geography: "Global"
+    access_level: restricted
+    entitlement_class: vendor-licensed
+    publication_date: 2026-06-30
+    ingestion_date: 2026-07-02
+    review_status: approved
+    freshness_days: 90
+    summary: "Example quarterly letter excerpt describing a fictional fund's rates and FX positioning rationale; licensed content, entitlement-gated, metadata shown here only."
+    citation: "Example Macro Partners LP quarterly letter, 2026-06-30 (vendor-licensed excerpt)"
+
+  - id: RES-0004
+    title: "Example sell-side note: US rates desk color"
+    source_type: sell_side
+    author_or_publisher: "Example Bank Rates Strategy (fictional)"
+    asset_class: rates
+    strategy_theme: "duration"
+    geography: "US"
+    access_level: restricted
+    entitlement_class: vendor-licensed
+    publication_date: 2026-08-01
+    ingestion_date: 2026-08-01
+    review_status: approved
+    freshness_days: 21
+    summary: "Example sell-side desk color on term-premium drift ahead of a fictional policy meeting; restricted per vendor distribution terms."
+    citation: "Example Bank Rates Strategy, 2026-08-01 (vendor-licensed excerpt)"
+
+  - id: RES-0005
+    title: "Generated synthesis: growth-vs-credit read-through"
+    source_type: generated
+    author_or_publisher: "quant_researcher agent (generated)"
+    asset_class: equities
+    strategy_theme: "cross-asset"
+    geography: "US"
+    access_level: internal
+    entitlement_class: firm-internal
+    publication_date: 2026-07-22
+    ingestion_date: 2026-07-22
+    review_status: pending_review
+    freshness_days: 14
+    summary: "Agent-generated synthesis connecting RES-0001's growth screen to RES-0002's credit view; derived artifact awaiting human review before promotion, not a primary source."
+    citation: "Generated synthesis of RES-0001, RES-0002 — pending review"
+
+  - id: RES-0006
+    title: "Tagged desk color: FX carry unwind chatter"
+    source_type: email_tagged
+    author_or_publisher: "fx-desk@example-internal (fictional address)"
+    asset_class: fx
+    strategy_theme: carry
+    geography: "G10"
+    access_level: internal
+    entitlement_class: firm-internal
+    publication_date: 2026-08-05
+    ingestion_date: 2026-08-05
+    review_status: approved
+    freshness_days: 10
+    summary: "Example tagged-thread color on G10 carry unwind chatter; message- and thread-level provenance preserved per REQ-017/REQ-019, not a broad inbox scan."
+    citation: "Tagged email thread EX-THREAD-118, msg EX-MSG-402, 2026-08-05"
+
+  - id: RES-0007
+    title: "Example note: cloud-software growth screen, Q2 (superseded)"
+    source_type: user_note
+    author_or_publisher: "J. Rivera (Quant Research)"
+    asset_class: equities
+    strategy_theme: growth
+    geography: "US"
+    access_level: internal
+    entitlement_class: firm-internal
+    publication_date: 2026-04-10
+    ingestion_date: 2026-04-10
+    review_status: superseded
+    superseded_by: RES-0001
+    freshness_days: 45
+    summary: "Prior-quarter version of the cloud-software growth screen; superseded by RES-0001's refreshed universe and multiples."
+    citation: "Internal research note, J. Rivera, 2026-04-10 (superseded)"
+
+  - id: RES-0008
+    title: "Example firm note flagged for review"
+    source_type: firm_research
+    author_or_publisher: "Example Credit Strategy Desk"
+    asset_class: rates
+    strategy_theme: "policy rates"
+    geography: "US"
+    access_level: internal
+    entitlement_class: firm-internal
+    publication_date: 2026-08-10
+    ingestion_date: 2026-08-10
+    review_status: quarantined
+    freshness_days: 30
+    summary: "Example item held out of retrieval pending manual review (illustrates REQ-011's quarantine state) — excluded from default answers until cleared."
+    citation: "Example Credit Strategy Desk note, 2026-08-10 (quarantined)"

@@ -172,10 +172,36 @@ the store (see Non-Goals), so it is safe to run against a live memory tree.
   Out of scope here by design; the contract takes records already filtered by
   the caller, so the engine never widens access.
 
+## Delivery surfaces
+
+The view-model and query API defined here are consumed by two independent front
+ends, both read-only and both honouring the grounding contract (NFR-006):
+
+1. **`web/`** — the reference SPA (Vite + React + hand-drawn charts, no runtime
+   third-party libraries), served by the standard-library API server in
+   `src/quantsmith/knowledge_console/server.py`, plus a self-contained snapshot
+   (REQ-012). This is the surface REQ-007–REQ-013 and every AC are written
+   against, and it is what keeps the SDK stdlib-only.
+
+2. **`apps/knowledge-console/`** — a Bloomberg-terminal-style application on a
+   heavier stack (React Router, Tailwind, Zustand, `lucide-react`, a custom Node
+   HTTP server with file-system API routing). It is a **separate application,
+   not part of the SDK runtime**: it adds nothing to `pyproject.toml`, and its
+   Node server does not re-implement the model — it shells out to this package's
+   Python CLI (`python -m quantsmith.knowledge_console print|query`), so both
+   surfaces read the *same* single source of truth and cannot drift. The heavy
+   stack lives entirely under `apps/` and is invisible to an adopter who never
+   opens that directory; QuantSmith stays a Markdown-and-shell scaffold with a
+   stdlib Python package. NFR-001/NFR-002 continue to bind the SDK; they were
+   never claims about a downstream application.
+
 ## Exceptions
 
 None. The console adds a read surface and a runtime over standards that already
 exist (`0002`, `0048`); it introduces no deviation from
 `instructions/engineering_principles.md`. The Node/Vite tooling under `web/` is
 build-time only and is quarantined from the SDK's runtime dependencies by
-NFR-001/NFR-002 — a deliberate boundary, not an exception to the constitution.
+NFR-001/NFR-002; the heavier `apps/knowledge-console/` terminal is a separate
+downstream application (see Delivery surfaces) that consumes this package's CLI
+rather than adding to it — a deliberate boundary, not an exception to the
+constitution.
