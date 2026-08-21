@@ -69,6 +69,13 @@ and matching prompts.
 repositories declared in `knowledge_sources.yml` (subfolders as domains), validated
 by the `knowledge` gate.
 
+**Scheduled workflow operations** — spec `0055-workflow-scheduling-operations`
+defines the agentic control plane for cron/jobs/scripts/Python/workflows: a schedule
+registry, scheduler-adapter validation, execution ledger, manual task reminders,
+daily status reports, failure routing, and memory handoff for recurring operational
+learnings. It builds on `adapters/schedulers/`, `0019-pipeline-observability`,
+`0020-alerting`, and `0002-workflow-memory`.
+
 ## Conventions To Preserve
 
 - A public agent is any directory containing `prompt.md` (any depth under `agents/`)
@@ -109,10 +116,21 @@ nobody noticed.
 | `0053` | **MCP memory-graph server** — tools over `0048`'s store, with `as_of` honouring the type-aware point-in-time rule | `0048` `T-002`/`T-004`; ideally `0049` | item 17 |
 | `0054` | **MCP RAG server** — vector search with per-access-tier indexes and cited passages | `0052` contract | item 17 |
 
-**Next free spec number: `0055`.** Reserving a number here does not create the
+**Next free spec number: `0056`.** Reserving a number here does not create the
 directory; run `./scripts/new-spec.sh` (or copy `templates/spec/`) when the work
 actually starts.
 
+
+**New P0 scheduled workflow operations control plane** — spec
+`0055-workflow-scheduling-operations/` covers cron jobs, Python scripts/modules,
+QuantSmith pipelines, and agentic workflows as deployable scheduled jobs. The
+planned slice is a registry → scheduler adapter dry-run/deploy → dispatcher →
+execution ledger → daily status report loop, with manual task reminders and
+failure/overdue routing into alerting. This is the missing operating layer for
+recurring desk workflows: "what ran, what completed, what failed, what needs a
+human, what runs next, and what should be learned for next time." First runtime
+target should be local and dependency-free (`workflow_scheduling.py` plus tests),
+then adapters can deploy to cron/GitHub Actions/Airflow/Dagster/Prefect.
 
 1. **P0 optimizer-agent workflow expansion — every `0013` solver now has a shipped
    application.** The optimization group has runtimes for the core mathematical
