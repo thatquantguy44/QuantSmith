@@ -616,8 +616,9 @@ then adapters can deploy to cron/GitHub Actions/Airflow/Dagster/Prefect.
       ids were served to a run, in the run-card slot that already exists.
     - **Market-research knowledge base — specced, not yet built** (spec `0056`).
       This is the knowledge-base half for user notes, firm research, generated
-      summaries, market color, fund-manager letters, sell-side research, and
-      other approved external materials. It deliberately keeps the same
+      summaries, market color, explicitly tagged email color, fund-manager
+      letters, sell-side research, and other approved external materials. It
+      deliberately keeps the same
       knowledge-base MCP interface (`knowledge://market_research/...`) while
       allowing separate governed storage, access-tiered indexes, entitlement
       checks, citations, point-in-time retrieval, and audit records underneath.
@@ -731,6 +732,8 @@ then adapters can deploy to cron/GitHub Actions/Airflow/Dagster/Prefect.
     different storage and governance underneath the shared interface. Treat it
     as a consumer of `0052`/`0054`, with stricter entitlement, source-license,
     freshness, and point-in-time rules than ordinary internal documentation.
+    Tagged email color is included only through explicit labels, folders, or
+    saved searches; broad inbox keyword scanning is deliberately out of scope.
 
 18. **Firmwide readiness — distribution, ownership, and usage signal.**
     Three of the five gaps between "a good SDK" and "infrastructure a firm

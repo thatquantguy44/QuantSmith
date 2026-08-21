@@ -22,6 +22,12 @@ backing stores. Agents query one namespace, such as
 server resolves caller clearance, storage location, search index, citations,
 freshness, and point-in-time filters internally.
 
+Tagged email market color is modeled as another governed source, not a special
+agent path. The scanner reads only configured labels, tags, folders, or saved
+searches, applies sender/domain and mailbox-scope policy, normalizes message and
+thread metadata, and emits reviewable ingestion candidates. Untagged inbox
+content is outside the contract.
+
 This keeps market research distinct from workflow memory. Workflow memory
 captures lessons about datasets, fields, runs, and model behavior. Market
 research captures sourced views, theses, market color, manager commentary, and
@@ -40,6 +46,7 @@ generated syntheses that require entitlement-aware retrieval.
 | MCP retrieval server | Exposes one `knowledge://market_research/...` surface and query tools to agents. |
 | Citation renderer | Returns cited passages or item summaries with accessible provenance. |
 | Audit ledger | Records ingestion, review, retrieval, denial, citation, and deletion/deprecation events. |
+| Tagged email scanner | Reads approved mailbox scopes with read-only permissions, label/tag filters, cursors, and sender/domain policy. |
 
 ## Interfaces & Data Contracts
 
@@ -56,6 +63,7 @@ knowledge://market_research/rates/firm_note/2026-08-21-policy-path
 knowledge://market_research/equities/fund_manager_letter/manager-a-2026-q2
 knowledge://market_research/macro/market_color/2026-08-21-asia-session
 knowledge://market_research/credit/generated_synthesis/2026-08-21-spread-watch
+knowledge://market_research/fx/email_market_color/thread-abc/message-def
 ```
 
 ### Market Research Item
@@ -65,7 +73,7 @@ knowledge://market_research/credit/generated_synthesis/2026-08-21-spread-watch
 | `item_id` | yes | Stable id used in citations and audit records. |
 | `source_uri` | yes | Pointer to original governed content. |
 | `title` | yes | Human-readable title. |
-| `source_type` | yes | `user_note`, `generated_report`, `firm_research`, `fund_manager`, `sell_side`, `transcript`, `meeting_note`, `other`. |
+| `source_type` | yes | `user_note`, `generated_report`, `firm_research`, `fund_manager`, `sell_side`, `email_market_color`, `transcript`, `meeting_note`, `other`. |
 | `author_or_publisher` | yes | Person, desk, firm, manager, or provider. |
 | `published_at` | yes | Source publication date. |
 | `effective_at` | no | Date the content describes, if different. |
@@ -80,6 +88,35 @@ knowledge://market_research/credit/generated_synthesis/2026-08-21-spread-watch
 | `freshness_days` | no | Current-context staleness threshold. |
 | `superseded_by` | no | Links later canonical item. |
 | `canonical_of` | no | Links conflict group or duplicate set. |
+
+### Email Market Color Source
+
+| Field | Required | Notes |
+| --- | --- | --- |
+| `provider` | yes | `gmail`, `outlook`, `imap_export`, or firm-specific provider id. |
+| `mailbox_ref` | yes | Mailbox alias or connector-owned mailbox id, not a credential. |
+| `label_filters` | yes | Explicit labels/tags/folders such as `market-color`, `desk-color`, or `research-approved`. |
+| `saved_search_ref` | no | Provider saved-search id or named query, if labels are insufficient. |
+| `sender_allowlist` | no | Domains, distribution lists, or senders approved as market-color sources. |
+| `sender_denylist` | no | Senders or domains excluded even if tagged. |
+| `attachment_policy` | yes | `metadata_only`, `review_required`, `index_allowed`, or `ignore`. |
+| `cursor` | yes | Provider cursor or timestamp watermark for incremental scans. |
+| `review_required` | yes | Whether candidates can be approved automatically; default `true`. |
+| `retention_policy` | yes | Policy id controlling message metadata/content retention. |
+
+### Email Market Color Candidate
+
+| Field | Required | Notes |
+| --- | --- | --- |
+| `thread_id` | yes | Groups related messages without collapsing provenance. |
+| `message_id` | yes | Per-message citation anchor. |
+| `sent_at` | yes | Publication timestamp for point-in-time retrieval. |
+| `received_at` | yes | Ingestion-availability timestamp. |
+| `sender_or_publisher` | yes | Sender display/source metadata; storage detail follows privacy policy. |
+| `tag_provenance` | yes | Label/tag/folder/saved-search that made the message eligible. |
+| `snippet_or_passage` | no | Optional extracted passage, only after policy and review allow it. |
+| `attachment_decisions` | yes | Include, metadata-only, ignored, or quarantined per attachment. |
+| `status` | yes | `pending_review`, `approved`, `quarantined`, `restricted`, `deprecated`, or `deleted`. |
 
 ### Retrieval Request
 
@@ -133,6 +170,10 @@ knowledge://market_research/credit/generated_synthesis/2026-08-21-spread-watch
 | REQ-013 | Agent integration contract | T-003, T-012 |
 | REQ-014 | Curation conflict/canonical-source workflow | T-013 |
 | REQ-015 | Scheduled report knowledge-candidate handoff | T-014 |
+| REQ-016 | Tagged email scanner and source manifest | T-018, T-019 |
+| REQ-017 | Email candidate normalization | T-018, T-020 |
+| REQ-018 | Email connector governance and sender/domain policy | T-019, T-021 |
+| REQ-019 | Thread grouping with per-message citations | T-020 |
 | NFR-001 | Access-tiered search and non-revealing denial response | T-006, T-007 |
 | NFR-002 | Citation coverage validator | T-009, T-015 |
 | NFR-003 | `as_of` validator | T-008, T-015 |
@@ -143,6 +184,8 @@ knowledge://market_research/credit/generated_synthesis/2026-08-21-spread-watch
 | NFR-008 | Compliance metadata propagation | T-006, T-010 |
 | NFR-009 | Freshness/index compaction policy | T-005, T-017 |
 | NFR-010 | Rebuild/deprecate/delete lifecycle tests | T-010, T-017 |
+| NFR-011 | Read-only label-scoped email connector | T-018, T-019 |
+| NFR-012 | Email privacy minimization | T-020, T-021 |
 
 ## Trade-offs & Alternatives
 
@@ -153,6 +196,8 @@ knowledge://market_research/credit/generated_synthesis/2026-08-21-spread-watch
 | Access filtering | Select access-tiered indexes before search | Search everything, then filter results | Post-retrieval filtering can leak restricted document existence. |
 | Generated content | Treat as derived synthesis with citations | Treat generated summaries as primary sources | Prevents model-generated prose from becoming unsupported firm knowledge. |
 | Taxonomy | Common core plus optional asset-class fields | One rigid schema for all markets | Rates, equities, credit, FX, commodities, and digital assets need different detail without losing common retrieval fields. |
+| Email scope | Explicit tags/labels/folders/saved searches only | Broad inbox keyword scanning | A broad scan is too noisy and too risky for private or restricted email. |
+| Email attachments | Policy-driven handling with review defaults | Index every attachment from tagged messages | Tags often apply to the email, not every attached file's license or sensitivity. |
 
 ## Validation Strategy
 
@@ -166,6 +211,9 @@ knowledge://market_research/credit/generated_synthesis/2026-08-21-spread-watch
   and unsupported gaps are explicit.
 - Quarantine tests prove secrets, PII, MNPI indicators, and license-restricted
   content are excluded from searchable indexes until review.
+- Email scanner tests prove only configured labels/tags/folders/saved searches are
+  scanned, sender/domain policy is applied before extraction, and untagged mail is
+  ignored.
 - Benchmark fixtures validate million-item catalog shape and retrieval latency
   assumptions with synthetic metadata only.
 
@@ -181,6 +229,9 @@ Roll out in four slices:
    audit records.
 4. Scheduled operations integration: use `0055` to run ingestion scans, daily
    review status, stale-content reports, and knowledge-candidate handoffs.
+5. Tagged email color: add a read-only connector adapter with synthetic fixtures,
+   label-scoped scans, cursor checkpoints, sender/domain policy, attachment
+   decisions, and review queue integration.
 
 Rollback is provider-local: remove a source from the manifest, mark items
 quarantined/deprecated, rebuild affected indexes, and preserve audit records.
@@ -192,3 +243,7 @@ quarantined/deprecated, rebuild affected indexes, and preserve audit records.
 - Which source types can be passage-indexed versus metadata-only?
 - Who owns canonical-source decisions for conflicting investment views?
 - What retention policy applies to generated synthesis and external research?
+- Which email provider should be first: Gmail labels, Outlook categories/folders,
+  mailbox exports, or a firm search/export API?
+- Are email recipients needed for provenance, or should they be omitted or hashed
+  by default?
