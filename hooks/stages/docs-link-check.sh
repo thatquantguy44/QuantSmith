@@ -4,6 +4,11 @@
 # Verifies that relative links and image paths in Markdown files point at
 # something that exists. External links (http/https/mailto) and pure anchors are
 # skipped. Advisory by default; set QF_STAGE_ENFORCE=1 to block.
+#
+# Vendored and build directories are excluded: their Markdown is third-party
+# (node_modules) or generated (dist), not repo docs, and its intra-package
+# relative links are not this gate's concern. They are also gitignored, so CI
+# never sees them; excluding them keeps a local run after `npm install` honest.
 
 set -e
 DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
@@ -12,7 +17,11 @@ DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 qf_stage_header docs-link "Relative Markdown link check"
 cd "$QF_ROOT"
 
-md_files=$(find . -type f -name '*.md' -not -path './.git/*' | sort)
+md_files=$(find . -type f -name '*.md' \
+  -not -path './.git/*' \
+  -not -path '*/node_modules/*' \
+  -not -path '*/dist/*' \
+  -not -path '*/dist-single/*' | sort)
 checked=0
 
 for f in $md_files; do

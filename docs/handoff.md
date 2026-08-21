@@ -523,8 +523,8 @@ then adapters can deploy to cron/GitHub Actions/Airflow/Dagster/Prefect.
     as real sources come into use.
 
 14. **P1 Generalization & Team Onboarding — making QuantSmith self-serve across
-    domains.** QuantSmith is now a comprehensive framework (161 agents, 48 specs,
-    27 gates, 33 standards); the next phase is reducing discovery friction and
+    domains.** QuantSmith is now a comprehensive framework (161 agents, 49 specs,
+    32 gates, 33 standards); the next phase is reducing discovery friction and
     enabling team-intuitive adoption without deep codebase reading.
     - **P0 Phase 1a: Role profiles** (`roles/{portfolio_manager,risk_manager,quant_researcher,data_engineer,compliance_officer}.md`):
       Define personas with their workflows, agents, specs, and handoff points. A
@@ -596,6 +596,19 @@ then adapters can deploy to cron/GitHub Actions/Airflow/Dagster/Prefect.
       handles (`T-007`), `store_version` (`T-008`), the CLI and gate
       rewiring (`T-009`/`T-010`), supersession and contradiction validation
       (`T-014`–`T-016`). 11 of 23 `AC-*` verified.
+    - **Read/analytics surface — built** (spec `0057-knowledge-console`):
+      `src/quantsmith/knowledge_console/`. The first consumer to read the whole
+      `memory/` tree as records rather than as strings — a filesystem
+      store-loader over `0048`, a pure, deterministic view-model (counts,
+      trends, a records↔scope↔evidence-run knowledge graph, a git changes feed,
+      and a needed-review queue that collects the curation signals `0048`
+      already computes), a standard-library HTTP API, and a Vite/React front
+      end with a self-contained single-file snapshot. It also ships the
+      **pluggable natural-language query seam** (`QueryEngine` protocol +
+      grounded keyword default via `resolve_engine`) so a real LLM engine can
+      answer questions over the store later without a UI or API change. It is
+      deliberately read-only: the approval *action* (write-back) stays with the
+      `0049` write path below.
     - **Write path — planned** (spec `0049`, not yet written). Capture belongs
       at the **runtime boundary, not the gate boundary**: a gate finding names
       a source file (`"negative .shift()"`), while a record needs a dataset
