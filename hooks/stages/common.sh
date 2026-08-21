@@ -23,6 +23,20 @@ qf_warn() {
   QF_FINDINGS=$((QF_FINDINGS + 1))
 }
 
+# Visually a warning ("!"), but NEVER counted toward QF_FINDINGS -- so it can
+# never flip a gate's exit code, even under QF_STAGE_ENFORCE=1.
+#
+# For a finding a gate's own design says should stay advisory forever (a
+# heuristic prone to false positives, distinct from a real structural
+# violation the same script also checks). Using qf_warn for both collapses
+# that distinction: CI enforcement then blocks on the heuristic half, on
+# every run, whether or not the heuristic is right that time -- exactly the
+# failure data-provenance-check.sh hit when docs/handoff.md's own honest
+# mention of synthetic data started failing every push.
+qf_notice() {
+  printf '  ! %s\n' "$1"
+}
+
 qf_stage_header() {
   printf '\n[qf:%s] %s\n' "$1" "$2"
 }
