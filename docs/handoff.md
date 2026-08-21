@@ -98,6 +98,35 @@ learnings. It builds on `adapters/schedulers/`, `0019-pipeline-observability`,
 
 ## What's Next (prioritized)
 
+**Highest priority, in order: (1) the knowledge base, (2) scheduler
+monitoring.** Everything else in this section is real, tracked work, but
+these two are what should get attention first if only one thing can move at
+a time:
+
+1. **Knowledge base (item 15, "Company knowledge over time").** The
+   read/write runtime and both front ends are built (`0048`/`0049`/`0057`),
+   and per-person access control now closes the enforcement gap
+   (`0058`) — but the store itself is still five reference records
+   (`PERSISTENT_KNOWLEDGE.md`'s own honest count) and the market-research
+   half (`0056`) is a fictional-content-only reference implementation, not a
+   deployed knowledge base. The machinery is ahead of the content. Populating
+   it with real findings, and moving `0056` from Draft to built, is
+   higher-leverage than any further machinery on top of what already exists.
+   MCP exposure (item 17) is the next step *after* there is real content
+   worth a team reaching for over the network — building the server first
+   would expose an empty store.
+2. **Scheduler monitoring (spec `0055`).** The control plane itself is built
+   and has a real worked example (`examples/scheduled_daily_report/`), but
+   nothing yet watches it in practice: `alert_handoffs()` returns payloads,
+   not delivered alerts (wiring them to a real `adapters/alert_delivery/`
+   provider is unbuilt), there is no `workflow_scheduling_cli` to render a
+   daily operations report without a bespoke script per team, and the
+   enforceable-vs-advisory deployment decision named in
+   `specs/0055-workflow-scheduling-operations/tasks.md`'s Follow-ups is still
+   open. Until failed/missed runs actually page someone, the scheduling
+   layer records history without doing the "watch it while it runs" job it
+   exists for.
+
 ### Planned specs (reserved, not yet written)
 
 The one place to see committed-to work that has no spec directory yet. The
