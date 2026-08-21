@@ -116,7 +116,7 @@ nobody noticed.
 | `0053` | **MCP memory-graph server** — tools over `0048`'s store, with `as_of` honouring the type-aware point-in-time rule | `0048` `T-002`/`T-004`; ideally `0049` | item 17 |
 | `0054` | **MCP RAG server** — vector search with per-access-tier indexes and cited passages | `0052` contract | item 17 |
 
-**Next free spec number: `0056`.** Reserving a number here does not create the
+**Next free spec number: `0057`.** Reserving a number here does not create the
 directory; run `./scripts/new-spec.sh` (or copy `templates/spec/`) when the work
 actually starts.
 
@@ -523,7 +523,7 @@ then adapters can deploy to cron/GitHub Actions/Airflow/Dagster/Prefect.
     as real sources come into use.
 
 14. **P1 Generalization & Team Onboarding — making QuantSmith self-serve across
-    domains.** QuantSmith is now a comprehensive framework (161 agents, 45 specs,
+    domains.** QuantSmith is now a comprehensive framework (161 agents, 48 specs,
     27 gates, 33 standards); the next phase is reducing discovery friction and
     enabling team-intuitive adoption without deep codebase reading.
     - **P0 Phase 1a: Role profiles** (`roles/{portfolio_manager,risk_manager,quant_researcher,data_engineer,compliance_officer}.md`):
@@ -614,11 +614,16 @@ then adapters can deploy to cron/GitHub Actions/Airflow/Dagster/Prefect.
       gates pruning: without it the store only grows, and eventually costs
       more to search than it saves. Cheapest version is recording which record
       ids were served to a run, in the run-card slot that already exists.
-    - **Knowledge-base half — unspecced.** `agents/knowledge/` has four agent
-      contracts (`knowledge_ingestion`, `knowledge_curation`,
-      `knowledge_retrieval`, `institutional_memory`) and **zero Python files**;
-      the `knowledge` gate checks that configured source paths exist and
-      nothing else. Open question below on whether it gets a runtime.
+    - **Market-research knowledge base — specced, not yet built** (spec `0056`).
+      This is the knowledge-base half for user notes, firm research, generated
+      summaries, market color, fund-manager letters, sell-side research, and
+      other approved external materials. It deliberately keeps the same
+      knowledge-base MCP interface (`knowledge://market_research/...`) while
+      allowing separate governed storage, access-tiered indexes, entitlement
+      checks, citations, point-in-time retrieval, and audit records underneath.
+      The `agents/knowledge/` contracts remain the agent layer; `0056` is the
+      deployable market-research knowledge contract they should eventually read.
+      Real research content remains outside this repo.
 
     **Honest status.** The store holds **5 records, all reference examples** —
     no real institutional knowledge has been captured yet. The read path is
@@ -719,6 +724,13 @@ then adapters can deploy to cron/GitHub Actions/Airflow/Dagster/Prefect.
 
     Related: item 15 (what the knowledge is), item 16 (how repos adopt it).
     This item is how a team *reaches* it.
+
+    **Market-research namespace now specified.** Spec `0056` adds
+    `knowledge://market_research/...` as a governed domain behind the same MCP
+    front door. It does not require a separate MCP client path; it requires
+    different storage and governance underneath the shared interface. Treat it
+    as a consumer of `0052`/`0054`, with stricter entitlement, source-license,
+    freshness, and point-in-time rules than ordinary internal documentation.
 
 18. **Firmwide readiness — distribution, ownership, and usage signal.**
     Three of the five gaps between "a good SDK" and "infrastructure a firm
