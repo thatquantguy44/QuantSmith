@@ -26,13 +26,27 @@ exist in 2020, so serving it to a 2020 backtest leaks the future. The rule
 therefore depends on record ``type``: mechanical facts about how data is built
 are timeless, while claims about what *worked* are bounded — see
 ``point_in_time_filter`` for the full reasoning (spec RISK-006).
+
+Spec ``0049`` adds the write path this module lacked: ``resolve_author``
+finishes ``0048``'s outstanding author-resolution requirements;
+``propose_records``/``stage_candidates`` let a pipeline capture what it
+observed into a **committed staging area** (``memory/inbox/``) without ever
+touching the live store; ``promote`` is the one deliberate, human-invoked
+action that turns an accepted candidate into a real ``Record`` — a
+``Candidate`` is a distinct, lighter type precisely so nothing *but*
+``promote`` can create a ``Record`` (spec NFR-005).
 """
 
 from __future__ import annotations
 
 import datetime
+import getpass
+import hashlib
+import os
 import re
+import subprocess
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Dict, List, Mapping, Optional, Sequence, Tuple
 
 # --------------------------------------------------------------------------
@@ -614,3 +628,540 @@ def validate(records: Sequence[Record]) -> List[Finding]:
                 "or free text must never be committed as authorship", **where))
 
     return findings
+
+
+# --------------------------------------------------------------------------
+# Author resolution (spec 0049 T-001, REQ-001/REQ-002 — completes 0048
+# REQ-007/REQ-008)
+# --------------------------------------------------------------------------
+
+#: Repo-constant salt for handle derivation. Per 0048's own Open Questions this
+#: makes handles comparable across clones of *this* repo; a per-store salt
+#: would make them uncorrelatable between repositories instead. Starting with
+#: the simpler, repo-constant choice — changing it later is a one-line change,
+#: not a migration, since handles are derived, never stored raw.
+_HANDLE_SALT = "quantsmith-workflow-memory-v1"
+
+
+def derive_handle(identity: str) -> str:
+    """A stable, pseudonymous handle for a source identity (email or username).
+
+    Matches ``_AUTHOR_RE`` by construction: a fixed-length lowercase hex digest
+    prefixed with ``u-`` so it always starts with a letter, satisfying the
+    pattern's ``[a-z0-9]`` first character regardless of the input.
+
+    **Pseudonymous, not anonymous** (0048 RISK-002, inherited unchanged here):
+    the same identity always derives the same handle, so a small team is
+    re-identifiable from the handle plus commit history. This is convenience
+    attribution, not an authentication or privacy guarantee.
+    """
+    digest = hashlib.sha256(f"{_HANDLE_SALT}:{identity.strip().lower()}".encode("utf-8")).hexdigest()
+    return f"u-{digest[:24]}"
+
+
+def _read_identity_config(root: str | os.PathLike = ".") -> Optional[str]:
+    """A local-only ``identity.yml`` (gitignored), the ``role_context.yml``
+    precedent from spec 0024: a file that may carry a real identity locally
+    and must never be committed."""
+    path = Path(root) / "identity.yml"
+    if not path.is_file():
+        return None
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError:
+        return None
+    try:
+        doc = parse_memory_file(text, str(path))
+    except MemoryParseError:
+        return None
+    value = doc.get("author")
+    return str(value).strip() or None if value else None
+
+
+def _git_identity() -> Optional[str]:
+    try:
+        out = subprocess.run(
+            ["git", "config", "user.email"],
+            capture_output=True, text=True, timeout=5, check=False,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    value = out.stdout.strip()
+    return value or None
+
+
+def _os_identity() -> Optional[str]:
+    try:
+        return getpass.getuser() or None
+    except (OSError, ImportError, KeyError):
+        return None
+
+
+def resolve_author(*, override: Optional[str] = None,
+                   root: str | os.PathLike = ".") -> Optional[str]:
+    """Resolve an author handle, in order: ``override`` (or ``QF_MEMORY_AUTHOR``)
+    -> local ``identity.yml`` -> git ``user.email`` -> OS username -> ``None``.
+
+    Never blocks, prompts, or raises (spec REQ-001, AC-004) — a missing
+    identity is a valid outcome, not an error.
+
+    ``override`` and ``QF_MEMORY_AUTHOR`` are both explicit, caller-controlled
+    values (a CLI flag, an environment setting a human chose) and are
+    returned exactly as given — the same treatment ``0048``'s ``validate``
+    already gives any ``author`` field: shape-checked downstream (rejected if
+    it contains ``@``, spec 0048 REQ-009), never resolved or sanitised
+    upstream, because the caller is asserting a handle, not handing over a
+    raw identity to be derived from. Only identities this function discovers
+    *itself* (local config, git, OS) — where the raw value is an email or a
+    system username, never chosen as a handle — are passed through
+    :func:`derive_handle`.
+    """
+    if override is not None:
+        return override.strip() or None
+    env = os.environ.get("QF_MEMORY_AUTHOR")
+    if env:
+        return env.strip() or None
+
+    for source in (_read_identity_config(root), _git_identity(), _os_identity()):
+        if source:
+            return derive_handle(source)
+    return None
+
+
+# --------------------------------------------------------------------------
+# Candidates (spec 0049 T-002, REQ-003/REQ-004)
+# --------------------------------------------------------------------------
+
+class MemoryWriteError(ValueError):
+    """A promotion was refused (spec REQ-009); nothing was written."""
+
+
+@dataclass(frozen=True)
+class CandidateSpec:
+    """What a proposer knows about an observation, before any review.
+
+    Deliberately excludes ``id``, ``author``, and ``first_seen`` — those are
+    supplied only by :func:`promote` (spec NFR-005). ``target_catalog`` is a
+    path relative to ``memory/`` (e.g. ``"quant_researcher/index.yaml"`` or
+    ``"_shared/datasets/example_prices/provenance.yaml"``); it is supplied by
+    the proposer explicitly rather than inferred from ``scope``, because
+    inference is guessable wrong in a way that would silently misfile a
+    record (spec plan.md Trade-offs).
+    """
+
+    scope: str
+    type: str
+    statement: str
+    confidence: str
+    pit_scope: str
+    evidence: Tuple[Mapping[str, str], ...]
+    target_catalog: str
+    access_level: str = "internal"
+
+
+@dataclass(frozen=True)
+class Candidate:
+    """A proposed, not-yet-real observation. Not a :class:`Record`.
+
+    ``candidate_id`` addresses this candidate within its inbox file
+    (workflow/source_run/position), independent of list order, so
+    :func:`promote`/:func:`discard` can name one precisely even if the file
+    has been hand-edited since staging.
+    """
+
+    candidate_id: str
+    spec: CandidateSpec
+    workflow: str
+    source_run: str
+    proposed_at: datetime.date
+
+
+def propose_records(specs: Sequence[CandidateSpec], *, workflow: str,
+                    source_run: str,
+                    proposed_at: Optional[datetime.date] = None) -> List[Candidate]:
+    """Build candidates from specs. Pure — writes nothing (spec AC-005).
+
+    ``candidate_id`` is deterministic: ``"<workflow>/<source_run>/<NNN>"`` by
+    position in ``specs``, so proposing the same batch twice yields the same
+    ids (spec AC-007's byte-identical restaging depends on this).
+    """
+    proposed_at = proposed_at or datetime.date.today()
+    return [
+        Candidate(
+            candidate_id=f"{workflow}/{source_run}/{i:03d}",
+            spec=s, workflow=workflow, source_run=source_run,
+            proposed_at=proposed_at,
+        )
+        for i, s in enumerate(specs, start=1)
+    ]
+
+
+# --------------------------------------------------------------------------
+# Deterministic YAML rendering (spec 0049 NFR-003)
+# --------------------------------------------------------------------------
+
+def _needs_quoting(text: str) -> bool:
+    if text == "" or text in ("[]", "{}"):
+        return True
+    if _DATE_RE.match(text):
+        return True
+    if re.fullmatch(r"-?\d+", text):
+        return True
+    if text[:1] in ("[", "{", "&", "*", "!", ">", "|"):
+        return True
+    if text != text.strip():
+        return True
+    return False
+
+
+def _render_scalar(value, *, always_quote: bool = False) -> str:
+    """Render one scalar value in the YAML subset ``parse_memory_file`` reads.
+
+    The subset has no escape sequences (spec plan.md), so a value containing a
+    double quote is sanitised (quotes replaced with single quotes) rather than
+    emitted in a form that would silently mis-parse on the way back in — the
+    same "never guess" stance ``parse_memory_file`` itself takes.
+    """
+    if isinstance(value, datetime.date):
+        return value.isoformat()
+    if isinstance(value, int) and not isinstance(value, bool) and not always_quote:
+        # A real int (e.g. corroboration_count) always renders bare, matching
+        # the store's existing style -- only a *string* that merely looks
+        # like digits goes through _needs_quoting's protective quoting below.
+        return str(value)
+    text = str(value)
+    if '"' in text:
+        text = text.replace('"', "'")
+        always_quote = True
+    if always_quote or _needs_quoting(text):
+        return f'"{text}"'
+    return text
+
+
+def _render_entry(fields: Sequence[Tuple[str, object, bool]], *, indent: str = "  ") -> List[str]:
+    """Render one ``- key: value`` list entry (plus its nested ``evidence:``).
+
+    ``fields`` is ``(key, value, always_quote)``; a value of type
+    ``Tuple[Mapping, ...]`` is rendered as a nested list-of-mappings (the
+    ``evidence:`` shape), matching what ``parse_memory_file`` accepts.
+    """
+    lines: List[str] = []
+    first = True
+    for key, value, always_quote in fields:
+        prefix = f"{indent}- " if first else f"{indent}  "
+        first = False
+        if isinstance(value, tuple):
+            lines.append(f"{prefix}{key}:")
+            for entry in value:
+                sub_first = True
+                for ek, ev in entry.items():
+                    sub_prefix = f"{indent}    - " if sub_first else f"{indent}      "
+                    sub_first = False
+                    lines.append(f"{sub_prefix}{ek}: {_render_scalar(ev)}")
+            continue
+        lines.append(f"{prefix}{key}: {_render_scalar(value, always_quote=always_quote)}")
+    return lines
+
+
+# --------------------------------------------------------------------------
+# Staging (spec 0049 T-003, REQ-005/REQ-006)
+# --------------------------------------------------------------------------
+
+def _inbox_path(root: str | os.PathLike, workflow: str, source_run: str) -> Path:
+    return Path(root) / "inbox" / workflow / f"{source_run}.yaml"
+
+
+def _candidate_to_fields(c: Candidate) -> List[Tuple[str, object, bool]]:
+    s = c.spec
+    return [
+        ("candidate_id", c.candidate_id, True),
+        ("workflow", c.workflow, False),
+        ("source_run", c.source_run, True),
+        ("proposed_at", c.proposed_at, False),
+        ("scope", s.scope, True),
+        ("type", s.type, False),
+        ("statement", s.statement, True),
+        ("confidence", s.confidence, False),
+        ("pit_scope", s.pit_scope, True),
+        ("target_catalog", s.target_catalog, True),
+        ("access_level", s.access_level, False),
+        ("evidence", tuple(s.evidence), False),
+    ]
+
+
+def _candidate_from_raw(raw: Mapping, source_file: str) -> Candidate:
+    evidence = _normalise_evidence(raw.get("evidence"), source_file, 0)
+    spec = CandidateSpec(
+        scope=str(raw.get("scope", "")),
+        type=str(raw.get("type", "")),
+        statement=str(raw.get("statement", "")),
+        confidence=str(raw.get("confidence", "")),
+        pit_scope=str(raw.get("pit_scope", "")),
+        evidence=evidence,
+        target_catalog=str(raw.get("target_catalog", "")),
+        access_level=str(raw.get("access_level", "internal")),
+    )
+    proposed_at = raw.get("proposed_at")
+    if not isinstance(proposed_at, datetime.date):
+        proposed_at = datetime.date.today()
+    return Candidate(
+        candidate_id=str(raw.get("candidate_id", "")),
+        spec=spec,
+        workflow=str(raw.get("workflow", "")),
+        source_run=str(raw.get("source_run", "")),
+        proposed_at=proposed_at,
+    )
+
+
+def stage_candidates(candidates: Sequence[Candidate], *,
+                     root: str | os.PathLike = "memory") -> Path:
+    """Write candidates to their committed inbox file(s); return the last path
+    written. Idempotent (spec AC-007): restaging the same batch — same
+    ``candidate_id``s — overwrites those entries in place rather than
+    duplicating them, and existing candidates in the file that are not part
+    of this batch are preserved.
+    """
+    root = Path(root)
+    by_file: Dict[Path, List[Candidate]] = {}
+    for c in candidates:
+        by_file.setdefault(_inbox_path(root, c.workflow, c.source_run), []).append(c)
+
+    last_path = None
+    for path, batch in by_file.items():
+        existing: Dict[str, Candidate] = {}
+        if path.is_file():
+            for cand, _ in _load_inbox_file(path):
+                existing[cand.candidate_id] = cand
+        for c in batch:
+            existing[c.candidate_id] = c
+
+        ordered = sorted(existing.values(), key=lambda c: c.candidate_id)
+        lines = ["# Staged memory candidates -- not yet real records.",
+                 "# Reviewed and merged via normal pull-request review;",
+                 "# accepted with `promote`, discarded with `discard` (spec 0049).",
+                 "",
+                 "candidates:"]
+        for c in ordered:
+            lines.extend(_render_entry(_candidate_to_fields(c)))
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        last_path = path
+    return last_path
+
+
+def _load_inbox_file(path: Path) -> List[Tuple[Candidate, str]]:
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError:
+        return []
+    try:
+        doc = parse_memory_file(text, str(path))
+    except MemoryParseError:
+        return []
+    raw_items = doc.get("candidates") or []
+    if not isinstance(raw_items, list):
+        return []
+    return [(_candidate_from_raw(r, str(path)), str(path)) for r in raw_items]
+
+
+def load_inbox(root: str | os.PathLike = "memory") -> List[Tuple[Candidate, str]]:
+    """Every staged candidate under ``memory/inbox/``, tagged with its source
+    file. Never merged into a live-store ``query``/``point_in_time_filter``
+    result (spec REQ-006, AC-008) — this is a wholly separate read path.
+    """
+    inbox_root = Path(root) / "inbox"
+    if not inbox_root.is_dir():
+        return []
+    out: List[Tuple[Candidate, str]] = []
+    for path in sorted(inbox_root.rglob("*.yaml")):
+        out.extend(_load_inbox_file(path))
+    return out
+
+
+# --------------------------------------------------------------------------
+# Promotion and discard (spec 0049 T-004/T-005, REQ-007..REQ-011)
+# --------------------------------------------------------------------------
+
+@dataclass(frozen=True)
+class PromotionResult:
+    record: Record
+    contradiction_warning: Optional[str]
+
+
+def _record_to_fields(r: Record) -> List[Tuple[str, object, bool]]:
+    fields: List[Tuple[str, object, bool]] = [
+        ("id", r.id, False),
+        ("scope", r.scope, True),
+        ("type", r.type, False),
+        ("statement", r.statement, True),
+        ("evidence", tuple(r.evidence), False),
+        ("confidence", r.confidence, False),
+        ("corroboration_count", r.corroboration_count, False),
+        ("first_seen", r.first_seen, False),
+        ("last_confirmed", r.last_confirmed, False),
+        ("status", r.status, False),
+        ("pit_scope", r.pit_scope, True),
+        ("access_level", r.access_level, False),
+    ]
+    if r.author is not None:
+        fields.append(("author", r.author, False))
+    if r.superseded_by is not None:
+        fields.append(("superseded_by", r.superseded_by, False))
+    # build_record()/parse_memory_file() only round-trip coexists/depends_on as
+    # a single scalar (or a 1-tuple) -- the parser has no list-of-bare-scalars
+    # form (only list-of-mappings). Multi-value coexists/depends_on is a
+    # pre-existing 0048 limitation this spec does not extend; fail loudly
+    # rather than silently drop data NFR-004 promises to preserve.
+    for field_name, values in (("coexists", r.coexists), ("depends_on", r.depends_on)):
+        if len(values) > 1:
+            raise MemoryWriteError(
+                f"cannot re-serialize {r.id}: multi-value {field_name} "
+                f"{values!r} has no round-trippable form in the current "
+                "YAML-subset writer (0048 parser limitation, not extended by 0049)")
+        if len(values) == 1:
+            fields.append((field_name, values[0], False))
+    return fields
+
+
+def _next_id(existing_ids: Sequence[str], *, workflow: str) -> str:
+    """A fresh id in this store's existing convention: ``MEM-<NNNN>`` for the
+    shared catalog, ``MEM-<PREFIX>-<NNNN>`` for a named workflow, where
+    ``<PREFIX>`` is the workflow name's leading letters. Collision-checked
+    against every id already in ``existing_ids`` (spec REQ-007/AC-012)."""
+    prefix = "MEM" if workflow == "_shared" else f"MEM-{''.join(ch for ch in workflow.upper() if ch.isalpha())[:2]}"
+    used = set(existing_ids)
+    n = 1
+    while True:
+        candidate = f"{prefix}-{n:04d}"
+        if candidate not in used:
+            return candidate
+        n += 1
+
+
+def _load_catalog_records(path: Path) -> Tuple[List[Record], str]:
+    if not path.is_file():
+        return [], "internal"
+    text = path.read_text(encoding="utf-8")
+    doc = parse_memory_file(text, str(path))
+    raw_records = doc.get("records") or []
+    default_access = str(doc.get("access_level", "internal"))
+    records = [build_record(r, file=str(path), access_level=default_access)
+              for r in (raw_records if isinstance(raw_records, list) else [])]
+    return records, default_access
+
+
+def _write_catalog_records(path: Path, records: Sequence[Record], *,
+                           access_level: str) -> None:
+    lines = [f"access_level: {access_level}", "", "records:"]
+    for r in records:
+        lines.extend(_render_entry(_record_to_fields(r)))
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def _rewrite_inbox_without(source_file: str, candidate_id: str) -> None:
+    path = Path(source_file)
+    remaining = [c for c, _ in _load_inbox_file(path) if c.candidate_id != candidate_id]
+    if not remaining:
+        path.unlink(missing_ok=True)
+        return
+    ordered = sorted(remaining, key=lambda c: c.candidate_id)
+    lines = ["# Staged memory candidates -- not yet real records.",
+             "# Reviewed and merged via normal pull-request review;",
+             "# accepted with `promote`, discarded with `discard` (spec 0049).",
+             "",
+             "candidates:"]
+    for c in ordered:
+        lines.extend(_render_entry(_candidate_to_fields(c)))
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def promote(candidate: Candidate, *, source_file: str,
+           root: str | os.PathLike = "memory",
+           author: Optional[str] = None,
+           as_of: Optional[datetime.date] = None,
+           identity_root: str | os.PathLike = ".") -> PromotionResult:
+    """Turn one staged candidate into a real, committed :class:`Record`.
+
+    Resolves an author (unless ``author`` is given explicitly) by looking for
+    a local ``identity.yml``/git identity/OS user under ``identity_root``
+    (default: the current directory — where a human running the CLI from a
+    repo checkout would have one, independent of where ``memory/`` itself
+    lives). Assigns a fresh, collision-checked id, stamps
+    ``first_seen``/``last_confirmed`` to ``as_of`` (default: today — spec
+    RISK-006's deliberately conservative choice, never the observation date),
+    appends the record to its declared ``target_catalog``, and removes the
+    candidate from its inbox file. Raises :class:`MemoryWriteError` and writes
+    nothing when the candidate would not validate as a record (spec REQ-009,
+    AC-011).
+    """
+    root = Path(root)
+    as_of = as_of or datetime.date.today()
+    s = candidate.spec
+    target_path = root / s.target_catalog
+    live_records, catalog_access = _load_catalog_records(target_path)
+    live_ids = [r.id for r in live_records]
+
+    resolved_author = author if author is not None else resolve_author(root=identity_root)
+    new_id = _next_id(live_ids, workflow=candidate.workflow)
+    if new_id in live_ids:
+        # _next_id()'s own search loop already avoids this in practice; this
+        # is the independent guard REQ-009/AC-012 asks for, so a collision is
+        # a refusal by construction rather than an emergent property of one
+        # helper's internals never being wrong.
+        raise MemoryWriteError(
+            f"refusing to promote {candidate.candidate_id}: assigned id "
+            f"{new_id!r} already exists in {target_path}")
+
+    # Only include the structural fields build_record()'s _REQUIRED check
+    # looks for when they actually hold a value — an empty/absent one must
+    # trigger that check's "missing required field" raise (spec REQ-009,
+    # AC-011), not sail through as a valid empty string.
+    raw: Dict[str, object] = {
+        "id": new_id,
+        "evidence": list(s.evidence),
+        "corroboration_count": len({e.get("source_run") for e in s.evidence if e.get("source_run")}),
+        "first_seen": as_of, "last_confirmed": as_of, "status": "active",
+        "access_level": s.access_level, "author": resolved_author,
+    }
+    for key, value in (("scope", s.scope), ("type", s.type), ("statement", s.statement),
+                       ("confidence", s.confidence), ("pit_scope", s.pit_scope)):
+        if value:
+            raw[key] = value
+
+    try:
+        record = build_record(raw, file=str(target_path), access_level=s.access_level)
+    except MemoryParseError as exc:
+        raise MemoryWriteError(
+            f"refusing to promote {candidate.candidate_id}: {exc}") from exc
+
+    findings = validate([record])
+    blocking = [f for f in findings if f.severity == "error"]
+    if blocking:
+        reasons = "; ".join(f.message for f in blocking)
+        raise MemoryWriteError(f"refusing to promote {candidate.candidate_id}: {reasons}")
+
+    contradiction = None
+    for r in live_records:
+        if r.status == "active" and r.scope == record.scope and r.type == record.type:
+            if record.id not in r.coexists and r.id not in record.coexists:
+                contradiction = (f"{new_id} shares scope {record.scope!r} and type "
+                                 f"{record.type!r} with active record {r.id} — review "
+                                 "before treating both as current (spec 0048 REQ-012).")
+                break
+
+    _write_catalog_records(target_path, [*live_records, record], access_level=catalog_access)
+    _rewrite_inbox_without(source_file, candidate.candidate_id)
+
+    return PromotionResult(record=record, contradiction_warning=contradiction)
+
+
+def discard(candidate: Candidate, *, source_file: str,
+           root: str | os.PathLike = "memory") -> None:
+    """Remove one staged candidate from its inbox file without promoting it.
+
+    Nothing is written to the live store. The commit that removes it is the
+    audit trail for this decision (spec REQ-011) — no separate "rejected"
+    record is kept, matching the "PR review is the approval workflow" design.
+    """
+    _rewrite_inbox_without(source_file, candidate.candidate_id)

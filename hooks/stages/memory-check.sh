@@ -2,9 +2,13 @@
 # Memory gate - workflow memory structure & safety check.
 #
 # Validates the persistent workflow memory store (memory/): that records carry
-# provenance, and that memory contains no secrets, connection strings, or PII
-# (memory is metadata only). See instructions/workflow_memory.md and
-# specs/0002-workflow-memory/. Advisory by default; QF_STAGE_ENFORCE=1 blocks.
+# provenance, that staged write-path candidates (memory/inbox/, spec 0049)
+# carry the same, and that memory contains no secrets, connection strings, or
+# PII (memory is metadata only). See instructions/workflow_memory.md,
+# specs/0002-workflow-memory/, and specs/0049-workflow-memory-write-path/.
+# Deliberately shell-only, no Python dependency: this gate must run in a
+# copied scaffold that may not even carry this repo's Python package.
+# Advisory by default; QF_STAGE_ENFORCE=1 blocks.
 
 set -e
 DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
@@ -34,6 +38,23 @@ else
   for r in $records; do
     for field in first_seen last_confirmed access_level; do
       grep -q "$field" "$r" 2>/dev/null || qf_warn "$r: records missing '$field'"
+    done
+  done
+fi
+
+# Staged write-path candidates (memory/inbox/): same field-presence check,
+# applied before promotion rather than only at it (spec 0049 REQ-015) -- a
+# candidate missing a required field is a finding on the PR that staged it,
+# not a surprise a human only hits when they try to run `promote`.
+inbox_files=""
+if [ -d memory/inbox ]; then
+  inbox_files=$(find memory/inbox -type f -name '*.yaml' 2>/dev/null)
+fi
+if [ -n "$inbox_files" ]; then
+  for r in $inbox_files; do
+    grep -q "candidate_id" "$r" 2>/dev/null || qf_warn "$r: does not look like a staged-candidate file (no 'candidate_id')"
+    for field in scope type statement confidence pit_scope target_catalog; do
+      grep -q "$field" "$r" 2>/dev/null || qf_warn "$r: staged candidate missing '$field'"
     done
   done
 fi
