@@ -121,16 +121,24 @@ directory; run `./scripts/new-spec.sh` (or copy `templates/spec/`) when the work
 actually starts.
 
 
-**New P0 scheduled workflow operations control plane** — spec
-`0055-workflow-scheduling-operations/` covers cron jobs, Python scripts/modules,
-QuantSmith pipelines, and agentic workflows as deployable scheduled jobs. The
-planned slice is a registry → scheduler adapter dry-run/deploy → dispatcher →
+**Scheduled workflow operations control plane — built** (spec
+`0055-workflow-scheduling-operations/`, `workflow_scheduling.py`). Covers cron
+jobs, Python scripts/modules, QuantSmith pipelines, and agentic workflows as
+deployable scheduled jobs: a registry → scheduler dry-run → dispatcher →
 execution ledger → daily status report loop, with manual task reminders and
 failure/overdue routing into alerting. This is the missing operating layer for
 recurring desk workflows: "what ran, what completed, what failed, what needs a
-human, what runs next, and what should be learned for next time." First runtime
-target should be local and dependency-free (`workflow_scheduling.py` plus tests),
-then adapters can deploy to cron/GitHub Actions/Airflow/Dagster/Prefect.
+human, what runs next, and what should be learned for next time." Local and
+dependency-free by design; `adapters/schedulers/` (cron, GitHub Actions,
+Airflow, Dagster/Prefect) remain contract-only Markdown, not executable
+deploy code — the same "spec first, executable providers later" pattern
+`alert_delivery` followed before specs `0032`/`0037`. A concrete worked
+example now exists: `examples/scheduled_daily_report/` runs the full loop
+against a real target (a workflow-memory review digest, reusing `0048`'s
+`validate` and `0057`'s `build_review_queue`), with a committed sample output
+and a documented two-cron-entry real deployment. See
+`specs/0055-workflow-scheduling-operations/tasks.md`'s Follow-ups for what's
+still open (enforceable vs. advisory deployment; a `workflow_scheduling_cli`).
 
 1. **P0 optimizer-agent workflow expansion — every `0013` solver now has a shipped
    application.** The optimization group has runtimes for the core mathematical
