@@ -39,6 +39,8 @@ storage backends and stronger governance under that shared interface.
 - Make user-authored research, firm research, fund-manager materials, sell-side
   research, generated notes, and meeting/transcript-derived notes first-class
   knowledge items with different governance rules.
+- Support explicitly tagged email market color as a source while avoiding broad
+  inbox scanning or unreviewed mailbox ingestion.
 
 ## Non-Goals
 
@@ -53,6 +55,8 @@ storage backends and stronger governance under that shared interface.
   approved entitlement model.
 - This spec does not produce trading recommendations without downstream
   research, risk, compliance, and portfolio review workflows.
+- This spec does not scan an entire inbox by keyword or infer that untagged
+  personal, operational, client, or vendor email is market research.
 
 ## Requirements
 
@@ -73,6 +77,10 @@ storage backends and stronger governance under that shared interface.
 | REQ-013 | The system shall expose curated research to existing QuantSmith research, portfolio-management, economist, knowledge, and role-operations agents without requiring agent-specific storage integrations. | should |
 | REQ-014 | The system shall support human review and canonical-source selection when multiple sources conflict. | should |
 | REQ-015 | The system shall generate memory or knowledge candidates from scheduled reports and research workflows only after reviewable provenance is available. | should |
+| REQ-016 | The system shall scan approved email inbox sources only for explicitly configured labels, tags, folders, or saved searches that identify market color or research. | must |
+| REQ-017 | The system shall normalize tagged email market color into research items with message/thread ids, sender or publisher, sent/received timestamps, tag provenance, attachment policy, and review status. | must |
+| REQ-018 | The system shall support sender/domain allowlists, deny lists, mailbox-scope limits, incremental cursors, and read-only connector permissions for email scanning. | must |
+| REQ-019 | The system shall group related tagged email messages by thread while preserving each message as separately citable provenance. | should |
 
 ## Non-Functional Requirements
 
@@ -88,6 +96,8 @@ storage backends and stronger governance under that shared interface.
 | NFR-008 | Compliance | The system must preserve entitlement, confidentiality, retention, deletion, and information-barrier metadata across ingestion, indexing, retrieval, and export. |
 | NFR-009 | Cost control | Indexing and retrieval must support freshness windows, domain filters, tiered storage, and index compaction so stale research does not create unbounded search cost. |
 | NFR-010 | Reversibility | Content deletion, deprecation, quarantine, supersession, and index rebuilds must be reversible or auditable according to retention policy. |
+| NFR-011 | Email connector safety | Email scanning must be opt-in, read-only, label/tag scoped, cursor-based, and never require credentials in the SDK repository. |
+| NFR-012 | Email privacy minimization | Email ingestion must avoid indexing unneeded recipients, signatures, disclaimers, calendar invites, personal content, and non-research attachments unless policy explicitly allows them. |
 
 ## Acceptance Criteria
 
@@ -105,6 +115,9 @@ Each criterion is testable and maps to a requirement.
 | AC-008 | Given a retrieval request, when results are served or denied, then audit records include caller clearance, query filters, item ids or denial class, citation ids, and timestamp without unnecessary confidential text. | REQ-012, NFR-007 |
 | AC-009 | Given stale or superseded market color, when retrieval asks for current context, then the item is excluded or explicitly flagged as stale/superseded. | REQ-007, REQ-009, NFR-009 |
 | AC-010 | Given scheduled research reports that produce durable sourced summaries, when candidates are proposed for persistence, then they retain citations and enter review instead of being auto-promoted. | REQ-015, NFR-010 |
+| AC-011 | Given a mailbox with tagged and untagged messages, when the email market-color scanner runs, then only messages matching the configured label/tag/folder/saved-search scope become ingestion candidates. | REQ-016, REQ-018, NFR-011 |
+| AC-012 | Given a tagged email thread with attachments, when it is normalized, then each candidate records thread id, message ids, timestamps, sender metadata, tag provenance, attachment handling decision, and review status. | REQ-017, REQ-019, NFR-012 |
+| AC-013 | Given a tagged email from a denied sender/domain or outside the allowed mailbox scope, when scanning runs, then the message is skipped or quarantined with a non-content audit event. | REQ-018, REQ-011, REQ-012, NFR-011, NFR-012 |
 
 ## Data & Dependencies
 
@@ -118,13 +131,17 @@ Each criterion is testable and maps to a requirement.
 - Related operational work: `0055` scheduled workflow operations for recurring
   research ingestion, status reports, and review reminders.
 - Data sources may include user Markdown notes, generated reports, PDFs, DOCX
-  files, HTML exports, email/transcript exports, enterprise drives, wikis,
-  object stores, document repositories, and approved external research feeds.
+  files, HTML exports, tagged email market color, email/transcript exports,
+  enterprise drives, wikis, object stores, document repositories, and approved
+  external research feeds.
 - Required metadata includes source URI, title, author/publisher, source type,
   publication date, effective date if available, ingestion date, hash/version,
   asset class, instruments/entities, geography/currency, strategy/theme,
   confidentiality, entitlement class, freshness policy, retention policy,
   supersession links, and review status.
+- Email-specific metadata includes provider, mailbox id or alias, label/tag/folder
+  scope, saved-search query id when used, thread id, message id, sent/received
+  timestamps, sender/publisher, attachment policy, cursor, and review status.
 
 ## Constraints & Risks
 
@@ -138,6 +155,8 @@ Each criterion is testable and maps to a requirement.
 | RISK-006 | Overbroad ingestion stores secrets, PII, or MNPI. | Legal, privacy, and compliance exposure. | Quarantine high-risk content before indexing and require review. |
 | RISK-007 | One taxonomy cannot represent all asset classes cleanly. | Poor retrieval and false confidence. | Keep a common core schema plus asset-class-specific optional fields. |
 | RISK-008 | External manager or sell-side terms prohibit model indexing. | Contract breach. | Carry license/entitlement class through ingestion and allow metadata-only indexing where required. |
+| RISK-009 | Email scanning captures personal, client, operational, or confidential material that is not market color. | Privacy and compliance exposure; loss of user trust. | Require explicit labels/tags/folders or saved searches, sender/domain rules, read-only scopes, and review before indexing. |
+| RISK-010 | Email-derived market color loses thread context or cites a synthesis instead of the original message. | Weak provenance and misleading attribution. | Preserve thread/message ids, timestamps, sender metadata, and per-message citations; generated summaries remain derived artifacts. |
 
 ## Assumptions & Open Questions
 
@@ -149,6 +168,8 @@ Each criterion is testable and maps to a requirement.
   clearance and entitlement context is supplied.
 - Assumption: Generated research summaries are derived artifacts, not canonical
   primary sources.
+- Assumption: Email market color is opt-in and tag-driven; users or firm policy
+  decide which labels/folders/saved searches identify research-worthy color.
 - Open question: Which enterprise stores are the first deployment targets
   (SharePoint, Google Drive, S3/object storage, Confluence, document warehouse,
   vendor research feed, or a dedicated research lake)?
@@ -160,6 +181,11 @@ Each criterion is testable and maps to a requirement.
   conflict across desk, firm, and external-manager research?
 - Open question: What retention and deletion policy applies to stale market
   color, generated summaries, and third-party research?
+- Open question: Which email providers and labels should be supported first
+  (for example Gmail labels, Outlook categories/folders, or firm mailbox saved
+  searches)?
+- Open question: Should email recipients be stored, hashed, omitted, or stored
+  only for approved distribution-list/source attribution cases?
 
 ## Exceptions
 

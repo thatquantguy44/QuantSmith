@@ -36,6 +36,10 @@
 | T-015 | Add validation tests for citation coverage and point-in-time correctness. | NFR-002, NFR-003 | todo | AC-004, AC-005 |
 | T-016 | Add synthetic capacity and latency benchmark fixtures for catalog/index scale. | NFR-005, NFR-006 | todo | |
 | T-017 | Add freshness, compaction, deprecation, deletion, and index rebuild tests. | NFR-009, NFR-010 | todo | AC-009 |
+| T-018 | Add a provider-neutral tagged email market-color source contract and template. | REQ-016, REQ-017, NFR-011 | todo | AC-011, AC-012 |
+| T-019 | Implement email scan policy validation for labels/tags/folders, saved searches, mailbox scope, cursors, and read-only permissions. | REQ-016, REQ-018, NFR-011 | todo | AC-011, AC-013 |
+| T-020 | Implement email thread/message normalization with per-message citations, sent/received timestamps, tag provenance, and attachment decisions. | REQ-017, REQ-019, NFR-012 | todo | AC-012 |
+| T-021 | Add sender/domain allowlist/denylist and privacy-minimization tests before message extraction or indexing. | REQ-018, REQ-011, REQ-012, NFR-012 | todo | AC-013 |
 
 Status values: `todo` | `in-progress` | `blocked` | `done`.
 
@@ -55,6 +59,9 @@ Every acceptance criterion must be named by at least one test.
 | AC-008 | `test_market_research_audit_record_ac008` | todo |
 | AC-009 | `test_market_research_stale_superseded_ac009` | todo |
 | AC-010 | `test_market_research_scheduled_candidate_ac010` | todo |
+| AC-011 | `test_email_market_color_tag_scope_ac011` | todo |
+| AC-012 | `test_email_market_color_thread_normalization_ac012` | todo |
+| AC-013 | `test_email_market_color_sender_policy_ac013` | todo |
 
 ## Follow-ups
 
@@ -64,5 +71,6 @@ Tracked work intentionally deferred (no silent "temporary" shortcuts — P8).
   approved.
 - Decide whether licensed manager and sell-side research can be passage-indexed,
   metadata-only indexed, or excluded from indexes.
+- Choose the first tagged-email provider adapter and label naming convention.
 - Add provider-specific deployment documentation only after compliance and
   entitlement owners approve the governance model.
