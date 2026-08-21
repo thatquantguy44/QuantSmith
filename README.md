@@ -15,7 +15,7 @@ signal and model **reproducible, leakage-safe, and traceable to a spec**.
 [![Approach: Spec-Driven](https://img.shields.io/badge/Approach-Spec--Driven-ff6f00)](instructions/spec_driven_development.md)
 [![Agents: 161](https://img.shields.io/badge/Agents-161-6f42c1)](agents/README.md)
 [![Quality Gates: 31](https://img.shields.io/badge/Quality%20Gates-31-2ea44f)](hooks/README.md)
-[![Specs: 46](https://img.shields.io/badge/Specs-46-0969da)](specs/README.md)
+[![Specs: 47](https://img.shields.io/badge/Specs-47-0969da)](specs/README.md)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](.github/GIT_GUIDELINES.md)
 
 <br/>
@@ -428,6 +428,7 @@ the [spec index](specs/README.md).
 | [`0006`](specs/0006-ml-return-forecasting/) | Cross-sectional short-horizon return forecasting | `return_forecasting.py` |
 | [`0041`](specs/0041-ranking-forecast/) | Cross-sectional ranking forecast — a pairwise (RankNet-style) ranking-loss variant of `0006`, composing its labels/features/folds/evaluation unmodified | `ranking_forecast.py` |
 | [`0048`](specs/0048-workflow-memory-runtime/) | Workflow memory runtime — makes `0002`'s committed store machine-readable: typed records, a type-aware point-in-time filter (mechanical facts timeless, claims about what worked bounded by `last_confirmed`), and structural validation replacing the string grep | `workflow_memory.py` |
+| [`0055`](specs/0055-workflow-scheduling-operations/) | Workflow scheduling operations — registry validation, cron dry-run evidence, idempotent dispatch, JSONL ledger, manual reminders, daily reports, alert handoff, memory candidates | `workflow_scheduling.py` |
 | [`0047`](specs/0047-downstream-contract/) | Downstream consumer contract — `DashboardSpec.schema_version` + compatibility check, release-notify workflow, and a copyable `quantsmith-version` gate for a separate consuming repository | `dashboard_spec.py` *(extended)* |
 | [`0046`](specs/0046-walk-forward/) | Walk-forward harness — purged/embargoed folds from `0006` refit per fold through `0044`'s engine; reports the out-of-sample fold distribution | `walk_forward.py` |
 | [`0045`](specs/0045-fred-point-in-time/) | FRED point-in-time panel adapter — vintage-correct reads of `gold_fred_point_in_time`, so a later revision cannot leak backwards | `fred_point_in_time.py` |

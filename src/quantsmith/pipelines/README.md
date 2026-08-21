@@ -607,3 +607,28 @@ Tests: `tests/test_workflow_memory.py` (one test per acceptance criterion).
 ```sh
 PYTHONPATH=src python3 -m pytest tests/test_workflow_memory.py -q
 ```
+
+## `workflow_scheduling.py` — spec `0055`
+
+The local, dependency-free operations control plane above scheduler adapters:
+validate a job registry, dry-run cron timing, dispatch scripts/Python/pipeline
+targets with idempotency metadata, append a JSONL ledger, carry manual reminders
+forward, render daily status reports, emit alert payloads, and propose workflow
+memory candidates for recurring failures.
+
+| Component | Spec | What it guarantees |
+| --- | --- | --- |
+| `validate_registry` | REQ-001 / AC-001 | Required ownership, target, timezone/calendar, retry, backfill, runbook, alert route, and manual-task fields are checked before deployment. |
+| `dry_run_schedule` | REQ-002 / AC-002 | Cron schedules produce provider-neutral dry-run IDs and next-run UTC evidence without executing the job. |
+| `dispatch_job` | REQ-003 / AC-003 | Duplicate idempotency keys skip or link to an existing completed run unless forced. |
+| `ExecutionLedger` | REQ-004 / AC-004 | Every run has status, timing, attempts, artifact/log links, and redacted failure metadata. |
+| `render_daily_operations_report` | REQ-005 / AC-005 | Daily Markdown status rollup by completed, failed, skipped/missed, manual, overdue, next-run, and owner/workflow sections. |
+| `ManualTaskQueue` | REQ-006 / AC-006 | Manual tasks remain open and reminder-eligible until acknowledged or completed with evidence. |
+| `alert_handoffs` | REQ-007 / AC-007 | Failed/missed runs and overdue tasks become alert payloads; no provider delivery is invoked. |
+| `memory_candidates_from_failures` | REQ-008 / AC-008 | Repeated failures become provenance-backed workflow-memory candidates for review. |
+
+Tests: `tests/test_workflow_scheduling.py` (one test per acceptance criterion).
+
+```sh
+PYTHONPATH=src python3 -m pytest tests/test_workflow_scheduling.py -q
+```
