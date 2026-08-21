@@ -8,6 +8,7 @@ import { Trends } from "./app/routes/trends";
 import { GraphView } from "./app/routes/graph";
 import { Changes } from "./app/routes/changes";
 import { Review } from "./app/routes/review";
+import { Research } from "./app/routes/research";
 import { Ask } from "./app/routes/ask";
 
 // Client-side routes (file-based by convention under src/app/routes/).
@@ -20,6 +21,7 @@ const routes = [
       { path: "graph", element: <GraphView /> },
       { path: "changes", element: <Changes /> },
       { path: "review", element: <Review /> },
+      { path: "research", element: <Research /> },
       { path: "ask", element: <Ask /> },
     ],
   },

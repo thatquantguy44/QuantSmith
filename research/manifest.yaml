@@ -1,0 +1,25 @@
+# Market Research Reference Store — manifest.
+#
+# Backs the Research view in apps/knowledge-console (the terminal) and the
+# quantsmith.knowledge_console.research reader module. Structurally follows the
+# target schema of specs/0056-market-research-knowledge-base/ (Draft) so the
+# front end has something real to render.
+#
+# This is NOT a compliant 0056 implementation: no knowledge-base MCP interface
+# (REQ-002), no entitlement/information-barrier enforcement (REQ-006), no email
+# connector (REQ-016..019), no quarantine pipeline (REQ-011). It is a read-only
+# reference example, same role `memory/` plays for `0002`/`0048` — copy the
+# structure, not the content.
+#
+# Real firm, client, fund-manager, MNPI, or licensed third-party research must
+# NEVER be committed here (0056 Non-Goals). Every item below is fictional.
+
+version: 1
+
+defaults:
+  access_level: internal
+  freshness_days: 60
+
+domains:
+  - name: market_research
+    path: market_research

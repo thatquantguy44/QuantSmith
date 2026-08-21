@@ -23,15 +23,16 @@ The API does **not** re-parse `memory/` in TypeScript. It shells out to the
 counts, trends, the knowledge graph, the git changes feed, and the review queue:
 
 ```
-GET  /api/model  ->  python -m quantsmith.knowledge_console print  --root memory
-POST /api/query  ->  python -m quantsmith.knowledge_console query  --root memory --question ...
+GET  /api/model     ->  python -m quantsmith.knowledge_console print     --root memory
+POST /api/query     ->  python -m quantsmith.knowledge_console query     --root memory --question ...
+GET  /api/research  ->  python -m quantsmith.knowledge_console research  --root research
 GET  /api/health
 ```
 
-The repo root (and thus `memory/`) is found by walking up for
-`memory/manifest.yaml`; override with `QF_REPO_ROOT` / `QF_MEMORY_ROOT`, and the
-Python interpreter with `QF_PYTHON`. Python must be importable — run from a
-checkout of this repo (no install needed; `PYTHONPATH` is set to `src/`).
+The repo root is found by walking up for `memory/manifest.yaml`; override with
+`QF_REPO_ROOT` / `QF_MEMORY_ROOT` / `QF_RESEARCH_ROOT`, and the Python
+interpreter with `QF_PYTHON`. Python must be importable — run from a checkout
+of this repo (no install needed; `PYTHONPATH` is set to `src/`).
 
 ## Run it
 
@@ -47,9 +48,18 @@ npm start          # serves both on http://127.0.0.1:8787 (HOST/PORT override)
 ## Views
 
 Overview (analytics) · Trends · Knowledge Graph · Recent Changes · Needed Review
-· Ask. The **Ask** panel uses the same pluggable engine as the SDK: a grounded
-keyword engine today, a real Claude engine registered behind the identical
-`QueryEngine` contract later — no change to this app or its API.
+· Research · Ask. The **Ask** panel uses the same pluggable engine as the SDK: a
+grounded keyword engine today, a real Claude engine registered behind the
+identical `QueryEngine` contract later — no change to this app or its API.
 
-Read-only: nothing here writes to `memory/`. The approval *action* (write-back)
-is the deferred `0049` write path.
+**Research** reads `research/` (repo root), a committed,
+fictional-content-only reference store demonstrating the target schema of
+`specs/0056-market-research-knowledge-base/` (status: Draft) — asset class,
+source type, access level, review status, provenance, supersession. It is
+**not** a compliant `0056` implementation (no MCP interface, no entitlement
+enforcement, no email connector); see `research/README.md` and the
+"Reference implementation" section of `specs/0056/spec.md` for exactly what's
+real and what isn't.
+
+Read-only: nothing here writes to `memory/` or `research/`. The `memory/`
+approval *action* (write-back) is the deferred `0049` write path.

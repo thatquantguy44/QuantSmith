@@ -11,12 +11,13 @@ import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import type { Model, QueryAnswer } from "./types";
+import type { Model, QueryAnswer, ResearchModel } from "./types";
 
 const PY = process.env.QF_PYTHON || "python3";
 const CACHE_MS = 3000;
 
 let cache: { at: number; model: Model } | null = null;
+let researchCache: { at: number; model: ResearchModel } | null = null;
 
 function findRepoRoot(): string {
   if (process.env.QF_REPO_ROOT) return process.env.QF_REPO_ROOT;
@@ -36,6 +37,7 @@ function findRepoRoot(): string {
 
 const repoRoot = findRepoRoot();
 const memoryRoot = process.env.QF_MEMORY_ROOT || join(repoRoot, "memory");
+const researchRoot = process.env.QF_RESEARCH_ROOT || join(repoRoot, "research");
 
 function runPython(args: string[]): Promise<string> {
   return new Promise((res, rej) => {
@@ -119,6 +121,45 @@ export async function runQuery(question: string, k = 5): Promise<QueryAnswer> {
   }
 }
 
+function emptyResearchModel(): ResearchModel {
+  const nowIso = new Date().toISOString();
+  return {
+    generated_at: nowIso,
+    as_of: nowIso.slice(0, 10),
+    default_freshness_days: 60,
+    counts: {
+      total: 0,
+      visible: 0,
+      hidden: 0,
+      by_source_type: {},
+      by_asset_class: {},
+      by_access_level: {},
+      by_review_status: {},
+    },
+    items: [],
+    disclaimer:
+      "Reference implementation of specs/0056-market-research-knowledge-base (status: Draft). No MCP interface, entitlement enforcement, or email connector. Every item is fictional.",
+  };
+}
+
+export async function getResearch(force = false): Promise<ResearchModel> {
+  if (!force && researchCache && Date.now() - researchCache.at < CACHE_MS) return researchCache.model;
+  try {
+    const out = await runPython(["research", "--root", researchRoot]);
+    const model = JSON.parse(out) as ResearchModel;
+    researchCache = { at: Date.now(), model };
+    return model;
+  } catch {
+    return emptyResearchModel();
+  }
+}
+
 export function health() {
-  return { status: "ok", generated_at: new Date().toISOString(), memory_root: memoryRoot, repo_root: repoRoot };
+  return {
+    status: "ok",
+    generated_at: new Date().toISOString(),
+    memory_root: memoryRoot,
+    research_root: researchRoot,
+    repo_root: repoRoot,
+  };
 }

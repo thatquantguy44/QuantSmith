@@ -1,11 +1,16 @@
-import type { Model, QueryAnswer, RecordView } from "./types";
+import type { Model, QueryAnswer, RecordView, ResearchModel } from "./types";
 
 // Two modes, decided here and nowhere else:
-//   served    -> the Node API is up; fetch /api/model, POST /api/query.
-//   embedded  -> a self-contained snapshot injected window.__KB_MODEL__ (no
-//                server); read that and run the Ask query in-browser.
+//   served    -> the Node API is up; fetch /api/model, /api/research, POST /api/query.
+//   embedded  -> a self-contained snapshot injected window.__KB_MODEL__ /
+//                window.__KB_RESEARCH__ (no server); read those and run the Ask
+//                query in-browser.
 function embedded(): Model | null {
   return typeof window !== "undefined" && window.__KB_MODEL__ ? window.__KB_MODEL__ : null;
+}
+
+function embeddedResearch(): ResearchModel | null {
+  return typeof window !== "undefined" && window.__KB_RESEARCH__ ? window.__KB_RESEARCH__ : null;
 }
 
 export function isEmbedded(): boolean {
@@ -20,6 +25,16 @@ export async function fetchModel(refresh = false): Promise<Model> {
   });
   if (!res.ok) throw new Error(`GET /api/model -> ${res.status}`);
   return (await res.json()) as Model;
+}
+
+export async function fetchResearch(refresh = false): Promise<ResearchModel> {
+  const snap = embeddedResearch();
+  if (snap) return snap;
+  const res = await fetch(`/api/research${refresh ? "?refresh=1" : ""}`, {
+    headers: { Accept: "application/json" },
+  });
+  if (!res.ok) throw new Error(`GET /api/research -> ${res.status}`);
+  return (await res.json()) as ResearchModel;
 }
 
 export async function askQuestion(question: string, k = 5): Promise<QueryAnswer> {

@@ -3,6 +3,8 @@
     python -m quantsmith.knowledge_console serve    [--root memory] [--port 8765] [--static web/dist]
     python -m quantsmith.knowledge_console snapshot  [--root memory] [--out model.json]
     python -m quantsmith.knowledge_console print     [--root memory]   # model to stdout
+    python -m quantsmith.knowledge_console query     --question "..." [--root memory]
+    python -m quantsmith.knowledge_console research  [--root research]  # research model to stdout
 
 Spec ``0057-knowledge-console`` (T-006, T-010). ``serve`` runs the API + static
 front end; ``snapshot`` writes the current view-model as JSON for the
@@ -19,6 +21,7 @@ import json
 
 from . import model as model_mod
 from . import query as query_mod
+from . import research as research_mod
 from . import server as server_mod
 
 
@@ -50,7 +53,15 @@ def main(argv=None) -> int:
     p_query.add_argument("--question", required=True)
     p_query.add_argument("--k", type=int, default=5)
 
+    p_research = sub.add_parser("research", help="print the research-store model to stdout")
+    p_research.add_argument("--root", default="research")
+
     args = parser.parse_args(argv)
+
+    if args.command == "research":
+        model = research_mod.build_research_model_from_root(args.root, generated_at=_utc_now_iso())
+        print(json.dumps(model, ensure_ascii=False, sort_keys=True))
+        return 0
 
     if args.command == "query":
         store = model_mod.load_store(args.root)

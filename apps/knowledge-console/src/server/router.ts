@@ -9,6 +9,7 @@
 import * as healthRoute from "../app/api/health/route";
 import * as modelRoute from "../app/api/model/route";
 import * as queryRoute from "../app/api/query/route";
+import * as researchRoute from "../app/api/research/route";
 
 export interface ApiResult {
   status: number;
@@ -21,6 +22,7 @@ const routes: Record<string, Record<string, Verb>> = {
   "/api/health": healthRoute as Record<string, Verb>,
   "/api/model": modelRoute as Record<string, Verb>,
   "/api/query": queryRoute as Record<string, Verb>,
+  "/api/research": researchRoute as Record<string, Verb>,
 };
 
 export function isApiPath(pathname: string): boolean {

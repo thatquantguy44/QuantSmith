@@ -106,8 +106,75 @@ export interface QueryAnswer {
   matched: boolean;
 }
 
+// Market Research reference store — mirrors
+// src/quantsmith/knowledge_console/research.py::build_research_model.
+// Reference implementation of spec 0056 (Draft); see research/README.md.
+
+export type ResearchSourceType =
+  | "user_note"
+  | "firm_research"
+  | "fund_manager"
+  | "sell_side"
+  | "generated"
+  | "email_tagged"
+  | string;
+
+export type ReviewStatus =
+  | "draft"
+  | "pending_review"
+  | "approved"
+  | "quarantined"
+  | "restricted"
+  | "superseded"
+  | "deprecated"
+  | "deleted"
+  | string;
+
+export interface ResearchItem {
+  id: string;
+  title: string;
+  source_type: ResearchSourceType;
+  author_or_publisher: string;
+  asset_class: string;
+  strategy_theme: string;
+  geography: string;
+  access_level: string;
+  entitlement_class: string;
+  publication_date: string;
+  ingestion_date: string;
+  review_status: ReviewStatus;
+  summary: string;
+  citation: string;
+  domain: string;
+  superseded_by: string | null;
+  source_file: string;
+  days_since_ingestion: number;
+  overdue: boolean;
+  hidden_by_default: boolean;
+}
+
+export interface ResearchCounts {
+  total: number;
+  visible: number;
+  hidden: number;
+  by_source_type: Record<string, number>;
+  by_asset_class: Record<string, number>;
+  by_access_level: Record<string, number>;
+  by_review_status: Record<string, number>;
+}
+
+export interface ResearchModel {
+  generated_at: string | null;
+  as_of: string;
+  default_freshness_days: number;
+  counts: ResearchCounts;
+  items: ResearchItem[];
+  disclaimer: string;
+}
+
 declare global {
   interface Window {
     __KB_MODEL__?: Model;
+    __KB_RESEARCH__?: ResearchModel;
   }
 }

@@ -6,6 +6,7 @@ import {
   LayoutGrid,
   MessageSquare,
   Network,
+  Newspaper,
   TrendingUp,
   CircleAlert,
   RefreshCw,
@@ -19,7 +20,8 @@ const NAV = [
   { to: "/graph", key: "F3", label: "Graph", icon: Network },
   { to: "/changes", key: "F4", label: "Changes", icon: GitBranch },
   { to: "/review", key: "F5", label: "Review", icon: CircleAlert },
-  { to: "/ask", key: "F6", label: "Ask", icon: MessageSquare },
+  { to: "/research", key: "F6", label: "Research", icon: Newspaper },
+  { to: "/ask", key: "F7", label: "Ask", icon: MessageSquare },
 ];
 
 function Clock() {
@@ -61,10 +63,14 @@ function Ticker() {
 }
 
 export function Layout() {
-  const { load, loading, model, error, lastLoaded } = useConsole();
+  const { load, loading, model, error, lastLoaded, research, loadResearch } = useConsole();
   useEffect(() => {
     load();
-  }, [load]);
+    loadResearch();
+  }, [load, loadResearch]);
+
+  const researchNeedsAttention =
+    (research?.counts.by_review_status.pending_review || 0) + (research?.counts.by_review_status.quarantined || 0);
 
   return (
     <div className="flex h-full flex-col">
@@ -92,6 +98,9 @@ export function Layout() {
               <span className="flex-1">{n.label}</span>
               {n.to === "/review" && model && model.review_queue.length > 0 && (
                 <span className="chip border-term-amber/50 text-term-amber">{model.review_queue.length}</span>
+              )}
+              {n.to === "/research" && researchNeedsAttention > 0 && (
+                <span className="chip border-term-amber/50 text-term-amber">{researchNeedsAttention}</span>
               )}
               <span className="kbd">{n.key}</span>
             </NavLink>
