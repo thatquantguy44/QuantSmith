@@ -2,6 +2,8 @@
 
 ## Operating Rules
 
+- Check `sources/<source-id>.yml` first for the registered connection method,
+  quality notes, and `credential_ref` before wiring a new connection.
 - Source credentials from environment variables or a secrets manager only.
 - Never commit or log connection strings, passwords, tokens, or keys.
 - Use parameterized queries; never concatenate untrusted values into SQL.
@@ -31,4 +33,5 @@ query, params). When the data is time-series, include a `Point-in-Time` note.
 Ingestion requirements belong in the spec: encode "point-in-time correct",
 "read-only", and "snapshot captured" as `AC-*`/`NFR-*`, and record credential
 handling so the constitution P9 check is explicit. Emit
-`templates/data/data_contract.md` for downstream stages.
+`templates/data/data_contract.md` for downstream stages. Backed by the
+shared `instructions/data_ingestion.md` standard.

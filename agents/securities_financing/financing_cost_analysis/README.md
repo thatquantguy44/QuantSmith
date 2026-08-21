@@ -43,3 +43,18 @@ what they borrow.
 - Short and long-short backtests that actually pay to borrow and fund.
 - Financing spread and its sensitivity to rates and specials.
 - Capacity reduced by expensive or scarce financing.
+
+## Runtime
+
+A tested, dependency-free pipeline exists for the calculations this agent
+reviews (spec `0028-financing-cost-analysis`):
+`src/quantsmith/pipelines/financing_cost_analysis.py` — per-position
+cost-of-carry decomposition (borrow fee, rebate, funding, margin) →
+financing-aware returns → understated-backtest flags → rate-shock
+sensitivity → classification-keyed capacity findings → a point-in-time
+look-ahead check on every leg. `position_from_borrow_rate()` reconciles
+directly with `securities_lending`'s rate/classification vocabulary
+(spec `0023`). This agent's review themes — whether the *inputs* (borrow,
+funding, margin data) are point-in-time and correctly sourced — still
+require human judgment the runtime does not automate; it computes
+correctly on what it's given.

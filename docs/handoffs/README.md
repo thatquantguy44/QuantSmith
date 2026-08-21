@@ -9,8 +9,6 @@ importantly the queue of features to build next.
 
 - `future_features.md` — the running backlog of features to build. Add new ideas
   here as they arise; promote one to a full `specs/NNNN-slug/` when work starts.
-- `../../evening_quant_content_twitter/docs/handoff.md` — root-level workflow-pack
-  handoff for the configurable nightly quant X/Twitter content, thread, visual,
   and meme draft workflow.
 
 ## How To Use

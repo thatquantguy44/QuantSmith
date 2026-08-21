@@ -2,6 +2,8 @@
 
 ## Operating Rules
 
+- Check `sources/<source-id>.yml` first for the registered endpoint, quality
+  notes, and `credential_ref` before wiring a new pull.
 - Source tokens/keys from environment or a secrets manager; never commit or log them.
 - Paginate to completion; detect and fail on truncated or missing pages.
 - Respect rate limits; back off and retry only transient (5xx / 429) failures.
@@ -31,4 +33,5 @@ When loading incrementally, include a `Cursor & Idempotency` note.
 Encode ingestion guarantees as spec criteria: "complete pagination", "idempotent
 re-run", and "as-of captured" become `AC-*`/`NFR-*`, and raw-payload archival
 plus secret handling make the P4 and P9 checks explicit. Emit
-`templates/data/data_contract.md` for downstream stages.
+`templates/data/data_contract.md` for downstream stages. Backed by the shared
+`instructions/data_ingestion.md` standard.

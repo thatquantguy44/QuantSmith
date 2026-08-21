@@ -18,6 +18,7 @@ creating vendor-specific agents.
 | `dashboard_render/` | Turn a rendered dashboard payload (`0015`/`0016`) into a live artifact: an `.xlsx` workbook, a scaffolded React app, or a published report. |
 | `data_access/` | Normalize access patterns for APIs, SQL, object storage, and market/vendor data sources. |
 | `llm_runtime/` | Normalize model runtime selection while keeping prompts, evaluation, and policy outside provider code. |
+| `model_plugin/` | Register an already-built internal optimization model so `optimization/` agents can route to and review it, without this SDK holding its logic. |
 
 ## Design Rules
 

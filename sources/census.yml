@@ -1,0 +1,36 @@
+source_id: "census"
+name: "U.S. Census Bureau API"
+type: api
+owner: "quant-research"
+description: >
+  Economic, demographic, housing, business, trade, and geographic datasets
+  (e.g. ACS, Economic Census, Business Formation Statistics). Relevant to
+  regional macro context, housing analysis, and local-market feature
+  enrichment. See adapters/data_access/external_apis/census.md for
+  delivery rules (required metadata, vintage handling).
+
+domain: ["macro"]
+access_level: public
+
+quality:
+  completeness: high
+  timeliness: "varies by dataset -- annual (ACS) to every 5 years (Economic Census)"
+  known_issues:
+    - "geographic definitions and vintages can change over time"
+    - "survey estimates may need margin-of-error handling before use in models"
+    - "suppressed or annotated values can be misread as ordinary numeric values"
+  last_assessed: "2026-08-10"
+
+point_in_time:
+  supports_asof: true
+  revision_policy: "vintage-tagged (ACS and other series specify a vintage year); use the vintage field for point-in-time-correct historical estimates, not the latest release"
+
+connection:
+  method: rest_api
+  endpoint_or_host: "https://api.census.gov/data"
+  credential_ref: "CENSUS_API_KEY"
+
+documentation_uri: "https://www.census.gov/data/developers.html"
+status: active
+
+data_contract_refs: []

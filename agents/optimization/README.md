@@ -8,12 +8,19 @@ The Optimization group covers mathematical programming, sequential decisioning, 
 optimization_orchestrator -> problem_formulation -> specialist optimizer -> solver_diagnostics_sensitivity -> risk/testing/deployment
 ```
 
+A registered plugin model (`model_plugin_registration/`) slots in as an
+alternative to a specialist optimizer: `problem_formulation` scopes the
+problem, `model_plugin_registration` ingests and reviews the registration
+before the plugged-in model runs in place of a built-in solver, and
+`solver_diagnostics_sensitivity` reviews its output the same way either way.
+
 ## Agents
 
 | Agent | Handles |
 | --- | --- |
 | `optimization_orchestrator/` | Routes optimization requests across formulation, solver, domain, validation, and deployment agents. |
 | `problem_formulation/` | Turns an ambiguous business objective into variables, objective functions, constraints, data contracts, and acceptance criteria. |
+| `model_plugin_registration/` | Ingests a registered internal-model manifest entry, checks contract compliance, and flags unverifiable claims before routing to it. |
 | `linear_programming/` | Designs and reviews LPs for allocation, blending, transportation, cash, collateral, and capacity problems. |
 | `quadratic_programming/` | Handles convex QPs such as mean-variance portfolios, tracking error minimization, ridge-style penalties, and turnover-aware allocation. |
 | `conic_optimization/` | Covers SOCP/SDP-style risk, norm, robust, covariance, and chance-constraint formulations when linear or quadratic forms are too weak. |

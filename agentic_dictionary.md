@@ -50,6 +50,12 @@ Examples: `pre-commit`, `commit-msg`, `pre-push`, documentation freshness checks
 
 A lightweight rule that prevents common mistakes or forces important risks into view. Good guardrails help reviewers without blocking legitimate exploration unnecessarily.
 
+## Adapter
+
+The boundary between an agent's decision and a provider-specific action. Agents decide what happened and what should be produced; adapters translate an already-approved payload into sending an email, posting to Slack, scheduling a job, writing an artifact, querying a warehouse, or invoking a model runtime. Adapters never decide severity, ownership, or workflow completion, and never own secrets directly.
+
+Recommended location: `adapters/<group>/`. See `adapters/README.md` for the catalog and design rules.
+
 ## Instruction
 
 A reusable standard or operating procedure for agents and humans.

@@ -1,0 +1,36 @@
+source_id: "eia"
+name: "EIA (U.S. Energy Information Administration)"
+type: api
+owner: "quant-research"
+description: >
+  Energy market data -- production, consumption, prices, inventories, and
+  forecasts across petroleum, natural gas, electricity, coal, and
+  renewables. Relevant to commodities and macro/energy research. See
+  adapters/data_access/external_apis/eia.md for delivery rules (required
+  metadata, v1/v2 endpoint shape, revision handling).
+
+domain: ["macro", "commodities"]
+access_level: public
+
+quality:
+  completeness: high
+  timeliness: "varies by route -- weekly (e.g. petroleum status) to annual, per the EIA release calendar"
+  known_issues:
+    - "weekly petroleum status figures are preliminary and later reconciled in monthly/annual Petroleum Supply reports -- do not treat a weekly pull as final"
+    - "unit mismatches (e.g. thousand barrels vs. barrels) are a common source of silent scaling errors across routes"
+    - "v1-to-v2 API migration changes identifier/endpoint shape; code against legacy series IDs may not carry over"
+  last_assessed: "2026-08-10"
+
+point_in_time:
+  supports_asof: false
+  revision_policy: "weekly/monthly figures are reconciled over time, but there is no full historical vintage archive -- record which release (weekly vs. monthly/annual) a pull came from, and prefer the finalized report for point-in-time-sensitive use"
+
+connection:
+  method: rest_api
+  endpoint_or_host: "https://api.eia.gov/v2"
+  credential_ref: "EIA_API_KEY"   # required if any eia_* manifest/series is active
+
+documentation_uri: "https://www.eia.gov/opendata/register.php"
+status: active
+
+data_contract_refs: []

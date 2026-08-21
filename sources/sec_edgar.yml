@@ -1,0 +1,41 @@
+source_id: "sec_edgar"
+name: "SEC EDGAR"
+type: api
+owner: "quant-research"
+description: >
+  Company submissions, company facts, filings, XBRL data, accession
+  records, and disclosure metadata from the U.S. Securities and Exchange
+  Commission. Used for fundamental research, issuer monitoring, event
+  detection, and compliance-aware evidence collection. See
+  adapters/data_access/external_apis/sec_edgar.md for delivery rules
+  (required metadata, user-agent requirement).
+
+domain: ["equities", "fixed_income_rates"]
+access_level: public
+
+quality:
+  completeness: high
+  timeliness: "near-real-time -- filings are available shortly after acceptance (accepted_at_utc)"
+  known_issues:
+    - "filing_date, accepted_at_utc, and period_of_report have different economic meanings -- do not conflate them"
+    - "company facts (XBRL aggregates) can restate prior periods"
+    - "ticker-to-CIK mappings change across corporate actions and are not stable identifiers"
+  last_assessed: "2026-08-10"
+
+point_in_time:
+  supports_asof: true
+  revision_policy: "individual filings are immutable once accepted (use accepted_at_utc); the 'company facts' XBRL aggregate endpoint can restate prior periods -- prefer filing-level data for point-in-time-safe research"
+
+connection:
+  method: rest_api
+  endpoint_or_host: "https://data.sec.gov"
+  # SEC EDGAR has no API key; it requires a compliant User-Agent header
+  # (application name + contact email) per SEC's fair-access policy. This
+  # still resolves through credential_access as a named value, not a
+  # traditional secret.
+  credential_ref: "SEC_EDGAR_USER_AGENT"
+
+documentation_uri: "https://www.sec.gov/edgar/sec-api-documentation"
+status: active
+
+data_contract_refs: []

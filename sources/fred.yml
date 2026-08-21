@@ -1,0 +1,40 @@
+# Reference entry -- a filled-in example showing the schema in use, the way
+# specs/0001-daily-momentum-signal/ is a filled-in reference for the spec
+# format. Copy the structure, not the content, for a real source.
+
+source_id: "fred"
+name: "FRED / ALFRED (Federal Reserve Bank of St. Louis)"
+type: api
+owner: "quant-research"
+description: >
+  Public macroeconomic time series -- rates, credit, inflation, labor, GDP,
+  monetary aggregates, and regional indicators. ALFRED provides vintages for
+  point-in-time research and backtesting. See
+  adapters/data_access/external_apis/fred.md for the technical delivery rules
+  (required metadata, vintage handling, transformation caveats).
+
+domain: ["macro", "fixed_income_rates"]
+access_level: public
+
+quality:
+  completeness: high
+  timeliness: "varies by series; most updated within days of the underlying release"
+  known_issues:
+    - "series get revised; a naive pull returns latest values, not what was known historically"
+    - "some series are seasonally adjusted with methodology changes over time"
+  last_assessed: "2026-08-10"
+
+point_in_time:
+  supports_asof: true
+  revision_policy: "vintages available via ALFRED; use vintage_date for point-in-time pulls, not the latest series"
+
+connection:
+  method: rest_api
+  endpoint_or_host: "https://api.stlouisfed.org/fred"
+  credential_ref: "FRED_API_KEY"   # free registration; still a pointer, not the key itself
+
+documentation_uri: "https://fred.stlouisfed.org/docs/api/fred/"
+status: active
+
+data_contract_refs: []   # populate with specs/NNNN-slug/ once a concrete dataset
+                          # pulled from FRED gets its own data_contract.md

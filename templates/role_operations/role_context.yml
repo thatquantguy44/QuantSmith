@@ -1,0 +1,53 @@
+# Role Context
+#
+# Declares the configurable context the agents/role_operations/ group reads to
+# tailor its output to real work -- without any of that real detail ever living
+# in version control. This is a template: copy it to `role_context.yml` at the
+# repo root and fill in your own specifics *there*. `role_context.yml` is
+# gitignored by default (see .gitignore) and the `role-context-check` hook fails
+# advisory (or blocks under QF_STAGE_ENFORCE=1) if it is ever staged or tracked.
+#
+# Hard rule: every value below is a placeholder. Nothing that identifies a real
+# firm, platform, client, team member, account, or data system belongs in any
+# file tracked by git -- describe things by category, not by name, if a
+# committed example is ever needed. Real specifics live only in your local,
+# gitignored copy.
+#
+# Resolution order used by the hook:
+#   1. $QF_ROLE_CONTEXT   path to a filled-in context file
+#   2. ./role_context.yml at the repo root (local only)
+#   3. none configured    role_operations agents work generically without one
+
+role:
+  # A generic label for what you do -- not a real title, not a firm name.
+  focus_label: "quantitative / data science lead, capital markets platform"
+  # What you actually want more time for; agents should protect this, not eat it.
+  protect_for: ["model scoping", "research"]
+
+platform:
+  # Describe the platform by category, never by its real product name.
+  category_placeholder: "internal financing / analytics platform"
+  # Ties into agents/asset_classes/: which mechanics agents are actually relevant.
+  asset_classes_in_scope: ["equities", "fixed_income_rates", "fx"]
+
+data_sources:
+  # Describe sources by category and cadence only -- never a real system,
+  # table, or endpoint name.
+  - category: "position / holdings snapshot"
+    refresh_cadence: "daily, T+1"
+  - category: "reference / instrument master"
+    refresh_cadence: "weekly"
+
+governance:
+  # Name the *kind* of review body, not its real name.
+  review_body_placeholder: "model risk review committee"
+  submission_cadence: "monthly"
+  required_evidence: ["model_card", "validation_summary", "monitoring_plan"]
+
+stakeholders:
+  # Roles/personas only -- never real names.
+  personas: ["risk reviewer", "client sponsor", "technical partner"]
+
+communication:
+  tone: "precise, evidence-first, no hedging without a stated reason"
+  demo_format_placeholder: "one-pager plus a short slide deck"

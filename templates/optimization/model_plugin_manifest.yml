@@ -1,0 +1,60 @@
+# Model Plugin Manifest
+#
+# Registers already-built internal optimization models so agents/optimization/
+# agents can route work to them and review their output, without this SDK ever
+# holding the model's logic, weights, or proprietary formulation. This is a
+# template: copy it to `model_plugins.yml` at the repo root and fill in your
+# own models *there*. `model_plugins.yml` is gitignored by default (see
+# .gitignore) and the `model-plugin` gate fails advisory (or blocks under
+# QF_STAGE_ENFORCE=1) if it is ever staged or tracked.
+#
+# Hard rule: every value below is a placeholder. This manifest is metadata and
+# interface shape only -- never the model's actual objective coefficients,
+# constraint matrices, weights, training data, or a real internal
+# hostname/import path/binary path. See adapters/model_plugin/adapter_contract.md
+# and instructions/model_plugin_integration.md.
+#
+# Resolution order used by the hook:
+#   1. $QF_MODEL_PLUGINS   path to a filled-in manifest
+#   2. ./model_plugins.yml at the repo root (local only)
+#   3. none configured     no plugin models are registered
+
+models:
+  - model_id: "{example-collateral-lp-v1}"
+    owner: "{team or role, not a person's name}"
+    category: lp   # lp | milp | qp | conic | nonlinear | global | stochastic |
+                    # robust | dp | network_flow | heuristic | other
+    declared_capability:
+      objective: "{one line: what it optimizes for}"
+      decision_variables: "{shape only, e.g. 'per-instrument allocation fraction'}"
+      constraint_types:
+        - "{e.g. balance-sheet cap}"
+        - "{e.g. counterparty concentration}"
+      known_limitations:
+        - "{stated by the model owner, not inferred}"
+    invocation:
+      type: python_callable   # python_callable | rest_endpoint | cli_binary
+      reference: "{module.path:callable_name}"   # or https://{internal-host}/{path}
+                                                   # or {binary} --input ... --output ...
+      timeout_seconds: 30
+    input_schema_uri: "{path or URI to the input schema doc}"
+    output_schema_uri: "{path or URI to the output schema doc}"
+    review_status: unreviewed   # unreviewed | reviewed | approved
+    last_reviewed: null
+
+  # - model_id: "{example-execution-heuristic-v2}"
+  #   owner: "{team or role}"
+  #   category: heuristic
+  #   declared_capability:
+  #     objective: "{...}"
+  #     decision_variables: "{...}"
+  #     constraint_types: ["{...}"]
+  #     known_limitations: ["{...}"]
+  #   invocation:
+  #     type: rest_endpoint
+  #     reference: "https://{internal-host}/{path}"
+  #     timeout_seconds: 10
+  #   input_schema_uri: "{...}"
+  #   output_schema_uri: "{...}"
+  #   review_status: unreviewed
+  #   last_reviewed: null

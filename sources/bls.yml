@@ -1,0 +1,34 @@
+source_id: "bls"
+name: "BLS (U.S. Bureau of Labor Statistics)"
+type: api
+owner: "quant-research"
+description: >
+  Labor market, CPI, PPI, wage, productivity, employment, and survey data.
+  API v2; a key raises the daily query limit and history depth but is not
+  required for basic access. See adapters/data_access/external_apis/bls.md
+  for delivery rules (required metadata, revision handling).
+
+domain: ["macro", "labor"]
+access_level: public
+
+quality:
+  completeness: high
+  timeliness: "monthly, per the BLS release calendar (varies by series)"
+  known_issues:
+    - "CPI, jobs, wage, and productivity series may be revised after initial release"
+    - "annual averages and monthly observations must be stored separately, not blended"
+  last_assessed: "2026-08-10"
+
+point_in_time:
+  supports_asof: false
+  revision_policy: "revised in place; release_date/revision_date are recorded per observation, but there is no full historical vintage archive (unlike FRED/ALFRED) -- treat pre-revision pulls as approximate for point-in-time research"
+
+connection:
+  method: rest_api
+  endpoint_or_host: "https://api.bls.gov/publicAPI/v2"
+  credential_ref: "BLS_API_KEY"   # optional -- raises rate limit (25 -> 500 queries/day) and history depth
+
+documentation_uri: "https://www.bls.gov/developers/api_signature_v2.htm"
+status: active
+
+data_contract_refs: []

@@ -37,3 +37,15 @@
 
 Capture incident ID, dedupe key, escalation policy, status, timestamp, and
 acknowledgement/resolution URI.
+
+## Executable Provider
+
+`src/quantsmith/adapters/alert_delivery/pagerduty_opsgenie.py`
+(`build_pagerduty_payload`, `deliver_pagerduty`) implements this mapping
+deterministically and enforces this file's own "only route `high` and
+`critical` alerts unless a workflow explicitly opts in" rule structurally:
+it raises unless the event's severity qualifies, unless
+`allow_all_severities=True` is passed (spec `0037`). It also applies
+redaction and the credential-shaped-value guard. It never calls the
+PagerDuty/Opsgenie API; a real send requires an injected `transport`
+callable and `dry_run=False`.

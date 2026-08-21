@@ -20,11 +20,6 @@ workflows:
     persistence: committed
     access_level: internal
 
-  - name: evening_quant_content
-    path: evening_quant_content
-    persistence: committed
-    access_level: internal
-
   # - name: data_engineer
   #   path: /mnt/memory/data_engineer   # external store for sensitive DB internals
   #   persistence: external

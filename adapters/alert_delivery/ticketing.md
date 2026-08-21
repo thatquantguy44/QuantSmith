@@ -38,3 +38,15 @@
 ## Result Evidence
 
 Capture ticket key/ID, URL, status, assignee, priority, and redacted payload hash.
+
+## Executable Provider
+
+`src/quantsmith/adapters/alert_delivery/ticketing.py`
+(`build_ticketing_payload`, `deliver_ticketing`) implements this mapping
+deterministically, applies redaction per `privacy.redaction_level`, and
+guards against a credential-shaped value ever appearing in the returned
+payload (spec `0037`). It never calls a ticketing API; a real send
+requires an injected `transport` callable and `dry_run=False`. The
+create-vs-update decision (matching an existing open ticket by
+`dedupe_key`) is the adopter's `transport` responsibility — this SDK holds
+no provider-side ticket state.

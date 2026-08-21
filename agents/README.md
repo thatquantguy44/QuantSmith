@@ -166,32 +166,6 @@ Standard: `instructions/portfolio_management.md`. Construction math routes to
 `optimization/portfolio_construction/`; execution scheduling routes to
 `optimization/execution_optimization/`.
 
-## Evening Content Workflow Pack
-
-The evening X/Twitter content agents moved out of the core `agents/` tree into the
-root-level `evening_quant_content_twitter/` workflow pack so the whole content
-surface can be ignored locally as one folder. That pack is now **local-only**
-(untracked from git; present on disk where it was set up), so the references below are
-paths within the pack rather than links. They still follow the same four-file agent
-contract.
-
-| Agent | Handles | Feeds mainly |
-| --- | --- | --- |
-| `evening_quant_content_twitter/agents/content/content_orchestrator/` | Config, topic budget, stage routing, ranking, draft-pack assembly, and delivery handoff | Orchestration, Reporting |
-| `evening_quant_content_twitter/agents/content/market_context_researcher/` | Current context, source notes, fact/reaction/speculation separation | Research, Data Ingestion |
-| `evening_quant_content_twitter/agents/content/quant_angle_generator/` | Quant-native, contrarian angles with mechanisms, scores, and risks | Research, Reporting |
-| `evening_quant_content_twitter/agents/content/x_post_packager/` | Short posts, quote-tweet replies, and thread drafts under platform constraints | Reporting |
-| `evening_quant_content_twitter/agents/content/visual_spec_agent/` | Chart, diagram, screenshot, and media specs with source/caveat requirements | Tooling, Reporting |
-| `evening_quant_content_twitter/agents/content/meme_culture_agent/` | Market-aware meme concepts with factual and reputational risk notes | Reporting |
-| `evening_quant_content_twitter/agents/content/claim_review_agent/` | Source support, labels, confidential-info review, and advice-language checks | Quality, Risk |
-| `evening_quant_content_twitter/agents/content/content_memory_agent/` | Prior themes, hooks, style, visual playbook, rejected framing, and memory updates | Knowledge, Memory |
-
-See `evening_quant_content_twitter/agents/content/README.md`,
-`evening_quant_content_twitter/specs/0003-evening-quant-content-workflow/`, and
-`evening_quant_content_twitter/specs/0005-evening-quant-content-runnable-pipeline/`
-for the workflow contracts (within the local-only pack).
-
-
 ## Optimization Agents (`optimization/`)
 
 Grouped in the `optimization/` category folder; these agents classify constrained decision problems, choose formulation families, review solver behavior, and hand work to specs/runtime only after objectives and constraints are explicit.
@@ -200,6 +174,7 @@ Grouped in the `optimization/` category folder; these agents classify constraine
 | --- | --- |
 | `optimization/optimization_orchestrator/` | Routes optimization requests across formulation, solver, domain, validation, and deployment agents. |
 | `optimization/problem_formulation/` | Turns an ambiguous decision into variables, objective functions, constraints, data contracts, and acceptance criteria. |
+| `optimization/model_plugin_registration/` | Ingests a registered internal-model manifest entry, checks contract compliance, and flags unverifiable claims before routing to it. |
 | `optimization/linear_programming/` | LPs for allocation, blending, transportation, cash, collateral, balance-sheet, and capacity problems. |
 | `optimization/quadratic_programming/` | Convex QPs for mean-variance, tracking error, turnover penalties, and regularized allocation. |
 | `optimization/conic_optimization/` | SOCP/SDP-style risk, norm, robust, covariance, and chance-constraint formulations. |
@@ -282,6 +257,34 @@ grounding, citations, access control, and provenance.
 | `knowledge/knowledge_retrieval/` | Grounded, cited answers respecting the asker's access level and information barriers | Cross-cutting |
 | `knowledge/institutional_memory/` | Persisting decisions, lessons, glossary, and FAQs as durable, referenceable artifacts | Maintenance, cross-cutting |
 
+## Role Operations Agents (`role_operations/`)
+
+Grouped in the `role_operations/` category folder (see
+[`role_operations/README.md`](role_operations/README.md)); a quant/data-science
+lead's operational overhead — meeting follow-ups, status updates, prototype
+setup, first-pass research scans, demo prep — absorbed so more time goes to
+model scoping and research. Configurable via a local, gitignored
+`role_context.yml`; this repository never carries real platform, client, or
+personal data (`role-context` gate). All three phases of the four-pillar
+roster are shipped: Phase 1 (spec `0024`), Phase 2 (spec `0029`), and Phase 3
+(spec `0030`, governance-adjacent) — fourteen agents in total.
+
+| Agent | Handles | Feeds mainly |
+| --- | --- | --- |
+| `role_operations/meeting_to_action/` | Notes/transcript → decisions, owners, open items, a draft follow-up | Cross-cutting |
+| `role_operations/status_rollup/` | Recent activity → a draft status update, blocked items stated plainly | Cross-cutting |
+| `role_operations/rapid_scaffolder/` | New idea → repo skeleton, data-contract stub, naive baseline plan | Planning, Implementation |
+| `role_operations/prior_art_scanner/` | Hypothesis → related approaches, failure modes, open questions | Planning |
+| `role_operations/demo_narrative_packager/` | Prototype results → situation/insight/recommendation narrative + one-pager | Client & Stakeholder Engagement |
+| `role_operations/tough_question_rehearsal/` | Demo material → persona-grouped tough questions with suggested answers | Client & Stakeholder Engagement |
+| `role_operations/experiment_ledger/` | Every prototype variant tried → an append-only, no-survivorship-bias log | Implementation |
+| `role_operations/model_card_drafter/` | Model info → a draft model card, gaps flagged not fabricated | Testing & Validation |
+| `role_operations/audit_trail_keeper/` | A decision as it's made → an append-only decision-log entry | Cross-cutting |
+| `role_operations/governance_readiness_checklist/` | Artifact state → each readiness item evidenced, a gap, or n/a | Testing & Validation |
+| `role_operations/second_look_backtest_reviewer/` | A backtest result → a fast pre-check, deferring to `backtest_review` | Testing & Validation |
+| `role_operations/build_handoff_writer/` | Project state → a draft handoff memo, unresolved items always stated | Deployment & Release |
+| `role_operations/alert_triage/` | Routed alerts → a personal priority pass, deferring to `alert_router` | Maintenance & Monitoring |
+
 ## Trading Strategy Agents (`trading_strategies/`)
 
 Grouped in the `trading_strategies/` category folder; they operationalize the
@@ -316,6 +319,29 @@ mechanics guidance inside every archetype.
 | `asset_classes/commodities/` | Futures curve shape, roll mechanics and roll yield, physical delivery vs cash settlement, storage/carry cost, seasonality | `trading_strategies/carry`, `momentum_trend`, `macro_multi_asset` |
 | `asset_classes/digital_assets/` | Venue fragmentation, custody/counterparty risk, perpetual-funding mechanics, 24/7 session structure, on-chain/oracle risk | `trading_strategies/market_making_microstructure`, `momentum_trend`; `securities_financing/collateral_management` |
 
+## Economists Agents (`economists/`)
+
+Grouped in the `economists/` category folder (see
+[`economists/README.md`](economists/README.md)); give a quant or
+portfolio-management workflow a grounded macro backdrop to start from —
+indicator tracking, policy reads, regime classification, cross-asset
+translation, forward scenarios, and two report writers (a recurring brief
+and a periodic outlook). Analysis and synthesis only: strategy design stays
+`trading_strategies/macro_multi_asset`'s job, and live-model regime-change
+detection stays `monitoring/model_signal_monitoring`'s job — neither is
+duplicated here. Backed by `instructions/macro_economic_analysis.md` and
+`sources/{fred,bls,bea,census,eia}.yml` (spec `0033`).
+
+| Agent | Handles | Feeds mainly |
+| --- | --- | --- |
+| `economists/macro_indicator_analyst/` | Core releases → a vintage-aware, surprise-vs-consensus read | `macro_regime_classifier`, `macro_backdrop_summarizer` |
+| `economists/monetary_policy_analyst/` | Central bank stance, rate path, balance sheet → a policy read | `macro_regime_classifier`, `research_analyst` |
+| `economists/macro_regime_classifier/` | Indicators + policy → a classified regime, distinct from `model_signal_monitoring`'s regime-change alerts | `macro_multi_asset`, `portfolio_management/allocation_policy` |
+| `economists/cross_asset_macro_linkages/` | A regime → cross-asset expression (rates/FX/credit/equities/commodities), no sizing | `research_analyst`, `trading_strategies/*` |
+| `economists/macro_scenario_analyst/` | A regime → forward stress scenarios with quantified indicator paths | `risk`, `backtest_review` |
+| `economists/macro_backdrop_summarizer/` | All of the above → a concise, recurring macro brief | `research_analyst`, `modeling`, `portfolio_management/*` |
+| `economists/economic_outlook_report_writer/` | All of the above → a longer periodic outlook report | `portfolio_management/*`, IC-facing review |
+
 ## Securities Financing Agents (`securities_financing/`)
 
 Grouped in the `securities_financing/` category folder; they make financing a
@@ -332,7 +358,12 @@ costs and risks.
 `securities_lending/` has a tested runtime (spec `0023-securities-lending-workflow`):
 `src/quantsmith/quant/agentic_quant/sec_lending_workflow.py` — universe
 construction, GC/WARM/HTB classification, LP inventory optimization, and
-concentration risk; run via `quantsmith-sec-lending`.
+concentration risk; run via `quantsmith-sec-lending`. `financing_cost_analysis/`
+also has a tested runtime (spec `0028-financing-cost-analysis`):
+`src/quantsmith/pipelines/financing_cost_analysis.py` — cost-of-carry
+decomposition, financing-aware returns, understated-backtest flags,
+rate-shock sensitivity, and capacity findings, reconciling with
+`securities_lending`'s rate/classification vocabulary by value.
 
 ## Formulaic Alpha Agents (`formulaic_alphas/`)
 

@@ -13,7 +13,7 @@ does.
 | `securities_lending/` | Stock loan/borrow: locates and availability, GC vs hard-to-borrow (specials) rates, short rebate, recalls, buy-ins, corporate actions and manufactured dividends. |
 | `repo_financing/` | Repo and reverse repo: funding positions, repo rates, term vs overnight, tri-party vs bilateral, haircuts, roll and counterparty risk. |
 | `collateral_management/` | Eligibility, haircuts, margin, collateral optimization and substitution, concentration, rehypothecation, and regulatory (LCR/NSFR) impact. |
-| `financing_cost_analysis/` | All-in cost of carry, borrow cost and short rebate, financing spread — and financing-aware backtesting. |
+| `financing_cost_analysis/` | All-in cost of carry, borrow cost and short rebate, financing spread — and financing-aware backtesting. Tested runtime (spec `0028`). |
 
 ## Group Workflow
 
@@ -21,6 +21,12 @@ does.
 securities_lending | repo_financing | collateral_management
   → financing_cost_analysis → backtest_review + risk
 ```
+
+`securities_lending/` (spec `0023`) and `financing_cost_analysis/` (spec
+`0028`) have tested runtimes; `repo_financing/` and `collateral_management/`
+remain agent-contract-only — `financing_cost_analysis`'s runtime accepts
+their financing legs (funding rate, margin/haircut) as structured input, so
+it does not require either to have a runtime first.
 
 Model the relevant borrow, funding, and collateral terms first; consolidate them
 into an all-in financing cost; then apply that cost to strategy validation and risk

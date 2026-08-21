@@ -12,6 +12,7 @@ entitlements, or redistribution rules matter to quant workflows.
 | `bls.md` | BLS labor, inflation, wage, productivity, and survey data. |
 | `bea.md` | BEA national, regional, industry, and international accounts. |
 | `census.md` | Census demographic, housing, business, and trade data. |
+| `eia.md` | EIA petroleum, natural gas, electricity, coal, and renewables data. |
 | `treasury.md` | U.S. Treasury rates, auctions, fiscal, and debt data. |
 | `federal_reserve.md` | Federal Reserve statistical releases and board datasets. |
 | `ny_fed.md` | NY Fed markets, rates, surveys, and reference datasets. |

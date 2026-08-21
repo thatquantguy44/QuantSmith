@@ -63,6 +63,20 @@ from .excel_profile import (
     ExcelWorkbookPayload,
     render_excel,
 )
+from .financing_cost_analysis import (
+    CapacityFinding,
+    CostDecomposition,
+    FinancedPosition,
+    FinancingAwareReturns,
+    FinancingLeg,
+    capacity_limit,
+    check_point_in_time,
+    decompose,
+    financing_aware_returns,
+    flag_understated_backtest,
+    position_from_borrow_rate,
+    spread_sensitivity,
+)
 from .experimentation import (
     ExperimentReadout,
     ProportionTest,
@@ -241,4 +255,17 @@ __all__ = [
     "render_looker",
     "render_superset",
     "render_qlik",
+    # 0028 — financing cost analysis
+    "CapacityFinding",
+    "CostDecomposition",
+    "FinancedPosition",
+    "FinancingAwareReturns",
+    "FinancingLeg",
+    "capacity_limit",
+    "check_point_in_time",
+    "decompose",
+    "financing_aware_returns",
+    "flag_understated_backtest",
+    "position_from_borrow_rate",
+    "spread_sensitivity",
 ]

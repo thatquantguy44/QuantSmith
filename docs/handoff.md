@@ -3,12 +3,15 @@
 ## Snapshot
 
 The SDK has a working v1: a **spec-driven engineering framework** over the six
-software-development stages, **105 agents** including the root evening-content
-workflow pack, **15 quality gates**, **13 instruction standards**, and CI that
+software-development stages, **161 agents** in `agents/`,
+**31 quality gates**, **33 instruction standards**, and CI that
 enforces the deterministic gates. It remains primarily a scaffold to be copied
-into quant repos, with `evening_quant_content_twitter/` as the first runnable local
-workflow pack and `src/quantsmith/pipelines/` holding runnable, dependency-free
-reference pipelines that make specs `0006` and `0007` executable and tested.
+into quant repos, with `src/quantsmith/pipelines/` holding runnable, dependency-free
+reference pipelines for most specs (see `specs/README.md`'s index for the current
+list), and `src/quantsmith/quant/agentic_quant/` holding a further runtime (spec
+`0023`) with `numpy`/optional-`scipy` dependencies. `adapters/` is a first-class
+SDK surface (6 groups) — the provider boundary between agent decisions and
+external systems (delivery, scheduling, storage, data access, model runtimes).
 
 - Build-out branch: `claude/dev-stages-hooks-agents-co1sjj` (open as PR #4 into `main`).
 - Root `CLAUDE.md` activates the framework by default for any agent in the repo.
@@ -24,44 +27,49 @@ it via stable IDs (`REQ`/`NFR`/`AC`/`RISK`/`T`).
 - `specs/NNNN-slug/{spec,plan,tasks}.md` from `templates/spec/`; worked example at
   `specs/0001-daily-momentum-signal/`.
 
-**Agents (105)** — all on the four-file contract (`README`/`prompt`/`instructions`/
-`tasks`) with a `Spec-Driven Role`:
+**Agents (161, verified by the `agent-catalog` gate — treat `agents/README.md`
+as the live count, not the number here)** — all on the four-file contract
+(`README`/`prompt`/`instructions`/`tasks`) with a `Spec-Driven Role`:
 
 - Orchestrator: `workflow_orchestrator/`.
 - Lifecycle (one per stage): `planning_requirements`, `design_architecture`,
   `implementation`, `testing_validation`, `deployment_release`, `maintenance_monitoring`.
 - Core domain: `research_analyst`, `data_quality`, `feature_engineering`, `modeling`,
   `backtest_review`, `risk`, `git_release`.
-- Groups: `optimization/` (21), `machine_learning/` (12), `deep_learning/` (12), `data_ingestion/` (3), `secrets_management/` (4), `tooling/` (3 — Excel,
-  Power BI, Tableau), `knowledge/` (4), `trading_strategies/` (8 archetypes from
-  *151 Trading Strategies*), `securities_financing/` (4), `formulaic_alphas/` (3 —
-  from *101 Formulaic Alphas*), and the root `evening_quant_content_twitter/`
-  pack (8 content agents plus runtime/scheduler).
+- Groups (largest first): `optimization/`, `deep_learning/`, `machine_learning/`,
+  `tooling/`, `data_engineering/`, `trading_strategies/`, `asset_classes/`,
+  `secrets_management/`, `securities_financing/`, `knowledge/`, `analytics/`,
+  `role_operations/`, `monitoring/`, `alerts/`, `data_ingestion/`,
+  `formulaic_alphas/` — see `agents/README.md` for per-group membership and
+  counts, which change more often than this file is refreshed.
 
-**Gates (15)** in `hooks/stages/`, driven by `run-stage.sh`; advisory by default,
+**Gates (31)** in `hooks/stages/`, driven by `run-stage.sh`; advisory by default,
 `QF_STAGE_ENFORCE=1` blocks:
 
 - Cross-cutting: `spec`. Per stage: `planning`, `design`, `implementation`,
   `testing`, `deployment`, `maintenance`.
-- Quant/content: `leakage`, `backtest` (incl. a financing theme for shorts),
+- Quant: `leakage`, `backtest` (incl. a financing theme for shorts),
   `repro`, `data-contract`, `pipeline-contract`, `alert-contract`,
-  `monitoring-coverage`, `content-draft-pack`.
-- Repo: `secret-scan`, `docs-link`, `agent-catalog`, `spec-index`, `knowledge`.
+  `monitoring-coverage`, `data-provenance`.
+- Repo: `secret-scan`, `docs-link`, `agent-catalog`, `spec-index`, `readme-sync`,
+  `doc-counts`, `quantsmith-version`, `agent-attribution`, `handoff-sync`, `upstream-drift`, `ownership`, `knowledge`, `memory`, `role-context`,
+  `model-plugin`, `source-catalog`.
 
-**Instructions (13)** — constitution, SDD method, point-in-time, and the domain
-standards (quant_research, data_quality, backtesting, model_validation, documentation,
-git_workflow, knowledge_base, trading_strategies, securities_financing, formulaic_alphas).
+**Instructions (33)** — constitution, SDD method, point-in-time, and the domain
+standards; see `README.md`'s "Public Instructions" table for the current list
+(this file lists categories, not every filename, to avoid drifting again).
 
 **Templates & prompts** — `templates/spec/`, `templates/docs/` (research memo,
 dataset/model card, backtest report, run card, model monitoring plan, incident
-postmortem, handoff memo, production readiness), `templates/data/data_contract.md`,
-`templates/knowledge/knowledge_sources.yml`, and matching prompts.
+postmortem, handoff memo, production readiness, decision log),
+`templates/data/data_contract.md`, `templates/knowledge/knowledge_sources.yml`,
+and matching prompts.
 
 **Configurable knowledge sources** — the knowledge agents plug into external
 repositories declared in `knowledge_sources.yml` (subfolders as domains), validated
 by the `knowledge` gate.
 
-**Scheduled workflow operations** — spec `0024-workflow-scheduling-operations`
+**Scheduled workflow operations** — spec `0055-workflow-scheduling-operations`
 defines the agentic control plane for cron/jobs/scripts/Python/workflows: a schedule
 registry, scheduler-adapter validation, execution ledger, manual task reminders,
 daily status reports, failure routing, and memory handoff for recurring operational
@@ -83,39 +91,80 @@ learnings. It builds on `adapters/schedulers/`, `0019-pipeline-observability`,
 ## Quality Gates — Enforced vs Advisory
 
 - **Enforced in CI:** required docs, agent contract, shell syntax, `spec`,
-  `backtest`, `secret-scan`, `docs-link`, `agent-catalog`, `spec-index`, and the pytest suite
+  `backtest`, `secret-scan`, `role-context`, `docs-link`, `agent-catalog`, `spec-index`, and the pytest suite
   (`tests/`, run against the package's declared dependencies).
 - **Advisory:** `leakage` (heuristic by design) and the per-stage/quant gates not
   listed above. Graduate a gate to enforced per repo as discipline matures.
 
 ## What's Next (prioritized)
 
-1. **P0 scheduled workflow operations control plane** — new spec
-   `0024-workflow-scheduling-operations/` covers cron jobs, Python scripts/modules,
-   QuantSmith pipelines, and agentic workflows as deployable scheduled jobs. The
-   planned slice is a registry → scheduler adapter dry-run/deploy → dispatcher →
-   execution ledger → daily status report loop, with manual task reminders and
-   failure/overdue routing into alerting. This is the missing operating layer for
-   recurring desk workflows: "what ran, what completed, what failed, what needs a
-   human, what runs next, and what should be learned for next time." First runtime
-   target should be local and dependency-free (`workflow_scheduling.py` plus tests),
-   then adapters can deploy to cron/GitHub Actions/Airflow/Dagster/Prefect.
-2. **P0 optimizer-agent workflow expansion** — the optimization group now has runtimes
-   for the core mathematical forms plus two applications: convex QP
-   (`specs/0007-portfolio-construction/`), a closed-form control
-   (`specs/0012-execution-scheduling/`), and the solver toolkit
-   (`specs/0013-optimization-solvers/`: LP, MILP, min-cost flow, dynamic programming).
-   The quant chain runs signal → forecast → portfolio → execution. Next: build
-   *application* specs on the new solvers — collateral/margin LP, cardinality-
-   constrained portfolio (MILP), funding-ladder min-cost flow, multi-period
-   rebalancing DP — and add conic/global/nonlinear forms when a dependency-free method
-   or an optional solver dependency is chosen.
-3. **Machine-learning and deep-learning workflow expansion** — the first runtime
-   workflow is shipped as `specs/0006-ml-return-forecasting/` (ML build chain end to
-   end with a DL challenger, plus a runnable reference pipeline and tests). Next: add
-   more ML/DL worked examples (ranking, RL, forecasting variants) as the desk needs
-   them.
-4. **Data-engineering & data-analyst spec + runtime coverage** — closing the biggest
+### Planned specs (reserved, not yet written)
+
+The one place to see committed-to work that has no spec directory yet. The
+`handoff-sync` gate cannot protect these: it checks that every spec *directory*
+is referenced here, so work that exists only as an intention is invisible to it.
+This table is the manual counterpart — if a number below never becomes a
+directory, that should be a deliberate decision recorded here, not a thing
+nobody noticed.
+
+| Spec | What | Depends on | Tracked in |
+| --- | --- | --- | --- |
+| `0049` | Workflow memory **write path** — `propose_records()` at the runtime boundary, committed `memory/inbox/` staging, `promote()` on human review | `0048` read path (`T-002`/`T-004`) | item 15 |
+| `0050` | **Portable doc-integrity gates** — parameterize against `quantsmith.conf`; collapse `agent-catalog`+`spec-index` into one `catalog-sync` | the three shapes (done, item 16) | item 16 |
+| `0051` | **Conformance levels** — make `QF_CONFORMANCE_LEVEL` verified rather than declared | `0050` config contract | item 16 |
+| `0052` | **MCP adapter contract + resources server** — `adapters/mcp_servers/`, serving `knowledge_sources.yml` over the resources primitive | none (reuses the existing manifest) | item 17 |
+| `0053` | **MCP memory-graph server** — tools over `0048`'s store, with `as_of` honouring the type-aware point-in-time rule | `0048` `T-002`/`T-004`; ideally `0049` | item 17 |
+| `0054` | **MCP RAG server** — vector search with per-access-tier indexes and cited passages | `0052` contract | item 17 |
+
+**Next free spec number: `0056`.** Reserving a number here does not create the
+directory; run `./scripts/new-spec.sh` (or copy `templates/spec/`) when the work
+actually starts.
+
+
+**New P0 scheduled workflow operations control plane** — spec
+`0055-workflow-scheduling-operations/` covers cron jobs, Python scripts/modules,
+QuantSmith pipelines, and agentic workflows as deployable scheduled jobs. The
+planned slice is a registry → scheduler adapter dry-run/deploy → dispatcher →
+execution ledger → daily status report loop, with manual task reminders and
+failure/overdue routing into alerting. This is the missing operating layer for
+recurring desk workflows: "what ran, what completed, what failed, what needs a
+human, what runs next, and what should be learned for next time." First runtime
+target should be local and dependency-free (`workflow_scheduling.py` plus tests),
+then adapters can deploy to cron/GitHub Actions/Airflow/Dagster/Prefect.
+
+1. **P0 optimizer-agent workflow expansion — every `0013` solver now has a shipped
+   application.** The optimization group has runtimes for the core mathematical
+   forms plus five applications: convex QP (`specs/0007-portfolio-construction/`),
+   a closed-form control (`specs/0012-execution-scheduling/`), the solver toolkit
+   (`specs/0013-optimization-solvers/`: LP, MILP, min-cost flow, dynamic programming),
+   **cardinality-constrained portfolio construction**
+   (`specs/0034-cardinality-constrained-portfolio/`, `cardinality_portfolio.py` —
+   composes `0013`'s MILP with `0007`'s unmodified QP, disclosed explicitly as a
+   two-stage heuristic rather than a joint MIQP solve), the **funding ladder**
+   (`specs/0035-funding-ladder/`, `funding_ladder.py` — a bipartite
+   tenor-to-obligation network on `0013`'s `min_cost_flow`, a general
+   treasury/cash-funding tool, explicitly not securities-financing), and
+   **multi-period rebalancing** (`specs/0036-multi-period-rebalancing/`,
+   `multi_period_rebalancing.py` — a discretized single-position DP on `0013`'s
+   `solve_dp`, trading transaction cost against tracking-error cost over a
+   horizon; unlike `0034`/`0035` it has no "infeasible" outcome, since "stay put"
+   is always a valid action). The quant chain runs signal → forecast → portfolio
+   → execution. Next: conic/global/nonlinear solver forms when a dependency-free
+   method or an optional solver dependency is chosen. (Securities-financing LP
+   work is deliberately out of scope: that domain routes to an adopter's own
+   models via `agents/optimization/model_plugin_registration/`, spec `0026`,
+   rather than the SDK
+   owning the optimization logic itself — see item 5.)
+2. **Machine-learning and deep-learning workflow expansion** — the agent roster
+   is specified by `specs/0004-optimizer-ml-dl-agent-expansion/` (the
+   `optimization/`, `machine_learning/`, and `deep_learning/` groups as agent
+   contracts, verified by the catalog/docs gates rather than a runtime). The
+   first runtime workflow is shipped as `specs/0006-ml-return-forecasting/` (ML
+   build chain end to end with a DL challenger, plus a runnable reference
+   pipeline and tests), with `specs/0041-ranking-forecast/` as its ranking-loss
+   variant. Next: add more ML/DL worked examples (RL, forecasting variants) as
+   the desk needs them.
+3. **Data-engineering & data-analyst spec + runtime coverage** — closing the biggest
    structural gap, role by role.
    - **Data Analyst — analysis + communication layers shipped.** Governed analysis:
      `metrics_semantic_layer/` (spec `0008`), `experimentation/` (spec `0009`), and the
@@ -154,34 +203,597 @@ learnings. It builds on `adapters/schedulers/`, `0019-pipeline-observability`,
      `data_governance`) get executable runtimes only when a concrete workflow needs
      one. The `src/quantsmith/agentic_code_tools/*` modules (SQL, EDA, prep, BI) remain
      runtime not tied to any spec. Backlog detail in `docs/handoffs/future_features.md`.
-5. **Adoption guide** — done. `docs/adoption_guide.md` is a full walkthrough of both
+4. **Role-operations agent roster (Data Science Lead efficiency plan) — done.**
+   All three phases of a 14-agent roster shipped, absorbing a
+   quant/data-science lead's operational toil so more time goes to model
+   scoping and research. Full roster and rationale: the role-efficiency
+   plan this initiative implements (see `agents/role_operations/README.md`
+   for the phase breakdown carried in-repo). Backlog detail also tracked
+   in `docs/handoffs/future_features.md`.
+   - **Phase 1 — done** (spec `0024`): `meeting_to_action`, `status_rollup`,
+     `rapid_scaffolder`, `prior_art_scanner` — the lowest-risk,
+     highest-frequency slice, deliberately built and used first so trust
+     forms before any agent touches a client or governance committee.
+     Configurable via a local-only `role_context.yml`, gitignored by
+     default and enforced by the `role-context` gate — this repository
+     carries no company-specific or personal data. Backed by
+     `instructions/role_operations.md`.
+   - **Data-provenance guardrail — done** (spec `0025`, prompted directly
+     by this initiative's own guardrails): real-data-first priority stack
+     and complete synthetic-data disclosure, wired into `rapid_scaffolder`
+     specifically since it's the agent most likely to reach for synthetic
+     data to make a scaffold runnable.
+   - **Phase 2 — done** (spec `0029`): `demo_narrative_packager`,
+     `tough_question_rehearsal`, `experiment_ledger` — prototype
+     accelerators. `demo_narrative_packager` disclosed synthetic data per
+     `instructions/data_provenance.md`; `tough_question_rehearsal` reads
+     `role_context.yml`'s stakeholder personas; `experiment_ledger` runs
+     alongside `rapid_scaffolder`'s iteration loop.
+   - **Phase 3 — done** (spec `0030`): `model_card_drafter`,
+     `audit_trail_keeper`, `governance_readiness_checklist`,
+     `second_look_backtest_reviewer`, `build_handoff_writer`,
+     `alert_triage` — governance-adjacent, deliberately sequenced last
+     given the higher stakes. Added `templates/docs/decision_log.md` (no
+     template existed yet for `agentic_dictionary.md`'s Decision Log
+     term). `second_look_backtest_reviewer` and `alert_triage` are
+     explicitly framed as handoff layers, not replacements — the former
+     always recommends the full `agents/backtest_review/` agent before a
+     production-promotion decision, the latter never suppresses,
+     escalates, resolves, or re-routes an alert, deferring all of that to
+     `agents/alerts/alert_router/` and
+     `agents/alerts/incident_notification/`.
+5. **P0 optimizer-agent workflow expansion (continued) — done.** All three
+   applications (cardinality-constrained portfolio, funding ladder,
+   multi-period rebalancing — specs `0034`, `0035`, `0036`) are shipped;
+   every solver in the `0013` toolkit now has one. A securities-financing
+   LP application remains deliberately not planned:
+   `repo_financing`/`collateral_management` stay agent-contract-only, and
+   that domain routes to an adopter's own optimization models via
+   `agents/optimization/model_plugin_registration/` (spec `0026`) instead
+   of the SDK owning securities-financing optimization logic itself.
+6. **Adoption guide** — done. `docs/adoption_guide.md` is a full walkthrough of both
    layers: `pip install quantsmith` + using the runtimes, and copying the scaffold +
    wiring the gates, with per-project-type recipes.
-6. **Packaging** — done (package phase active). `docs/packaging.md` records the hybrid
+7. **Packaging** — done (package phase active). `docs/packaging.md` records the hybrid
    (versioned `quantsmith` package for the runtimes + template for the scaffold);
    `CHANGELOG.md` and a versioning policy are in place. Remaining optional step: the
    Copier `qf` sync CLI, and an optional PyPI release when there is demand.
-7. **More worked examples** — the forecast spec is done
-   (`specs/0006-ml-return-forecasting/`); still open: a risk-model spec end to end
-   and an ingestion example that emits a data contract (see item 3).
-8. **Remaining backing instructions** — risk_management, data_ingestion,
-   reproducibility, monitoring. (`pipeline_engineering`, `metrics_semantic_layer`, and
-   `data_storytelling` are shipped.)
-9. **`CHANGELOG.md`** — done (Keep a Changelog + a SemVer-style versioning policy).
-10. **Optional gates** — `ingestion-snapshot`; a stricter notebook-output gate;
-   revisit enforcing `leakage`.
+8. **More worked examples — done.** The forecast spec is done
+   (`specs/0006-ml-return-forecasting/`). The risk-model spec is done
+   (`specs/0038-factor-risk-model/`, `factor_risk_model.py`): variance
+   decomposition, Euler risk attribution (assets and factors), risk
+   concentration, and a linear factor-shock stress loss, operationalizing
+   `instructions/risk_management.md` (`0031`) with a tested runtime. The
+   ingestion example is done (`specs/0039-ingestion-data-contract/`,
+   `ingestion_data_contract.py`): validates an already-pulled row set
+   against a declared schema/key/quality-rule contract and renders a
+   `data_contract.md` populated with real, computed results — a duplicate
+   key or missingness breach appears because it was actually found, never
+   because someone wrote it down.
+9. **Remaining backing instructions — done** (spec `0031`).
+   `instructions/risk_management.md` (backs `agents/risk/`),
+   `instructions/data_ingestion.md` (shared standard behind the three
+   `data_ingestion/*` agents, replacing three independently-restated
+   copies of the same rules), and `instructions/reproducibility.md`
+   (operationalizes P4 for the `repro` gate and `templates/docs/run_card.md`,
+   backing `implementation`/`testing_validation`) — all cross-referenced
+   from the agents they back. Every backing-standard gap called out in this
+   section historically is now closed: `pipeline_engineering`,
+   `metrics_semantic_layer`, `data_storytelling`, `monitoring`, `alerting`,
+   `asset_class_mechanics`, `role_operations`, `data_provenance`,
+   `risk_management`, `data_ingestion`, and `reproducibility` are all
+   shipped.
+10. **Economists agent group — done** (spec `0033`). Seven agents
+    (`macro_indicator_analyst`, `monetary_policy_analyst`,
+    `macro_regime_classifier`, `cross_asset_macro_linkages`,
+    `macro_scenario_analyst`, `macro_backdrop_summarizer`,
+    `economic_outlook_report_writer`) giving a quant/PM workflow a
+    grounded macro backdrop — indicators through policy through a
+    classified regime through cross-asset/scenario translation to a
+    recurring brief and a periodic outlook report. Reclaims
+    `agents/economists/`, a stray, unwired placeholder (a literal
+    `"placeholder"` `README.md`) left by the earlier parallel
+    `agent/portfolio-management-agents` merge. Backed by
+    `instructions/macro_economic_analysis.md` and
+    `templates/docs/macro_backdrop_report.md`; draws on
+    `sources/{fred,bls,bea,census,eia}.yml` (`0027`). Analysis and
+    synthesis only — hands off to `trading_strategies/macro_multi_asset`,
+    `portfolio_management/*`, and `risk` rather than replacing them, and
+    is explicitly distinguished from `monitoring/model_signal_monitoring`'s
+    regime-change detection (a different, operational question from
+    classifying what the current regime *is*).
+11. **`CHANGELOG.md`** — done (Keep a Changelog + a SemVer-style versioning policy).
+12. **Optional gates** — `ingestion-snapshot`; a stricter notebook-output gate;
+    revisit enforcing `leakage`.
+13. **Shipped since this section was last written (specs `0019`–`0028`):**
+    - `0019` pipeline observability.
+    - `0020`/`0021` the monitoring → alerting chain (`agents/monitoring/`,
+      `agents/alerts/`, `adapters/alert_delivery/`).
+    - `0022` asset-class mechanics agents, feeding `trading_strategies/` and
+      `securities_financing/`.
+    - `0023` the securities-lending workflow promoted to a tested runtime,
+      with a balance-sheet-cap correctness fix found along the way.
+    - `0024`/`0025` role-operations Phase 1 + the data-provenance guardrail
+      — see item 4, the dedicated tracking entry for this initiative.
+    - `0026` the model plugin adapter — register an already-built internal
+      optimization model as a reviewed, contract-bound plugin via a
+      local-only `model_plugins.yml`.
+    - `0027` the data source catalog (`sources/`) — a centralized,
+      per-source registry of APIs/DBs/feeds with quality, point-in-time,
+      and credential-pointer metadata, wired into `data_contract.md`,
+      `credential_access`, and `data_ingestion`; populated with six public
+      sources (FRED, BLS, EIA, BEA, Census, SEC EDGAR), with a matching
+      `adapters/data_access/external_apis/eia.md` profile added.
+    - `0028` financing cost analysis promoted to a tested, dependency-free
+      runtime — cost-of-carry decomposition, financing-aware returns,
+      understated-backtest flags, rate-shock sensitivity, and
+      classification-keyed capacity findings, reconciling with `0023`'s
+      rate/classification vocabulary by value (no `numpy` dependency added).
+    - `0029`/`0030` role-operations Phases 2 and 3 — see item 4, the
+      dedicated tracking entry for this initiative. The fourteen-agent
+      roster is now complete.
+    - `0031` the last three backing instructions
+      (`risk_management`/`data_ingestion`/`reproducibility`) — see item 9,
+      the dedicated tracking entry.
+    - `0032` the first two executable `adapters/alert_delivery/` providers
+      — email and webhook, following the adapter's own pre-existing
+      Recommended Starting Set. Deterministic payload construction and
+      redaction only; no network/SMTP/HTTP code lives in this SDK — a real
+      send requires an adopter-supplied `transport` callable and
+      `dry_run=False`, the same credential/execution boundary already drawn
+      for `credential_access` and the `0026` model-plugin dispatcher. The
+      remaining five providers shipped in `0037` (see below).
+    - `0033` the `economists/` agent group — see item 10, the dedicated
+      tracking entry.
+    - `0034` cardinality-constrained portfolio construction — see item 1,
+      the dedicated tracking entry. Closes the SDK's only standing `P0`
+      backlog item (an application actually built on the `0013` solver
+      toolkit) and corrects the stale collateral/margin-LP mention that
+      previously stood in for it.
+    - `0035` the funding ladder (`funding_ladder.py`) — see item 1, the
+      dedicated tracking entry. The second application built on `0013`'s
+      toolkit (`min_cost_flow`), a general treasury/cash-funding tool
+      matching cash obligations to funding tenors at minimum cost;
+      explicitly not a securities-financing tool.
+    - `0036` multi-period rebalancing (`multi_period_rebalancing.py`) —
+      see item 1, the dedicated tracking entry. The third and last
+      application on the `0013` toolkit (`solve_dp`): a discretized
+      single-position DP trading transaction cost against tracking-error
+      cost over a horizon. Every `0013` solver now has a shipped
+      application.
+    - `0037` the remaining five `adapters/alert_delivery/` providers —
+      Slack, Teams, ticketing, PagerDuty/Opsgenie, SMS/push — completing
+      the adapter's own Recommended Starting Set end to end (all seven
+      providers now executable). `pagerduty_opsgenie` and `sms_push`
+      structurally enforce their own stated severity-routing rules
+      (raise unless `allow_all_severities=True`) rather than leaving them
+      as prose; `sms_push` also truncates an oversized message to a
+      short-message length cap with a visible marker. Also factored the
+      dry-run/transport/`DeliveryResult` wrapper duplicated between
+      `email.py`/`webhook.py` into a shared `deliver_via` helper, verified
+      behavior-preserving by `0032`'s own test suite passing unchanged.
+    - `0038` the factor risk model (`factor_risk_model.py`) — see item 8,
+      the dedicated tracking entry. Closes the standing "risk-model spec
+      end to end" worked-example gap and operationalizes
+      `instructions/risk_management.md` (`0031`) with a tested runtime;
+      every decomposition sums exactly to the total it decomposes, by
+      construction (Euler identity), not just by convention.
+    - `0039` ingestion data contract emission (`ingestion_data_contract.py`)
+      — see item 8, the dedicated tracking entry. Closes the standing
+      "ingestion example that emits a data contract" worked-example gap;
+      `validate_ingestion` checks a caller-supplied row set against a
+      declared contract (schema, keys, missingness), and
+      `render_data_contract` renders `templates/data/data_contract.md`'s
+      section structure populated entirely from those real, computed
+      results, phrased as findings "in the validated sample" rather than
+      an unqualified guarantee. Item 8's worked-examples backlog is now
+      fully closed.
+    - `0040` the README index/runtime sync gate
+      (`hooks/stages/readme-sync-check.sh`). `agent-catalog`/`spec-index`
+      already kept `agents/README.md`/`specs/README.md` from drifting as
+      agents/specs were added; this gate closes the third leg — a spec
+      whose `specs/README.md` row names a real, tested pytest module (its
+      Tests column) but whose ID is missing from root `README.md`'s own
+      runtime table. Wired into `run-stage.sh`, `hooks/README.md`, root
+      `README.md`'s gate table, and CI's docs-integrity enforcement step
+      alongside `docs-link`/`agent-catalog`/`spec-index`. The exact gap
+      this file's own Risks section names ("narrative docs ... need
+      periodic manual refresh") is now partially self-checking.
+    - `0041` ranking-loss forecasting (`ranking_forecast.py`) — closes the
+      SDK's sole remaining `P0` backlog line ("additional ML/DL examples"
+      beyond `0006`'s point-wise baseline/challenger). `train_ranker`
+      trains a linear scorer with a pairwise (RankNet-style) ranking loss
+      over same-day pairs only, composing `0006`'s `build_labels`/
+      `FeatureStore`/`make_folds`/`evaluate`/`LinearModel` unmodified —
+      changes only the training objective, not the leakage-safe
+      machinery around it. `run_ranking_forecast` trains the ranker and
+      `0006`'s point-wise baseline on identical folds for direct
+      comparison; a fixed-seed synthetic fixture demonstrates the ranker
+      matching or beating the point-wise baseline's rank IC, disclosed
+      explicitly (spec `RISK-003`) as a mechanism demonstration, not a
+      backtested market claim.
+
+    - `0042` the pipeline builder (`pipeline_builder.py`) — the
+      design-time layer ahead of `0011`'s runtime, and the first of the
+      three remaining `P1` `data_engineering` items to get an executable
+      runtime. `compile_intent` validates a declared intent's graph **by
+      constructing an `0011` `Pipeline`**, so cycles, unknown
+      dependencies, and duplicate step names cannot be judged differently
+      at design time than at run time; `review_readiness` encodes
+      `instructions/pipeline_engineering.md`'s checklist as
+      severity-tagged findings, collecting all of them;
+      `render_pipeline_manifest` emits a
+      `templates/data/pipeline_manifest.md`-shaped document from the real
+      DAG and real findings; `to_pipeline` binds implementations back
+      into a runnable `0011` `Pipeline`. It reviews *declarations, not
+      implementations*, and says so — idempotency and test coverage are
+      claims until `0011` exercises them. The generated example at
+      `specs/0042-pipeline-builder/pipeline_manifest.md` is the
+      repository's first manifest artifact, so the `pipeline-contract`
+      gate now validates real content rather than reporting "no manifest
+      detected" on every run.
+
+    - `0043` the documented-count drift gate
+      (`hooks/stages/doc-counts-check.sh`). `agent-catalog`, `spec-index`,
+      and `readme-sync` each check that an *entity* is listed somewhere;
+      none can check a number written in prose, which is how the agent,
+      gate, and instruction-standard counts in this file, `sdk_plan.md`,
+      and root `README.md` all went stale at once. The gate derives each
+      count from the filesystem — reusing `agent-catalog-check.sh`'s own
+      definition of a public agent, so the two cannot disagree — and
+      reports every stated count that differs. It also reports how many
+      claims it checked, so a pattern that stops matching is visible
+      rather than passing quietly. The Risks entry below about narrative
+      docs needing manual refresh is now materially narrower: the
+      countable part is mechanical.
+
+    - `0044` the backtest engine (`backtesting.py`) — the artifact this SDK
+      existed to govern and had never produced. `instructions/backtesting.md`,
+      `agents/backtest_review/`, `templates/docs/backtest_report.md`, and a
+      **CI-enforced** `backtest` gate were all in place while the gate
+      reported "no backtest report artifact detected" on every run. No
+      look-ahead is structural: `weights[i]` meets `returns[i + lag]` with
+      `lag >= 1` enforced, an indexing impossibility rather than an
+      assertion. Net of costs is the default (turnover-scaled transaction
+      cost, financing on short exposure only), and a probabilistic Sharpe
+      (Bailey & López de Prado) ships with every Sharpe rather than as an
+      optional extra. The generated example on **disclosed synthetic data**
+      is the repo's first backtest artifact; it reports a *negative* result
+      (Sharpe −0.69, PSR 0.167), which is the correct answer for random data
+      after costs and a fair demonstration that the engine is not tuned to
+      flatter. Its stated limit: the guarantee covers the simulation loop,
+      not the provenance of the weights it is handed.
+
+    - `0045` the FRED point-in-time panel adapter
+      (`fred_point_in_time.py`) — the input-side half of the gap `0044`
+      left open. `0044` guarantees its simulation loop does not look
+      ahead and says it cannot vouch for the weights it is handed; for a
+      macro backtest that is precisely where leakage lives, because
+      economic series are revised. This adapter reads
+      `gold_fred_point_in_time` and selects vintages by window
+      containment on `realtime_start`/`realtime_end`, so a revision
+      published later can never be returned for an earlier as-of date —
+      the property its decisive test pins directly (original value before
+      the revision, revised value after). Publication lag falls out of
+      the data rather than needing a parameter, and `is_missing` rows are
+      absent rather than zero, because a zero is a number a model will
+      happily trade on. Read-only, no API key: it consumes a SQLite file
+      the operator produced (P9).
+
+    - `0046` the walk-forward backtest harness (`walk_forward.py`) —
+      closes the gap `0044`'s own rendered report admitted to ("results
+      here are in-sample unless that was applied upstream"), which is the
+      first thing `agents/backtest_review/` discounts. The pieces already
+      existed and had never been composed: `0006`'s `make_folds` produces
+      purged, embargoed splits and `0044`'s `run_backtest` measures a
+      path. Fold construction is **delegated**, not reimplemented — a
+      second implementation could disagree with `0006` about what is
+      purged. `fit_predict` is called once per fold on training periods
+      only, and its weights are evaluated on that fold's held-out periods
+      with the rebalance lag preserved across the slice. The headline is
+      the fold *distribution* (Sharpe dispersion, best/worst, positive
+      fraction), not a single pooled number that could hide one lucky
+      stretch. The generated example is again honestly negative — 20% of
+      folds positive, pooled probabilistic Sharpe 0.041 — which is the
+      right answer for a trailing-mean tilt on random data after costs.
+      Variant selection on fold results is an explicit Non-Goal: that
+      needs a deflated Sharpe, the named follow-up.
+
+    **Next up — the real run.** With `0044`, `0045`, and `0046` in place, the
+    remaining step is a wiring exercise, blocked only on data:
+    `fred_local.db`, produced by the operator from
+    `joshualutkemuller/fred-bronze-to-gold-pipeline` via
+    `PYTHONPATH=src python -m fred_pipeline run --local --db-path fred_local.db`
+    with their own `FRED_API_KEY`. No Databricks needed — that repo has a
+    fully local mode. **Blocked on that file.**
+
+    **Otherwise:** conic/global/nonlinear optimizer forms once a
+    dependency-free method or an optional solver dependency is chosen, a
+    listwise ranking loss once `0041`'s pairwise variant is trusted, or
+    the two remaining `P1` `data_engineering` runtimes (`data_modeling`,
+    `pipeline_deployment` — the latter is the handoff edge `0042`
+    deliberately stops at).
+    `repo_financing`/`collateral_management`
+    stay agent-contract-only by choice — this SDK routes to an adopter's
+    own optimization models via
+    `agents/optimization/model_plugin_registration/` (spec `0026`) rather
+    than owning securities-financing LP/optimization logic itself; an
+    executable dispatcher for `0026` is worth building once a concrete
+    invocation target exists. Otherwise: continuing to populate `sources/`
+    as real sources come into use.
+
+14. **P1 Generalization & Team Onboarding — making QuantSmith self-serve across
+    domains.** QuantSmith is now a comprehensive framework (161 agents, 45 specs,
+    27 gates, 33 standards); the next phase is reducing discovery friction and
+    enabling team-intuitive adoption without deep codebase reading.
+    - **P0 Phase 1a: Role profiles** (`roles/{portfolio_manager,risk_manager,quant_researcher,data_engineer,compliance_officer}.md`):
+      Define personas with their workflows, agents, specs, and handoff points. A
+      new Portfolio Manager reads `roles/portfolio_manager.md` and learns which
+      agents apply, which specs they own, which gates matter. Replaces the treasure
+      hunt through `agents/README.md`.
+    - **P0 Phase 1b: Domain starter kits** (`templates/domains/{equities,fixed_income,multi_asset,derivatives}/`):
+      Copy-paste templates with pre-wired agents, specs, and instructions for each
+      asset class. New equities team forks `templates/domains/equities/` → 80% of
+      their agent catalog and specs are ready. Reduces onboarding from weeks to
+      days.
+    - **Phase 2: Workflow discovery** (`docs/workflow_discovery.md`):
+      A decision tree (3 questions: Goal? Stage? Timeline?) that routes users to the
+      right orchestrator without reading 161 agent READMEs. Pairs with workflow
+      patterns below.
+    - **Phase 3: Cross-domain composition patterns** (`patterns/{portfolio_plus_hedge,macro_asset_allocation,signal_plus_model_plus_portfolio}.md`):
+      Document 5–10 common multi-domain workflows (equities + options, multi-asset
+      with macro, signal → forecast → portfolio) with agent chaining, handoff
+      boundaries, and expected outputs. Teams reuse patterns rather than designing
+      from first principles.
+    - **Phase 4: Extensibility by recipe** (`docs/extending_quantsmith/{add_asset_class,add_signal_type,add_risk_model,add_gate}.md`):
+      Step-by-step walkthroughs showing how to add a new domain/agent/spec/gate
+      without breaking existing ones, with concrete examples. Enables downstream
+      teams to extend rather than fork-and-modify.
+    - **Phase 5: Consumer upgrade path & versioning** (`docs/consumer_adoption.md`):
+      Document the full lifecycle for external repos: fork → pin → customize →
+      upgrade → contribute back, with schema_version compatibility checking (from
+      spec `0047`). Enables multi-team adoption and central maintenance.
+    - **Phase 6: Instrumentation & observability** (agent call logging):
+      Track which agents, workflows, gates, and domain patterns are used by which
+      teams; failure rates, completion times, and handoff quality. Informs next
+      iterations and prioritization.
+15. **Company knowledge over time — one initiative, phased across specs.**
+    *(Related: item 16 ships the repo shapes that adopt it; item 17 exposes it
+    to a team over MCP.)*
+    The goal: a workflow arrives already knowing a dataset's kinks, a
+    researcher does not re-derive what a colleague established last quarter,
+    and both can say where the knowledge came from and who vouched for it.
+    Phased like the role-operations roster (item 4) — small, shippable
+    specs rather than one large one, because the read path is useful before
+    a write path exists, and the write path should not be designed until
+    retrieval has shown what is worth capturing.
+
+    **Two distinct systems, easily conflated.** `instructions/workflow_memory.md`
+    governs `memory/` — structured records about databases, datasets, schemas,
+    fields, and their quirks. `instructions/knowledge_base.md` governs
+    `agents/knowledge/` reading a company's *unstructured* institutional
+    knowledge from external sources declared in `knowledge_sources.yml`. The
+    same four `knowledge/` agents serve both. Only the first has a runtime.
+
+    - **Scaffold — done** (spec `0002`): the `memory/` two-axis layout, the
+      record vocabulary (`type`/`confidence`/`corroboration`/`pit_scope`/
+      `status`), `manifest.yaml`, and the `memory` gate. Records were
+      committed but nothing ever read them *as records* — the gate greps for
+      the string `first_seen`, which proves a field name appears in a file
+      and nothing more.
+    - **Runtime, read path — partial** (spec `0048`): `workflow_memory.py`.
+      Built: a dependency-free subset YAML parser that raises rather than
+      guessing (`T-001`), a **type-aware point-in-time filter** (`T-003`),
+      and structural validation replacing the string grep (`T-005`), plus
+      list-form `evidence` with a derived corroboration count (`T-013`).
+      The PIT rule is the substantive idea: a memory store is *itself*
+      look-ahead, so mechanical facts (`schema`/`quirk`/`pitfall`) are
+      timeless while claims about what worked (`pattern`/`metric`/
+      `performance`) are bounded by `last_confirmed` — corroboration is
+      where the future enters a record.
+      **Outstanding:** `query` (`T-002`), `render_context` (`T-004` — until
+      this lands nothing can feed an agent prompt), decay (`T-006`), author
+      handles (`T-007`), `store_version` (`T-008`), the CLI and gate
+      rewiring (`T-009`/`T-010`), supersession and contradiction validation
+      (`T-014`–`T-016`). 11 of 23 `AC-*` verified.
+    - **Write path — planned** (spec `0049`, not yet written). Capture belongs
+      at the **runtime boundary, not the gate boundary**: a gate finding names
+      a source file (`"negative .shift()"`), while a record needs a dataset
+      scope (`field:close_adj`), and gates emit prose with no structured
+      output. `validate_ingestion` (`0039`) already returns findings carrying
+      a column and a quality rule — it looked at real rows and found something
+      about a real field. Same for `walk_forward` (`0046`, `performance`),
+      `fred_point_in_time` (`0045`, vintages), `factor_risk_model` (`0038`,
+      `metric`). Proposed shape: `propose_records()` in `workflow_memory.py`,
+      a **committed** `memory/inbox/` staging area so pull-request review *is*
+      the approval workflow, and `promote()` stamping `author`/`first_seen` on
+      acceptance. `templates/docs/run_card.md` gains a "Memory proposed"
+      section beside its existing "Memory version used".
+    - **Retrieval logging — not specced.** Nothing measures whether retrieval
+      helps, which leaves this initiative's own premise unevidenced. It also
+      gates pruning: without it the store only grows, and eventually costs
+      more to search than it saves. Cheapest version is recording which record
+      ids were served to a run, in the run-card slot that already exists.
+    - **Knowledge-base half — unspecced.** `agents/knowledge/` has four agent
+      contracts (`knowledge_ingestion`, `knowledge_curation`,
+      `knowledge_retrieval`, `institutional_memory`) and **zero Python files**;
+      the `knowledge` gate checks that configured source paths exist and
+      nothing else. Open question below on whether it gets a runtime.
+
+    **Honest status.** The store holds **5 records, all reference examples** —
+    no real institutional knowledge has been captured yet. The read path is
+    being built ahead of demand. The fastest test of whether this earns its
+    keep is capturing 20–30 real records from actual CRSP/FRED work and seeing
+    whether retrieval changes anyone's behaviour, before investing further in
+    machinery.
+
+16. **Repository shapes — pre-canned skeletons for multi-repo adoption.**
+    *(Related: item 15 is the knowledge these repos accumulate; item 17 is how
+    a team reaches it.)*
+    `templates/repos/` ships scaffolds a team picks from rather than assembling
+    a repo by hand: `quant-research`, `quant-models`, `data-pipelines`. Each
+    carries the full root structure (`.agents/`, `.copilot/`, `.githooks/`,
+    `.github/`, `config/`, `docs/`, `hooks/stages/`, `instructions/`,
+    `memory/`, `scripts/`, `specs/`, `src/`, `tests/`, `templates/`) plus
+    `CLAUDE.md`, `CONTRIBUTING.md`, `CHANGELOG.md`, `pyproject.toml`, and a
+    **pre-filled `quantsmith.conf`** — so the adopter configures nothing.
+
+    `scaffold-repo.sh --shape <name> --into <dir>` copies the shared base,
+    overlays the shape, and pulls in the SDK's gate scripts and templates, so
+    a scaffolded repo runs its own gates immediately. All three shapes
+    currently scaffold to ~90 files and pass their declared blocking gates on
+    a fresh tree, verified.
+
+    **The gate selection per shape is the substance, not the directories.**
+    `quant-research` keeps `spec` advisory — demanding a spec per experiment
+    stops people experimenting, which is the entire value of that shape.
+    `quant-models` blocks on `backtest` and `leakage`, because a look-ahead bug
+    there is a bad trade rather than a bad report. `data-pipelines` blocks on
+    `data-contract`/`pipeline-contract`, since a silent schema change reaching
+    a model months later is that shape's characteristic failure. Each shape's
+    `README.md` argues its selection rather than listing it.
+
+    This also **reverses the sequencing** previously planned for the
+    portability work: shipping the shapes first means the config format is
+    *derived* from three real configs rather than guessed at, so the gate
+    parameterization has something concrete to be validated against.
+    - **Done:** the three shapes, the scaffolder, the shared base, and
+      `handoff-sync` reading `QF_DOC_ROADMAP` (a down-payment on the gate
+      parameterization — a scaffolded repo names its roadmap
+      `docs/roadmap.md`, and the gate now honours that).
+    - **Next (`0050`):** parameterize the remaining doc gates against
+      `quantsmith.conf`; collapse `agent-catalog`+`spec-index` into one
+      `catalog-sync`, since both are "entities under a root must appear in an
+      index".
+    - **Then (`0051`):** conformance levels. `docs/conformance.md` and
+      `QF_CONFORMANCE_LEVEL` ship in the skeletons already, declared but not
+      yet verified by any gate — adoption is currently a claim, not a check.
+    - **Known gap:** `doc-counts` and `repro` are advisory in the shapes
+      because a fresh repo has no counts to drift and no run to reproduce.
+      Both should be promoted once a repo has content; the shapes say so
+      inline rather than leaving it silent.
+
+17. **MCP servers over the shared knowledge base — exposing it to a team.**
+    A centralized knowledge-base repository is only useful if agents across the
+    team can reach it. `adapters/` is already the right seam: its own README
+    defines an adapter as "the boundary between agent decisions and external
+    systems... agents decide, adapters translate an approved payload into a
+    provider-specific action." An MCP server is exactly that, so this becomes an
+    **eighth adapter group**, `adapters/mcp_servers/`, following `llm_runtime/`'s
+    shape (README + `adapter_contract.md` + one file per provider).
+
+    Two existing pieces do most of the work:
+    - **`templates/knowledge/knowledge_sources.yml` is already a server
+      manifest** — `path`, `access_level`, `include`/`exclude`, `freshness_days`,
+      `domains_from_subfolders`. Written for the `knowledge` gate; it happens to
+      be exactly what a resources server needs.
+    - **`0048`'s runtime is the graph server's backing store** — typed records,
+      validation, and the type-aware point-in-time filter.
+
+    Three servers, sequenced by dependency (see the Planned specs table):
+    - **`0052` resources primitive** — read-only, serves declared Markdown/text
+      under a `knowledge://<source>/<domain>/<path>` scheme. Build first: it
+      needs no new storage and it validates the adapter contract.
+    - **`0053` memory/knowledge graph** — `memory_query(scope, type, as_of)` over
+      `0048`. The `as_of` parameter is the differentiator: a generic memory MCP
+      server will serve 2026 knowledge to a 2020 backtest, and this one will not,
+      because mechanical facts are timeless while claims about what worked are
+      bounded by `last_confirmed`. For a quant team that is the difference
+      between a memory server and a leakage vector. Graph edges already exist as
+      fields (`superseded_by`, `coexists`).
+    - **`0054` vector/RAG** — `search(query, domain, access_level, as_of)`
+      returning cited passages, never bare prose, since
+      `instructions/knowledge_base.md` already requires grounded, cited answers.
+
+    **The team-scale hazard, recorded because it is easy to miss.** MCP servers
+    run with the *server's* credentials, not the caller's — so a shared
+    knowledge-base server reachable by the whole team will serve `restricted`
+    content to anyone who can open a connection unless designed against. Two
+    rules belong in the contract: the caller's clearance is a **parameter**,
+    never an assumption about who can reach the endpoint; and for RAG, filter at
+    **index** time with one index per access tier, not at query time.
+    Post-retrieval filtering still leaks — nearest-neighbour distances reveal
+    that a restricted document exists and roughly what it concerns, even when it
+    is never returned. For an MNPI-adjacent shop that is the difference between
+    a compliance story and a compliance incident.
+
+    Related: item 15 (what the knowledge is), item 16 (how repos adopt it).
+    This item is how a team *reaches* it.
+
+18. **Firmwide readiness — distribution, ownership, and usage signal.**
+    Three of the five gaps between "a good SDK" and "infrastructure a firm
+    runs on". Built as gates rather than documents, because the failure in
+    each case is silence.
+
+    - **Distribution that does not drift** — `upstream-drift` (gate 30) plus
+      `scripts/sync-upstream.sh`. Adoption is copy-and-own, so ten repos
+      copying one gate and each tuning it a little is not a risk, it is a
+      certainty. You cannot prevent that and should not try: adopters SHOULD
+      tune gates to their repo. What you can do is make divergence **visible**.
+      Each shape now pins `QF_UPSTREAM_REF`; the gate reports every copied file
+      that differs from it, and the sync script either refreshes the copies or
+      moves the pin. Dry-run by default, since a sync that silently overwrote
+      local tuning would destroy the thing the model is built around.
+      Offline-tolerant: an unreachable upstream reports and exits clean,
+      because a gate that goes red when GitHub is slow is one people learn to
+      ignore.
+
+    - **Ownership and a support path** — `ownership` (gate 31), plus
+      `docs/ownership.md` and `docs/gate_runbook.md` in this repo and every
+      shape. The gate's substance is **placeholder detection**: a scaffold
+      ships `@OWNER` and `<@handle>` deliberately, and those are precisely the
+      strings that survive to production if nothing looks for them. An unfilled
+      template reads as governed while owning nothing. It is blocking in every
+      shape — unlike a run manifest, ownership can be filled in on day one, and
+      a fresh scaffold goes from blocked to passing in about thirty seconds.
+      Found the gap **here** on its first run: this repository had no
+      CODEOWNERS, no ownership document, and no runbook. All three now exist.
+      `docs/ownership.md` states the single-maintainer risk plainly rather than
+      hiding it — every surface has one owner and no backup, which is the first
+      thing that breaks at firm scale.
+
+    - **A usage signal** — `QF_USAGE_LOG` in `common.sh` plus
+      `scripts/usage-report.sh`. Off unless the path is set; records only
+      timestamp, gate, finding count, and enforce flag. No paths, no finding
+      text, no identity, and it never leaves the machine — a usage log carrying
+      findings would carry company data, and this has to stay safe to enable
+      anywhere. It answers what nobody could answer before: which gates ever
+      fire, which never do, which deserve promoting to blocking.
+      **Its first run was already informative** — `repro`, `doc-counts`, and
+      `data-provenance` fire on 100% of runs in this repo, which by the
+      report's own guidance means "a known finding people have learned to
+      ignore." That is an accurate description of how they have been treated.
+
+    **The two gaps deliberately NOT closed here**, because neither is buildable
+    from inside this repository:
+    - **One real workflow on real data.** Every shipped result is synthetic and
+      says so. The real run remains blocked on `fred_local.db`, which only the
+      operator can produce. This is the highest-value next action in the whole
+      backlog — it converts every worked example from argument to evidence, and
+      it is the thing that would make the memory write path concrete rather
+      than speculative.
+    - **`access_level` enforced rather than declared.** It exists in the record
+      schema, in `knowledge_sources.yml`, and in `instructions/knowledge_base.md`
+      — and `query()` cannot filter on it. For a firm with information barriers
+      that is a blocker, not a gap. Belongs with the MCP work (item 17), where
+      caller clearance has to be a parameter rather than an assumption.
 
 ## Open Questions For The Owner
 
 - Copyable scaffold, Python package, or CLI/copier? (Directionally answered in
   `docs/packaging.md`; revisit its criteria if audience or update cadence changes.)
 - Which agent runtime is the primary target (local, general LLM, both)?
+- Does the knowledge-base half (item 15) get a runtime, or stay a pointer to
+  wherever the company's unstructured knowledge already lives (Confluence,
+  Notion, a docs repo)? Building a second store is only worth it if grounding,
+  access control, and provenance are things the existing system cannot do —
+  otherwise `agents/knowledge/` should retrieve from it, not replace it.
 - Which gates should graduate from advisory to enforced, and when?
 - Should downstream repos pin a version of the SDK, and how are updates delivered?
 
 ## Risks
 
-- Breadth: 43 agents is useful only if each stays narrow and inspectable.
+- Breadth: 161 agents is useful only if each stays narrow and inspectable.
 - Heuristic gates (`leakage`, `backtest`, `secret-scan` fallback) can false-positive
   or miss; keep them advisory unless a repo's layout makes them reliable.
 - Docs can drift from the code; the `docs-link`, `agent-catalog`, and `spec-index` gates help, but
@@ -194,3 +806,10 @@ learnings. It builds on `adapters/schedulers/`, `0019-pipeline-observability`,
 - `docs/adoption_guide.md` is complete enough that a fresh repo can install the SDK.
 - The packaging decision has a chosen path with first steps taken.
 - A second end-to-end worked example exists beyond the momentum signal.
+- **Generalization phase (item 14) — foundations in place:**
+  - `roles/` directory populated with at least three personas (Portfolio Manager, Quant Researcher, Risk Manager).
+  - `templates/domains/equities/` starter kit complete and validated by a new team's onboarding.
+  - `docs/workflow_discovery.md` decision tree operational and tested on 5+ team requests.
+  - At least two composition patterns extracted and documented in `patterns/`.
+  - First extensibility recipe written (e.g., `docs/extending_quantsmith/add_asset_class.md`).
+  - Logging instrumentation added to `agents/workflow_orchestrator/` to track agent calls and gate results.

@@ -30,5 +30,7 @@ financing.
 Financing-cost accounting is a testable acceptance criterion: "returns net of borrow,
 rebate, funding, and margin" and "point-in-time financing inputs" become `AC-*`/
 `NFR-*`; financing-spread and capacity risks become `RISK-*`. This agent backs the
-`backtest` gate's financing theme (shorts must account for borrow/rebate). See
-`instructions/securities_financing.md`. Hands off to `backtest_review` and `risk`.
+`backtest` gate's financing theme (shorts must account for borrow/rebate). The
+decomposition, sensitivity, and capacity mechanics have a tested runtime in
+`specs/0028-financing-cost-analysis/`. See `instructions/securities_financing.md`.
+Hands off to `backtest_review` and `risk`.

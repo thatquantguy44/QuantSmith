@@ -82,9 +82,16 @@ asset_classes/equities (shorts mechanics) → securities_financing/securities_le
   counterparty/single-name concentration risk → optional ML demand forecast and
   anomaly detection → report
   (`src/quantsmith/quant/agentic_quant/sec_lending_workflow.py`; CLI:
-  `quantsmith-sec-lending`). `financing_cost_analysis`,
-  `repo_financing`, and `collateral_management` remain agent-contract-only until a
-  future spec promotes them the same way.
+  `quantsmith-sec-lending`).
+- Worked example: `specs/0028-financing-cost-analysis/` closes the chain's
+  quant bridge — per-position cost-of-carry decomposition (borrow fee,
+  rebate, funding, margin) → financing-aware returns → understated-backtest
+  flags → rate-shock sensitivity → GC/WARM/HTB-keyed capacity findings
+  (`src/quantsmith/pipelines/financing_cost_analysis.py`, dependency-free;
+  reconciles with `0023`'s rate/classification vocabulary by value).
+  `repo_financing` and `collateral_management` remain agent-contract-only —
+  `financing_cost_analysis` accepts their financing legs as structured
+  input rather than requiring either to have a runtime first.
 
 ### Data Analyst
 
@@ -157,31 +164,7 @@ pipeline_builder → pipeline_orchestration → pipeline_deployment
 - Automated remediation remains opt-in and runbook-governed; notification alone
   never authorizes a portfolio, data, model, or production mutation.
 
-### Evening Quant Content
-
-Market context → ranked X/Twitter ideas, thread drafts, visual specs, meme
-concepts, source notes, and claim review.
-
-```text
-content_orchestrator → market_context_researcher → quant_angle_generator
-  → x_post_packager → visual_spec_agent → meme_culture_agent
-  → claim_review_agent → content_memory_agent → delivery adapter
-```
-
-- Handoff: `evening_quant_content_twitter/docs/handoff.md`.
-- Spec: `evening_quant_content_twitter/specs/0003-evening-quant-content-workflow/`.
-- Runtime spec: `evening_quant_content_twitter/specs/0005-evening-quant-content-runnable-pipeline/`.
-- Config: `evening_quant_content_twitter/configs/evening_quant_content.yml`.
-- Runtime: `evening_quant_content_twitter/runtime/evening_quant_pipeline.py`.
-- Scheduler profile: `evening_quant_content_twitter/scheduler/cron.md`.
-- Content group map: `evening_quant_content_twitter/agents/content/README.md`.
-- Delivery produces local nightly draft-pack artifacts; posting stays manual unless
-  a future spec adds explicit approval gates and platform write permissions.
-- Platform limits, topic weights, tone, schedule, and delivery channels are config,
-  not hard-coded agent behavior.
-
-
-### Optimization Problem Build
+## Optimization Problem Build
 
 Ambiguous constrained decision -> formulated optimization spec -> solver-ready design -> reviewed implementation.
 
@@ -317,7 +300,6 @@ mini-map:
 | [Securities Financing](../agents/securities_financing/README.md#group-workflow) | Model financing inputs → all-in cost → backtest and risk |
 | [Secrets Management](../agents/secrets_management/README.md#group-workflow) | Store → access → rotate, with scanning throughout |
 | [Analytics](../agents/analytics/README.md#group-workflow) | Define metrics → design/read out experiments; feeds dashboards and reports |
-| Content (`evening_quant_content_twitter/agents/content/README.md`, local-only pack) | Orchestrate → research context → generate angles → package posts/visuals/memes → review → update memory |
 
 Parallel catalogs such as `trading_strategies/`, `asset_classes/`, and `tooling/`
 intentionally do not have workflow maps: their members are alternatives, not

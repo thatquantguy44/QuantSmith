@@ -37,7 +37,7 @@ pattern-based; tune them to your repository.
 | Pipeline contract | `pipeline-contract-check.sh` | `templates/data/pipeline_manifest.md`, `agents/data_engineering/` |
 | Alert contract | `alert-contract-check.sh` | `templates/data/alert_policy.md`, `agents/alerts/` |
 | Monitoring coverage | `monitoring-coverage-check.sh` | `templates/docs/model_monitoring_plan.md`, `agents/monitoring/` |
-| Evening content draft pack | `content-draft-pack-check.sh` | `evening_quant_content_twitter/` |
+| Data provenance | `data-provenance-check.sh` | `templates/docs/synthetic_data_disclosure.md`, `instructions/data_provenance.md` |
 
 ### Repo Gates (security & docs integrity)
 
@@ -47,8 +47,18 @@ pattern-based; tune them to your repository.
 | Markdown link check | `docs-link-check.sh` | all docs |
 | Agent catalog sync | `agent-catalog-check.sh` | `agents/README.md` |
 | Spec index sync | `spec-index-check.sh` | `specs/README.md` |
+| README index/runtime sync | `readme-sync-check.sh` | `specs/README.md`, root `README.md` |
+| Documented-count drift | `doc-counts-check.sh` | root `README.md`, `docs/handoff.md`, `docs/sdk_plan.md` |
+| QuantSmith consumer pin | `quantsmith-version-check.sh` | a consuming repo's `requirements*.txt` / `pyproject.toml` (copy this gate there) |
+| Commit authorship | `agent-attribution-check.sh` | commit author/committer identity and co-author trailers in a git range |
+| Handoff roadmap sync | `handoff-sync-check.sh` | every spec is referenced in `docs/handoff.md`; a new spec arrives with its entry |
+| Upstream surface drift | `upstream-drift-check.sh` | copied gates/standards vs the pinned upstream ref (consumer repos) |
+| Ownership & support path | `ownership-check.sh` | CODEOWNERS, `docs/ownership.md`, and a gate runbook name real owners, not placeholders |
+| Source catalog sync | `source-catalog-check.sh` | `sources/README.md`, `templates/data/source_catalog_entry.yml` |
 | Knowledge source check | `knowledge-check.sh` | `agents/knowledge/` |
 | Workflow memory check | `memory-check.sh` | `memory/`, `agents/knowledge/` |
+| Role context check | `role-context-check.sh` | `templates/role_operations/role_context.yml`, `agents/role_operations/` |
+| Model plugin registration check | `model-plugin-check.sh` | `templates/optimization/model_plugin_manifest.yml`, `adapters/model_plugin/`, `agents/optimization/model_plugin_registration/` |
 
 Each script:
 
@@ -71,7 +81,6 @@ hooks/stages/run-stage.sh planning design
 hooks/stages/run-stage.sh spec
 
 # Run only the quant/content gates:
-hooks/stages/run-stage.sh leakage backtest repro data-contract content-draft-pack
 ```
 
 ## Quant Gates
@@ -86,10 +95,14 @@ hooks/stages/run-stage.sh leakage backtest repro data-contract content-draft-pac
   lockfile, and seeded randomness in changed code.
 - **`data-contract-check.sh`** verifies a data contract declares schema, keys,
   point-in-time rules, and missingness rules.
-- **`content-draft-pack-check.sh`** verifies the evening quant content workflow
   pack, including config, draft-pack template, sample fixture, content agent
   contracts, scheduler profile, runtime smoke test, manual approval flag, and
   no-autopost boundary.
+- **`data-provenance-check.sh`** verifies a synthetic-data disclosure artifact
+  declares its required fields (location, reason, generation method,
+  reviewer), and advisorially flags report/dashboard-shaped artifacts that
+  mention synthetic data with no matching disclosure anywhere in the tree.
+  See `instructions/data_provenance.md`.
 
 ## Repo Gates
 
@@ -114,6 +127,31 @@ hooks/stages/run-stage.sh leakage backtest repro data-contract content-draft-pac
   that records carry provenance (`first_seen`, `last_confirmed`, `access_level`) and
   that memory holds no secrets, connection strings, or PII (memory is metadata only).
   See `instructions/workflow_memory.md` and `specs/0002-workflow-memory/`.
+- **`role-context-check.sh`** guards the configurable context for
+  `agents/role_operations/`: it deterministically flags a `role_context.yml`
+  that is tracked or staged (blocking under `QF_STAGE_ENFORCE=1`), reports the
+  shape of whatever context is resolved (`$QF_ROLE_CONTEXT`, then
+  `./role_context.yml`), and advisorially checks the shipped template for
+  placeholder hygiene. See `templates/role_operations/role_context.yml` and
+  `instructions/role_operations.md`.
+- **`model-plugin-check.sh`** guards the registration manifest for
+  `adapters/model_plugin/`: it deterministically flags a `model_plugins.yml`
+  that is tracked or staged (blocking under `QF_STAGE_ENFORCE=1`), resolves
+  whatever manifest is configured (`$QF_MODEL_PLUGINS`, then
+  `./model_plugins.yml`), and checks each registered entry declares the
+  required contract fields (owner, category, objective, invocation type,
+  review status). See `templates/optimization/model_plugin_manifest.yml` and
+  `instructions/model_plugin_integration.md`.
+- **`source-catalog-check.sh`** validates the data source catalog
+  (`sources/`): every `sources/*.yml` declares the required fields (source
+  id, name, type, owner, description, access level, quality block,
+  connection block, credential reference, status), every file is listed in
+  the index (`sources/README.md`), and `credential_ref` doesn't contain a
+  token-shaped secret value (reuses `secret-scan`'s patterns). Unlike
+  `role-context`/`model-plugin`, `sources/*.yml` is meant to be tracked —
+  this gate protects the credential field, not the file's git status. See
+  `templates/data/source_catalog_entry.yml` and
+  `instructions/data_source_catalog.md`.
 
 ## Spec-Driven Check
 
@@ -143,6 +181,8 @@ Behavior is controlled by environment variables:
 | `QF_DIFF_BASE=<ref>` | Diff changed files against `<ref>` (e.g. `origin/main`) instead of the working tree. |
 | `QF_KNOWLEDGE_SOURCES=<path>` | Path to a knowledge-source manifest for the `knowledge` gate. |
 | `QF_KNOWLEDGE_BASE=<paths>` | Colon-separated knowledge-base locations for the `knowledge` gate (ad-hoc, no manifest). |
+| `QF_ROLE_CONTEXT=<path>` | Path to a filled-in role-context file for the `role-context` gate and `agents/role_operations/` (local only; never commit it). |
+| `QF_MODEL_PLUGINS=<path>` | Path to a filled-in model-plugin manifest for the `model-plugin` gate and `adapters/model_plugin/` (local only; never commit it). |
 
 ## Wiring Into Git
 

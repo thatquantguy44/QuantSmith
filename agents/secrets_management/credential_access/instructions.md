@@ -31,3 +31,7 @@ serialization are prevented). Never include real secret values.
 "No secret in logs", "least-privilege identity", and "read from store, not repo"
 are testable `AC-*`. The `secret_scanning` agent and the implementation-stage
 secret check verify them; encode them in the spec so they are enforced.
+When resolving a registered data source's connection, the store/env key to
+read is named by that source's `connection.credential_ref` in `sources/*.yml`
+(see `instructions/data_source_catalog.md`) — this agent's job is retrieving
+what that pointer names, never storing the value back into the catalog.

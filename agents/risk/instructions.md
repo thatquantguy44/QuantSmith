@@ -30,4 +30,6 @@ include a `Go / Size / Hold` recommendation with rationale.
 Risk findings feed the spec: material risks become `RISK-*` entries in the owning
 `spec.md`, and proposed limits become `NFR-*`/`AC-*` (e.g. "max drawdown ≤ X",
 "net factor exposure within ±Y") so they are testable and monitored, not just
-narrated.
+narrated. Backed by `instructions/risk_management.md`, which states the full
+review standard (exposure, concentration, tail/drawdown, stress, monitorable
+limits) this agent's operating rules apply.

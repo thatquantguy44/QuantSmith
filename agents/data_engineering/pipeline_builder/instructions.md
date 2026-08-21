@@ -30,5 +30,12 @@ the risks. Reference the DAG runner and data-contract template when handing off 
 
 The design becomes `REQ-*`; contracts, grain/keys, ownership, and point-in-time
 correctness become testable `AC-*`; leakage, contract drift, and unowned data become
-`RISK-*`. The standard is `instructions/pipeline_engineering.md`; the DAG runtime is
-`specs/0011-data-pipeline-orchestration/`. Hands off to `pipeline_orchestration`, `pipeline_deployment`, and `data_quality`.
+`RISK-*`. The standard is `instructions/pipeline_engineering.md`; this agent's own
+runtime is `src/quantsmith/pipelines/pipeline_builder.py`
+(`specs/0042-pipeline-builder/` — `compile_intent`, `review_readiness`,
+`render_pipeline_manifest`, `to_pipeline`), and the DAG runtime it hands off to is
+`specs/0011-data-pipeline-orchestration/`. Name those symbols when handing a design
+to code. Note that the runtime reviews a *declared* intent — it cannot verify that a
+step is genuinely idempotent or tested, so report those as declared, never as
+verified. Hands off to `pipeline_orchestration`, `pipeline_deployment`, and
+`data_quality`.

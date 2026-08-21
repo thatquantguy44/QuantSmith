@@ -41,3 +41,12 @@
 
 Capture provider message ID, recipient group, timestamp, attachment/link list, and
 redacted send status.
+
+## Executable Provider
+
+`src/quantsmith/adapters/alert_delivery/email.py` (`build_email_payload`,
+`deliver_email`) implements this mapping deterministically, applies
+redaction per `privacy.redaction_level`, and guards against a credential-
+shaped value ever appearing in the returned payload (spec `0032`). It
+never opens an SMTP connection; a real send requires an injected
+`transport` callable and `dry_run=False`.

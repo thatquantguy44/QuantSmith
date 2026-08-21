@@ -1,0 +1,32 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+*.log
+.DS_Store
+.ipynb_checkpoints/
+dist/
+build/
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local-only config: carries real platform, team, or credential-pointer
+# specifics once filled in. Root-anchored so committed templates stay tracked.
+/role_context.yml
+/model_plugins.yml
+/knowledge_sources.yml
+/identity.yml
+
+# Local data artifacts -- produced from your own accounts, never committed.
+*.db
+*.sqlite
+*.sqlite3
+*.parquet
+data/raw/
+data/interim/
+
+# Local gate usage telemetry -- see scripts/usage-report.sh
+.qf-usage.tsv

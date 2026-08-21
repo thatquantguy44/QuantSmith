@@ -32,4 +32,6 @@ acceptance criteria: every `AC-*` must have passing, deterministic evidence and
 every `NFR-*` must be checked (constitution P3). Name the covered `AC-*` in each
 test (test name, docstring, or assertion message) so traceability is mechanical,
 and report any `AC-*` without a real test as uncovered — a passing test that
-proves nothing does not close a criterion.
+proves nothing does not close a criterion. "Deterministic" here follows
+`instructions/reproducibility.md` — seeded randomness, pinned inputs, no hidden
+state — the same standard the `repro` gate checks for.

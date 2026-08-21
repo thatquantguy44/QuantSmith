@@ -39,3 +39,12 @@
 
 Capture Slack channel ID, message timestamp, thread timestamp, permalink if
 available, and redacted payload hash.
+
+## Executable Provider
+
+`src/quantsmith/adapters/alert_delivery/slack.py` (`build_slack_payload`,
+`deliver_slack`) implements this mapping deterministically, applies
+redaction per `privacy.redaction_level`, and guards against a credential-
+shaped value ever appearing in the returned payload (spec `0037`). It
+never calls the Slack API; a real send requires an injected `transport`
+callable and `dry_run=False`.

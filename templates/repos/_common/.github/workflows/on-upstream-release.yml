@@ -1,0 +1,40 @@
+name: Upstream release
+
+# OPTIONAL, and the ONLY inbound trigger you should ever add.
+#
+# Receives the `quantsmith-release` event an upstream fires on its own v* tag,
+# and opens a PR bumping the pin. It deliberately does NOT merge: a human
+# decides when to take a new upstream version. Automatic notification, never
+# automatic bumps.
+#
+# Delete this file if you pin manually.
+
+on:
+  repository_dispatch:
+    types: [quantsmith-release]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Open a pin-bump PR
+        env:
+          VERSION: ${{ github.event.client_payload.version }}
+        run: |
+          [ -n "$VERSION" ] || { echo "No version in payload; nothing to do."; exit 0; }
+          git config user.name  "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+          git checkout -b "chore/upstream-$VERSION"
+          # Adjust to wherever your pin lives.
+          sed -i "s/^quantsmith==.*/quantsmith==$VERSION/" requirements.txt || true
+          git add -A
+          git commit -m "chore(deps): upstream release $VERSION available" || exit 0
+          git push -u origin "chore/upstream-$VERSION"
+          gh pr create --fill --title "chore(deps): upstream $VERSION" \
+            --body "Upstream published $VERSION. Review the changelog, run the gates, then merge."
+        continue-on-error: true

@@ -17,13 +17,19 @@ dataset with a data contract, without leaking secrets or the future.
 ## Group Workflow
 
 ```
-database_connectivity | file_ingestion | api_ingestion
+sources/<source-id>.yml (catalog lookup)
+  → database_connectivity | file_ingestion | api_ingestion
   → typed, validated snapshot → data contract + dataset card → data_quality
 ```
 
-Choose the ingress agent by source type. Every path converges on the same output:
-an immutable or reproducibly identified dataset, explicit schema and
-point-in-time semantics, and the contracts required by downstream quality checks.
+Before connecting, check `sources/` for the source's registered connection
+method, quality notes, and `credential_ref` (resolved via
+`agents/secrets_management/credential_access`, never inlined). Choose the
+ingress agent by source type. Every path converges on the same output: an
+immutable or reproducibly identified dataset, explicit schema and
+point-in-time semantics, and the contracts required by downstream quality
+checks — with the resulting `data_contract.md` naming the `source_id` it
+traces to. See `instructions/data_source_catalog.md`.
 
 ## Shared Principles
 
@@ -43,6 +49,11 @@ and, in particular:
 - **Emit a data contract.** Output `templates/data/data_contract.md` (schema, keys,
   point-in-time rules, missingness) and a dataset card. Feeds the `data_quality`
   agent and the `data-contract-check` hook.
+
+Each agent's own `instructions.md` states its format-specific rules; the shared
+rules across all three (source-catalog lookup, credential resolution, snapshot
+capture, point-in-time, load-time validation) live once in
+`instructions/data_ingestion.md`.
 
 ## Where They Fit
 

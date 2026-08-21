@@ -51,6 +51,13 @@ modes structurally impossible in a QuantSmith pipeline.
 - Runtime: `src/quantsmith/pipelines/data_pipeline.py`
   (`Pipeline`, `Step`, `DataContract`, `run`, `backfill`, `RunManifest`).
 - Spec: `specs/0011-data-pipeline-orchestration/`.
+- Design-time runtime: `src/quantsmith/pipelines/pipeline_builder.py`
+  (`compile_intent`, `review_readiness`, `render_pipeline_manifest`,
+  `to_pipeline`), spec `specs/0042-pipeline-builder/` — checks an intent against
+  this checklist before implementations exist, and renders the manifest below.
+  It reviews *declarations*, not implementations.
 - Contract template: `templates/data/data_contract.md`.
+- Manifest template: `templates/data/pipeline_manifest.md`; worked example at
+  `specs/0042-pipeline-builder/pipeline_manifest.md`.
 - Consumers/handoffs: `data_ingestion/*`, `data-prep-agent`, `data_quality`, and a
   future `pipeline_observability` node.

@@ -1,0 +1,46 @@
+# Data Source Catalog Entry
+#
+# One file per source, at sources/<source-id>.yml. Copy this template, fill in
+# real values, and add a row to sources/README.md's index (the `source-catalog`
+# hook checks both: required fields present, and every file indexed).
+#
+# Hard rule: `connection.credential_ref` is a POINTER to a secret (a secrets-
+# manager path or an environment variable name) -- never the credential itself.
+# Retrieval happens through agents/secrets_management/credential_access at
+# runtime. See instructions/data_source_catalog.md.
+
+source_id: "{example-source-id}"          # stable slug, matches the filename
+name: "{Human-readable source name}"
+type: api                                  # api | database | website | file_feed |
+                                            # vendor_export | streaming
+owner: "{team or role, not a person's name}"
+description: >
+  {What this source provides and why it's used. One or two sentences.}
+
+domain: ["{e.g. macro}", "{e.g. rates}"]   # ties to agents/asset_classes/ taxonomy
+                                            # where applicable
+access_level: internal                     # public | internal | restricted
+                                            # (same vocabulary as knowledge_sources.yml)
+
+quality:
+  completeness: unknown                    # high | medium | low | unknown
+  timeliness: "{e.g. 'T+1', 'real-time', 'weekly'}"
+  known_issues:
+    - "{state plainly, or remove this list if there are none known}"
+  last_assessed: null                      # date this quality assessment was made
+
+point_in_time:
+  supports_asof: false                     # can you query "as known on date X"?
+  revision_policy: "{e.g. 'first-print only', 'restated in place', 'vintages available'}"
+
+connection:
+  method: rest_api                         # rest_api | sql | sftp | scrape | vendor_sdk
+  endpoint_or_host: "{public base URL if non-sensitive, else a placeholder}"
+  credential_ref: "{secrets-manager path or env var NAME -- never a real key value}"
+
+documentation_uri: "{link to the vendor/internal docs}"
+status: evaluating                         # active | deprecated | evaluating
+
+data_contract_refs: []                     # e.g. ["specs/NNNN-slug/"] -- datasets
+                                            # pulled from this source; each has its
+                                            # own templates/data/data_contract.md

@@ -2,6 +2,9 @@
 
 ## Operating Rules
 
+- Check `sources/<source-id>.yml` first if the file originates from a
+  registered source (a vendor export or file feed), for its quality notes
+  and access level.
 - Declare an explicit schema and dtypes; do not rely on silent inference.
 - Set encoding, delimiter, quoting, and header handling explicitly per format.
 - Parse dates with an explicit format and timezone; never guess ambiguous dates.
@@ -31,4 +34,5 @@ Types` section and a `Validation` section. When files are large, include a
 
 The file's expected schema and quality thresholds are acceptance criteria: encode
 them as `AC-*` and emit `templates/data/data_contract.md` so the
-`data-contract-check` hook and the testing stage can enforce them.
+`data-contract-check` hook and the testing stage can enforce them. Backed by
+the shared `instructions/data_ingestion.md` standard.

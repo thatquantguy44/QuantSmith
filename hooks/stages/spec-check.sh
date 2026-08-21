@@ -25,7 +25,7 @@ fi
 
 # Collect spec directories (those containing at least one of the SDD files).
 spec_dirs=""
-for d in specs/*/ evening_quant_content_twitter/specs/*/; do
+for d in specs/*/; do
   [ -d "$d" ] || continue
   if [ -f "${d}spec.md" ] || [ -f "${d}plan.md" ] || [ -f "${d}tasks.md" ]; then
     spec_dirs="$spec_dirs $d"

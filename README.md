@@ -13,9 +13,9 @@ signal and model **reproducible, leakage-safe, and traceable to a spec**.
 [![CI](https://github.com/joshualutkemuller/QuantSmith/actions/workflows/ci.yml/badge.svg)](https://github.com/joshualutkemuller/QuantSmith/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](pyproject.toml)
 [![Approach: Spec-Driven](https://img.shields.io/badge/Approach-Spec--Driven-ff6f00)](instructions/spec_driven_development.md)
-[![Agents: 127](https://img.shields.io/badge/Agents-127-6f42c1)](agents/README.md)
-[![Quality Gates: 21](https://img.shields.io/badge/Quality%20Gates-21-2ea44f)](hooks/README.md)
-[![Specs: 21](https://img.shields.io/badge/Specs-21-0969da)](specs/README.md)
+[![Agents: 161](https://img.shields.io/badge/Agents-161-6f42c1)](agents/README.md)
+[![Quality Gates: 31](https://img.shields.io/badge/Quality%20Gates-31-2ea44f)](hooks/README.md)
+[![Specs: 46](https://img.shields.io/badge/Specs-46-0969da)](specs/README.md)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](.github/GIT_GUIDELINES.md)
 
 <br/>
@@ -64,8 +64,8 @@ signal and model **reproducible, leakage-safe, and traceable to a spec**.
 | 🧠 Plan research from a hypothesis | Spec-driven planning agents + traceable requirements |
 | 🔎 Catch leakage & time-alignment bugs | Point-in-time standards + `leakage`/`backtest` gates |
 | 📝 Document features, models, backtests | Templates, cards, and reproducible run artifacts |
-| 🤖 Reuse research workflows | 122 narrow, inspectable agent roles across the stack |
-| 🚦 Stop mistakes before commit/push | 21 quality gates, advisory by default, CI-enforceable |
+| 🤖 Reuse research workflows | 161 narrow, inspectable agent roles across the stack |
+| 🚦 Stop mistakes before commit/push | 31 quality gates, advisory by default, CI-enforceable |
 | 🗣️ Share a common vocabulary | An [agentic dictionary](agentic_dictionary.md) for the team |
 
 ---
@@ -163,6 +163,7 @@ quantsmith/
 ├── ⌨️ prompts/                   # task-specific starting points
 ├── 🗂️ specs/                     # source-of-truth specifications
 ├── 🧾 templates/                 # repeatable artifacts (memos, cards, reports)
+├── 🗃️ sources/                   # data source catalog (APIs, DBs, feeds)
 ├── 🧪 examples/
 └── 📚 docs/
 ```
@@ -261,7 +262,7 @@ each. Uses the catalog as its routing table.
 
 **Monitoring** (`agents/monitoring/`) — `pipeline_monitoring/`, `model_signal_monitoring/`, `infrastructure_cost_monitoring/`: watch pipelines, live signals/models, and infra/cost against point-in-time baselines, report honest health (degraded on any breach), and emit `Observation`s for the alerting layer instead of paging directly (spec `0021`, tested `signal_monitoring` runtime).
 
-**Alerting** (`agents/alerts/`) — `alert_policy/`, `alert_router/`, `incident_notification/`: turn monitoring observations into deduplicated, severity-routed alerts — policy evaluation, suppression, escalation, owner/channel routing, and redaction — delivering through the `adapters/alert_delivery/` contract, never remediating silently (spec `0020`, tested `alerting` runtime).
+**Alerting** (`agents/alerts/`) — `alert_policy/`, `alert_router/`, `incident_notification/`: turn monitoring observations into deduplicated, severity-routed alerts — policy evaluation, suppression, escalation, owner/channel routing, and redaction — delivering through the `adapters/alert_delivery/` contract, all seven providers now executable (email, webhook, Slack, Teams, ticketing, PagerDuty/Opsgenie, SMS/push — specs `0032`/`0037`), never remediating silently (spec `0020`, tested `alerting` runtime).
 
 </details>
 
@@ -274,22 +275,17 @@ each. Uses the catalog as its routing table.
 
 **Knowledge** (`agents/knowledge/`) — `knowledge_ingestion/`, `knowledge_curation/`, `knowledge_retrieval/`, `institutional_memory/`: absorb, organize, retrieve, and persist institutional knowledge across domains — grounded, cited answers, access control and information barriers, provenance, and durable memory.
 
+**Role operations** (`agents/role_operations/`) — `meeting_to_action/`, `status_rollup/`, `rapid_scaffolder/`, `prior_art_scanner/`, `demo_narrative_packager/`, `tough_question_rehearsal/`, `experiment_ledger/`, `model_card_drafter/`, `audit_trail_keeper/`, `governance_readiness_checklist/`, `second_look_backtest_reviewer/`, `build_handoff_writer/`, `alert_triage/`: absorb a quant/data-science lead's operational overhead — meeting follow-ups, status updates, prototype setup, first-pass research scans, demo prep, and governance-adjacent drafting — so more time goes to model scoping and research. Configurable via a local, **gitignored** `role_context.yml`; this repository never carries real platform, client, or personal data, enforced by the `role-context` gate. All three phases of the four-pillar roster are shipped (specs `0024`, `0029`, `0030`) — fourteen agents in total; `second_look_backtest_reviewer` and `alert_triage` hand off to `backtest_review` and `alert_router`/`incident_notification` rather than replacing them.
+
 **Trading strategies** (`agents/trading_strategies/`) — `momentum_trend/`, `mean_reversion_statarb/`, `carry/`, `value_factor/`, `volatility_options/`, `event_driven_arbitrage/`, `macro_multi_asset/`, `market_making_microstructure/`: design-and-review roles for the archetypes in *151 Trading Strategies* (Kakushadze & Serur).
 
 **Asset class mechanics** (`agents/asset_classes/`) — `equities/`, `fixed_income_rates/`, `fx/`, `commodities/`, `digital_assets/`: mechanics-only agents, one per asset class, covering settlement, sessions, conventions, corporate actions/roll, curve construction, and custody — handing `trading_strategies/` and `securities_financing/` clean, point-in-time-correct inputs instead of duplicating mechanics per archetype (spec `0022`).
 
-**Securities financing** (`agents/securities_financing/`) — `securities_lending/`, `repo_financing/`, `collateral_management/`, `financing_cost_analysis/`: make financing a first-class part of strategy economics — borrow cost, short rebate, repo/funding, collateral and margin. `securities_lending/` has a tested runtime — GC/WARM/HTB classification, LP inventory optimization, concentration risk (spec `0023`).
+**Securities financing** (`agents/securities_financing/`) — `securities_lending/`, `repo_financing/`, `collateral_management/`, `financing_cost_analysis/`: make financing a first-class part of strategy economics — borrow cost, short rebate, repo/funding, collateral and margin. `securities_lending/` has a tested runtime — GC/WARM/HTB classification, LP inventory optimization, concentration risk (spec `0023`). `financing_cost_analysis/` also has one — cost-of-carry decomposition, financing-aware returns, rate-shock sensitivity, capacity (spec `0028`); `repo_financing/` and `collateral_management/` remain agent-contract-only.
+
+**Economists** (`agents/economists/`) — `macro_indicator_analyst/`, `monetary_policy_analyst/`, `macro_regime_classifier/`, `cross_asset_macro_linkages/`, `macro_scenario_analyst/`, `macro_backdrop_summarizer/`, `economic_outlook_report_writer/`: give a quant or portfolio-management workflow a grounded macro backdrop — indicators through policy through a classified regime through cross-asset/scenario translation to a recurring brief and a periodic outlook report. Analysis and synthesis only; strategy design stays `trading_strategies/macro_multi_asset`'s job and live-model regime-change detection stays `monitoring/model_signal_monitoring`'s job. Draws on `sources/{fred,bls,bea,census,eia}.yml`; every figure traces to a supplied input or registered source, never invented (spec `0033`).
 
 **Formulaic alphas** (`agents/formulaic_alphas/`) — `alpha_construction/`, `alpha_combination/`, `alpha_evaluation/`: operationalize the methodology of *101 Formulaic Alphas* (Kakushadze, 2016) — build tradable signals from an operator library, combine weakly-correlated alphas, and evaluate holding period, turnover, correlation, and capacity.
-
-</details>
-
-<details>
-<summary><b>🌙 Evening content workflow pack</b> (local-only)</summary>
-
-<br/>
-
-`evening_quant_content_twitter/` — `content_orchestrator/`, `market_context_researcher/`, `quant_angle_generator/`, `x_post_packager/`, `visual_spec_agent/`, `meme_culture_agent/`, `claim_review_agent/`, `content_memory_agent/`: produce **non-posting** evening quant content draft packs with ranked ideas, posts, threads, visual specs, meme concepts, source notes, review findings, and memory updates. `runtime/evening_quant_pipeline.py` and `scheduler/cron.md` run the local pipeline and document the 10:30 PM scheduler profile.
 
 </details>
 
@@ -304,8 +300,9 @@ each. Uses the catalog as its routing table.
 > invoking an approved model runtime.
 
 See [`adapters/README.md`](adapters/README.md) for the catalog: alert delivery,
-schedulers, artifact delivery, data access, and LLM runtimes — the provider boundary
-for workflows and agents.
+schedulers, artifact delivery, data access, LLM runtimes, and model plugins
+(registering an already-built internal optimization model, spec `0026`) — the
+provider boundary for workflows and agents.
 
 ---
 
@@ -320,6 +317,7 @@ Reusable standards and behavioral rules that agents follow.
 - [`engineering_principles.md`](instructions/engineering_principles.md) — the constitution
 - [`spec_driven_development.md`](instructions/spec_driven_development.md) — the SDD method
 - [`point_in_time.md`](instructions/point_in_time.md) — leakage checklist
+- [`reproducibility.md`](instructions/reproducibility.md) — P4 operationalized; backs the `repro` gate
 - [`workflow_memory.md`](instructions/workflow_memory.md)
 - [`git_workflow.md`](instructions/git_workflow.md)
 - [`documentation.md`](instructions/documentation.md)
@@ -329,6 +327,7 @@ Reusable standards and behavioral rules that agents follow.
 **Quant & research**
 - [`quant_research.md`](instructions/quant_research.md)
 - [`data_quality.md`](instructions/data_quality.md)
+- [`risk_management.md`](instructions/risk_management.md)
 - [`backtesting.md`](instructions/backtesting.md)
 - [`model_development.md`](instructions/model_development.md) — how to build
 - [`model_validation.md`](instructions/model_validation.md) — how to validate
@@ -336,7 +335,12 @@ Reusable standards and behavioral rules that agents follow.
 - [`portfolio_management.md`](instructions/portfolio_management.md)
 - [`asset_class_mechanics.md`](instructions/asset_class_mechanics.md)
 - [`securities_financing.md`](instructions/securities_financing.md)
+- [`macro_economic_analysis.md`](instructions/macro_economic_analysis.md)
 - [`formulaic_alphas.md`](instructions/formulaic_alphas.md)
+- [`optimization.md`](instructions/optimization.md)
+- [`model_plugin_integration.md`](instructions/model_plugin_integration.md)
+- [`machine_learning.md`](instructions/machine_learning.md)
+- [`deep_learning.md`](instructions/deep_learning.md)
 
 </td><td>
 
@@ -344,9 +348,13 @@ Reusable standards and behavioral rules that agents follow.
 - [`metrics_semantic_layer.md`](instructions/metrics_semantic_layer.md)
 - [`data_storytelling.md`](instructions/data_storytelling.md)
 - [`pipeline_engineering.md`](instructions/pipeline_engineering.md)
+- [`data_ingestion.md`](instructions/data_ingestion.md)
 - [`monitoring.md`](instructions/monitoring.md)
 - [`alerting.md`](instructions/alerting.md)
 - [`knowledge_base.md`](instructions/knowledge_base.md)
+- [`role_operations.md`](instructions/role_operations.md)
+- [`data_provenance.md`](instructions/data_provenance.md)
+- [`data_source_catalog.md`](instructions/data_source_catalog.md)
 
 </td></tr>
 </table>
@@ -398,8 +406,8 @@ QF_STAGE_ENFORCE=1 hooks/stages/run-stage.sh spec   # blocking (as CI runs it)
 | --- | --- |
 | 🧭 Cross-cutting | `spec` |
 | 🔄 Per-stage | `planning` · `design` · `implementation` · `testing` · `deployment` · `maintenance` |
-| 📈 Quant / content | `leakage` · `backtest` · `repro` · `data-contract` · `pipeline-contract` · `alert-contract` · `monitoring-coverage` · `content-draft-pack` |
-| 🗃️ Repo | `secret-scan` · `docs-link` · `agent-catalog` · `spec-index` · `knowledge` |
+| 📈 Quant | `leakage` · `backtest` · `repro` · `data-contract` · `pipeline-contract` · `alert-contract` · `monitoring-coverage` · `data-provenance` |
+| 🗃️ Repo | `secret-scan` · `docs-link` · `agent-catalog` · `spec-index` · `readme-sync` · `doc-counts` · `quantsmith-version` · `agent-attribution` · `handoff-sync` · `upstream-drift` · `ownership` · `knowledge` · `role-context` · `model-plugin` · `source-catalog` |
 
 > [!TIP]
 > Use `QF_RUN_TESTS=1` to let the testing stage run the suite, and
@@ -418,6 +426,13 @@ the [spec index](specs/README.md).
 | --- | --- | --- |
 | [`0001`](specs/0001-daily-momentum-signal/) | Daily cross-sectional momentum signal *(reference)* | `momentum_signal.py` |
 | [`0006`](specs/0006-ml-return-forecasting/) | Cross-sectional short-horizon return forecasting | `return_forecasting.py` |
+| [`0041`](specs/0041-ranking-forecast/) | Cross-sectional ranking forecast — a pairwise (RankNet-style) ranking-loss variant of `0006`, composing its labels/features/folds/evaluation unmodified | `ranking_forecast.py` |
+| [`0048`](specs/0048-workflow-memory-runtime/) | Workflow memory runtime — makes `0002`'s committed store machine-readable: typed records, a type-aware point-in-time filter (mechanical facts timeless, claims about what worked bounded by `last_confirmed`), and structural validation replacing the string grep | `workflow_memory.py` |
+| [`0047`](specs/0047-downstream-contract/) | Downstream consumer contract — `DashboardSpec.schema_version` + compatibility check, release-notify workflow, and a copyable `quantsmith-version` gate for a separate consuming repository | `dashboard_spec.py` *(extended)* |
+| [`0046`](specs/0046-walk-forward/) | Walk-forward harness — purged/embargoed folds from `0006` refit per fold through `0044`'s engine; reports the out-of-sample fold distribution | `walk_forward.py` |
+| [`0045`](specs/0045-fred-point-in-time/) | FRED point-in-time panel adapter — vintage-correct reads of `gold_fred_point_in_time`, so a later revision cannot leak backwards | `fred_point_in_time.py` |
+| [`0044`](specs/0044-backtesting/) | Backtest engine — net-of-cost simulation, no look-ahead by construction, probabilistic Sharpe on every run | `backtesting.py` |
+| [`0042`](specs/0042-pipeline-builder/) | Pipeline builder — compiles a declared intent into a DAG validated by `0011`'s own toposort, reviews readiness, renders a `pipeline_manifest.md` | `pipeline_builder.py` |
 | [`0007`](specs/0007-portfolio-construction/) | Constrained portfolio construction (QP) | `portfolio_construction.py` |
 | [`0008`](specs/0008-metrics-semantic-layer/) | Metrics semantic layer | `metrics_semantic_layer.py` |
 | [`0009`](specs/0009-experimentation/) | Experiment (A/B test) analysis | `experimentation.py` |
@@ -431,16 +446,26 @@ the [spec index](specs/README.md).
 | [`0020`](specs/0020-alerting/) | Alerting — policy evaluation + routing | `alerting.py` |
 | [`0021`](specs/0021-signal-monitoring/) | Model/signal monitoring — drift, calibration, decay, regime | `signal_monitoring.py` |
 | [`0023`](specs/0023-securities-lending-workflow/) | Securities lending — borrow classification, LP inventory optimization, concentration risk | `quant/agentic_quant/sec_lending_workflow.py` *(not `pipelines/`; needs `numpy`)* |
+| [`0028`](specs/0028-financing-cost-analysis/) | Financing cost analysis — cost-of-carry decomposition, financing-aware returns, rate-shock sensitivity, capacity | `financing_cost_analysis.py` |
+| [`0032`](specs/0032-alert-delivery-providers/) | Alert delivery executable providers — email + webhook, deterministic payload/redaction, injectable transport | `adapters/alert_delivery/` |
+| [`0037`](specs/0037-alert-delivery-remaining-providers/) | Alert delivery — Slack, Teams, ticketing, PagerDuty/Opsgenie, SMS/push; completes all seven providers, with structural severity gating + SMS length cap | `adapters/alert_delivery/` |
+| [`0034`](specs/0034-cardinality-constrained-portfolio/) | Cardinality-constrained portfolio construction — MILP selects, QP sizes (a documented two-stage heuristic on `0013` + `0007`) | `cardinality_portfolio.py` |
+| [`0035`](specs/0035-funding-ladder/) | Funding ladder — matches cash obligations to funding tenors at minimum cost via `0013`'s min-cost flow; general treasury/cash, not securities-financing | `funding_ladder.py` |
+| [`0036`](specs/0036-multi-period-rebalancing/) | Multi-period rebalancing — a discretized single-position DP via `0013`'s `solve_dp`, trading transaction cost against tracking-error cost over a horizon | `multi_period_rebalancing.py` |
+| [`0038`](specs/0038-factor-risk-model/) | Factor risk model — variance decomposition, Euler risk attribution, concentration, linear stress loss; operationalizes `instructions/risk_management.md` | `factor_risk_model.py` |
+| [`0039`](specs/0039-ingestion-data-contract/) | Ingestion data contract emission — validates a pulled row set against a declared schema/key/quality-rule contract, renders a `data_contract.md` populated with real computed results | `ingestion_data_contract.py` |
 
 **Themed chains**
 
-- 🔬 **Quant research:** `0001` signal → `0006` forecast → `0007` portfolio → `0012` execution
+- 🔬 **Quant research:** `0001` signal → `0006` forecast (`0041` ranking-loss variant) → `0007` portfolio → `0012` execution → `0038` factor risk → `0044` backtest → `0046` walk-forward
 - 📌 **Portfolio management:** mandate → universe → signal intake → allocation policy → construction oversight → implementation → monitored governance
-- 🧮 **Optimization toolkit:** `0007` (QP) · `0013` (LP/MILP/flow/DP) · `0012` (control)
+- 🧮 **Optimization toolkit:** `0007` (QP) · `0013` (LP/MILP/flow/DP) · `0012` (control) · `0034` (cardinality-constrained portfolio, composing `0013`+`0007`) · `0035` (funding ladder, `0013`'s min-cost flow) · `0036` (multi-period rebalancing, `0013`'s DP) — every `0013` solver now has a shipped application
 - 📊 **Data Analyst:** `0008` metrics → `0009` experimentation → `0010` pipeline → `0014` storytelling → `0015`/`0016`/`0018` dashboards → `0017` render adapters
-- 🏗️ **Data Engineer:** `0011` orchestration → `0019` observability
-- 🛰️ **Monitoring & alerting:** `0021` signal monitoring → `0020` alerting → `adapters/alert_delivery/`
-- 💵 **Securities financing:** `0022` asset-class mechanics → `0023` securities lending → `financing_cost_analysis` → backtest/risk
+- 🏗️ **Data Engineer:** `0042` pipeline builder (design-time) → `0011` orchestration (execution) → `0019` observability
+- 🛰️ **Monitoring & alerting:** `0021` signal monitoring → `0020` alerting → `adapters/alert_delivery/` (`0032`: email + webhook; `0037`: Slack, Teams, ticketing, PagerDuty/Opsgenie, SMS/push — all seven executable)
+- 💵 **Securities financing:** `0022` asset-class mechanics → `0023` securities lending → `0028` financing cost analysis → backtest/risk
+- 🌐 **Macro & economics:** `0027` source catalog → `0033` economists agents (indicators → policy → regime → cross-asset/scenario → brief/outlook) → `macro_multi_asset`, `portfolio_management`, `risk`
+- 🗂️ **Data foundations:** `0027` source catalog → `data_contract.md` (per-dataset) → `agents/data_ingestion/` → `0039` ingestion data contract emission (validates real rows, renders a populated contract) → `data_quality`/`point_in_time`
 
 ---
 
@@ -473,6 +498,7 @@ From inside `quantsmith`, run:
 | --- | --- |
 | [`specs/README.md`](specs/README.md) | The spec index — every spec with its runtime and tests |
 | [`src/quantsmith/pipelines/README.md`](src/quantsmith/pipelines/README.md) | The runtime catalog — every reference pipeline mapped to its spec and tests |
+| [`sources/README.md`](sources/README.md) | The data source catalog — every API/DB/feed with quality, point-in-time, and credential-pointer metadata |
 | [`docs/workflows.md`](docs/workflows.md) | The workflow map — role and scenario workflows as agent + gate chains |
 | [`docs/adoption_guide.md`](docs/adoption_guide.md) | How to adopt the SDK — package + scaffold — into an existing quant repo |
 | [`docs/packaging.md`](docs/packaging.md) | Packaging & distribution decision record (hybrid: package + template) |
@@ -480,11 +506,6 @@ From inside `quantsmith`, run:
 | [`docs/handoff.md`](docs/handoff.md) | Continuation guide for the next implementer |
 | [`CHANGELOG.md`](CHANGELOG.md) | Release history and the versioning policy |
 | [`agentic_dictionary.md`](agentic_dictionary.md) | Definitions for the SDK vocabulary |
-
-The evening content pack is self-contained (and local-only) under
-`evening_quant_content_twitter/` with its own configurable workflow spec
-(`0003-evening-quant-content-workflow`) and runnable-pipeline spec
-(`0005-evening-quant-content-runnable-pipeline`).
 
 ---
 

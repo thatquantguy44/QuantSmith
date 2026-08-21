@@ -15,7 +15,11 @@ design where leakage is impossible over a check that catches it after the fact.
 - **Leakage:** any path by which the target, the future, or out-of-sample data
   influences training, features, or a backtest signal.
 - **Point-in-time (PIT):** each input is used only as of when it was actually
-  knowable, including publication and revision lags.
+  knowable, including publication and revision lags. A source's PIT
+  characteristics are registered once in `sources/<source-id>.yml`
+  (`point_in_time.supports_asof`, `revision_policy`) so every feature or
+  backtest drawing on it starts from a stated answer, not a fresh guess. See
+  `instructions/data_source_catalog.md`.
 
 ## Feature Checklist
 

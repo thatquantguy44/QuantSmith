@@ -46,7 +46,6 @@ patterns locally rather than expecting them to update in place.
 ### Fixed
 - Repaired the dead `agentic_code_tools/powerbi.py` (missing `PowerBIPayload`
   contract) so the Power BI runtime imports.
-- Corrected dangling docs links to the now-untracked evening-content pack.
 
 ## [0.1.0] — 2026-07
 

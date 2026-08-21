@@ -1,0 +1,130 @@
+# Data Source: CRSP Daily Returns
+
+# This file is an example of how to declare and register a data source.
+# Copy/adapt this for your own data sources and register in sources/crsp.yml
+
+source_name: "CRSP Daily Stock Returns"
+source_id: "crsp-daily"
+source_type: "database"  # database | api | file
+
+## Access Details (credentials go in credential store, not here)
+connection:
+  database: "wrds"         # WRDS connection (via credential_access agent)
+  schema: "crsp"
+  tables:
+    - "dsf"                # Daily stock file
+    - "msenames"           # Mapping table (ticker → permno)
+
+## Data Contract
+contract:
+  schema:
+    - {name: "date", type: "date"}
+    - {name: "permno", type: "int"}
+    - {name: "ticker", type: "string"}
+    - {name: "ret", type: "float"}           # Daily return (%)
+    - {name: "retx", type: "float"}          # Return excluding dividends
+    - {name: "vol", type: "float"}           # Daily volume
+    - {name: "shrout", type: "int"}          # Shares outstanding
+    - {name: "prc", type: "float"}           # Closing price
+    - {name: "cfacpr", type: "float"}        # Cumulative factor (adjusts for splits)
+    - {name: "dlstcd", type: "string"}       # Delisting code (if delisted)
+
+  primary_key: ["date", "permno"]
+
+  quality_rules:
+    - no_nulls: ["date", "permno", "ret"]
+    - no_duplicates: ["date", "permno"]
+    - ret_range: [-1.0, 5.0]                # Reasonable daily return bounds
+    - date_monotonic: true
+
+  freshness:
+    sla: "T+1"  # Data available by T+1 (next trading day, 5pm ET)
+    retention: "30 years"
+    lag: "1 trading day"
+
+## Point-in-Time Properties
+point_in_time:
+  effective_date: "date"          # Data is valid as-of this date
+  available_since: "1926-01-01"
+  revision_lag: "None"            # CRSP is not revised post-publication
+  as_of_query: true               # You can ask "as of 2023-01-15"
+
+  example_lag:
+    description: "Returns for day D are available by 5pm ET on day D+1"
+    day: "2023-01-17 (Tuesday)"
+    available_at: "2023-01-18 (Wednesday) 5:00pm ET"
+
+## Coverage
+coverage:
+  universe: "All US stocks traded on NYSE/NASDAQ"
+  start_date: "1926-01-01"
+  end_date: "Current (daily updates)"
+  geographic_focus: "US"
+  asset_classes: ["equities"]
+
+  universes:
+    - {name: "All stocks", count: "~25,000"}
+    - {name: "Large cap (top 500 by cap)", count: "500"}
+    - {name: "Survivorship bias: exclude if ticker missing", note: "Affects backtests"}
+
+## Adjustments & Delisting
+adjustments:
+  stock_splits: "Included in price; cfacpr factor provided"
+  dividends: "Excluded from ret; retx includes dividends"
+  delisting: "Included until dlstcd date; after that, no data"
+  delisting_bias: "Delisted stocks often have negative final returns (survivorship bias)"
+
+## Cost
+cost:
+  data_subscription: "Bundled in WRDS subscription (~$5k/year)"
+  api_calls: "Included"
+  support: "WRDS documentation + GitHub issues"
+
+## Usage in QuantSmith
+usage:
+  agents:
+    - `data_ingestion/database_connectivity` — pulls from WRDS
+    - `data_quality` — validates schema/keys/freshness
+  specs:
+    - `0001-daily-momentum-signal` — uses CRSP returns
+    - `0044-backtesting` — uses CRSP for historical price/returns
+  instructions:
+    - `instructions/point_in_time.md` — CRSP as example of point-in-time correctness
+
+## Example Query
+query: |
+  SELECT date, permno, ticker, ret, vol, prc, dlstcd
+  FROM crsp.dsf
+  WHERE permno IN (10104, 10107, ...)  -- Your universe
+    AND date BETWEEN '2023-01-01' AND '2023-12-31'
+  ORDER BY date, permno
+
+## Example Processing (Python)
+python: |
+  from quantsmith.data_ingestion import DatabaseConnectivity
+
+  db = DatabaseConnectivity(source_id="crsp-daily")
+
+  # Pull data with point-in-time correctness
+  data = db.fetch(
+    date_range=("2023-01-01", "2023-12-31"),
+    universe=["ticker1", "ticker2", ...],
+    as_of_date="2023-12-31"  # Guarantees no future data leaks in
+  )
+
+  # Validate
+  contract = load_contract("data_contract.md")
+  validated = db.validate(data, contract)
+
+  # Use in backtest
+  from quantsmith.pipelines import backtesting
+  backtest_results = backtesting.run_backtest(
+    weights=portfolio_weights,
+    returns=validated["ret"],
+    costs=0.001
+  )
+
+## See Also
+- WRDS documentation: https://wrds-www.wharton.upenn.edu/pages/
+- CRSP delisting guide: https://www.crsp.org/files/delisting_guide.pdf
+- Point-in-time correctness: instructions/point_in_time.md

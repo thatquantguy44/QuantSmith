@@ -1,7 +1,9 @@
 # Data Contract: <dataset name>
 
 - **Owner:**
-- **Source:**
+- **Source:** `sources/<source-id>.yml` — see the data source catalog (`sources/README.md`)
+  for connection, quality, and point-in-time notes for the origin; this contract
+  covers the dataset itself.
 - **Spec:** NNNN-short-slug (if applicable)
 - **Last updated:** YYYY-MM-DD
 
@@ -40,7 +42,8 @@
 
 ## Lineage & Access
 
-- Upstream dependencies:
+- Upstream dependencies: (name the `source_id` from `sources/`; add this
+  contract's path to that source's `data_contract_refs`)
 - Access constraints / private-data handling:
 - Refresh schedule:
 

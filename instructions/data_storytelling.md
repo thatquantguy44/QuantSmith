@@ -16,7 +16,10 @@ communication tied to the governed evidence.
 
 1. **Numbers come from the governed source.** Every figure traces to the analytics
    `Report` (`0010`) or a governed metric definition (`0008`); nothing is recomputed
-   or invented in the narrative or dashboard.
+   or invented in the narrative or dashboard. If a governed source is unavailable and
+   synthetic/illustrative data is used instead, that use is disclosed per
+   `instructions/data_provenance.md` — never blended into a chart indistinguishably
+   from governed data.
 2. **Describe metrics as defined.** Use the metric's canonical definition and grain;
    do not silently redefine it.
 3. **Respect experiment verdicts.** Communicate an experiment (`0009`) with its

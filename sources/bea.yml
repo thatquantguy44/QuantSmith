@@ -1,0 +1,34 @@
+source_id: "bea"
+name: "BEA (U.S. Bureau of Economic Analysis)"
+type: api
+owner: "quant-research"
+description: >
+  National income and product accounts, GDP, personal income, industry
+  accounts, regional accounts, international transactions, and fixed asset
+  datasets. See adapters/data_access/external_apis/bea.md for delivery
+  rules (required metadata, revision handling).
+
+domain: ["macro"]
+access_level: public
+
+quality:
+  completeness: high
+  timeliness: "quarterly/annual, per the BEA release calendar (varies by dataset)"
+  known_issues:
+    - "major BEA benchmark revisions can materially rewrite history"
+    - "table-line joins can drift when upstream table structures change"
+  last_assessed: "2026-08-10"
+
+point_in_time:
+  supports_asof: false
+  revision_policy: "revised in place; release_date/revision_date are recorded per observation, but there is no full historical vintage archive -- treat pre-revision pulls as approximate for point-in-time research"
+
+connection:
+  method: rest_api
+  endpoint_or_host: "https://apps.bea.gov/api/data"
+  credential_ref: "BEA_API_KEY"   # required if any bea_* manifest is active; BEA calls this a "UserID"
+
+documentation_uri: "https://apps.bea.gov/API/signup/"
+status: active
+
+data_contract_refs: []

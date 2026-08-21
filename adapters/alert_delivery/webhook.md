@@ -38,3 +38,12 @@ provider_context:
 
 Capture HTTP status, response correlation ID, redacted response body hash, and
 retryability classification.
+
+## Executable Provider
+
+`src/quantsmith/adapters/alert_delivery/webhook.py` (`build_webhook_payload`,
+`deliver_webhook`) implements this mapping deterministically, applies
+redaction per `privacy.redaction_level`, and guards against a credential-
+shaped value ever appearing in the returned payload (spec `0032`). It
+never makes the HTTP call itself; a real send requires an injected
+`transport` callable and `dry_run=False`.

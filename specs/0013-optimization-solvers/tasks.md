@@ -47,6 +47,9 @@ by `0007-portfolio-construction`. A production build may swap in a mature solver
 
 - Add conic/SOCP, global, and nonlinear forms (need a cone/NLP method or an optional
   dependency).
-- Build application specs on these solvers: collateral/margin LP, cardinality-
-  constrained portfolio (MILP), funding-ladder min-cost flow, multi-period
-  rebalancing DP.
+- Build application specs on these solvers: cardinality-constrained
+  portfolio (MILP), funding-ladder min-cost flow, multi-period rebalancing
+  DP. (Securities-financing LP work is deliberately out of scope — that
+  domain routes to an adopter's own models via `agents/optimization/
+  model_plugin_registration/`, spec `0026`, rather than the SDK owning
+  the optimization logic itself.)

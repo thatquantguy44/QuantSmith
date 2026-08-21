@@ -1,0 +1,51 @@
+# Pre-Wired Agents for Equities Domain
+
+## Entry Point & Orchestration
+- workflow_orchestrator          # Route work through Specify→Plan→Implement→Verify→Release→Operate
+
+## Research & Planning
+- research_analyst              # Hypothesis structuring and assumption validation
+- quant_analyst                 # Compose research→data→signal→forecast→portfolio workflow
+- data_quality                  # Lineage, timestamps, point-in-time correctness review
+
+## Signal Development
+- data_ingestion/database_connectivity   # Pull from SQL databases (CRSP, Compustat, etc.)
+- data_ingestion/file_ingestion          # Load CSV/Parquet files
+- feature_engineering                    # Build features with leakage detection
+- modeling                               # Model selection + leakage-free validation
+- trading_strategies/momentum_analyst    # Cross-sectional momentum signal
+- trading_strategies/value_analyst       # Value/factor strategies
+- trading_strategies/carry_analyst       # Dividend carry + corporate actions
+- trading_strategies/mean_reversion_analyst   # Reversal signals
+- trading_strategies/volatility_options_analyst # Vol-based signals (if options trading)
+
+## Portfolio Construction & Execution
+- portfolio_management/pm_orchestrator   # Portfolio lifecycle routing
+- portfolio_management/portfolio_optimizer    # QP mean-variance construction
+- portfolio_management/execution_scheduler    # Almgren-Chriss execution optimization
+- portfolio_management/rebalancing_scheduler  # When/what to rebalance
+- portfolio_management/attribution_analyst    # Performance attribution
+
+## Risk & Monitoring
+- risk/                          # Factor risk modeling, attribution, stress testing
+- monitoring/model_signal_monitoring     # Drift detection (signal decay, regime sensitivity)
+- monitoring/model_signal_monitoring     # Portfolio stress testing daily
+- alerts/alert_router            # Route risk alerts by severity
+- alerts/incident_notification   # Escalate critical events
+
+## Validation & Release
+- backtest_review/               # Validates backtest for bias, costs, robustness
+- testing_validation/            # Validates acceptance criteria
+- deployment_release/            # Production release + monitoring setup
+- maintenance_monitoring/        # Living spec + ongoing signal monitoring
+
+## Governance
+- role_operations/model_card_drafter         # Model card structuring
+- role_operations/audit_trail_keeper         # Decision log maintenance
+- role_operations/governance_readiness_checklist  # Pre-production validation
+- role_operations/second_look_backtest_reviewer   # Independent backtest review
+
+## Data & Infrastructure (Advisory)
+- data_engineering/pipeline_orchestration    # DAG runner for data pipelines
+- data_engineering/pipeline_observability    # Freshness/SLA monitoring
+- secrets_management/credential_access      # Safe credential handling

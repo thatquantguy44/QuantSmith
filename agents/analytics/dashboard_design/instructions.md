@@ -6,6 +6,9 @@
   agents.
 - Reference governed metric definitions (`0008`) for every panel; never redefine a
   metric or invent a number.
+- If a panel must use synthetic/illustrative data (governed data unavailable), mark
+  it visibly as such and disclose it per `instructions/data_provenance.md` — never
+  render it identically to a governed panel.
 - Choose chart types that fit the data and the question, per the `dataviz` skill;
   reject misleading encodings (distorting truncation, false dual-axis correlation,
   rainbow scales).

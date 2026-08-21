@@ -46,6 +46,9 @@ jobs:
       - name: Enforce alert & monitoring contracts (only when artifacts exist)
         run: |
           QF_STAGE_ENFORCE=1 sh hooks/stages/run-stage.sh alert-contract monitoring-coverage
+      - name: Enforce data provenance (only when a disclosure artifact exists)
+        run: |
+          QF_STAGE_ENFORCE=1 sh hooks/stages/run-stage.sh data-provenance
       - name: Leakage smell scan (advisory)
         run: |
           BASE="${{ github.event.pull_request.base.sha }}"
@@ -56,15 +59,30 @@ jobs:
           BASE="${{ github.event.pull_request.base.sha }}"
           [ -n "$BASE" ] || BASE="$(git rev-parse HEAD~1 2>/dev/null || true)"
           QF_STAGE_ENFORCE=1 QF_DIFF_BASE="$BASE" sh hooks/stages/run-stage.sh secret-scan
-      - name: Enforce docs links, agent catalog, and spec index
+      - name: Enforce commit authorship (no AI agent as author or co-author)
         run: |
-          QF_STAGE_ENFORCE=1 sh hooks/stages/run-stage.sh docs-link agent-catalog spec-index
+          BASE="${{ github.event.pull_request.base.sha }}"
+          if [ -n "$BASE" ]; then RANGE="$BASE..HEAD"; else RANGE="HEAD~1..HEAD"; fi
+          QF_STAGE_ENFORCE=1 QF_ATTRIB_RANGE="$RANGE" \
+            sh hooks/stages/run-stage.sh agent-attribution
+      - name: Enforce role-context safety (role_context.yml must never be tracked)
+        run: |
+          QF_STAGE_ENFORCE=1 sh hooks/stages/run-stage.sh role-context
+      - name: Enforce model-plugin safety (model_plugins.yml must never be tracked)
+        run: |
+          QF_STAGE_ENFORCE=1 sh hooks/stages/run-stage.sh model-plugin
+      - name: Enforce docs links, agent catalog, spec index, README sync, documented counts, handoff roadmap sync, and ownership
+        run: |
+          QF_STAGE_ENFORCE=1 sh hooks/stages/run-stage.sh docs-link agent-catalog spec-index readme-sync doc-counts handoff-sync ownership
+      - name: Enforce source catalog (fields, index sync, credential-pointer safety)
+        run: |
+          QF_STAGE_ENFORCE=1 sh hooks/stages/run-stage.sh source-catalog
 
   tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.11"
       - name: Install package with declared dependencies

@@ -24,4 +24,22 @@ for agent in $(find agents -type f -name prompt.md -exec dirname {} \; | sort -u
   done
 done
 
+# Authorship: scan the commits actually being pushed. pre-commit only guards
+# commits made in THIS clone with hooks installed -- a rebase, a cherry-pick, or
+# a branch fetched from elsewhere can carry agent-authored commits that never
+# passed through it. This is the last check before they leave the machine.
+range=""
+if git rev-parse --verify -q origin/main >/dev/null 2>&1; then
+  range="origin/main..HEAD"
+fi
+if [ -n "$range" ] && [ -x hooks/stages/agent-attribution-check.sh ]; then
+  QF_STAGE_ENFORCE=1 QF_ATTRIB_RANGE="$range" \
+    sh hooks/stages/agent-attribution-check.sh || {
+      echo
+      echo "Push blocked: agent-authored commits in $range."
+      echo "Rewrite authorship before pushing -- see .github/GIT_GUIDELINES.md."
+      exit 1
+    }
+fi
+
 echo "QuantSmith pre-push checks passed."

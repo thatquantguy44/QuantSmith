@@ -6,7 +6,10 @@ Use this instruction set to review datasets, feature tables, labels, joins, and 
 
 ## Required Inputs
 
-- Dataset name, source, owner, and permissions.
+- Dataset name, source, owner, and permissions — if the source is cataloged,
+  its `sources/<source-id>.yml` entry's `quality` block is the starting
+  point, not a fresh assessment from scratch. See
+  `instructions/data_source_catalog.md`.
 - Schema and expected grain.
 - Date range, frequency, and refresh schedule.
 - Primary keys, natural keys, and join keys.

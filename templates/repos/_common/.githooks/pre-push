@@ -1,0 +1,6 @@
+#!/bin/sh
+set -e
+ROOT=$(git rev-parse --show-toplevel); cd "$ROOT"
+[ -f quantsmith.conf ] && . ./quantsmith.conf
+QF_STAGE_ENFORCE=1 sh hooks/stages/run-stage.sh ${QF_GATES_BLOCKING:-secret-scan}
+echo "pre-push checks passed."

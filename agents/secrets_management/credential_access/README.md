@@ -20,6 +20,8 @@ widening scope.
 - The secret store and its client/SDK, or the env-injection mechanism.
 - The runtime environment(s) and their identity/role setup.
 - Logging, caching, and concurrency considerations.
+- A registered source's `connection.credential_ref` (`sources/*.yml`), when
+  the credential being resolved is for a cataloged data source.
 
 ## Outputs
 

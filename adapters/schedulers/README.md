@@ -17,7 +17,6 @@ provider-specific timing, retries, permissions, and run metadata.
 ## Use Cases
 
 - Daily intelligence reports.
-- 10:30 PM ET evening content workflows.
 - Data ingestion backfills.
 - Pipeline and model monitoring checks.
 - Scheduled artifact generation.
