@@ -32,7 +32,7 @@ from __future__ import annotations
 
 import datetime
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, List, Mapping, Optional, Sequence, Tuple
 
 # --------------------------------------------------------------------------
@@ -406,6 +406,132 @@ def point_in_time_filter(records: Sequence[Record],
     """
     return [r for r in records
             if type_rule_admits(r, as_of) and pit_scope_admits(r)]
+
+
+# --------------------------------------------------------------------------
+# Query and ranking (T-002, REQ-002, NFR-002)
+# --------------------------------------------------------------------------
+
+def rank_key(record: Record):
+    """The total order records are returned and rendered in.
+
+    ``confidence`` desc, ``corroboration_derived`` desc, ``last_confirmed``
+    desc, then ``id`` ascending as a tiebreak.
+
+    The ``id`` term is what makes the order *total*. Without it, two records
+    equal on the first three fields would come back in whatever order the
+    filesystem or a dict iteration happened to produce, and the same query
+    could answer differently on two machines (NFR-002).
+
+    Ranking uses ``corroboration_derived``, never the declared
+    ``corroboration_count``: the declared number is a claim, and retrieval
+    order must not be settable by typing a larger integer. ``confidence`` is
+    still human-set and therefore still gameable — ``validate`` constrains it
+    but does not derive it, so this ordering is a heuristic for usefulness and
+    not a measurement of it (spec RISK-005).
+    """
+    return (
+        -_CONFIDENCE_RANK.get(record.confidence, 0),
+        -record.corroboration_derived,
+        -record.last_confirmed.toordinal(),
+        record.id,
+    )
+
+
+def query(records: Sequence[Record], *,
+          scope: Optional[str] = None,
+          type: Optional[str] = None,
+          min_confidence: Optional[str] = None,
+          status: Optional[str] = "active",
+          as_of: Optional[datetime.date] = None) -> List[Record]:
+    """Select records, in deterministic rank order.
+
+    Every filter is opt-in except ``status``, which defaults to ``"active"``:
+    a caller who does not say otherwise wants what the store currently
+    believes, not what it has retired. Pass ``status=None`` for every record
+    regardless of lifecycle.
+
+    ``as_of`` applies the point-in-time firewall (``point_in_time_filter``).
+    It is deliberately a parameter rather than a default: a query with no
+    ``as_of`` is unbounded and returns everything, which is right for "what do
+    we know about this dataset" and wrong for anything feeding a backtest.
+    """
+    out = list(records)
+
+    if scope is not None:
+        out = [r for r in out if r.scope == scope]
+    if type is not None:
+        out = [r for r in out if r.type == type]
+    if status is not None:
+        out = [r for r in out if r.status == status]
+    if min_confidence is not None:
+        floor = _CONFIDENCE_RANK.get(min_confidence, 0)
+        out = [r for r in out if _CONFIDENCE_RANK.get(r.confidence, 0) >= floor]
+    if as_of is not None:
+        out = point_in_time_filter(out, as_of)
+
+    return sorted(out, key=rank_key)
+
+
+# --------------------------------------------------------------------------
+# Rendering (T-004, REQ-004, RISK-003, RISK-005)
+# --------------------------------------------------------------------------
+
+def format_record_line(record: Record) -> str:
+    """One record as a single line of prompt context.
+
+    ``last_confirmed`` appears on every line deliberately. Decay checking is
+    advisory, so a stale record can sit in the store indefinitely; showing the
+    date is how a reader discounts it without the gate having to (RISK-003).
+    """
+    return (
+        f"- [{record.id}] {record.scope} ({record.type}, "
+        f"{record.confidence}, confirmed {record.last_confirmed.isoformat()}): "
+        f"{record.statement}"
+    )
+
+
+def render_context(records: Sequence[Record], *, budget_chars: int = 2000,
+                   header: str = "Known about this scope:") -> str:
+    """Render records as a bounded text block for an agent prompt.
+
+    Fills in rank order and stops at ``budget_chars``, then states how many
+    were dropped. Records are dropped from the *bottom* of the ranking, so
+    what survives a tight budget is what the store is most confident about.
+
+    **The budget is characters, not tokens.** This module has no tokenizer and
+    will not pretend to estimate one — a wrong token estimate silently
+    overflows a context window, which is worse than an honest character count.
+    A caller who needs tokens owns that conversion.
+
+    An omission notice is emitted whenever anything is dropped, including the
+    case where nothing fits at all. Silently returning less than was asked for
+    is how a workflow ends up reasoning from a partial store without knowing it.
+    """
+    ordered = sorted(records, key=rank_key)
+    if not ordered:
+        return ""
+
+    lines: List[str] = [header]
+    used = len(header) + 1  # header plus its newline
+    included = 0
+
+    for record in ordered:
+        line = format_record_line(record)
+        # +1 for the newline this line will carry.
+        if used + len(line) + 1 > budget_chars:
+            break
+        lines.append(line)
+        used += len(line) + 1
+        included += 1
+
+    omitted = len(ordered) - included
+    if omitted:
+        lines.append(
+            f"... {omitted} further record(s) omitted "
+            "(ranked below the included set)."
+        )
+    return "\n".join(lines)
 
 
 # --------------------------------------------------------------------------

@@ -21,9 +21,13 @@ from quantsmith.pipelines.workflow_memory import (
     MemoryParseError,
     Record,
     build_record,
+    format_record_line,
     load_records,
     parse_memory_file,
     point_in_time_filter,
+    query,
+    rank_key,
+    render_context,
     type_rule_admits,
     validate,
 )
@@ -266,3 +270,100 @@ def test_committed_store_validates_with_only_author_findings():
     findings = validate(_committed_records())
     assert [f.severity for f in findings] == ["info"] * 5
     assert all("no author" in f.message for f in findings)
+
+
+# --------------------------------------------------------------------------
+# T-002 — query and deterministic ordering (REQ-002, NFR-002)
+# --------------------------------------------------------------------------
+
+def test_query_by_scope_AC_002():
+    """A scope query returns only that scope's records."""
+    got = query(_committed_records(), scope="field:volume", status=None)
+    assert [r.id for r in got] == ["MEM-0003"]
+
+
+def test_query_deterministic_AC_003():
+    """The same query twice returns identical content AND order.
+
+    The id tiebreak is what makes this true: without it, records equal on
+    confidence/corroboration/date would come back in filesystem order.
+    """
+    records = _committed_records()
+    first = query(records, status=None)
+    second = query(list(reversed(records)), status=None)
+    assert [r.id for r in first] == [r.id for r in second]
+    # Ties on the first three keys must still be ordered, by id.
+    tied = [_record(id="B", confidence="high"), _record(id="A", confidence="high")]
+    assert [r.id for r in query(tied, status=None)] == ["A", "B"]
+
+
+def test_query_filters_compose():
+    """Filters are opt-in and stack; status defaults to active."""
+    records = _committed_records()
+    assert len(query(records)) == 5                      # all committed are active
+    assert query(records, status="retired") == []
+    hi = query(records, min_confidence="high", status=None)
+    assert {r.id for r in hi} == {"MEM-0001", "MEM-0002", "MEM-QR-0001"}
+    assert [r.id for r in query(records, type="decision", status=None)] == ["MEM-QR-0002"]
+
+
+def test_query_as_of_applies_the_firewall():
+    """as_of is opt-in; supplying it bounds the result to what was knowable."""
+    records = _committed_records()
+    assert len(query(records, status=None)) == 5
+    bounded = query(records, status=None, as_of=datetime.date(2020, 1, 1))
+    assert {r.id for r in bounded} == {"MEM-0001", "MEM-0003"}
+
+
+def test_rank_prefers_derived_corroboration_over_declared():
+    """A larger declared count must not buy a higher rank."""
+    liar = _record(id="LIAR", corroboration_count=99, evidence=({"source_run": "r1"},))
+    honest = _record(id="HONEST", corroboration_count=1,
+                     evidence=({"source_run": "r1"}, {"source_run": "r2"}))
+    assert [r.id for r in sorted([liar, honest], key=rank_key)] == ["HONEST", "LIAR"]
+
+
+# --------------------------------------------------------------------------
+# T-004 — rendering (REQ-004)
+# --------------------------------------------------------------------------
+
+def test_render_budget_drops_lowest_ranked_AC_005():
+    """A budget admitting two of three keeps the top two and says so."""
+    high = _record(id="A", confidence="high", statement="alpha")
+    med = _record(id="B", confidence="medium", statement="bravo")
+    low = _record(id="C", confidence="low", statement="charlie")
+    records = [low, high, med]
+
+    full = render_context(records, budget_chars=10_000)
+    assert full.index("[A]") < full.index("[B]") < full.index("[C]")
+    assert "omitted" not in full
+
+    header = "Known:"
+    budget = len(header) + 1 + sum(
+        len(format_record_line(r)) + 1 for r in (high, med))
+    out = render_context(records, budget_chars=budget, header=header)
+    assert "[A]" in out and "[B]" in out
+    assert "[C]" not in out                     # lowest-ranked is the one dropped
+    assert "1 further record(s) omitted" in out
+
+
+def test_render_states_omission_even_when_nothing_fits():
+    """A budget too small for any record still says what was withheld.
+
+    Silently returning an empty block is how a workflow reasons from a store
+    it thinks was empty.
+    """
+    out = render_context([_record(id="A")], budget_chars=5)
+    assert "1 further record(s) omitted" in out
+
+
+def test_render_empty_input_is_empty():
+    assert render_context([]) == ""
+
+
+def test_render_shows_last_confirmed_on_every_line():
+    """Decay is advisory, so the date is how a reader discounts a stale record."""
+    out = render_context(_committed_records(), budget_chars=10_000)
+    body = [ln for ln in out.splitlines() if ln.startswith("- [")]
+    assert len(body) == 5
+    assert all("confirmed 20" in ln for ln in body)
