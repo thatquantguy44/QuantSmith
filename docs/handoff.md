@@ -91,6 +91,29 @@ by the `knowledge` gate.
 
 ## What's Next (prioritized)
 
+### Planned specs (reserved, not yet written)
+
+The one place to see committed-to work that has no spec directory yet. The
+`handoff-sync` gate cannot protect these: it checks that every spec *directory*
+is referenced here, so work that exists only as an intention is invisible to it.
+This table is the manual counterpart — if a number below never becomes a
+directory, that should be a deliberate decision recorded here, not a thing
+nobody noticed.
+
+| Spec | What | Depends on | Tracked in |
+| --- | --- | --- | --- |
+| `0049` | Workflow memory **write path** — `propose_records()` at the runtime boundary, committed `memory/inbox/` staging, `promote()` on human review | `0048` read path (`T-002`/`T-004`) | item 15 |
+| `0050` | **Portable doc-integrity gates** — parameterize against `quantsmith.conf`; collapse `agent-catalog`+`spec-index` into one `catalog-sync` | the three shapes (done, item 16) | item 16 |
+| `0051` | **Conformance levels** — make `QF_CONFORMANCE_LEVEL` verified rather than declared | `0050` config contract | item 16 |
+| `0052` | **MCP adapter contract + resources server** — `adapters/mcp_servers/`, serving `knowledge_sources.yml` over the resources primitive | none (reuses the existing manifest) | item 17 |
+| `0053` | **MCP memory-graph server** — tools over `0048`'s store, with `as_of` honouring the type-aware point-in-time rule | `0048` `T-002`/`T-004`; ideally `0049` | item 17 |
+| `0054` | **MCP RAG server** — vector search with per-access-tier indexes and cited passages | `0052` contract | item 17 |
+
+**Next free spec number: `0055`.** Reserving a number here does not create the
+directory; run `./scripts/new-spec.sh` (or copy `templates/spec/`) when the work
+actually starts.
+
+
 1. **P0 optimizer-agent workflow expansion — every `0013` solver now has a shipped
    application.** The optimization group has runtimes for the core mathematical
    forms plus five applications: convex QP (`specs/0007-portfolio-construction/`),
@@ -517,6 +540,8 @@ by the `knowledge` gate.
       teams; failure rates, completion times, and handoff quality. Informs next
       iterations and prioritization.
 15. **Company knowledge over time — one initiative, phased across specs.**
+    *(Related: item 16 ships the repo shapes that adopt it; item 17 exposes it
+    to a team over MCP.)*
     The goal: a workflow arrives already knowing a dataset's kinks, a
     researcher does not re-derive what a colleague established last quarter,
     and both can say where the knowledge came from and who vouched for it.
@@ -585,6 +610,8 @@ by the `knowledge` gate.
     machinery.
 
 16. **Repository shapes — pre-canned skeletons for multi-repo adoption.**
+    *(Related: item 15 is the knowledge these repos accumulate; item 17 is how
+    a team reaches it.)*
     `templates/repos/` ships scaffolds a team picks from rather than assembling
     a repo by hand: `quant-research`, `quant-models`, `data-pipelines`. Each
     carries the full root structure (`.agents/`, `.copilot/`, `.githooks/`,
@@ -627,6 +654,53 @@ by the `knowledge` gate.
       because a fresh repo has no counts to drift and no run to reproduce.
       Both should be promoted once a repo has content; the shapes say so
       inline rather than leaving it silent.
+
+17. **MCP servers over the shared knowledge base — exposing it to a team.**
+    A centralized knowledge-base repository is only useful if agents across the
+    team can reach it. `adapters/` is already the right seam: its own README
+    defines an adapter as "the boundary between agent decisions and external
+    systems... agents decide, adapters translate an approved payload into a
+    provider-specific action." An MCP server is exactly that, so this becomes an
+    **eighth adapter group**, `adapters/mcp_servers/`, following `llm_runtime/`'s
+    shape (README + `adapter_contract.md` + one file per provider).
+
+    Two existing pieces do most of the work:
+    - **`templates/knowledge/knowledge_sources.yml` is already a server
+      manifest** — `path`, `access_level`, `include`/`exclude`, `freshness_days`,
+      `domains_from_subfolders`. Written for the `knowledge` gate; it happens to
+      be exactly what a resources server needs.
+    - **`0048`'s runtime is the graph server's backing store** — typed records,
+      validation, and the type-aware point-in-time filter.
+
+    Three servers, sequenced by dependency (see the Planned specs table):
+    - **`0052` resources primitive** — read-only, serves declared Markdown/text
+      under a `knowledge://<source>/<domain>/<path>` scheme. Build first: it
+      needs no new storage and it validates the adapter contract.
+    - **`0053` memory/knowledge graph** — `memory_query(scope, type, as_of)` over
+      `0048`. The `as_of` parameter is the differentiator: a generic memory MCP
+      server will serve 2026 knowledge to a 2020 backtest, and this one will not,
+      because mechanical facts are timeless while claims about what worked are
+      bounded by `last_confirmed`. For a quant team that is the difference
+      between a memory server and a leakage vector. Graph edges already exist as
+      fields (`superseded_by`, `coexists`).
+    - **`0054` vector/RAG** — `search(query, domain, access_level, as_of)`
+      returning cited passages, never bare prose, since
+      `instructions/knowledge_base.md` already requires grounded, cited answers.
+
+    **The team-scale hazard, recorded because it is easy to miss.** MCP servers
+    run with the *server's* credentials, not the caller's — so a shared
+    knowledge-base server reachable by the whole team will serve `restricted`
+    content to anyone who can open a connection unless designed against. Two
+    rules belong in the contract: the caller's clearance is a **parameter**,
+    never an assumption about who can reach the endpoint; and for RAG, filter at
+    **index** time with one index per access tier, not at query time.
+    Post-retrieval filtering still leaks — nearest-neighbour distances reveal
+    that a restricted document exists and roughly what it concerns, even when it
+    is never returned. For an MNPI-adjacent shop that is the difference between
+    a compliance story and a compliance incident.
+
+    Related: item 15 (what the knowledge is), item 16 (how repos adopt it).
+    This item is how a team *reaches* it.
 
 ## Open Questions For The Owner
 
