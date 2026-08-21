@@ -6,6 +6,14 @@
 # same spec ID also appears in root README.md's runtime table. Catches the
 # one sync step agent-catalog/spec-index don't cover: specs/README.md and
 # root README.md drifting apart from each other as new tested runtimes ship.
+#
+# A cell reading "planned `test_x.py`" is not evidence of a real runtime --
+# it is a spec author naming what the test WILL be called once it exists
+# (spec 0056 was written this way; the same convention 0048 itself briefly
+# used before its runtime shipped). Skip any cell containing "planned" before
+# checking for a test filename, so the gate never demands a README row for a
+# spec whose own table already says "not built yet".
+#
 # Advisory by default; set QF_STAGE_ENFORCE=1 to block.
 
 set -e
@@ -35,6 +43,7 @@ while IFS= read -r line; do
   [ -n "$id" ] || continue
   tests_col=$(printf '%s\n' "$line" | awk -F'|' '{print $5}')
   case "$tests_col" in
+    *[Pp]lanned*) continue ;;
     *test_*.py*) : ;;
     *) continue ;;
   esac
