@@ -118,6 +118,33 @@ def test_evidence_singular_and_list_forms_AC_022():
     assert listed.corroboration_derived == 2
 
 
+def test_depends_on_parses_list_and_string_forms():
+    """``depends_on`` accepts a list or a single id, mirroring ``coexists``.
+
+    Not validated yet (no cycle/dangling check) -- the field exists so a real
+    record can carry the relation from the day it is written, distinct from
+    ``coexists`` (two records that legitimately both hold, not one relying on
+    the other).
+    """
+    a = build_record({
+        "id": "A", "scope": "s", "type": "pattern", "statement": "x",
+        "confidence": "low", "first_seen": datetime.date(2020, 1, 1),
+        "last_confirmed": datetime.date(2020, 1, 1), "status": "active",
+        "pit_scope": "<= run date",
+        "depends_on": ["MEM-0002", "MEM-0001"],
+    })
+    b = build_record({
+        "id": "B", "scope": "s", "type": "pattern", "statement": "x",
+        "confidence": "low", "first_seen": datetime.date(2020, 1, 1),
+        "last_confirmed": datetime.date(2020, 1, 1), "status": "active",
+        "pit_scope": "<= run date",
+        "depends_on": "MEM-0002",
+    })
+    assert a.depends_on == ("MEM-0002", "MEM-0001")
+    assert b.depends_on == ("MEM-0002",)
+    assert _record().depends_on == ()  # default: no dependency declared
+
+
 # --------------------------------------------------------------------------
 # T-003 — point-in-time (REQ-003, REQ-016)
 # --------------------------------------------------------------------------
