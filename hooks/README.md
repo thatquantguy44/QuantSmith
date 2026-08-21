@@ -54,6 +54,7 @@ pattern-based; tune them to your repository.
 | Handoff roadmap sync | `handoff-sync-check.sh` | every spec is referenced in `docs/handoff.md`; a new spec arrives with its entry |
 | Upstream surface drift | `upstream-drift-check.sh` | copied gates/standards vs the pinned upstream ref (consumer repos) |
 | Ownership & support path | `ownership-check.sh` | CODEOWNERS, `docs/ownership.md`, and a gate runbook name real owners, not placeholders |
+| Persistent knowledge guide sync | `persistent-knowledge-check.sh` | `PERSISTENT_KNOWLEDGE.md`'s status table vs. the real record/task/AC counts; co-change with `workflow_memory.py`/`memory/`/spec `0048` |
 | Source catalog sync | `source-catalog-check.sh` | `sources/README.md`, `templates/data/source_catalog_entry.yml` |
 | Knowledge source check | `knowledge-check.sh` | `agents/knowledge/` |
 | Workflow memory check | `memory-check.sh` | `memory/`, `agents/knowledge/` |
