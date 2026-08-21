@@ -55,3 +55,8 @@ agents.zip
 *.sqlite
 *.sqlite3
 *.parquet
+
+# Local gate usage telemetry (scripts/usage-report.sh). Never committed:
+# it is local signal, not a shared artifact.
+.qf-usage.tsv
+*.qf-usage.tsv

@@ -23,9 +23,9 @@
 | ID | Task | Covers | Status | Notes |
 | --- | --- | --- | --- | --- |
 | T-001 | Subset YAML parser + `Record`/`Store`/`Finding` dataclasses; `load_store`. | REQ-001, NFR-001, NFR-005 | done | Raise `MemoryParseError(file, line, reason)` outside the subset — never guess (RISK-001). Committed store is the fixture. |
-| T-002 | `query` with scope/type/confidence/status filters and deterministic ordering. | REQ-002, NFR-002 | todo | Total order: confidence, corroboration, `last_confirmed`, then `id`. |
+| T-002 | `query` with scope/type/confidence/status filters and deterministic ordering. | REQ-002, NFR-002 | done | Total order: confidence, corroboration, `last_confirmed`, then `id`. |
 | T-003 | Point-in-time filtering: the type-based temporal rule plus the `pit_scope` rule, both of which must pass. | REQ-003, REQ-016 | done | Mechanical types timeless; predictive bound on `last_confirmed` (corroboration is where the future enters); `decision` on `first_seen`. Unrecognised `pit_scope` ⇒ **excluded** and reported. Exclusion is the safe failure; inclusion leaks (RISK-004, RISK-006). |
-| T-004 | `render_context` with a character budget, rank-ordered fill, and an explicit omitted count. | REQ-004 | todo | Budget is characters, not tokens — no tokenizer in this module. Show `last_confirmed` on every line. |
+| T-004 | `render_context` with a character budget, rank-ordered fill, and an explicit omitted count. | REQ-004 | done | Budget is characters, not tokens — no tokenizer in this module. Show `last_confirmed` on every line. |
 | T-005 | `validate`: required fields, enum values, duplicate ids, date order, author pattern. | REQ-005, REQ-009, REQ-010 | done | This is what replaces grepping for the string `first_seen`. Missing author is a finding, not an error. |
 | T-006 | `check_decay` against each store's `freshness_days`. | REQ-006 | todo | Reads the value `manifest.yaml` has always declared and nothing has ever read. |
 | T-007 | `resolve_author` chain + pseudonymous handle derivation; `identity.yml` gitignored. | REQ-007, REQ-008, NFR-004 | todo | Env override short-circuits before any subprocess. Hex output cannot contain `@` — that is the guard, not convention. |
@@ -46,10 +46,10 @@ Status values: `todo` | `in-progress` | `blocked` | `done`.
 | Acceptance criterion | Verification | Status |
 | --- | --- | --- |
 | AC-001 | `test_committed_store_loads_unchanged_AC_001` | done |
-| AC-002 | `test_query_by_scope_AC_002` | todo |
-| AC-003 | `test_query_deterministic_AC_003` | todo |
+| AC-002 | `test_query_by_scope_AC_002` | done |
+| AC-003 | `test_query_deterministic_AC_003` | done |
 | AC-004 | `test_pit_scope_excludes_original_vintage_AC_004` | done |
-| AC-005 | `test_render_budget_drops_lowest_ranked_AC_005` | todo |
+| AC-005 | `test_render_budget_drops_lowest_ranked_AC_005` | done |
 | AC-006 | `test_missing_last_confirmed_flagged_AC_006` | done |
 | AC-007 | `test_duplicate_id_flagged_AC_007` | done |
 | AC-008 | `test_date_order_flagged_AC_008` | done |

@@ -14,7 +14,7 @@ signal and model **reproducible, leakage-safe, and traceable to a spec**.
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](pyproject.toml)
 [![Approach: Spec-Driven](https://img.shields.io/badge/Approach-Spec--Driven-ff6f00)](instructions/spec_driven_development.md)
 [![Agents: 161](https://img.shields.io/badge/Agents-161-6f42c1)](agents/README.md)
-[![Quality Gates: 29](https://img.shields.io/badge/Quality%20Gates-29-2ea44f)](hooks/README.md)
+[![Quality Gates: 31](https://img.shields.io/badge/Quality%20Gates-31-2ea44f)](hooks/README.md)
 [![Specs: 46](https://img.shields.io/badge/Specs-46-0969da)](specs/README.md)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](.github/GIT_GUIDELINES.md)
 
@@ -65,7 +65,7 @@ signal and model **reproducible, leakage-safe, and traceable to a spec**.
 | 🔎 Catch leakage & time-alignment bugs | Point-in-time standards + `leakage`/`backtest` gates |
 | 📝 Document features, models, backtests | Templates, cards, and reproducible run artifacts |
 | 🤖 Reuse research workflows | 161 narrow, inspectable agent roles across the stack |
-| 🚦 Stop mistakes before commit/push | 29 quality gates, advisory by default, CI-enforceable |
+| 🚦 Stop mistakes before commit/push | 31 quality gates, advisory by default, CI-enforceable |
 | 🗣️ Share a common vocabulary | An [agentic dictionary](agentic_dictionary.md) for the team |
 
 ---
@@ -407,7 +407,7 @@ QF_STAGE_ENFORCE=1 hooks/stages/run-stage.sh spec   # blocking (as CI runs it)
 | 🧭 Cross-cutting | `spec` |
 | 🔄 Per-stage | `planning` · `design` · `implementation` · `testing` · `deployment` · `maintenance` |
 | 📈 Quant | `leakage` · `backtest` · `repro` · `data-contract` · `pipeline-contract` · `alert-contract` · `monitoring-coverage` · `data-provenance` |
-| 🗃️ Repo | `secret-scan` · `docs-link` · `agent-catalog` · `spec-index` · `readme-sync` · `doc-counts` · `quantsmith-version` · `agent-attribution` · `handoff-sync` · `knowledge` · `role-context` · `model-plugin` · `source-catalog` |
+| 🗃️ Repo | `secret-scan` · `docs-link` · `agent-catalog` · `spec-index` · `readme-sync` · `doc-counts` · `quantsmith-version` · `agent-attribution` · `handoff-sync` · `upstream-drift` · `ownership` · `knowledge` · `role-context` · `model-plugin` · `source-catalog` |
 
 > [!TIP]
 > Use `QF_RUN_TESTS=1` to let the testing stage run the suite, and

@@ -12,8 +12,9 @@
 #   alert-contract monitoring-coverage
 #   (quant-specific checks; heuristic and advisory, run after the SDLC stages)
 # Repo gates: secret-scan docs-link agent-catalog spec-index readme-sync doc-counts
-#   quantsmith-version agent-attribution handoff-sync
-#   (security, documentation-integrity, consumer-pin, authorship, and roadmap checks)
+#   quantsmith-version agent-attribution handoff-sync upstream-drift ownership
+#   (security, documentation-integrity, consumer-pin, authorship, roadmap,
+#    distribution-drift, and ownership checks)
 # Knowledge gate: knowledge
 #   (validates configured knowledge-base source locations)
 # Memory gate: memory
@@ -23,10 +24,13 @@
 #   QF_STAGE_ENFORCE=1  make findings blocking (non-zero exit)
 #   QF_RUN_TESTS=1      let the testing stage run the suite
 #   QF_DIFF_BASE=<ref>  diff changed files against <ref> instead of the worktree
+#   QF_USAGE_LOG=<path> append one line per gate (timestamp, gate, findings,
+#                       enforce) so usage can be reported. Off unless set;
+#                       never leaves the machine. See scripts/usage-report.sh.
 
 DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 
-ALL="spec planning design implementation testing deployment maintenance leakage backtest repro data-contract pipeline-contract alert-contract monitoring-coverage secret-scan docs-link agent-catalog spec-index readme-sync doc-counts quantsmith-version agent-attribution handoff-sync knowledge memory role-context data-provenance model-plugin source-catalog"
+ALL="spec planning design implementation testing deployment maintenance leakage backtest repro data-contract pipeline-contract alert-contract monitoring-coverage secret-scan docs-link agent-catalog spec-index readme-sync doc-counts quantsmith-version agent-attribution handoff-sync upstream-drift ownership knowledge memory role-context data-provenance model-plugin source-catalog"
 stages="$*"
 [ -z "$stages" ] && stages="$ALL"
 

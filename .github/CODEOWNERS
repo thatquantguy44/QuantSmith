@@ -1,0 +1,11 @@
+# Review routing. Who ANSWERS a question is docs/ownership.md; this file only
+# decides whose review GitHub requests.
+
+*                       @joshualutkemuller
+
+/hooks/                 @joshualutkemuller
+/specs/                 @joshualutkemuller
+/src/quantsmith/        @joshualutkemuller
+/instructions/          @joshualutkemuller
+/.github/               @joshualutkemuller
+/templates/repos/       @joshualutkemuller

@@ -52,6 +52,8 @@ pattern-based; tune them to your repository.
 | QuantSmith consumer pin | `quantsmith-version-check.sh` | a consuming repo's `requirements*.txt` / `pyproject.toml` (copy this gate there) |
 | Commit authorship | `agent-attribution-check.sh` | commit author/committer identity and co-author trailers in a git range |
 | Handoff roadmap sync | `handoff-sync-check.sh` | every spec is referenced in `docs/handoff.md`; a new spec arrives with its entry |
+| Upstream surface drift | `upstream-drift-check.sh` | copied gates/standards vs the pinned upstream ref (consumer repos) |
+| Ownership & support path | `ownership-check.sh` | CODEOWNERS, `docs/ownership.md`, and a gate runbook name real owners, not placeholders |
 | Source catalog sync | `source-catalog-check.sh` | `sources/README.md`, `templates/data/source_catalog_entry.yml` |
 | Knowledge source check | `knowledge-check.sh` | `agents/knowledge/` |
 | Workflow memory check | `memory-check.sh` | `memory/`, `agents/knowledge/` |

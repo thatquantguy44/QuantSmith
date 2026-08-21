@@ -135,6 +135,13 @@ cat <<NEXT
 Next:
   cd $target
   git init && ./scripts/setup-hooks.sh
-  \$EDITOR README.md docs/roadmap.md docs/conformance.md   # fill in the <...>
-  ./scripts/check.sh
+
+  REQUIRED before your first commit -- the ownership gate blocks on these,
+  because an unfilled template reads as governed while owning nothing:
+    \$EDITOR .github/CODEOWNERS     # replace @OWNER with real handles
+    \$EDITOR docs/ownership.md      # replace <@handle>; name a backup
+
+  Then:
+    \$EDITOR README.md docs/roadmap.md docs/conformance.md   # fill in the <...>
+    ./scripts/check.sh
 NEXT
