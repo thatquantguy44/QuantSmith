@@ -20,6 +20,8 @@
 #   (validates configured knowledge-base source locations)
 # Memory gate: memory
 #   (validates the persistent workflow memory store)
+# Access gate: access
+#   (validates the per-person viewer access roster)
 #
 # Environment:
 #   QF_STAGE_ENFORCE=1  make findings blocking (non-zero exit)
@@ -31,7 +33,7 @@
 
 DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 
-ALL="spec planning design implementation testing deployment maintenance leakage backtest repro data-contract pipeline-contract alert-contract monitoring-coverage secret-scan docs-link agent-catalog spec-index readme-sync doc-counts quantsmith-version agent-attribution handoff-sync upstream-drift ownership persistent-knowledge knowledge memory role-context data-provenance model-plugin source-catalog"
+ALL="spec planning design implementation testing deployment maintenance leakage backtest repro data-contract pipeline-contract alert-contract monitoring-coverage secret-scan docs-link agent-catalog spec-index readme-sync doc-counts quantsmith-version agent-attribution handoff-sync upstream-drift ownership persistent-knowledge knowledge memory access role-context data-provenance model-plugin source-catalog"
 stages="$*"
 [ -z "$stages" ] && stages="$ALL"
 

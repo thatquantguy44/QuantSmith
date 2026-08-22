@@ -14,8 +14,8 @@ signal and model **reproducible, leakage-safe, and traceable to a spec**.
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](pyproject.toml)
 [![Approach: Spec-Driven](https://img.shields.io/badge/Approach-Spec--Driven-ff6f00)](instructions/spec_driven_development.md)
 [![Agents: 161](https://img.shields.io/badge/Agents-161-6f42c1)](agents/README.md)
-[![Quality Gates: 32](https://img.shields.io/badge/Quality%20Gates-32-2ea44f)](hooks/README.md)
-[![Specs: 50](https://img.shields.io/badge/Specs-50-0969da)](specs/README.md)
+[![Quality Gates: 33](https://img.shields.io/badge/Quality%20Gates-33-2ea44f)](hooks/README.md)
+[![Specs: 51](https://img.shields.io/badge/Specs-51-0969da)](specs/README.md)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](.github/GIT_GUIDELINES.md)
 
 <br/>
@@ -65,7 +65,7 @@ signal and model **reproducible, leakage-safe, and traceable to a spec**.
 | 🔎 Catch leakage & time-alignment bugs | Point-in-time standards + `leakage`/`backtest` gates |
 | 📝 Document features, models, backtests | Templates, cards, and reproducible run artifacts |
 | 🤖 Reuse research workflows | 161 narrow, inspectable agent roles across the stack |
-| 🚦 Stop mistakes before commit/push | 32 quality gates, advisory by default, CI-enforceable |
+| 🚦 Stop mistakes before commit/push | 33 quality gates, advisory by default, CI-enforceable |
 | 🗣️ Share a common vocabulary | An [agentic dictionary](agentic_dictionary.md) for the team |
 
 ---
@@ -430,6 +430,7 @@ the [spec index](specs/README.md).
 | [`0048`](specs/0048-workflow-memory-runtime/) | Workflow memory runtime — makes `0002`'s committed store machine-readable: typed records, a type-aware point-in-time filter (mechanical facts timeless, claims about what worked bounded by `last_confirmed`), and structural validation replacing the string grep | `workflow_memory.py` |
 | [`0049`](specs/0049-workflow-memory-write-path/) | Workflow memory write path — propose/stage candidates to a committed `memory/inbox/`, promote/discard as deliberate human actions, author resolution finishing `0048`'s outstanding requirement, one worked producer integration from `0039`'s real validation findings | `workflow_memory.py` *(extended)*, `workflow_memory_cli.py` |
 | [`0057`](specs/0057-knowledge-console/) | Knowledge Console — read-only analytics web app over the `memory/` store built on `0048`: view-model (counts, trends, knowledge graph, changes feed, needed-review queue), a stdlib HTTP API, a pluggable natural-language query seam (grounded keyword now, LLM later), and a Vite/React front end with a self-contained snapshot | `knowledge_console/` |
+| [`0058`](specs/0058-viewer-access-control/) | Viewer access control — activates `0048`'s deferred `access_level` field: an opt-in, committed `access/roster.yml` maps a resolved pseudonymous handle to a `public`/`internal`/`restricted` clearance, enforced once at the read boundary in `query()` and both `0057` view-model builders | `access_control.py` |
 | [`0055`](specs/0055-workflow-scheduling-operations/) | Workflow scheduling operations — registry validation, cron dry-run evidence, idempotent dispatch, JSONL ledger, manual reminders, daily reports, alert handoff, memory candidates | `workflow_scheduling.py` |
 | [`0047`](specs/0047-downstream-contract/) | Downstream consumer contract — `DashboardSpec.schema_version` + compatibility check, release-notify workflow, and a copyable `quantsmith-version` gate for a separate consuming repository | `dashboard_spec.py` *(extended)* |
 | [`0046`](specs/0046-walk-forward/) | Walk-forward harness — purged/embargoed folds from `0006` refit per fold through `0044`'s engine; reports the out-of-sample fold distribution | `walk_forward.py` |

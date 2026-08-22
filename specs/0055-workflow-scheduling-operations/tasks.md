@@ -49,6 +49,17 @@ Every acceptance criterion must be named by at least one test.
 
 ## Follow-ups
 
-- Add a concrete low-risk worked example, such as a daily report script scheduled by
-  cron and summarized in a Markdown operations report.
+- ~~Add a concrete low-risk worked example, such as a daily report script scheduled by
+  cron and summarized in a Markdown operations report.~~ **Done:**
+  `examples/scheduled_daily_report/` -- a real target (a workflow-memory review
+  digest, reusing `0048`'s `validate` and `0057`'s `build_review_queue`) run
+  through the full registry → dry-run → dispatch → ledger → report loop, with
+  a committed sample output and a documented real cron deployment (two
+  entries: the job itself, and a later report-render step). Covered by
+  `tests/test_scheduled_daily_report_example.py`.
 - Decide when schedule deployment becomes enforceable rather than advisory.
+- The worked example's README names the gap it deliberately doesn't close: a
+  `workflow_scheduling_cli` (mirroring `workflow_memory_cli.py`'s pattern) so
+  the report-render half of a real cron deployment doesn't need a bespoke
+  script per team. Natural next slice if this moves from example to adopted
+  practice.

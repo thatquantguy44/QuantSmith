@@ -1,0 +1,32 @@
+# Viewer access roster (spec 0058-viewer-access-control).
+#
+# Ships with zero entries on purpose: an empty `people:` list means
+# enforcement is INACTIVE, and every viewer sees everything, exactly as
+# before this spec existed (REQ-004). Adding the first entry below turns
+# enforcement ON for everyone, not just the people you list (REQ-005) —
+# anyone not named here falls back to `default_clearance`.
+#
+# Clearance ordering: public < internal < restricted. A viewer at a given
+# clearance sees items at or below it.
+#
+# `handle` must be a pseudonymous handle, never a raw name/email/username.
+# Find your own handle by running:
+#     python -m quantsmith.pipelines.workflow_memory_cli whoami
+# It is the same handle spec 0049 already attributes your written records
+# to, derived by hashing your local identity with a repo-wide salt — never
+# reversible back to who you are from the file alone.
+#
+# Before merging a roster change, preview its effect without becoming that
+# viewer:
+#     python -m quantsmith.knowledge_console preview-access --viewer-override <handle-or-level>
+#
+# Template (uncomment and fill in to activate enforcement):
+#
+# people:
+#   - handle: u-xxxxxxxxxxxxxxxxxxxxxxxx
+#     label: "descriptive-role-not-a-real-name"
+#     clearance: internal
+
+default_clearance: public
+
+people:

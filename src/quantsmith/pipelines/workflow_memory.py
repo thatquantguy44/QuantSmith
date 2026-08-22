@@ -40,14 +40,22 @@ action that turns an accepted candidate into a real ``Record`` — a
 from __future__ import annotations
 
 import datetime
-import getpass
-import hashlib
 import os
 import re
-import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Mapping, Optional, Sequence, Tuple
+
+# Identity resolution lives in access_control.py (spec 0058) so it can be
+# shared by read-time clearance without a circular import; re-exported here
+# unchanged so every existing caller (the CLI, 0049's promote(), tests) keeps
+# working at its original import path.
+from .access_control import (  # noqa: F401
+    AUTHOR_HANDLE_RE,
+    derive_handle,
+    resolve_author,
+)
+from . import access_control as _access_control
 
 # --------------------------------------------------------------------------
 # Vocabulary — mirrors instructions/workflow_memory.md (spec 0002)
@@ -78,8 +86,10 @@ PIT_SCOPE_KNOWN = PIT_SCOPE_ADMISSIBLE + ("original vintage only",)
 _CONFIDENCE_RANK = {"high": 3, "medium": 2, "low": 1}
 
 #: An author must be a pseudonymous handle, never a routable address. The
-#: pattern is the guard, not a convention (spec REQ-009).
-_AUTHOR_RE = re.compile(r"^[a-z0-9][a-z0-9._-]{1,63}$")
+#: pattern is the guard, not a convention (spec REQ-009). Alias kept for
+#: backward compatibility; the canonical definition lives in
+#: access_control.py (spec 0058), which also uses it for roster handles.
+_AUTHOR_RE = AUTHOR_HANDLE_RE
 _DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 
@@ -471,7 +481,8 @@ def query(records: Sequence[Record], *,
           type: Optional[str] = None,
           min_confidence: Optional[str] = None,
           status: Optional[str] = "active",
-          as_of: Optional[datetime.date] = None) -> List[Record]:
+          as_of: Optional[datetime.date] = None,
+          viewer_clearance: Optional[str] = None) -> List[Record]:
     """Select records, in deterministic rank order.
 
     Every filter is opt-in except ``status``, which defaults to ``"active"``:
@@ -483,6 +494,11 @@ def query(records: Sequence[Record], *,
     It is deliberately a parameter rather than a default: a query with no
     ``as_of`` is unbounded and returns everything, which is right for "what do
     we know about this dataset" and wrong for anything feeding a backtest.
+
+    ``viewer_clearance`` applies the per-person access filter (spec 0058,
+    REQ-010). It is ``None`` by default so every existing caller is unfiltered
+    (NFR-004); pass the caller's resolved clearance to drop records whose
+    ``access_level`` exceeds it.
     """
     out = list(records)
 
@@ -497,6 +513,9 @@ def query(records: Sequence[Record], *,
         out = [r for r in out if _CONFIDENCE_RANK.get(r.confidence, 0) >= floor]
     if as_of is not None:
         out = point_in_time_filter(out, as_of)
+    if viewer_clearance is not None:
+        out = [r for r in out
+               if _access_control.access_level_allows(r.access_level, viewer_clearance)]
 
     return sorted(out, key=rank_key)
 
@@ -628,104 +647,6 @@ def validate(records: Sequence[Record]) -> List[Finding]:
                 "or free text must never be committed as authorship", **where))
 
     return findings
-
-
-# --------------------------------------------------------------------------
-# Author resolution (spec 0049 T-001, REQ-001/REQ-002 — completes 0048
-# REQ-007/REQ-008)
-# --------------------------------------------------------------------------
-
-#: Repo-constant salt for handle derivation. Per 0048's own Open Questions this
-#: makes handles comparable across clones of *this* repo; a per-store salt
-#: would make them uncorrelatable between repositories instead. Starting with
-#: the simpler, repo-constant choice — changing it later is a one-line change,
-#: not a migration, since handles are derived, never stored raw.
-_HANDLE_SALT = "quantsmith-workflow-memory-v1"
-
-
-def derive_handle(identity: str) -> str:
-    """A stable, pseudonymous handle for a source identity (email or username).
-
-    Matches ``_AUTHOR_RE`` by construction: a fixed-length lowercase hex digest
-    prefixed with ``u-`` so it always starts with a letter, satisfying the
-    pattern's ``[a-z0-9]`` first character regardless of the input.
-
-    **Pseudonymous, not anonymous** (0048 RISK-002, inherited unchanged here):
-    the same identity always derives the same handle, so a small team is
-    re-identifiable from the handle plus commit history. This is convenience
-    attribution, not an authentication or privacy guarantee.
-    """
-    digest = hashlib.sha256(f"{_HANDLE_SALT}:{identity.strip().lower()}".encode("utf-8")).hexdigest()
-    return f"u-{digest[:24]}"
-
-
-def _read_identity_config(root: str | os.PathLike = ".") -> Optional[str]:
-    """A local-only ``identity.yml`` (gitignored), the ``role_context.yml``
-    precedent from spec 0024: a file that may carry a real identity locally
-    and must never be committed."""
-    path = Path(root) / "identity.yml"
-    if not path.is_file():
-        return None
-    try:
-        text = path.read_text(encoding="utf-8")
-    except OSError:
-        return None
-    try:
-        doc = parse_memory_file(text, str(path))
-    except MemoryParseError:
-        return None
-    value = doc.get("author")
-    return str(value).strip() or None if value else None
-
-
-def _git_identity() -> Optional[str]:
-    try:
-        out = subprocess.run(
-            ["git", "config", "user.email"],
-            capture_output=True, text=True, timeout=5, check=False,
-        )
-    except (OSError, subprocess.SubprocessError):
-        return None
-    value = out.stdout.strip()
-    return value or None
-
-
-def _os_identity() -> Optional[str]:
-    try:
-        return getpass.getuser() or None
-    except (OSError, ImportError, KeyError):
-        return None
-
-
-def resolve_author(*, override: Optional[str] = None,
-                   root: str | os.PathLike = ".") -> Optional[str]:
-    """Resolve an author handle, in order: ``override`` (or ``QF_MEMORY_AUTHOR``)
-    -> local ``identity.yml`` -> git ``user.email`` -> OS username -> ``None``.
-
-    Never blocks, prompts, or raises (spec REQ-001, AC-004) — a missing
-    identity is a valid outcome, not an error.
-
-    ``override`` and ``QF_MEMORY_AUTHOR`` are both explicit, caller-controlled
-    values (a CLI flag, an environment setting a human chose) and are
-    returned exactly as given — the same treatment ``0048``'s ``validate``
-    already gives any ``author`` field: shape-checked downstream (rejected if
-    it contains ``@``, spec 0048 REQ-009), never resolved or sanitised
-    upstream, because the caller is asserting a handle, not handing over a
-    raw identity to be derived from. Only identities this function discovers
-    *itself* (local config, git, OS) — where the raw value is an email or a
-    system username, never chosen as a handle — are passed through
-    :func:`derive_handle`.
-    """
-    if override is not None:
-        return override.strip() or None
-    env = os.environ.get("QF_MEMORY_AUTHOR")
-    if env:
-        return env.strip() or None
-
-    for source in (_read_identity_config(root), _git_identity(), _os_identity()):
-        if source:
-            return derive_handle(source)
-    return None
 
 
 # --------------------------------------------------------------------------

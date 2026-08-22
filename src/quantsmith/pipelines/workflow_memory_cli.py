@@ -15,10 +15,18 @@
     python -m quantsmith.pipelines.workflow_memory_cli discard \\
         --candidate-id quant_researcher/run-2026-08-21-x/001 [--root memory]
 
+    python -m quantsmith.pipelines.workflow_memory_cli whoami [--root .]
+
 Every command is a thin wrapper over ``workflow_memory``'s library functions
 (T-007, REQ-013) — a human-runnable surface, not new logic. ``promote`` and
 ``discard`` are the only commands that ever touch the live store or the
 inbox; ``propose`` (which also stages) never does (spec NFR-005).
+
+``whoami`` (spec 0058 REQ-013) prints the pseudonymous handle this process
+resolves to — the same handle ``promote`` would attribute a record to, and
+the same handle a roster entry must match for enforcement to recognise this
+person. It exists so someone can check what to put in ``access/roster.yml``
+before editing it, rather than guessing.
 """
 
 from __future__ import annotations
@@ -92,6 +100,12 @@ def _cmd_discard(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_whoami(args: argparse.Namespace) -> int:
+    handle = wm.resolve_author(root=args.root)
+    print(handle)
+    return 0
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(
         prog="quantsmith.pipelines.workflow_memory_cli",
@@ -126,6 +140,10 @@ def main(argv=None) -> int:
     p_discard.add_argument("--root", default="memory")
     p_discard.add_argument("--candidate-id", required=True)
 
+    p_whoami = sub.add_parser("whoami", help="print the resolved author/viewer handle")
+    p_whoami.add_argument("--root", default=".",
+                          help="repo root to read identity.yml from (default: cwd)")
+
     args = parser.parse_args(argv)
 
     dispatch = {
@@ -133,6 +151,7 @@ def main(argv=None) -> int:
         "list-inbox": _cmd_list_inbox,
         "promote": _cmd_promote,
         "discard": _cmd_discard,
+        "whoami": _cmd_whoami,
     }
     handler = dispatch.get(args.command)
     if handler is None:

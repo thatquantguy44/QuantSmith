@@ -31,6 +31,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Tuple
 
+from quantsmith.pipelines import access_control
 from quantsmith.pipelines import workflow_memory as wm
 
 SHARED_WORKFLOW = "_shared"
@@ -444,15 +445,33 @@ def build_review_queue(store: Store, as_of: datetime.date,
 
 def build_model(store: Store, *, as_of: Optional[datetime.date] = None,
                 changes: Optional[Sequence[Dict]] = None,
-                generated_at: Optional[str] = None) -> Dict:
+                generated_at: Optional[str] = None,
+                viewer_clearance: Optional[str] = None) -> Dict:
     """Build the full JSON view-model. Pure and deterministic (spec NFR-004).
 
     ``generated_at`` is *passed in*, never read from the clock here, so identical
     inputs produce byte-identical output (AC-002). The server passes a wall-clock
     timestamp; tests pass a fixed one or ``None``.
+
+    ``viewer_clearance`` is ``None`` by default (see everything, today's
+    behavior). When set, records above that clearance are dropped *before*
+    counts/trends/graph/review_queue/findings are computed (spec 0058
+    REQ-011), so a filtered-out record leaves no trace anywhere in the
+    output — not even in an aggregate count.
     """
     as_of = as_of or datetime.date.today()
     changes = list(changes) if changes is not None else []
+
+    if viewer_clearance is not None:
+        store = Store(
+            records=tuple(
+                lr for lr in store.records
+                if access_control.access_level_allows(lr.record.access_level, viewer_clearance)
+            ),
+            freshness_days=store.freshness_days,
+            files=store.files,
+            root=store.root,
+        )
 
     plain = [lr.record for lr in store.records]
     findings = wm.validate(plain)
@@ -492,12 +511,27 @@ def build_model(store: Store, *, as_of: Optional[datetime.date] = None,
 def build_model_from_root(root: str | os.PathLike = "memory", *,
                           as_of: Optional[datetime.date] = None,
                           generated_at: Optional[str] = None,
-                          with_changes: bool = True) -> Dict:
-    """Convenience: load a tree and build its model in one call."""
+                          with_changes: bool = True,
+                          viewer_override: Optional[str] = None) -> Dict:
+    """Convenience: load a tree, resolve the viewer's clearance, build its model.
+
+    ``access/roster.yml`` is looked up next to ``root`` (its parent directory,
+    same as :func:`git_changes`'s repo-root inference), since ``root`` is a
+    subtree (``memory``) while the roster lives at the repo root. Enforcement
+    stays opt-in: an absent or empty roster resolves to ``None`` and this call
+    is byte-identical to the pre-0058 behavior (NFR-004).
+
+    ``viewer_override`` previews another handle or clearance level without
+    changing who is actually running the process (spec REQ-014).
+    """
     store = load_store(root)
     changes = git_changes(root) if with_changes else []
+    root_path = Path(root)
+    access_root = root_path.parent if root_path.name else root_path
+    viewer_clearance = access_control.resolve_viewer_clearance(
+        override=viewer_override, root=access_root)
     return build_model(store, as_of=as_of, changes=changes,
-                       generated_at=generated_at)
+                       generated_at=generated_at, viewer_clearance=viewer_clearance)
 
 
 def model_json(model: Dict) -> str:

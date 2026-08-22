@@ -58,6 +58,7 @@ pattern-based; tune them to your repository.
 | Source catalog sync | `source-catalog-check.sh` | `sources/README.md`, `templates/data/source_catalog_entry.yml` |
 | Knowledge source check | `knowledge-check.sh` | `agents/knowledge/` |
 | Workflow memory check | `memory-check.sh` | `memory/`, `agents/knowledge/` |
+| Access roster check | `access-check.sh` | `access/roster.yml`, `specs/0058-viewer-access-control/` |
 | Role context check | `role-context-check.sh` | `templates/role_operations/role_context.yml`, `agents/role_operations/` |
 | Model plugin registration check | `model-plugin-check.sh` | `templates/optimization/model_plugin_manifest.yml`, `adapters/model_plugin/`, `agents/optimization/model_plugin_registration/` |
 
@@ -128,6 +129,11 @@ hooks/stages/run-stage.sh spec
   that records carry provenance (`first_seen`, `last_confirmed`, `access_level`) and
   that memory holds no secrets, connection strings, or PII (memory is metadata only).
   See `instructions/workflow_memory.md` and `specs/0002-workflow-memory/`.
+- **`access-check.sh`** validates the per-person viewer access roster
+  (`access/roster.yml`): parses it, flags duplicate handles, unrecognized
+  clearance levels, and email/free-text-shaped handles, and runs the same
+  secret/PII safety scan `memory-check.sh` applies to `memory/`, applied to
+  `access/`. See `specs/0058-viewer-access-control/` and `access/README.md`.
 - **`role-context-check.sh`** guards the configurable context for
   `agents/role_operations/`: it deterministically flags a `role_context.yml`
   that is tracked or staged (blocking under `QF_STAGE_ENFORCE=1`), reports the
