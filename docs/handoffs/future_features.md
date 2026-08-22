@@ -197,15 +197,16 @@ belong under profiles/adapters unless they require materially different behavior
   `realtime_start`/`realtime_end` window containment, so a revision
   published later can never leak backwards into an earlier as-of date.
   Closes the input-side half of the gap `0044` left open. The real run
-  still needs `fred_local.db` from the operator.
+  against an operator-produced `fred_local.db` is done —
+  `scripts/fred_real_run.py`, report at
+  `specs/0045-fred-point-in-time/backtest_report.md`.
 - The backtest engine (spec `0044`, `backtesting.py`) — net-of-cost
   simulation with no look-ahead by construction, turnover-scaled costs,
   financing charged on shorts only, drawdown, and a probabilistic Sharpe
   on every run. Ships the repo's first backtest artifact, so the
   CI-enforced `backtest` gate validates real content instead of
   no-opping. First half of a two-step build; the real point-in-time FRED
-  vertical slice is the second, blocked on an operator-held
-  `FRED_API_KEY`.
+  vertical slice is the second — see `0045` above.
 - The documented-count drift gate (spec `0043`,
   `hooks/stages/doc-counts-check.sh`) — derives the true agent, gate, and
   instruction-standard counts from the filesystem and flags stated counts

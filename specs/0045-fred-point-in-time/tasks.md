@@ -1,7 +1,7 @@
 # Tasks: FRED Point-In-Time Panel Adapter
 
 - **Spec:** 0045-fred-point-in-time (`spec.md`, `plan.md`)
-- **Last updated:** 2026-08-12
+- **Last updated:** 2026-08-21
 
 ## Definition of Done (applies to every task)
 
@@ -21,6 +21,7 @@
 | T-002 | Write `tests/test_fred_point_in_time.py`. | REQ-001 – REQ-006, NFR-001 | done | Temporary SQLite fixture mirroring the upstream DDL, with a revised series, an open-ended vintage, a publication lag, and an `is_missing` row. One test per AC-001 – AC-010. |
 | T-003 | Wire catalogs and handoff docs. | REQ-007 | done | `specs/README.md`, `src/quantsmith/pipelines/README.md`, root `README.md`, `docs/handoff.md`, `docs/handoffs/future_features.md`, `docs/sdk_plan.md`. |
 | T-004 | Run validation gates. | NFR-004 | done | `spec`, `docs-link`, `spec-index`, `readme-sync`, `doc-counts`, `backtest`; `pytest tests/ -q`; `git diff --check`. |
+| T-005 | The real run: wire the panel into `0046`'s walk-forward harness against an operator-produced `fred_local.db`. | REQ-005 (applied) | done | `scripts/fred_real_run.py`; report at `specs/0045-fred-point-in-time/backtest_report.md`. 61,833 rows, 8 series, 320 monthly as-of dates, 5 folds, 265 held-out periods; pooled Sharpe 0.28, probabilistic Sharpe 0.907, 80% folds positive. Demonstration-only weighting per this spec's Non-Goals. |
 
 Status values: `todo` | `in-progress` | `blocked` | `done`.
 
@@ -42,12 +43,6 @@ Status values: `todo` | `in-progress` | `blocked` | `done`.
 
 ## Follow-ups
 
-- **The real run** — the remaining half of the vertical slice. Requires
-  `fred_local.db` produced by the operator via
-  `PYTHONPATH=src python -m fred_pipeline run --local --db-path fred_local.db`
-  with their own `FRED_API_KEY`. Once that file exists, building a
-  point-in-time macro panel and backtesting it is a wiring exercise on
-  this module plus `0044`.
 - Consume `gold_fred_macro_feature_daily` for pre-computed transforms
   once this path is trusted end to end (carried as an open question in
   `spec.md`).
