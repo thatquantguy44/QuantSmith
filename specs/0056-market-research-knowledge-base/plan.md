@@ -3,7 +3,7 @@
 - **Spec:** 0056-market-research-knowledge-base (`spec.md`)
 - **Status:** Draft
 - **Author:** QuantSmith
-- **Last updated:** 2026-08-21
+- **Last updated:** 2026-08-22
 
 > HOW. This plan requires an approved `spec.md`. Every requirement in the spec
 > must appear in the traceability matrix below.
@@ -33,6 +33,28 @@ captures lessons about datasets, fields, runs, and model behavior. Market
 research captures sourced views, theses, market color, manager commentary, and
 generated syntheses that require entitlement-aware retrieval.
 
+## Dependency status (updated since this plan was first written)
+
+Four specs this plan depends on or overlaps with have shipped since it was
+drafted; two are still unbuilt. This changes what "start now" means without
+changing any requirement:
+
+| Dependency | Status | What it changes here |
+| --- | --- | --- |
+| `0057-knowledge-console` | **Built** | `src/quantsmith/knowledge_console/research.py` already reads the reference `research/` store and derives a view-model with asset class, source type, access level, review status, and supersession — the shape T-001/T-002/T-005 need to formalize into a real schema, not build from nothing. |
+| `0055-workflow-scheduling-operations` | **Built**, with a worked example | T-014's "integrate with `0055`" is no longer speculative — `examples/scheduled_daily_report/` is the pattern to extend (a job target that reuses existing read logic, dispatched through the registry, reported through the daily operations report). |
+| `0058-viewer-access-control` | **Built** | Directly overlaps T-006/T-007. `access_control.py`'s `ACCESS_LEVELS` (`public`/`internal`/`restricted`) and `access_level_allows()` already enforce a 3-tier clearance for the `research/` reference store, reused unmodified from `0049`'s identity resolution. **Decision:** this spec's `confidentiality` field collapses to those same three values plus a separate `status: quarantined`/`mnpi_quarantine`-as-status (see the schema note below) rather than inventing a fourth clearance tier — reusing `0058`'s vocabulary, not a parallel one. What `0058` does *not* cover, and what T-006/T-007 still owns: `entitlement_class` (a different axis — "am I licensed for this vendor's content," not "what's my clearance"), information-barrier checks beyond the three tiers, and a real (non-reference-store) backend. |
+| `0052`/`0053`/`0054` (MCP servers) | **Not built** | REQ-002/REQ-003's `knowledge://market_research/...` surface has nothing to be served *over* yet. This is the actual blocker for Rollout Slice 2 (below), not an open design question — Slice 1 (contract-only: schema, tests, synthetic fixtures) does not need it and is unblocked today. |
+
+**Schema correction this implies:** the Market Research Item table below
+originally listed `confidentiality` as a 4-value enum including
+`mnpi_quarantine` *and* a separate `status` enum that also includes
+`quarantined` — two fields saying the same thing two ways. Fixed: `confidentiality`
+is now exactly `0058`'s `ACCESS_LEVELS` (`public`/`internal`/`restricted`);
+an MNPI/secret/PII detection hit sets `status: quarantined` (already in the
+status enum) rather than a fourth confidentiality tier. One axis, one meaning,
+reusing a vocabulary that already has a tested, fail-closed implementation.
+
 ## Architecture & Components
 
 | Component | Responsibility |
@@ -42,7 +64,7 @@ generated syntheses that require entitlement-aware retrieval.
 | Metadata catalog | Stores item ids, provenance, classifications, access metadata, dates, status, and supersession links. |
 | Governed content store | Holds original content in provider-appropriate storage outside the SDK repo. |
 | Search/index tier | Builds access-tiered keyword/vector indexes from approved items or metadata-only records. |
-| Governance policy engine | Applies clearance, entitlement, confidentiality, retention, and information-barrier rules before retrieval. |
+| Governance policy engine | Applies clearance, entitlement, confidentiality, retention, and information-barrier rules before retrieval. Clearance/confidentiality checks call `0058`'s `access_control.access_level_allows()` unmodified (see Dependency status); this component's own new logic is `entitlement_class` and information-barrier rules, which `0058` does not model. |
 | MCP retrieval server | Exposes one `knowledge://market_research/...` surface and query tools to agents. |
 | Citation renderer | Returns cited passages or item summaries with accessible provenance. |
 | Audit ledger | Records ingestion, review, retrieval, denial, citation, and deletion/deprecation events. |
@@ -82,7 +104,7 @@ knowledge://market_research/fx/email_market_color/thread-abc/message-def
 | `asset_class` | yes | Common taxonomy plus `multi_asset`. |
 | `entities` | no | Securities, issuers, countries, managers, sectors, curves, commodities, or protocols. |
 | `themes` | no | Strategy/regime/topic labels. |
-| `confidentiality` | yes | `public`, `internal`, `restricted`, `mnpi_quarantine`. |
+| `confidentiality` | yes | `public`, `internal`, `restricted` — `0058`'s `ACCESS_LEVELS`, reused, not reinvented. An MNPI/secret/PII hit is a `status: quarantined`, not a fourth confidentiality tier (see Dependency status above). |
 | `entitlement_class` | yes | License/access class used before index selection. |
 | `status` | yes | `draft`, `pending_review`, `approved`, `quarantined`, `restricted`, `superseded`, `deprecated`, `deleted`. |
 | `freshness_days` | no | Current-context staleness threshold. |
@@ -160,7 +182,7 @@ knowledge://market_research/fx/email_market_color/thread-abc/message-def
 | REQ-003 | Governed content store abstraction and metadata catalog | T-001, T-004 |
 | REQ-004 | Provenance fields in Market Research Item | T-001, T-002 |
 | REQ-005 | Classification taxonomy | T-001, T-005 |
-| REQ-006 | Governance policy engine and access-tiered index selection | T-006, T-007 |
+| REQ-006 | Governance policy engine and access-tiered index selection (clearance half reuses `0058`'s `access_level_allows()`; entitlement/info-barrier half is net-new) | T-006, T-007 |
 | REQ-007 | Point-in-time retrieval fields and filters | T-008 |
 | REQ-008 | Citation renderer and response contract | T-009 |
 | REQ-009 | Result typing for fact/color/opinion/generated/stale/unsupported | T-005, T-009 |
@@ -191,6 +213,7 @@ knowledge://market_research/fx/email_market_color/thread-abc/message-def
 
 | Decision | Chosen | Rejected alternative | Why |
 | --- | --- | --- | --- |
+| Clearance vocabulary | Reuse `0058`'s `public`/`internal`/`restricted` `ACCESS_LEVELS` for `confidentiality`; MNPI/secret/PII detection sets `status: quarantined` | A fourth `mnpi_quarantine` confidentiality tier (the plan's original schema) | Two fields encoding the same "don't show this" fact two ways is a place they can silently disagree; one clearance vocabulary shared with `0058` means `access_level_allows()` is correct here by construction, not reimplemented and re-tested. `entitlement_class` stays the separate axis it always was — licensing, not clearance. |
 | MCP shape | Same MCP interface, separate market-research namespace | Separate market-research MCP client path | One retrieval contract is easier for agents to use and govern. |
 | Storage | External governed stores with SDK contracts | Commit research documents to the repo | Prevents confidential, licensed, or MNPI-adjacent content from entering source control. |
 | Access filtering | Select access-tiered indexes before search | Search everything, then filter results | Post-retrieval filtering can leak restricted document existence. |
