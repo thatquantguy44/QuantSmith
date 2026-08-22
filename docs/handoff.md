@@ -499,13 +499,18 @@ then adapters can deploy to cron/GitHub Actions/Airflow/Dagster/Prefect.
       Variant selection on fold results is an explicit Non-Goal: that
       needs a deflated Sharpe, the named follow-up.
 
-    **Next up — the real run.** With `0044`, `0045`, and `0046` in place, the
-    remaining step is a wiring exercise, blocked only on data:
-    `fred_local.db`, produced by the operator from
-    `joshualutkemuller/fred-bronze-to-gold-pipeline` via
-    `PYTHONPATH=src python -m fred_pipeline run --local --db-path fred_local.db`
-    with their own `FRED_API_KEY`. No Databricks needed — that repo has a
-    fully local mode. **Blocked on that file.**
+    **The real run — done.** `scripts/fred_real_run.py` wires the leak-free
+    `fred_point_in_time` panel into the `0046` walk-forward harness against
+    an operator-produced `fred_local.db`: 61,833 point-in-time rows across
+    8 macro series, 320 monthly as-of dates, 5 purged/embargoed folds, 265
+    held-out periods. Pooled out-of-sample Sharpe 0.28, probabilistic Sharpe
+    0.907, 80% of folds positive — with one fold sharply negative (Sharpe
+    −1.31), the honest walk-forward answer a single pooled number would
+    have hidden. Report: `specs/0045-fred-point-in-time/backtest_report.md`.
+    The weighting is a demonstration-only cross-sectional z-score of
+    trailing momentum (fit per-fold, train-only) — not a claimed signal,
+    per `0045`'s Non-Goals; re-run with `scripts/fred_real_run.py
+    --db-path <fred_local.db>` whenever the operator refreshes the data.
 
     **Otherwise:** conic/global/nonlinear optimizer forms once a
     dependency-free method or an optional solver dependency is chosen, a

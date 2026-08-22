@@ -318,26 +318,33 @@ operations, data provenance):
   `returns[i + lag]`, `lag >= 1` enforced), turnover-scaled transaction costs,
   financing on short exposure, drawdown, and a probabilistic Sharpe computed on
   every run. Closes the largest dormant-gate gap in the SDK: the CI-enforced
-  `backtest` gate had never validated anything. Explicitly the first half of a
-  two-step build — the second is a real point-in-time macro backtest over
-  `gold_fred_point_in_time` from the FRED bronze-to-gold pipeline, blocked on
-  an operator-held `FRED_API_KEY` (P9: never held here).
+  `backtest` gate had never validated anything. First half of a two-step
+  build — the second, a real point-in-time macro backtest over
+  `gold_fred_point_in_time`, is now done; see `0045`/`0046` below.
 - FRED point-in-time panel adapter — done (spec `0045`,
   `fred_point_in_time.py`). Reads `gold_fred_point_in_time` from the FRED
   bronze-to-gold pipeline's local SQLite output and selects vintages by window
   containment on `realtime_start`/`realtime_end`, so a revision published later
   cannot leak backwards into an earlier as-of date. Closes the input-side half
-  of the gap `0044` left open; the real run is blocked only on the operator
-  producing `fred_local.db`.
+  of the gap `0044` left open.
 - Walk-forward backtest harness — done (spec `0046`, `walk_forward.py`).
   Composes `0006`'s purged, embargoed `make_folds` with `0044`'s engine:
   `fit_predict` is called once per fold on training periods only, and the
   resulting weights are evaluated on that fold's held-out periods. Reports the
   fold distribution — Sharpe dispersion, best/worst fold, positive fraction —
   plus a pooled out-of-sample series and its probabilistic Sharpe. Closes the
-  in-sample gap `0044`'s own report admitted to, and makes the pending FRED run
-  defensible over a short macro sample. Selecting variants on fold results is
-  explicitly out of scope: that needs a deflated Sharpe, the natural follow-up.
+  in-sample gap `0044`'s own report admitted to. Selecting variants on fold
+  results is explicitly out of scope: that needs a deflated Sharpe, the
+  natural follow-up.
+- **The real FRED run — done** (`scripts/fred_real_run.py`). With an
+  operator-produced `fred_local.db`, wires `0045`'s leak-free panel into
+  `0046`'s walk-forward harness: 8 macro series, 320 monthly as-of dates, 5
+  purged/embargoed folds, 265 held-out periods. Pooled out-of-sample Sharpe
+  0.28, probabilistic Sharpe 0.907, 80% of folds positive, one fold sharply
+  negative — the fold distribution doing exactly the job it exists for.
+  Report: `specs/0045-fred-point-in-time/backtest_report.md`. The weighting
+  is a demonstration-only cross-sectional momentum z-score (train-only, per
+  fold), not a claimed signal, per `0045`'s Non-Goals.
 - Optional gates: `ingestion-snapshot`, a stricter notebook-output gate; revisit
   enforcing the heuristic `leakage` gate.
 - Done: a plugin/adapter contract so an adopter's already-built internal

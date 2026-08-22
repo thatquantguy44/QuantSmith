@@ -1,7 +1,7 @@
 # Tasks: Walk-Forward Backtest Harness
 
 - **Spec:** 0046-walk-forward (`spec.md`, `plan.md`)
-- **Last updated:** 2026-08-12
+- **Last updated:** 2026-08-21
 
 ## Definition of Done (applies to every task)
 
@@ -49,6 +49,8 @@ Status values: `todo` | `in-progress` | `blocked` | `done`.
   open question in `spec.md`).
 - Anchored and rolling walk-forward variants, if the contiguous
   expanding-train shape `make_folds` provides proves too restrictive.
-- **The FRED run**, still blocked on `fred_local.db` from the operator:
-  with `0044`, `0045`, and this harness in place, a genuinely
-  point-in-time, out-of-sample macro backtest is a wiring exercise.
+- **The FRED run — done.** `scripts/fred_real_run.py` wires `0044`, `0045`,
+  and this harness against an operator-produced `fred_local.db`: 5
+  purged/embargoed folds, 265 held-out periods, pooled out-of-sample
+  Sharpe 0.28, probabilistic Sharpe 0.907, 80% of folds positive. Report:
+  `specs/0045-fred-point-in-time/backtest_report.md`.
