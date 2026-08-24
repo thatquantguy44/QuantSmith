@@ -47,6 +47,30 @@ agents.zip
 /knowledge_sources.yml
 /knowledge_sources.yaml
 
+# Local author identity (workflow_memory.py's resolve_author, spec 0048) -- read
+# before git config/OS username; referenced as gitignored in the module's own
+# docstring but missing here until now.
+/identity.yml
+
+# Local secrets for dev-only credential resolution (agents/secrets_management/
+# credential_access) -- never committed; sources/*.yml's credential_ref only
+# ever names the env var to read, never the value.
+.env
+*.env.local
+
+# Local morning-brief personalization (spec 0059, agents/economists/
+# morning_brief_writer/) -- watchlist, delivery route, and schedule are personal,
+# not scaffold. Anchored to the repo root, same pattern as role_context.yml,
+# so it does not hide templates/data/morning_brief_config.yml.
+/morning_brief_config.yml
+/morning_brief_config.yaml
+
+# Local generated market-research candidates (spec 0059) -- real pulled
+# commentary and agent-written analysis; specs/0056's own Non-Goals are
+# explicit that real research content must never be committed to this
+# repository, unlike research/, which holds only fictional reference data.
+/research_local/
+
 # Local data artifacts -- the operator produces these from their own accounts
 # (e.g. fred_local.db via the FRED pipeline with their own API key). They are
 # data, not scaffold, and can be large; the SDK ships code that reads them, never

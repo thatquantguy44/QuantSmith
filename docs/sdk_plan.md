@@ -14,7 +14,7 @@ The SDK now has a working v1 built on a spec-driven engineering framework:
   (`instructions/engineering_principles.md`), the SDD method
   (`instructions/spec_driven_development.md`), per-feature specs under `specs/`, and
   a worked example (`specs/0001-daily-momentum-signal/`).
-- **161 agents** in `agents/`, indexed by the catalog `agents/README.md` (the
+- **162 agents** in `agents/`, indexed by the catalog `agents/README.md` (the
   live count — this file is a roadmap, not the source of truth): an
   orchestrator, six lifecycle agents (one per SDLC stage), core domain agents, and
   18 grouped categories — `optimization/`, `machine_learning/`,

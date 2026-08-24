@@ -3,7 +3,7 @@
 ## Snapshot
 
 The SDK has a working v1: a **spec-driven engineering framework** over the six
-software-development stages, **161 agents** in `agents/`,
+software-development stages, **162 agents** in `agents/`,
 **33 quality gates**, **33 instruction standards**, and CI that
 enforces the deterministic gates. It remains primarily a scaffold to be copied
 into quant repos, with `src/quantsmith/pipelines/` holding runnable, dependency-free
@@ -27,7 +27,7 @@ it via stable IDs (`REQ`/`NFR`/`AC`/`RISK`/`T`).
 - `specs/NNNN-slug/{spec,plan,tasks}.md` from `templates/spec/`; worked example at
   `specs/0001-daily-momentum-signal/`.
 
-**Agents (161, verified by the `agent-catalog` gate — treat `agents/README.md`
+**Agents (162, verified by the `agent-catalog` gate — treat `agents/README.md`
 as the live count, not the number here)** — all on the four-file contract
 (`README`/`prompt`/`instructions`/`tasks`) with a `Spec-Driven Role`:
 
@@ -145,7 +145,7 @@ nobody noticed.
 | `0053` | **MCP memory-graph server** — tools over `0048`'s store, with `as_of` honouring the type-aware point-in-time rule | `0048` `T-002`/`T-004`; ideally `0049` | item 17 |
 | `0054` | **MCP RAG server** — vector search with per-access-tier indexes and cited passages | `0052` contract | item 17 |
 
-**Next free spec number: `0059`.** Reserving a number here does not create the
+**Next free spec number: `0060`.** Reserving a number here does not create the
 directory; run `./scripts/new-spec.sh` (or copy `templates/spec/`) when the work
 actually starts.
 
@@ -565,7 +565,7 @@ still open (enforceable vs. advisory deployment; a `workflow_scheduling_cli`).
     as real sources come into use.
 
 14. **P1 Generalization & Team Onboarding — making QuantSmith self-serve across
-    domains.** QuantSmith is now a comprehensive framework (161 agents, 51 specs,
+    domains.** QuantSmith is now a comprehensive framework (162 agents, 52 specs,
     33 gates, 33 standards); the next phase is reducing discovery friction and
     enabling team-intuitive adoption without deep codebase reading.
     - **P0 Phase 1a: Role profiles** (`roles/{portfolio_manager,risk_manager,quant_researcher,data_engineer,compliance_officer}.md`):
@@ -580,7 +580,7 @@ still open (enforceable vs. advisory deployment; a `workflow_scheduling_cli`).
       days.
     - **Phase 2: Workflow discovery** (`docs/workflow_discovery.md`):
       A decision tree (3 questions: Goal? Stage? Timeline?) that routes users to the
-      right orchestrator without reading 161 agent READMEs. Pairs with workflow
+      right orchestrator without reading 162 agent READMEs. Pairs with workflow
       patterns below.
     - **Phase 3: Cross-domain composition patterns** (`patterns/{portfolio_plus_hedge,macro_asset_allocation,signal_plus_model_plus_portfolio}.md`):
       Document 5–10 common multi-domain workflows (equities + options, multi-asset
@@ -722,6 +722,22 @@ still open (enforceable vs. advisory deployment; a `workflow_scheduling_cli`).
       The `agents/knowledge/` contracts remain the agent layer; `0056` is the
       deployable market-research knowledge contract they should eventually read.
       Real research content remains outside this repo.
+    - **Morning market brief — first real runtime slice of `0056`'s
+      generated-summaries flow** (spec `0059`,
+      `src/quantsmith/pipelines/market_brief.py`). Pulls free-API market
+      commentary from three providers (NewsAPI, Alpha Vantage
+      `NEWS_SENTIMENT`, Finnhub), computes what's honestly deterministic
+      (recency filtering, cross-provider dedupe, a sentiment rollup where
+      Alpha Vantage actually covers a ticker), and hands the rest to a new
+      `agents/economists/morning_brief_writer/` agent to write the grounded
+      "Views & Analysis" section. Stages a `pending_review` candidate to a
+      local-only, gitignored root — never `research/`, per `0056`'s own
+      Non-Goals. Credentials follow the existing `sources/*.yml` +
+      `credential_access` pattern, so this is configurable per clone with
+      no code change: three new `sources/*.yml` entries, one new local
+      `morning_brief_config.yml` (watchlist, enabled providers, delivery
+      route, schedule). Does not build `0056`'s promotion mechanics, MCP
+      exposure, or entitlement enforcement — see `0059`'s Non-Goals.
 
     **Honest status.** The store holds **5 records, all reference examples** —
     no real institutional knowledge has been captured yet. The read path is
@@ -876,19 +892,21 @@ still open (enforceable vs. advisory deployment; a `workflow_scheduling_cli`).
       report's own guidance means "a known finding people have learned to
       ignore." That is an accurate description of how they have been treated.
 
-    **The two gaps deliberately NOT closed here**, because neither is buildable
-    from inside this repository:
-    - **One real workflow on real data.** Every shipped result is synthetic and
-      says so. The real run remains blocked on `fred_local.db`, which only the
-      operator can produce. This is the highest-value next action in the whole
-      backlog — it converts every worked example from argument to evidence, and
-      it is the thing that would make the memory write path concrete rather
-      than speculative.
-    - **`access_level` enforced rather than declared.** It exists in the record
-      schema, in `knowledge_sources.yml`, and in `instructions/knowledge_base.md`
-      — and `query()` cannot filter on it. For a firm with information barriers
-      that is a blocker, not a gap. Belongs with the MCP work (item 17), where
-      caller clearance has to be a parameter rather than an assumption.
+    **Two gaps named here — both now closed:**
+    - **One real workflow on real data — done.** `scripts/fred_real_run.py`
+      wires `0045`'s leak-free FRED panel into `0046`'s walk-forward harness
+      against an operator-produced `fred_local.db`; see item 13's "The real
+      run" entry above for the numbers. Converts that worked example from
+      argument to evidence.
+    - **`access_level` enforced rather than declared — done** (spec `0058`).
+      `workflow_memory.query()` now accepts an explicit `caller_clearance`
+      parameter and filters records by `access_level` when one is supplied,
+      defaulting to unrestricted for today's single local trust boundary. The
+      narrower gap that remains: no caller yet *resolves* a real person's
+      clearance and passes it in — that's still the MCP work (item 17,
+      `0052`–`0054`), where a network-reachable server must always supply an
+      explicit `caller_clearance` rather than relying on the default meant for
+      a local, already-trusted process.
 
 ## Open Questions For The Owner
 
@@ -905,7 +923,7 @@ still open (enforceable vs. advisory deployment; a `workflow_scheduling_cli`).
 
 ## Risks
 
-- Breadth: 161 agents is useful only if each stays narrow and inspectable.
+- Breadth: 162 agents is useful only if each stays narrow and inspectable.
 - Heuristic gates (`leakage`, `backtest`, `secret-scan` fallback) can false-positive
   or miss; keep them advisory unless a repo's layout makes them reliable.
 - Docs can drift from the code; the `docs-link`, `agent-catalog`, and `spec-index` gates help, but

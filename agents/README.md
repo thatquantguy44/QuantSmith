@@ -341,6 +341,7 @@ duplicated here. Backed by `instructions/macro_economic_analysis.md` and
 | `economists/macro_scenario_analyst/` | A regime → forward stress scenarios with quantified indicator paths | `risk`, `backtest_review` |
 | `economists/macro_backdrop_summarizer/` | All of the above → a concise, recurring macro brief | `research_analyst`, `modeling`, `portfolio_management/*` |
 | `economists/economic_outlook_report_writer/` | All of the above → a longer periodic outlook report | `portfolio_management/*`, IC-facing review |
+| `economists/morning_brief_writer/` | Real pulled market commentary (spec `0059`) → grounded Views & Analysis for a personal daily brief | staged `pending_review` via `market_brief.candidates_from_brief` |
 
 ## Securities Financing Agents (`securities_financing/`)
 

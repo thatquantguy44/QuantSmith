@@ -15,7 +15,7 @@ read already exists; this group is where that read actually comes from.
 | Indicators | `macro_indicator_analyst/` |
 | Policy & Regime | `monetary_policy_analyst/`, `macro_regime_classifier/` |
 | Cross-Asset & Scenario | `cross_asset_macro_linkages/`, `macro_scenario_analyst/` |
-| Synthesis & Reporting | `macro_backdrop_summarizer/`, `economic_outlook_report_writer/` |
+| Synthesis & Reporting | `macro_backdrop_summarizer/`, `economic_outlook_report_writer/`, `morning_brief_writer/` |
 
 ## Note On Scope
 
@@ -38,13 +38,17 @@ a named downstream agent rather than acting on it.
 | `economists/macro_scenario_analyst/` | A regime → forward stress scenarios with quantified indicator paths | `risk`, `backtest_review` |
 | `economists/macro_backdrop_summarizer/` | Everything above → a concise, recurring macro brief | `research_analyst`, `modeling`, `portfolio_management/*` (shared workflow context) |
 | `economists/economic_outlook_report_writer/` | Everything above → a longer periodic outlook report | `portfolio_management/*`, an IC-facing deliverable |
+| `economists/morning_brief_writer/` | Real, pulled market commentary (`market_brief.py`, spec `0059`) → grounded "Views & Analysis" for a personal daily brief | `market_brief.render_morning_brief`/`candidates_from_brief` (staged `pending_review`, never this group's other agents) |
 
 ## Data Foundation
 
 Every agent here checks `sources/{fred,bls,bea,census,eia}.yml` (spec
 `0027`) first for registered indicator data — quality, point-in-time
 characteristics, and connection details — before treating any figure as
-known. See `instructions/data_source_catalog.md`.
+known. See `instructions/data_source_catalog.md`. `morning_brief_writer` is
+the one exception: it works from market **commentary**, not macro
+**indicators**, and its data foundation is `sources/{newsapi,
+alpha_vantage_news,finnhub_news}.yml` (spec `0059`) instead.
 
 ## Shared Principles
 
