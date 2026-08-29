@@ -57,9 +57,13 @@ Every acceptance criterion must be named by at least one test.
   a committed sample output and a documented real cron deployment (two
   entries: the job itself, and a later report-render step). Covered by
   `tests/test_scheduled_daily_report_example.py`.
-- Decide when schedule deployment becomes enforceable rather than advisory.
-- The worked example's README names the gap it deliberately doesn't close: a
-  `workflow_scheduling_cli` (mirroring `workflow_memory_cli.py`'s pattern) so
-  the report-render half of a real cron deployment doesn't need a bespoke
-  script per team. Natural next slice if this moves from example to adopted
-  practice.
+- ~~Decide when schedule deployment becomes enforceable rather than
+  advisory.~~ **Resolved by spec `0060`:** advisory by default, matching
+  every gate in this repo — no blocking mechanism wired into `dispatch_job`
+  until a concrete provider-scheduler deployment exists to enforce against.
+- ~~The worked example's README names the gap it deliberately doesn't close:
+  a `workflow_scheduling_cli`...~~ **Done, spec `0060`:**
+  `workflow_scheduling_cli.py` (`render-report`/`alerts`), plus
+  `deliver_routed_alerts` closing the other named gap — `alert_handoffs()`
+  returning payloads with nothing to deliver them. See
+  `specs/0060-scheduler-monitoring/`.
