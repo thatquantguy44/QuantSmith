@@ -53,19 +53,22 @@ explicit timezone, logs to a known directory, paired alert route):
   >> /var/log/quantsmith/memory-review-digest.log 2>&1
 
 # 07:30 America/New_York -- after the day's jobs have had a chance to run,
-# render the operations report from the shared ledger (a thin wrapper
-# around ExecutionLedger + render_daily_operations_report, not shown here)
+# render the operations report from the shared ledger
 30 7 * * 1-5 cd /path/to/repo && /usr/bin/env python3 \
   -m quantsmith.pipelines.workflow_scheduling_cli render-report \
-  --ledger /var/quantsmith/ledger.jsonl --root memory \
+  --ledger /var/quantsmith/ledger.jsonl \
   >> /var/log/quantsmith/daily-operations-report.log 2>&1
 ```
 
-There is no `workflow_scheduling_cli` in the SDK yet -- that second line is
-what a team would add, using `ExecutionLedger`/`render_daily_operations_report`
-exactly as `run_example.py` calls them, once they need this running for real
-rather than as a worked example. See `specs/0055-workflow-scheduling-operations/tasks.md`'s
-Follow-ups.
+`workflow_scheduling_cli` now exists (spec `0060`) -- `render-report` wraps
+`ExecutionLedger`/`render_daily_operations_report` exactly as `run_example.py`
+calls them, so the second cron entry above is real, not aspirational. An
+`alerts` subcommand previews (never delivers) the routed alert handoffs
+`alert_handoffs`/`alerting.route` would produce for the same ledger; wiring
+real delivery is `workflow_scheduling.deliver_routed_alerts` composed with
+your own `adapters/alert_delivery/` transport, in your own scheduler
+integration -- this SDK holds no transport/credentials (P9). See
+`specs/0060-scheduler-monitoring/`.
 
 ## What this proves, and what it doesn't
 

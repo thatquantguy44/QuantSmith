@@ -1,0 +1,37 @@
+source_id: "newsapi"
+name: "NewsAPI.org"
+type: api
+owner: "quant-research"
+description: >
+  Broad general-news search and headlines aggregation across thousands of
+  publishers. Used by spec 0059's morning market brief for general
+  macro/market-topic coverage alongside ticker-scoped commentary from
+  alpha_vantage_news and finnhub_news. See
+  adapters/data_access/external_apis/newsapi.md for delivery rules (required
+  metadata, request shape, dedupe guidance).
+
+domain: ["macro", "equities", "market_commentary"]
+access_level: internal
+
+quality:
+  completeness: medium
+  timeliness: "near real-time on paid tiers; the free 'Developer' tier delays articles ~24 hours"
+  known_issues:
+    - "free 'Developer' tier is restricted by NewsAPI's own terms to non-commercial, local-development use -- not for a production/paid deployment"
+    - "free tier is capped at 100 requests/day; a watchlist with many topics can exhaust this quickly"
+    - "no sentiment or ticker tagging -- relevance to a specific security is a keyword match only, not a verified association"
+  last_assessed: "2026-08-22"
+
+point_in_time:
+  supports_asof: false
+  revision_policy: "articles are not revised; a publisher may retract or remove an article after the fact with no versioned history"
+
+connection:
+  method: rest_api
+  endpoint_or_host: "https://newsapi.org/v2/everything"
+  credential_ref: "NEWSAPI_API_KEY"   # free registration; still a pointer, not the key itself
+
+documentation_uri: "https://newsapi.org/docs"
+status: active
+
+data_contract_refs: []

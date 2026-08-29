@@ -26,7 +26,8 @@ from pathlib import Path
 from typing import Any, Callable, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple
 from zoneinfo import ZoneInfo
 
-from .alerting import Alert
+from .alerting import Alert, RoutedAlert
+from ..adapters.alert_delivery.result import AlertDeliveryEvent, DeliveryResult
 
 VALID_ENVIRONMENTS = ("dev", "staging", "prod")
 VALID_TARGET_TYPES = (
@@ -527,6 +528,58 @@ def alert_handoffs(records: Sequence[RunRecord], tasks: Sequence[ManualTask], *,
                 )
             )
     return tuple(alerts)
+
+
+def deliver_routed_alerts(
+    routed: Sequence[RoutedAlert],
+    *,
+    job_id: str,
+    correlation_id: str,
+    senders: Mapping[str, Callable[[AlertDeliveryEvent], DeliveryResult]],
+    alert_route: str = "",
+) -> Tuple[DeliveryResult, ...]:
+    """Deliver already-routed alerts through a caller-chosen provider per channel.
+
+    Closes the gap ``alert_handoffs`` states plainly: it "returns alert
+    payloads only." ``alerting.route`` already assigns ``owner``/``channel``
+    (spec 0020); this is the missing other half, spec 0055's own Follow-up.
+
+    ``senders`` maps a channel name (``"email"``, ``"slack"``, ...) to a
+    fully pre-bound callable of one argument -- the caller applies its own
+    ``transport``/``dry_run`` via e.g. ``functools.partial(deliver_email,
+    transport=my_transport, dry_run=False)`` before handing it in, the same
+    injected-callable shape ``dispatch_job``'s own ``handlers`` parameter
+    already uses. No network code lives here; a channel with no matching
+    sender raises rather than silently dropping the alert.
+
+    ``alert_route`` (typically ``ScheduleJob.alert_route``) becomes the
+    delivered event's ``route`` field -- the destination *within* a channel
+    (a mailbox, a webhook target); ``RoutedAlert.channel`` decides *which*
+    channel/provider handles it. The two are deliberately independent.
+    """
+    results: List[DeliveryResult] = []
+    for r in routed:
+        sender = senders.get(r.channel)
+        if sender is None:
+            raise ValueError(
+                f"no sender registered for channel {r.channel!r} "
+                f"(alert {r.alert.rule_id}); registered channels: {sorted(senders)}"
+            )
+        event = AlertDeliveryEvent(
+            event_id=r.alert.dedup_key,
+            workflow_id=job_id,
+            source="quantsmith-scheduling",
+            severity=r.alert.severity,
+            status="triggered",
+            owner=r.owner,
+            route=alert_route,
+            title=f"{r.alert.rule_id}: {r.alert.metric}",
+            summary=r.alert.message,
+            correlation_id=correlation_id,
+            dedupe_key=r.alert.dedup_key,
+        )
+        results.append(sender(event))
+    return tuple(results)
 
 
 def memory_candidates_from_failures(records: Sequence[RunRecord], *, minimum_failures: int = 2) -> Tuple[MemoryCandidate, ...]:

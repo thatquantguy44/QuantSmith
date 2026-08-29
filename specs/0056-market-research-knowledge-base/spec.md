@@ -4,7 +4,7 @@
 - **Status:** Draft
 - **Author:** QuantSmith
 - **Approver:** TBD
-- **Last updated:** 2026-08-21
+- **Last updated:** 2026-08-22
 
 > WHAT and WHY only. No implementation detail — that belongs in `plan.md`.
 
@@ -130,6 +130,13 @@ Each criterion is testable and maps to a requirement.
   `0054` RAG server from the handoff plan.
 - Related operational work: `0055` scheduled workflow operations for recurring
   research ingestion, status reports, and review reminders.
+- First real runtime slice: `0059` morning market brief
+  (`src/quantsmith/pipelines/market_brief.py`) builds the generated-summaries
+  half of the requirement to produce candidates from scheduled reports only
+  after reviewable provenance is available — proposing and staging a
+  `pending_review` candidate to a local-only root, never `research/`. It does
+  not satisfy this spec's access-control, quarantine, audit-logging, MCP, or
+  email-connector requirements; see `0059`'s own Non-Goals.
 - Data sources may include user Markdown notes, generated reports, PDFs, DOCX
   files, HTML exports, tagged email market color, email/transcript exports,
   enterprise drives, wikis, object stores, document repositories, and approved

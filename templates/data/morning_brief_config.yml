@@ -1,0 +1,63 @@
+# Morning Brief Config
+#
+# Personalizes spec 0059's morning-market-brief pipeline
+# (src/quantsmith/pipelines/market_brief.py,
+# agents/economists/morning_brief_writer/) -- which topics/tickers to watch,
+# which of the three registered providers to pull from, where to deliver the
+# rendered brief, and where staged research candidates land for review. This
+# is a template: copy it to `morning_brief_config.yml` at the repo root and
+# fill in your own specifics *there*. `morning_brief_config.yml` is
+# gitignored by default (see .gitignore).
+#
+# Hard rule, same as role_context.yml: nothing identifying a real firm,
+# account, or person belongs in any file tracked by git.
+#
+# Resolution order (mirrors role_context.yml):
+#   1. $QF_MORNING_BRIEF_CONFIG   path to a filled-in config file
+#   2. ./morning_brief_config.yml at the repo root (local only)
+#   3. none configured            the pipeline has nothing to run against
+
+watchlist:
+  # Free-text topics (matched against NewsAPI's general search) and/or
+  # ticker symbols (matched against Alpha Vantage's and Finnhub's
+  # ticker-scoped endpoints). List both if you want both; each provider
+  # below only consumes the kind of term it understands.
+  topics: ["Federal Reserve", "inflation", "labor market"]
+  tickers: ["AAPL", "MSFT"]
+
+providers:
+  # Each key names a sources/*.yml source_id. Credentials are never set
+  # here -- see that source's connection.credential_ref for which
+  # environment variable to set (resolved at runtime by
+  # agents/secrets_management/credential_access). Setting `enabled: false`
+  # (or omitting a provider entirely) means market_brief.fetch_commentary
+  # is simply never called for it.
+  newsapi:
+    enabled: true
+  alpha_vantage_news:
+    enabled: true
+  finnhub_news:
+    enabled: true
+
+lookback_hours: 18        # how far back a run pulls from each provider
+max_articles_per_topic: 5 # per topic/ticker, after dedupe across providers
+
+delivery:
+  # Names an adapters/alert_delivery/ route; the actual recipient address or
+  # webhook is configured wherever that adapter's transport is wired up for
+  # your environment, never here.
+  route: "morning-brief-email"
+
+research_staging:
+  # Local-only root for staged, pending-review market-research candidates
+  # (market_brief.stage_research_candidates). Never research/ -- per
+  # specs/0056-market-research-knowledge-base/spec.md's own Non-Goals, real
+  # generated research content must never be committed to this repository.
+  root: "research_local"
+
+schedule:
+  # Register a job against this time in your own schedule registry
+  # (spec 0055, templates/data/schedule_registry.md) -- this file only
+  # states the intent, it does not itself schedule anything.
+  time_utc: "11:00"
+  timezone_note: "11:00 UTC ~= 06:00 US/Eastern (standard time) -- adjust to your own morning"

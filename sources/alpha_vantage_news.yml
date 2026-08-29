@@ -1,0 +1,38 @@
+source_id: "alpha_vantage_news"
+name: "Alpha Vantage NEWS_SENTIMENT"
+type: api
+owner: "quant-research"
+description: >
+  Ticker-tagged news and market-commentary headlines with a machine-readable
+  sentiment score and label per article and per mentioned ticker. Used by
+  spec 0059's morning market brief as the one provider that gives the
+  pipeline a genuinely deterministic aggregate to compute -- a sentiment
+  rollup by ticker -- rather than only more headlines. See
+  adapters/data_access/external_apis/alpha_vantage_news.md for delivery
+  rules (required metadata, request shape, sentiment-field handling).
+
+domain: ["equities", "market_commentary"]
+access_level: internal
+
+quality:
+  completeness: medium
+  timeliness: "near real-time"
+  known_issues:
+    - "free tier is rate-limited (historically ~25 requests/day on the standard free key); a watchlist with many tickers can exhaust this quickly"
+    - "sentiment_score/sentiment_label are the provider's own model output, not a verified fact -- treat as a signal, not a claim, per instructions/knowledge_base.md's grounding standard"
+    - "ticker relevance_score can be low for an article that only mentions a ticker in passing; a caller should consider filtering on it"
+  last_assessed: "2026-08-22"
+
+point_in_time:
+  supports_asof: false
+  revision_policy: "articles are not revised after publication; no versioned sentiment history"
+
+connection:
+  method: rest_api
+  endpoint_or_host: "https://www.alphavantage.co/query"
+  credential_ref: "ALPHA_VANTAGE_API_KEY"   # free registration; still a pointer, not the key itself
+
+documentation_uri: "https://www.alphavantage.co/documentation/#news-sentiment"
+status: active
+
+data_contract_refs: []

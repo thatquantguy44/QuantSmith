@@ -19,6 +19,9 @@ entitlements, or redistribution rules matter to quant workflows.
 | `sec_edgar.md` | SEC EDGAR filings, company facts, submissions, and XBRL data. |
 | `finra.md` | FINRA reference, transparency, short interest, and market regulation data. |
 | `sp_global.md` | S&P Global Market Intelligence, ratings, indices, and vendor APIs. |
+| `newsapi.md` | NewsAPI.org general-news search and headline aggregation. |
+| `alpha_vantage_news.md` | Alpha Vantage NEWS_SENTIMENT — ticker-tagged news with sentiment scoring. |
+| `finnhub_news.md` | Finnhub company/market news — ticker-scoped headlines. |
 
 ## Standard Metadata
 

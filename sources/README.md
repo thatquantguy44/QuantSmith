@@ -27,13 +27,19 @@ sources/
 | [`bea`](bea.yml) | BEA (GDP, personal income, national accounts) | api | public | active | high |
 | [`census`](census.yml) | U.S. Census Bureau (economic, demographic, housing) | api | public | active | high |
 | [`sec_edgar`](sec_edgar.yml) | SEC EDGAR (filings, XBRL, disclosure metadata) | api | public | active | high |
+| [`newsapi`](newsapi.yml) | NewsAPI.org (general news search/headlines) | api | internal | active | medium |
+| [`alpha_vantage_news`](alpha_vantage_news.yml) | Alpha Vantage NEWS_SENTIMENT (ticker-tagged news + sentiment) | api | internal | active | medium |
+| [`finnhub_news`](finnhub_news.yml) | Finnhub Company/Market News (ticker-scoped news) | api | internal | active | medium |
 
 `fred.yml` is a filled-in reference showing the schema in use — the same
 role `specs/0001-daily-momentum-signal/` plays for the spec format. Copy
 its structure, not its content, for a real source. `bls`, `eia`, `bea`, and
 `census` require or accept a free-registration API key (see each entry's
 `connection.credential_ref`); `sec_edgar` requires a compliant User-Agent
-header instead of a key.
+header instead of a key. `newsapi`, `alpha_vantage_news`, and
+`finnhub_news` back spec `0059`'s morning market brief — each requires a
+free-registration API key, and each has a free-tier caveat worth reading
+before relying on it (see each entry's `quality.known_issues`).
 
 ## How This Connects
 

@@ -1,0 +1,36 @@
+source_id: "finnhub_news"
+name: "Finnhub Company/Market News"
+type: api
+owner: "quant-research"
+description: >
+  Ticker-scoped company news and general market-news headlines. Used by
+  spec 0059's morning market brief for per-position headline coverage
+  alongside NewsAPI's broader search and Alpha Vantage's sentiment-scored
+  coverage. See adapters/data_access/external_apis/finnhub_news.md for
+  delivery rules (required metadata, request shape, endpoint selection).
+
+domain: ["equities", "market_commentary"]
+access_level: internal
+
+quality:
+  completeness: medium
+  timeliness: "near real-time"
+  known_issues:
+    - "free tier is rate-limited (60 calls/minute) and company-news lookback is capped to roughly one year"
+    - "no sentiment score on the free news endpoints -- headline text and category only"
+    - "company-news requires one call per ticker; a watchlist with many tickers means many calls per run, not one batched call"
+  last_assessed: "2026-08-22"
+
+point_in_time:
+  supports_asof: false
+  revision_policy: "articles are not revised after publication; no versioned history"
+
+connection:
+  method: rest_api
+  endpoint_or_host: "https://finnhub.io/api/v1"
+  credential_ref: "FINNHUB_API_KEY"   # free registration; still a pointer, not the key itself
+
+documentation_uri: "https://finnhub.io/docs/api/company-news"
+status: active
+
+data_contract_refs: []
