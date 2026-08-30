@@ -54,9 +54,9 @@ Status values: `todo` | `in-progress` | `blocked` | `done`.
 | AC-007 | `test_duplicate_id_flagged_AC_007` | done |
 | AC-008 | `test_date_order_flagged_AC_008` | done |
 | AC-009 | `test_check_decay_flags_old_record`, `test_check_decay_fresh_record_not_flagged`, `test_check_decay_retired_not_flagged` | done |
-| AC-010 | `test_env_override_short_circuits_AC_010` | todo |
-| AC-011 | `test_git_email_handle_stable_and_opaque_AC_011` | todo |
-| AC-012 | `test_distinct_identities_distinct_handles_AC_012` | todo |
+| AC-010 | `test_env_override_short_circuits_AC_010`, `test_env_override_explicit_arg_short_circuits_AC_010` | done |
+| AC-011 | `test_git_email_handle_stable_and_opaque_AC_011`, `test_git_email_handle_case_insensitive_AC_011`, `test_handle_length_and_prefix_AC_011` | done |
+| AC-012 | `test_distinct_identities_distinct_handles_AC_012` | done |
 | AC-013 | `test_email_author_flagged_and_agrees_with_pii_scan_AC_013` | done |
 | AC-014 | `test_store_version_stable_across_order`, `test_store_version_changes_on_update` | done |
 | AC-015 | `test_unsupported_yaml_raises_with_location_AC_015` | done |

@@ -17,6 +17,13 @@ import pathlib
 
 import pytest
 
+import os
+
+from quantsmith.pipelines.access_control import (
+    AUTHOR_HANDLE_RE,
+    derive_handle,
+    resolve_author,
+)
 from quantsmith.pipelines.workflow_memory import (
     MemoryParseError,
     Record,
@@ -568,3 +575,59 @@ def test_store_version_changes_on_update():
     r1 = _record(id="A", statement="original")
     r2 = _record(id="A", statement="updated")
     assert store_version([r1]) != store_version([r2])
+
+
+# ---------------------------------------------------------------------------
+# T-007 / AC-010, AC-011, AC-012: resolve_author + derive_handle
+# ---------------------------------------------------------------------------
+
+def test_env_override_short_circuits_AC_010(monkeypatch):
+    """QF_MEMORY_AUTHOR env var is returned as-is, no derivation (AC-010)."""
+    handle = "u-testhandle-from-env"
+    monkeypatch.setenv("QF_MEMORY_AUTHOR", handle)
+    # Must use the env value without transforming it through derive_handle.
+    result = resolve_author()
+    assert result == handle
+
+
+def test_env_override_explicit_arg_short_circuits_AC_010():
+    """An explicit override kwarg takes the same pass-through path as the env var."""
+    result = resolve_author(override="u-explicit-handle")
+    assert result == "u-explicit-handle"
+
+
+def test_git_email_handle_stable_and_opaque_AC_011():
+    """derive_handle turns a git email into a stable, opaque handle (AC-011).
+
+    The handle must:
+    - match AUTHOR_HANDLE_RE (no @, lowercase hex, starts with a letter)
+    - be stable: same input → same output
+    - not contain the raw email
+    """
+    email = "researcher@example.com"
+    h1 = derive_handle(email)
+    h2 = derive_handle(email)
+    assert h1 == h2, "handle must be stable across calls"
+    assert AUTHOR_HANDLE_RE.match(h1), f"{h1!r} does not match AUTHOR_HANDLE_RE"
+    assert "@" not in h1, "raw email must not appear in handle"
+    assert "researcher" not in h1, "local part of email must not appear in handle"
+    assert "example" not in h1, "domain of email must not appear in handle"
+
+
+def test_git_email_handle_case_insensitive_AC_011():
+    """Email case-folding ensures the same handle regardless of capitalisation."""
+    assert derive_handle("Researcher@Example.COM") == derive_handle("researcher@example.com")
+
+
+def test_distinct_identities_distinct_handles_AC_012():
+    """Two different identities produce two different handles (AC-012)."""
+    h1 = derive_handle("alice@example.com")
+    h2 = derive_handle("bob@example.com")
+    assert h1 != h2
+
+
+def test_handle_length_and_prefix_AC_011():
+    """Handle is always 'u-' + 24 hex chars = 26 chars total."""
+    h = derive_handle("any.user@firm.io")
+    assert h.startswith("u-")
+    assert len(h) == 26  # "u-" + 24 hex chars
