@@ -646,7 +646,111 @@ def validate(records: Sequence[Record]) -> List[Finding]:
                 f"author {r.author!r} is not a pseudonymous handle — an address "
                 "or free text must never be committed as authorship", **where))
 
+        # T-014 — corroboration consistency (spec REQ-010)
+        if r.corroboration_derived > 0 and r.corroboration_count > r.corroboration_derived:
+            findings.append(Finding(
+                r.id, "warn",
+                f"declared corroboration_count {r.corroboration_count} exceeds "
+                f"derived count {r.corroboration_derived} (distinct source_run entries); "
+                "update the count or add more evidence runs", **where))
+        elif r.confidence == "high" and r.corroboration_derived <= 1:
+            findings.append(Finding(
+                r.id, "warn",
+                f"confidence=high but only {r.corroboration_derived} corroborating "
+                "evidence run(s); consider lowering confidence or adding runs", **where))
+
+    # T-015 — supersession integrity (spec REQ-015)
+    all_ids = set(seen.keys())
+    for r in records:
+        where = {"file": r.source_file, "line": r.source_line}
+        if r.status == "superseded" and r.superseded_by is None:
+            findings.append(Finding(
+                r.id, "error",
+                "status=superseded but superseded_by is not set", **where))
+        if r.superseded_by is not None and r.superseded_by not in all_ids:
+            findings.append(Finding(
+                r.id, "error",
+                f"superseded_by={r.superseded_by!r} does not resolve to a known id",
+                **where))
+    # Cycle detection over the superseded_by graph.
+    superseded_by_map = {r.id: r.superseded_by for r in records if r.superseded_by}
+    for start_id in superseded_by_map:
+        visited: set = {start_id}
+        current = superseded_by_map.get(start_id)
+        while current is not None and current in superseded_by_map:
+            if current in visited:
+                findings.append(Finding(
+                    start_id, "error",
+                    f"superseded_by chain is cyclic (revisited {current!r})"))
+                break
+            visited.add(current)
+            current = superseded_by_map.get(current)
+
+    # T-016 — contradiction candidates (spec REQ-016)
+    active = [r for r in records if r.status == "active"]
+    for i, r1 in enumerate(active):
+        for r2 in active[i + 1:]:
+            if r1.scope == r2.scope and r1.type == r2.type:
+                if r2.id in r1.coexists or r1.id in r2.coexists:
+                    continue
+                findings.append(Finding(
+                    r1.id, "info",
+                    f"active record {r2.id!r} shares scope {r1.scope!r} and type "
+                    f"{r1.type!r}; mark one superseded or add coexists to silence",
+                    file=r1.source_file, line=r1.source_line))
+
     return findings
+
+
+# --------------------------------------------------------------------------
+# Decay check and store fingerprint (spec 0048 T-006, T-008)
+# --------------------------------------------------------------------------
+
+def check_decay(records: Sequence[Record], freshness_days: int) -> List[Finding]:
+    """Records whose last_confirmed is older than freshness_days.
+
+    Returns info-severity findings only — decay is advisory; nothing is
+    excluded from queries because it is stale. The cutoff is relative to
+    today so the same store produces different findings on different dates,
+    which is expected: decay is a live-operations concern, not an audit trail.
+    """
+    import hashlib as _hashlib  # local import to avoid shadowing top-level name
+    cutoff = datetime.date.today() - datetime.timedelta(days=freshness_days)
+    return [
+        Finding(
+            r.id, "info",
+            f"last_confirmed {r.last_confirmed.isoformat()} is older than "
+            f"{freshness_days} days; consider reconfirming",
+            file=r.source_file, line=r.source_line,
+        )
+        for r in records
+        if r.status == "active" and r.last_confirmed < cutoff
+    ]
+
+
+def store_version(records: Sequence[Record]) -> str:
+    """A short content hash of the record set, for change detection.
+
+    Sorted by id so the hash is independent of load order, and built from
+    the fields most likely to change on a legitimate update (statement,
+    last_confirmed, status) rather than provenance metadata.
+    """
+    import hashlib as _hashlib
+    h = _hashlib.sha256()
+    for r in sorted(records, key=lambda r: r.id):
+        h.update(
+            f"{r.id}:{r.statement}:{r.last_confirmed.isoformat()}:{r.status}\n"
+            .encode("utf-8")
+        )
+    return h.hexdigest()[:16]
+
+
+def load_manifest(root: str | os.PathLike = "memory") -> Dict:
+    """Load memory/manifest.yaml, returning an empty dict if absent."""
+    path = Path(root) / "manifest.yaml"
+    if not path.is_file():
+        return {}
+    return parse_memory_file(path.read_text(encoding="utf-8"), str(path))
 
 
 # --------------------------------------------------------------------------

@@ -30,3 +30,42 @@ records:
     last_confirmed: 2026-06-02
     status: active
     pit_scope: "<= decision date"
+
+  - id: MEM-QR-0003
+    scope: strategy:12-1-momentum
+    type: pattern
+    statement: "12-1 momentum skips the most recent month (t-1) to avoid microstructure reversal. Formation window is months t-12 through t-2 inclusive; the skip month is not a data gap — it is structural."
+    evidence:
+      source_run: run-2026-08-30-backtest-momentum-v2
+    confidence: medium
+    corroboration_count: 1
+    first_seen: 2026-08-30
+    last_confirmed: 2026-08-30
+    status: active
+    pit_scope: "<= decision date"
+
+  - id: MEM-QR-0004
+    scope: strategy:momentum-universe
+    type: pitfall
+    statement: "Exclude securities with fewer than 12 months of listing history at the rebalance date; they have no valid formation period and introduce look-ahead if included via their first-day return."
+    evidence:
+      source_run: run-2026-08-30-backtest-momentum-v2
+    confidence: medium
+    corroboration_count: 1
+    first_seen: 2026-08-30
+    last_confirmed: 2026-08-30
+    status: active
+    pit_scope: "<= run date"
+
+  - id: MEM-QR-0005
+    scope: strategy:signal-normalization
+    type: pattern
+    statement: "Signals are z-scored cross-sectionally within each asset class at the rebalance date, not globally, to avoid spurious factor exposures from unequal universe composition across asset classes."
+    evidence:
+      source_run: run-2026-08-30-backtest-momentum-v2
+    confidence: medium
+    corroboration_count: 1
+    first_seen: 2026-08-30
+    last_confirmed: 2026-08-30
+    status: active
+    pit_scope: "<= decision date"

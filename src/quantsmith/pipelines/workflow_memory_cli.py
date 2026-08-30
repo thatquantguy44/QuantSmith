@@ -106,6 +106,55 @@ def _cmd_whoami(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_validate(args: argparse.Namespace) -> int:
+    import pathlib
+    root = pathlib.Path(args.root)
+    all_records = []
+    for path in sorted(root.rglob("*.yaml")):
+        if "inbox" in path.parts:
+            continue
+        try:
+            all_records.extend(wm.load_records(path.read_text(), str(path)))
+        except wm.MemoryParseError as exc:
+            print(f"parse error: {exc}", file=sys.stderr)
+            return 1
+    findings = wm.validate(all_records)
+    errors = 0
+    for f in findings:
+        loc = f"{f.file}:{f.line}" if f.file else ""
+        prefix = f"[{f.severity.upper()}]"
+        print(f"{prefix} {f.record_id}: {f.message}" + (f"  ({loc})" if loc else ""))
+        if f.severity == "error":
+            errors += 1
+    if not findings:
+        print(f"ok — {len(all_records)} record(s), no findings")
+    return 1 if errors else 0
+
+
+def _cmd_decay(args: argparse.Namespace) -> int:
+    import pathlib
+    root = pathlib.Path(args.root)
+    manifest = wm.load_manifest(args.root)
+    freshness_days = int(manifest.get("freshness_days", args.freshness_days))
+    all_records = []
+    for path in sorted(root.rglob("*.yaml")):
+        if "inbox" in path.parts:
+            continue
+        try:
+            all_records.extend(wm.load_records(path.read_text(), str(path)))
+        except wm.MemoryParseError as exc:
+            print(f"parse error: {exc}", file=sys.stderr)
+            return 1
+    findings = wm.check_decay(all_records, freshness_days)
+    if not findings:
+        print(f"ok — {len(all_records)} active record(s) all confirmed within "
+              f"{freshness_days} days")
+        return 0
+    for f in findings:
+        print(f"[STALE] {f.record_id}: {f.message}")
+    return 0  # decay is advisory; never blocks
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(
         prog="quantsmith.pipelines.workflow_memory_cli",
@@ -144,6 +193,16 @@ def main(argv=None) -> int:
     p_whoami.add_argument("--root", default=".",
                           help="repo root to read identity.yml from (default: cwd)")
 
+    p_validate = sub.add_parser("validate", help="validate all records under a memory root")
+    p_validate.add_argument("--root", default="memory",
+                            help="memory root directory (default: memory)")
+
+    p_decay = sub.add_parser("decay", help="report stale records under a memory root")
+    p_decay.add_argument("--root", default="memory",
+                         help="memory root directory (default: memory)")
+    p_decay.add_argument("--freshness-days", type=int, default=90,
+                         help="age threshold in days (default: 90; overridden by manifest)")
+
     args = parser.parse_args(argv)
 
     dispatch = {
@@ -152,6 +211,8 @@ def main(argv=None) -> int:
         "promote": _cmd_promote,
         "discard": _cmd_discard,
         "whoami": _cmd_whoami,
+        "validate": _cmd_validate,
+        "decay": _cmd_decay,
     }
     handler = dispatch.get(args.command)
     if handler is None:

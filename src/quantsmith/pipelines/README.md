@@ -589,23 +589,67 @@ PYTHONPATH=src python3 -m pytest tests/test_financing_cost_analysis.py -q
 
 ## `workflow_memory.py` — spec `0048`
 
-Makes spec `0002`'s committed `memory/` store machine-readable. `load_records`
+Makes spec `0002`'s committed `memory/` store machine-readable. `load_store()`
 parses the YAML into typed `Record` objects with a dependency-free subset parser
 that raises `MemoryParseError(file, line, reason)` rather than guessing;
-`point_in_time_filter` enforces the P4 firewall; `validate` replaces the string
-grep the `memory` gate has always used.
+`query()` retrieves records by scope, type, confidence, and status with
+deterministic ordering (confidence → corroboration → `last_confirmed` → id);
+`render_context()` fills a character budget rank-ordered; `validate()` replaces
+the string grep the `memory` gate has always used; `check_decay()` flags records
+overdue against `freshness_days`.
 
-The point-in-time rule depends on record `type`, because a memory store is
-itself look-ahead: mechanical facts (`schema`/`quirk`/`pitfall`) are timeless,
-claims about what worked (`pattern`/`metric`/`performance`) are bounded by
-`last_confirmed` — corroboration is where the future enters a record — and
-`decision` is bounded by `first_seen`. The `pit_scope` rule applies
-independently and both must pass.
+**Point-in-time rule (two independent checks — both must pass).**
+Type-based: mechanical facts (`schema`/`quirk`/`pitfall`) are timeless; claims
+about what worked (`pattern`/`metric`/`performance`) are bounded by
+`last_confirmed`; `decision` is bounded by `first_seen`. The `pit_scope` rule
+applies on top — an unrecognised `pit_scope` excludes the record (exclusion is
+the safe failure). An unknown type is also excluded.
+
+**New fields beyond `0002`'s base schema.**
+`evidence` accepts a single mapping or a list of mappings; `corroboration_derived`
+counts the list length and is used for ordering — the declared integer is advisory.
+`superseded_by` points from a superseded record to its replacement; `coexists`
+on either of a same-scope/same-type pair silences the contradiction candidate.
+`author` is a pseudonymous `u-<24 hex>` handle derived by `derive_handle()` in
+`access_control.py` — raw email and OS username are never written.
 
 Tests: `tests/test_workflow_memory.py` (one test per acceptance criterion).
 
 ```sh
 PYTHONPATH=src python3 -m pytest tests/test_workflow_memory.py -q
+```
+
+## `market_research.py` — spec `0056`
+
+Governed storage, retrieval, citation, audit, and curation for market research
+items: user notes, generated reports, firm research, manager letters, sell-side
+notes, and transcripts. Confidentiality reuses `0058`'s three-tier vocabulary
+(`public`/`internal`/`restricted`); MNPI, PII, secret, and license heuristics
+force `status: quarantined` on ingestion rather than introducing a fourth tier.
+
+Access-tiered filtering (`filter_by_access_tier()`) runs before search, so
+restricted items cannot leak through ranking behavior. Governance denial responses
+carry only a `denial_class` — never the item's title, content, or existence.
+
+| Component | Spec | What it guarantees |
+| --- | --- | --- |
+| `ingest_item()` | REQ-001, REQ-004 | Normalizes metadata, scans for PII/MNPI/secrets/license patterns, forces quarantine on hits; returns `(item, quarantine_flags)`. |
+| `check_governance()` / `filter_by_access_tier()` | REQ-006, NFR-001 | Clearance + entitlement + status check before search; denial reveals only `denial_class`. |
+| `point_in_time_filter()` | REQ-007, NFR-003 | Excludes by `published_at`, `effective_at`, `ingested_at`, and supersession status as of a supplied date. |
+| `render_citation()` / `render_unsupported_gap()` | REQ-008, REQ-009 | Structured citation with provenance; explicit gap when coverage is absent. |
+| `ResearchAuditLedger` | REQ-012, NFR-007 | Append-only JSONL; records ingestion, retrieval, denial, citation, and lifecycle events without logging confidential content. |
+| `find_conflicts()` / `select_canonical()` | REQ-014 | Groups approved items sharing asset class and themes; records canonical-source selection. |
+| `propose_knowledge_candidate()` | REQ-015 | Deterministic `candidate_id` from source item + title + date; always `pending_review`. |
+| `generate_synthetic_catalog()` | NFR-005, NFR-006 | Deterministic benchmark fixture iterator (LCG seed, no `random` state). |
+
+The `knowledge_uri` property on `MarketResearchItem` returns
+`knowledge://market_research/{asset_class}/{source_type}/{item_id}`.
+
+Tests: `tests/test_market_research.py` (one test class per acceptance criterion,
+90 tests total).
+
+```sh
+PYTHONPATH=src python3 -m pytest tests/test_market_research.py -q
 ```
 
 ## `workflow_scheduling.py` — spec `0055`

@@ -31,4 +31,4 @@ Curation decisions are traceable: canonical-source choices and conflict resoluti
 are recorded (with their basis) so an answer can be defended, and coverage gaps
 become `RISK-*` or backlog items. Honest handling of conflicts and staleness is
 constitution P8 (no silent trade-offs) and P10 (honest reporting). See
-`instructions/knowledge_base.md` for the shared standard. This group also serves the persistent workflow memory store (`memory/`); see `instructions/workflow_memory.md`.
+`instructions/knowledge_base.md` for the shared standard. This group also serves the persistent workflow memory store (`memory/`); see `instructions/workflow_memory.md`. The machine-readable runtime is `workflow_memory.py` (spec `0048`): call `validate()` to check required fields, enum values, duplicate ids, date order, author pattern, supersession cycles, and contradiction candidates, and `check_decay()` to flag records overdue for re-confirmation.
