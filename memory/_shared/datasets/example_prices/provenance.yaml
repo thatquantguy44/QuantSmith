@@ -44,3 +44,29 @@ records:
     last_confirmed: 2026-06-02
     status: active
     pit_scope: "<= run date"
+
+  - id: MEM-0004
+    scope: field:adj_factor
+    type: schema
+    statement: "The adjustment factor applies to price only; raw share volume is unadjusted. For consistent dollar-volume calculations scale raw volume by 1/adj_factor before multiplying by price."
+    evidence:
+      source_run: run-2026-08-30-data-audit
+    confidence: medium
+    corroboration_count: 1
+    first_seen: 2026-08-30
+    last_confirmed: 2026-08-30
+    status: active
+    pit_scope: "<= run date"
+
+  - id: MEM-0005
+    scope: field:currency
+    type: quirk
+    statement: "Prices are denominated in the exchange's local currency; no USD conversion is applied. Cross-listing pairs (e.g. TSX and NYSE for the same issuer) report in different currencies and must be converted to a common base before any pooled cross-section."
+    evidence:
+      source_run: run-2026-08-30-data-audit
+    confidence: medium
+    corroboration_count: 1
+    first_seen: 2026-08-30
+    last_confirmed: 2026-08-30
+    status: active
+    pit_scope: "<= run date"
