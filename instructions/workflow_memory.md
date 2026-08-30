@@ -28,10 +28,17 @@ it. This prevents every workflow re-learning the same database.
 
 Every learning is a record with: `id`; `scope` (dataset/table/field); `type`
 (schema | quirk | pattern | pitfall | decision | metric | performance); `statement`;
-`evidence` (source run reference, optional sample query — never data); `confidence`
-and `corroboration_count`; `first_seen`, `last_confirmed`; `status`
-(active | stale | superseded | retired); `access_level`; and `pit_scope` (the data
-window the learning came from).
+`evidence` — a single mapping or a list of mappings, each citing a source run with an
+optional sample query but never raw data; `confidence` and `corroboration_count`
+(derived from the evidence list length — the committed value is advisory and validated
+against the derived count); `first_seen`, `last_confirmed`; `status`
+(active | stale | superseded | retired); `access_level`; `pit_scope` (the data window
+the learning came from); `author` (a pseudonymous `u-<24 hex>` handle produced by
+`derive_handle()` — the raw email or OS username is never written); and, when
+applicable, `superseded_by` (the id of the record that replaces this one) and
+`coexists` (marks a pair of same-scope/same-type records as intentionally
+non-contradictory — no `coexists` means the pair is flagged as a candidate
+contradiction).
 
 ## Lifecycle
 
@@ -48,9 +55,13 @@ window the learning came from).
 
 - **Provenance always.** Every record cites its source run and carries `first_seen`,
   `last_confirmed`, `confidence`, and `access_level`. No provenance, no record.
-- **Point-in-time firewall.** A research or backtest run may use only records whose
-  `pit_scope` is on or before the decision date; operational memory must not leak the
-  future into research. See `instructions/point_in_time.md` (constitution P4).
+- **Point-in-time firewall.** Two independent rules, both must pass. (1) Type-based:
+  mechanical facts (`schema`/`quirk`/`pitfall`) are timeless and always eligible;
+  performance claims (`pattern`/`metric`/`performance`) are bounded by `last_confirmed`
+  because corroboration is where the future enters a record; a `decision` is bounded by
+  `first_seen`. An unknown type is excluded. (2) Scope-based: the record's `pit_scope`
+  must be on or before the decision date. Exclusion is the safe failure — inclusion
+  leaks future knowledge. See `instructions/point_in_time.md` (constitution P4).
 - **Metadata only.** Never store credentials, connection strings, raw data rows, or
   PII in memory. See `agents/secrets_management/` (P9).
 - **Freshness.** Treat old records as hypotheses; re-validate schema memory before
@@ -77,9 +88,39 @@ window the learning came from).
 - Silently overwriting a record instead of superseding it.
 - Treating a low-confidence, single-observation record as established fact.
 
+## Author Attribution
+
+Every record carries an `author` field whose value is a pseudonymous handle produced
+by `derive_handle(identity)` in `access_control.py`. The handle is `u-<24 hex chars>`
+— 26 characters, stable across calls, case-insensitive with respect to the raw input,
+and structurally incapable of containing an email address or a recognisable username.
+The resolution chain for the identity to hash is: explicit override argument →
+`QF_MEMORY_AUTHOR` environment variable → `identity.yml` (local-only, gitignored) →
+git author email for the working tree → OS username → None. Override and env values
+are returned as-is; everything else goes through `derive_handle()`. Pseudonymous is
+not anonymous: the same identity always produces the same handle, so records from one
+person can be attributed, but the handle cannot be reversed to the raw identity without
+the SHA-256 pre-image.
+
+## Supersession and Coexistence
+
+When a record is replaced: mark the old record `status: superseded` and add a
+`superseded_by: <new-id>` field pointing to the replacement. A superseded record is
+excluded from active retrieval but preserved in the store — no silent overwrite.
+
+When two records share the same `scope` and `type` but are intentionally not
+contradictory (e.g., two patterns that both hold under different conditions), add
+`coexists: true` on at least one of the pair. Without `coexists`, the `validate`
+command flags the pair as an info-level contradiction candidate.
+
 ## Spec-Driven Alignment
 
-Defined by `specs/0002-workflow-memory/`. Guarantees become testable: "provenance
-present", "no secrets/PII", and "pit_scope-bounded" are `AC-*`; staleness, leakage,
-secrets, and irreproducibility are the spec's `RISK-*`. Validated by the
-`memory-check` gate and `secret-scan`; served by the `knowledge/` agents.
+The record standard is `specs/0002-workflow-memory/`. The machine-readable runtime is
+`src/quantsmith/pipelines/workflow_memory.py` (spec `0048`): use `load_store()` to
+parse the committed `memory/` store into typed `Record` objects, `query()` /
+`render_context()` to retrieve records at run time, and `validate()` to replace the
+`memory-check` gate's grep-based checks. The `memory-check` gate (`hooks/stages/
+memory-check.sh`) routes to the runtime when the package is installed and falls back
+to grep when it is not. Guarantees become testable: "provenance present",
+"no secrets/PII", and "pit_scope-bounded" are `AC-*`; staleness, leakage, secrets,
+and irreproducibility are the spec's `RISK-*`.
