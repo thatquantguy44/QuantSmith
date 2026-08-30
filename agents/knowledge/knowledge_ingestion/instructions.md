@@ -35,4 +35,4 @@ preserved", and "PII/secret/MNPI flagged" become `AC-*`/`NFR-*`. Confidentiality
 handling defers to `agents/secrets_management/` and constitution P9. Emit the
 knowledge base's schema (fields, access model, provenance) as a data-contract-style
 artifact so curation and retrieval can rely on it. See
-`instructions/knowledge_base.md` for the shared standard. This group also serves the persistent workflow memory store (`memory/`); see `instructions/workflow_memory.md`.
+`instructions/knowledge_base.md` for the shared standard. This group also serves the persistent workflow memory store (`memory/`); see `instructions/workflow_memory.md`. The write-path runtime is `workflow_memory.py` (spec `0049`, extended from `0048`): use `propose_records()` to draft candidates and `stage_candidates()` to write them to a local-only `memory/inbox/` staging area for human review before promotion.
