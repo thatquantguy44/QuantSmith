@@ -30,11 +30,27 @@ else
   qf_warn "No memory/manifest.yaml (see instructions/workflow_memory.md)."
 fi
 
-# Provenance: every record catalog must declare the required fields.
+# Provenance: prefer the Python runtime for structural validation (T-010);
+# fall back to grep when the package is not importable (copied scaffold).
 records=$(find memory -type f \( -name provenance.yaml -o -name index.yaml \) 2>/dev/null)
 if [ -z "$records" ]; then
   qf_warn "No memory records found (provenance.yaml / index.yaml)."
+elif python3 -c "import quantsmith.pipelines.workflow_memory_cli" 2>/dev/null; then
+  # Runtime validation — structural checks, enum values, dates, supersession, etc.
+  python3 -m quantsmith.pipelines.workflow_memory_cli validate --root memory \
+    | while IFS= read -r line; do
+        case "$line" in
+          \[ERROR\]*) qf_error "$line" ;;
+          \[WARN\]*)  qf_warn  "$line" ;;
+          \[INFO\]*)  qf_info  "$line" ;;
+          *)           qf_info  "$line" ;;
+        esac
+      done
+  # Treat any exit code 1 from validate as a hard finding.
+  python3 -m quantsmith.pipelines.workflow_memory_cli validate --root memory \
+    > /dev/null 2>&1 || qf_error "workflow_memory_cli validate reported errors"
 else
+  # Fallback: field-presence grep (no Python package available).
   for r in $records; do
     for field in first_seen last_confirmed access_level; do
       grep -q "$field" "$r" 2>/dev/null || qf_warn "$r: records missing '$field'"
