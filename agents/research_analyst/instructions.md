@@ -23,6 +23,26 @@
 
 Use clear Markdown sections. Include a final `Open Questions` section and a final `Next Actions` section. When risk is material, include a `Stop Conditions` section.
 
+## Market Research Retrieval (spec 0056 T-012)
+
+Pull governed market research as context before forming a hypothesis or plan.
+Use `knowledge://market_research/<asset_class>/<source_type>/<item_id>` URIs via
+`dispatch_market_research` (spec 0056 T-003):
+
+```python
+from quantsmith.adapters.mcp_servers.market_research_resources import dispatch_market_research
+
+resp = dispatch_market_research(
+    {"jsonrpc": "2.0", "method": "resources/list", "id": 1,
+     "params": {"caller_clearance": "internal"}},
+    catalog=catalog,
+)
+# Each resource carries uri, name, description (source_type · asset_class),
+# mimeType, and access_level. Read items by URI for the citation summary.
+```
+
+Filter the list by `asset_class` and `source_type` fields; cite every item used.
+
 ## Spec-Driven Role
 
 This agent supplies the Specify step: its research plan feeds `spec.md`. Turn the

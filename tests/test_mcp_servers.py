@@ -34,6 +34,12 @@ from quantsmith.adapters.mcp_servers.knowledge_resources import (
     parse_sources_config,
     read_resource,
 )
+from quantsmith.adapters.mcp_servers.market_research_resources import (
+    dispatch_market_research,
+    list_market_research_resources,
+    read_market_research_resource,
+)
+from quantsmith.pipelines.market_research import InMemoryResearchCatalog, MarketResearchItem
 
 
 # ---------------------------------------------------------------------------
@@ -361,3 +367,148 @@ def test_resources_list_result_structure(tmp_path: Path) -> None:
     assert "name" in resource
     assert "mimeType" in resource
     assert resource["uri"].startswith("knowledge://sources/kb/")
+
+
+# ---------------------------------------------------------------------------
+# Spec 0056 T-003 — knowledge://market_research/... MCP namespace
+# ---------------------------------------------------------------------------
+
+import datetime as _dt
+
+
+def _make_item(
+    item_id: str = "item-001",
+    asset_class: str = "equities",
+    source_type: str = "user_note",
+    confidentiality: str = "internal",
+    entitlement_class: str = "public",
+    status: str = "approved",
+) -> MarketResearchItem:
+    return MarketResearchItem(
+        item_id=item_id,
+        source_uri=f"file://research/{item_id}.md",
+        title=f"Research note {item_id}",
+        source_type=source_type,
+        author_or_publisher="Analyst A",
+        published_at=_dt.date(2026, 1, 15),
+        ingested_at=_dt.date(2026, 1, 16),
+        content_hash="abc123",
+        asset_class=asset_class,
+        confidentiality=confidentiality,
+        entitlement_class=entitlement_class,
+        status=status,
+    )
+
+
+def _mr_req(method: str, params: dict, req_id: int = 1) -> dict:
+    return {"jsonrpc": "2.0", "method": method, "id": req_id, "params": params}
+
+
+def test_mr_list_returns_approved_items_for_internal_caller() -> None:
+    catalog = InMemoryResearchCatalog()
+    catalog.put(_make_item("itm-001"))
+    resp = dispatch_market_research(
+        _mr_req("resources/list", {"caller_clearance": INTERNAL}),
+        catalog=catalog,
+    )
+    assert "error" not in resp
+    uris = [r["uri"] for r in resp["result"]["resources"]]
+    assert any("itm-001" in u for u in uris)
+
+
+def test_mr_list_excludes_restricted_item_from_internal_caller() -> None:
+    catalog = InMemoryResearchCatalog()
+    catalog.put(_make_item("pub-001", confidentiality="internal"))
+    catalog.put(_make_item("res-001", confidentiality="restricted"))
+    resp = dispatch_market_research(
+        _mr_req("resources/list", {"caller_clearance": INTERNAL}),
+        catalog=catalog,
+    )
+    assert "error" not in resp
+    uris = [r["uri"] for r in resp["result"]["resources"]]
+    assert any("pub-001" in u for u in uris)
+    assert all("res-001" not in u for u in uris)
+
+
+def test_mr_list_sorted_by_uri() -> None:
+    catalog = InMemoryResearchCatalog()
+    catalog.put(_make_item("zzz-item"))
+    catalog.put(_make_item("aaa-item"))
+    resp = dispatch_market_research(
+        _mr_req("resources/list", {"caller_clearance": RESTRICTED}),
+        catalog=catalog,
+    )
+    uris = [r["uri"] for r in resp["result"]["resources"]]
+    assert uris == sorted(uris)
+
+
+def test_mr_read_returns_citation_for_allowed_item() -> None:
+    catalog = InMemoryResearchCatalog()
+    item = _make_item("r001", asset_class="equities", source_type="user_note")
+    catalog.put(item)
+    uri = item.knowledge_uri
+    resp = dispatch_market_research(
+        _mr_req("resources/read", {"caller_clearance": INTERNAL, "uri": uri}),
+        catalog=catalog,
+    )
+    assert "error" not in resp, resp
+    contents = resp["result"]["contents"]
+    assert len(contents) == 1
+    assert contents[0]["uri"] == uri
+    assert "Research note r001" in contents[0]["text"]
+
+
+def test_mr_read_access_denied_for_restricted_item_to_internal_caller() -> None:
+    catalog = InMemoryResearchCatalog()
+    item = _make_item("sec-001", confidentiality="restricted")
+    catalog.put(item)
+    resp = dispatch_market_research(
+        _mr_req("resources/read", {"caller_clearance": INTERNAL, "uri": item.knowledge_uri}),
+        catalog=catalog,
+    )
+    assert resp["error"]["code"] == ERR_ACCESS_DENIED
+
+
+def test_mr_read_existence_masked_for_missing_item() -> None:
+    """Non-existent item must return -32600, not -32604 (RISK-003 existence masking)."""
+    catalog = InMemoryResearchCatalog()
+    resp = dispatch_market_research(
+        _mr_req("resources/read", {
+            "caller_clearance": INTERNAL,
+            "uri": "knowledge://market_research/equities/user_note/ghost-999",
+        }),
+        catalog=catalog,
+    )
+    assert resp["error"]["code"] == ERR_ACCESS_DENIED
+
+
+def test_mr_missing_clearance_returns_access_denied() -> None:
+    catalog = InMemoryResearchCatalog()
+    resp = dispatch_market_research(
+        _mr_req("resources/list", {}),
+        catalog=catalog,
+    )
+    assert resp["error"]["code"] == ERR_ACCESS_DENIED
+
+
+def test_mr_wrong_authority_returns_not_found() -> None:
+    catalog = InMemoryResearchCatalog()
+    resp = dispatch_market_research(
+        _mr_req("resources/read", {
+            "caller_clearance": INTERNAL,
+            "uri": "knowledge://sources/kb/some.md",
+        }),
+        catalog=catalog,
+    )
+    assert resp["error"]["code"] == ERR_NOT_FOUND
+
+
+def test_mr_quarantined_item_denied() -> None:
+    catalog = InMemoryResearchCatalog()
+    item = _make_item("qua-001", status="quarantined")
+    catalog.put(item)
+    resp = dispatch_market_research(
+        _mr_req("resources/read", {"caller_clearance": RESTRICTED, "uri": item.knowledge_uri}),
+        catalog=catalog,
+    )
+    assert resp["error"]["code"] == ERR_ACCESS_DENIED

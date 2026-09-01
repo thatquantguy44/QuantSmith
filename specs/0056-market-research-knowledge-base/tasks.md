@@ -1,7 +1,7 @@
 # Tasks: Market Research Knowledge Base
 
 - **Spec:** 0056-market-research-knowledge-base (`spec.md`, `plan.md`)
-- **Last updated:** 2026-08-30
+- **Last updated:** 2026-09-01
 
 > Ordered, testable units of work. Every task cites the requirement(s) it advances
 > and carries a Definition of Done. No task without a requirement.
@@ -46,8 +46,8 @@ reordered here by what can actually start, not by narrative sequence.
 | T-016 | Add synthetic capacity and latency benchmark fixtures for catalog/index scale. | NFR-005, NFR-006 | done | 3 | — | `generate_synthetic_catalog(n, seed)` iterator in `market_research.py`; `TestBenchmarkFixturesT016` in tests. |
 | T-014 | Integrate scheduled research reports and knowledge-candidate review handoff with `0055`. | REQ-015 | done | 4 | — | AC-010. `propose_knowledge_candidate()` + `KnowledgeCandidate` in `market_research.py`; deterministic candidate_id; always pending_review. |
 | T-017 | Add freshness, compaction, deprecation, deletion, and index rebuild tests. | NFR-009, NFR-010 | done | 4 | — | AC-009. Covered in `TestStaleSuperssededAC009` (`TestStaleSuperssededAC009` in tests). |
-| T-012 | Add integration examples for research, portfolio-management, economist, role-operations, and knowledge agents. | REQ-013 | todo | 2 | `0052` MCP resources server (unbuilt) | AC-002. Agent examples need a server to call. |
-| T-003 | Define the `knowledge://market_research/...` MCP namespace and agent-facing retrieval contract. | REQ-002, REQ-013 | todo | 2 | `0052` MCP resources server (unbuilt) | AC-002. The *contract* (URI shape, request/response fields) is already written in `plan.md`'s Interfaces section and could be drafted as a Python protocol/dataclass today; wiring it to a live MCP server is what's blocked. |
+| T-012 | Add integration examples for research, portfolio-management, economist, role-operations, and knowledge agents. | REQ-013 | done | 2 | — | AC-002. Examples added to `agents/knowledge/knowledge_retrieval/`, `agents/research_analyst/`, `agents/portfolio_management/data_signal_intake/`, `agents/economists/macro_backdrop_summarizer/`, and `agents/role_operations/prior_art_scanner/`. |
+| T-003 | Define the `knowledge://market_research/...` MCP namespace and agent-facing retrieval contract. | REQ-002, REQ-013 | done | 2 | — | AC-002. `dispatch_market_research` in `adapters/mcp_servers/market_research_resources.py`; 9 tests in `tests/test_mcp_servers.py` (clearance guard, list/read, existence masking, authority routing). |
 | T-018 | Add a provider-neutral tagged email market-color source contract and template. | REQ-016, REQ-017, NFR-011 | todo | 5 | email provider choice (spec.md Open Question) | AC-011, AC-012. The *provider-neutral* contract itself doesn't strictly need the choice made — see Follow-ups. |
 | T-019 | Implement email scan policy validation for labels/tags/folders, saved searches, mailbox scope, cursors, and read-only permissions. | REQ-016, REQ-018, NFR-011 | todo | 5 | email provider choice (spec.md Open Question) | AC-011, AC-013 |
 | T-020 | Implement email thread/message normalization with per-message citations, sent/received timestamps, tag provenance, and attachment decisions. | REQ-017, REQ-019, NFR-012 | todo | 5 | email provider choice (spec.md Open Question) | AC-012 |
@@ -64,7 +64,7 @@ Every acceptance criterion must be named by at least one test.
 | Acceptance criterion | Test(s) | Status |
 | --- | --- | --- |
 | AC-001 | `TestIngestionMetadataAC001` (8 tests) in `tests/test_market_research.py` | done |
-| AC-002 | `TestMCPNamespaceAC002` (6 tests) in `tests/test_market_research.py` | done |
+| AC-002 | `TestMCPNamespaceAC002` (6 tests) in `tests/test_market_research.py`; `test_mr_*` (9 tests) in `tests/test_mcp_servers.py` | done |
 | AC-003 | `TestRestrictedDenialAC003` (9 tests) in `tests/test_market_research.py` | done |
 | AC-004 | `TestPointInTimeFilterAC004` (7 tests) in `tests/test_market_research.py` | done |
 | AC-005 | `TestCitationCoverageAC005` (6 tests) in `tests/test_market_research.py` | done |
