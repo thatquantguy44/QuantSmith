@@ -15,7 +15,7 @@ signal and model **reproducible, leakage-safe, and traceable to a spec**.
 [![Approach: Spec-Driven](https://img.shields.io/badge/Approach-Spec--Driven-ff6f00)](instructions/spec_driven_development.md)
 [![Agents: 162](https://img.shields.io/badge/Agents-162-6f42c1)](agents/README.md)
 [![Quality Gates: 33](https://img.shields.io/badge/Quality%20Gates-33-2ea44f)](hooks/README.md)
-[![Specs: 52](https://img.shields.io/badge/Specs-52-0969da)](specs/README.md)
+[![Specs: 54](https://img.shields.io/badge/Specs-54-0969da)](specs/README.md)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](.github/GIT_GUIDELINES.md)
 
 <br/>
@@ -455,6 +455,7 @@ the [spec index](specs/README.md).
 | [`0028`](specs/0028-financing-cost-analysis/) | Financing cost analysis — cost-of-carry decomposition, financing-aware returns, rate-shock sensitivity, capacity | `financing_cost_analysis.py` |
 | [`0032`](specs/0032-alert-delivery-providers/) | Alert delivery executable providers — email + webhook, deterministic payload/redaction, injectable transport | `adapters/alert_delivery/` |
 | [`0037`](specs/0037-alert-delivery-remaining-providers/) | Alert delivery — Slack, Teams, ticketing, PagerDuty/Opsgenie, SMS/push; completes all seven providers, with structural severity gating + SMS length cap | `adapters/alert_delivery/` |
+| [`0052`](specs/0052-mcp-adapter-contract/) | MCP adapter contract + knowledge resources server — stdlib-only JSON-RPC 2.0 adapter for the MCP `resources` primitive; `caller_clearance` required on every request (never assumed from connection identity); `knowledge://` URI scheme for `sources`/`memory`/`market_research` authorities; credential scan + path-traversal protection; unblocks 0053, 0054, and 0056 T-003 | `adapters/mcp_servers/` |
 | [`0034`](specs/0034-cardinality-constrained-portfolio/) | Cardinality-constrained portfolio construction — MILP selects, QP sizes (a documented two-stage heuristic on `0013` + `0007`) | `cardinality_portfolio.py` |
 | [`0035`](specs/0035-funding-ladder/) | Funding ladder — matches cash obligations to funding tenors at minimum cost via `0013`'s min-cost flow; general treasury/cash, not securities-financing | `funding_ladder.py` |
 | [`0036`](specs/0036-multi-period-rebalancing/) | Multi-period rebalancing — a discretized single-position DP via `0013`'s `solve_dp`, trading transaction cost against tracking-error cost over a horizon | `multi_period_rebalancing.py` |

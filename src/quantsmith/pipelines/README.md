@@ -676,3 +676,35 @@ Tests: `tests/test_workflow_scheduling.py` (one test per acceptance criterion).
 ```sh
 PYTHONPATH=src python3 -m pytest tests/test_workflow_scheduling.py -q
 ```
+
+## `adapters/mcp_servers/` — spec `0052`
+
+*(Not under `pipelines/` — lives at `src/quantsmith/adapters/mcp_servers/`.)*
+
+Stdlib-only adapter contract for MCP (Model Context Protocol) knowledge
+servers, plus the `resources` primitive implementation for files declared
+in `knowledge_sources.yml`. The adapter has no I/O of its own; transport
+(stdio, SSE, HTTP+SSE) is injected by the host.
+
+**Security invariant:** `caller_clearance` is a required parameter on every
+request. MCP servers run with the server's credentials; clearance is a
+parameter, never an assumption about who can reach the endpoint
+(spec RISK-001). `ACCESS_RANK = {public: 0, internal: 1, restricted: 2}` is
+the enforcement constant in code.
+
+| Component | Spec | What it guarantees |
+| --- | --- | --- |
+| `contract.py` — `ACCESS_RANK`, `clearance_allows` | NFR-003 | Rank order `public < internal < restricted` in code, not only the spec. |
+| `contract.py` — `KnowledgeUri` | REQ-005 | Parses `knowledge://authority/path`; raises on wrong scheme. |
+| `contract.py` — `McpRequest`, `McpResponse`, `McpError` | REQ-001 | JSON-RPC 2.0 envelope as stdlib frozen dataclasses; no `mcp` package. |
+| `contract.py` — `contains_secret` | REQ-007 | Credential-pattern scan; called before any content is returned. |
+| `knowledge_resources.py` — `parse_sources_config` | REQ-006 | Subset YAML parser for `knowledge_sources.yml`; inline flow-sequence only. |
+| `knowledge_resources.py` — `list_resources` | REQ-003 | Lists files filtered by clearance; sorted by URI. |
+| `knowledge_resources.py` — `read_resource` | REQ-004, REQ-010, REQ-012 | Reads file; restricted resource always -32600; path-traversal check. |
+| `knowledge_resources.py` — `dispatch` | REQ-002, REQ-008, REQ-009 | Routes `resources/list`/`resources/read`; -32600 on missing clearance; -32601 on unknown method; -32604 on unknown authority. |
+
+Tests: `tests/test_mcp_servers.py` (one test per acceptance criterion, 20 total).
+
+```sh
+PYTHONPATH=src python3 -m pytest tests/test_mcp_servers.py -q
+```
