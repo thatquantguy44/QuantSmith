@@ -51,7 +51,9 @@ response = dispatch(
 | File | Purpose |
 | --- | --- |
 | `contract.py` | Shared types: clearance constants, `KnowledgeUri`, `McpRequest/Response`, `clearance_allows`, `contains_secret` |
-| `knowledge_resources.py` | Resources server: `parse_sources_config`, `list_resources`, `read_resource`, `dispatch` |
+| `knowledge_resources.py` | Resources server: `parse_sources_config`, `list_resources`, `read_resource`, `dispatch` — `sources` authority |
+| `memory_resources.py` | Resources server: `dispatch_memory`, `list_memory_resources`, `read_memory_resource` — `memory` authority (spec 0053) |
+| `market_research_resources.py` | Resources server: `dispatch_market_research`, `list_market_research_resources`, `read_market_research_resource` — `market_research` authority (spec 0056 T-003) |
 | `adapter_contract.md` | Full contract spec — inputs, outputs, error codes, URI scheme |
 
 ## URI scheme
@@ -62,15 +64,11 @@ knowledge://<authority>/<path>
 
 | Authority | Status | Served by |
 | --- | --- | --- |
-| `sources` | Live (0052) | `knowledge_resources.py` — files from `knowledge_sources.yml` |
-| `memory` | Reserved (0053) | Future memory/knowledge-graph server |
-| `market_research` | Reserved (0054/0056) | Future RAG + market research server |
+| `sources` | Live (0052) | `knowledge_resources.dispatch` — files from `knowledge_sources.yml` |
+| `memory` | Live (0053) | `memory_resources.dispatch_memory` — `workflow_memory.Record` objects |
+| `market_research` | Live (0056 T-003) | `market_research_resources.dispatch_market_research` — `market_research.MarketResearchItem` objects |
 
 ## Downstream specs
 
-- **0053** — memory/knowledge-graph server: wraps `workflow_memory.py`'s
-  `load_store`/`query` with PIT filter, served over the same adapter contract.
 - **0054** — RAG server: semantic search with citations, one index per access
-  tier, no post-retrieval leakage.
-- **0056 T-003** — `knowledge://market_research/...` namespace; unblocked by
-  this spec.
+  tier, no post-retrieval leakage. Uses the same adapter contract.

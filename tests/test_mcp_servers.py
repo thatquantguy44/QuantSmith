@@ -39,7 +39,9 @@ from quantsmith.adapters.mcp_servers.market_research_resources import (
     list_market_research_resources,
     read_market_research_resource,
 )
+from quantsmith.adapters.mcp_servers.memory_resources import dispatch_memory
 from quantsmith.pipelines.market_research import InMemoryResearchCatalog, MarketResearchItem
+from quantsmith.pipelines.workflow_memory import build_record
 
 
 # ---------------------------------------------------------------------------
@@ -512,3 +514,159 @@ def test_mr_quarantined_item_denied() -> None:
         catalog=catalog,
     )
     assert resp["error"]["code"] == ERR_ACCESS_DENIED
+
+
+# ---------------------------------------------------------------------------
+# Spec 0053 — knowledge://memory/... MCP namespace
+# ---------------------------------------------------------------------------
+
+def _make_record(
+    record_id: str = "mem-001",
+    scope: str = "equity_signal",
+    record_type: str = "pattern",
+    access_level: str = "internal",
+    status: str = "active",
+) -> Any:
+    import datetime as _dt2
+    return build_record(
+        {
+            "id": record_id,
+            "scope": scope,
+            "type": record_type,
+            "statement": f"Test statement for {record_id}",
+            "confidence": "high",
+            "corroboration_count": 2,
+            "first_seen": _dt2.date(2025, 1, 10),
+            "last_confirmed": _dt2.date(2026, 3, 1),
+            "status": status,
+            "pit_scope": "backtest_safe",
+            "access_level": access_level,
+        },
+        file="test",
+        line=1,
+    )
+
+
+def _mem_req(method: str, params: dict, req_id: int = 1) -> dict:
+    return {"jsonrpc": "2.0", "method": method, "id": req_id, "params": params}
+
+
+def test_mem_missing_clearance_returns_access_denied_AC_001() -> None:
+    resp = dispatch_memory(_mem_req("resources/list", {}), records=[])
+    assert resp["error"]["code"] == ERR_ACCESS_DENIED
+
+
+def test_mem_list_excludes_restricted_from_internal_AC_002() -> None:
+    records = [
+        _make_record("pub-001", access_level="public"),
+        _make_record("int-001", access_level="internal"),
+        _make_record("res-001", access_level="restricted"),
+    ]
+    resp = dispatch_memory(
+        _mem_req("resources/list", {"caller_clearance": INTERNAL}),
+        records=records,
+    )
+    assert "error" not in resp
+    uris = [r["uri"] for r in resp["result"]["resources"]]
+    assert any("pub-001" in u for u in uris)
+    assert any("int-001" in u for u in uris)
+    assert all("res-001" not in u for u in uris)
+
+
+def test_mem_list_public_sees_only_public_AC_003() -> None:
+    records = [
+        _make_record("pub-001", access_level="public"),
+        _make_record("int-001", access_level="internal"),
+    ]
+    resp = dispatch_memory(
+        _mem_req("resources/list", {"caller_clearance": PUBLIC}),
+        records=records,
+    )
+    assert "error" not in resp
+    uris = [r["uri"] for r in resp["result"]["resources"]]
+    assert all("pub-001" in u for u in uris), f"non-public URI found: {uris}"
+    assert all("int-001" not in u for u in uris)
+
+
+def test_mem_read_returns_citation_for_allowed_record_AC_004() -> None:
+    rec = _make_record("mem-r001", scope="macro_regime", access_level="internal")
+    uri = f"knowledge://memory/macro_regime/mem-r001"
+    resp = dispatch_memory(
+        _mem_req("resources/read", {"caller_clearance": INTERNAL, "uri": uri}),
+        records=[rec],
+    )
+    assert "error" not in resp, resp
+    contents = resp["result"]["contents"]
+    assert len(contents) == 1
+    assert contents[0]["uri"] == uri
+    assert "mem-r001" in contents[0]["text"]
+    assert "macro_regime" in contents[0]["text"]
+
+
+def test_mem_wrong_authority_returns_not_found_AC_005() -> None:
+    resp = dispatch_memory(
+        _mem_req("resources/read", {
+            "caller_clearance": INTERNAL,
+            "uri": "knowledge://sources/kb/some.md",
+        }),
+        records=[],
+    )
+    assert resp["error"]["code"] == ERR_NOT_FOUND
+
+
+def test_mem_restricted_record_denied_to_internal_AC_006() -> None:
+    rec = _make_record("res-r001", access_level="restricted")
+    uri = f"knowledge://memory/equity_signal/res-r001"
+    resp = dispatch_memory(
+        _mem_req("resources/read", {"caller_clearance": INTERNAL, "uri": uri}),
+        records=[rec],
+    )
+    assert resp["error"]["code"] == ERR_ACCESS_DENIED
+
+
+def test_mem_missing_record_existence_masked_AC_007() -> None:
+    """Missing record must return -32600, not -32604 (RISK-003 existence masking)."""
+    resp = dispatch_memory(
+        _mem_req("resources/read", {
+            "caller_clearance": INTERNAL,
+            "uri": "knowledge://memory/equity_signal/ghost-999",
+        }),
+        records=[],
+    )
+    assert resp["error"]["code"] == ERR_ACCESS_DENIED
+
+
+def test_mem_unsupported_method_returns_method_not_found_AC_008() -> None:
+    resp = dispatch_memory(
+        _mem_req("memory/query", {"caller_clearance": INTERNAL}),
+        records=[],
+    )
+    assert resp["error"]["code"] == ERR_METHOD_NOT_FOUND
+
+
+def test_mem_restricted_clearance_sees_all_AC_009() -> None:
+    records = [
+        _make_record("pub-001", access_level="public"),
+        _make_record("int-001", access_level="internal"),
+        _make_record("res-001", access_level="restricted"),
+    ]
+    resp = dispatch_memory(
+        _mem_req("resources/list", {"caller_clearance": RESTRICTED}),
+        records=records,
+    )
+    assert "error" not in resp
+    levels = {r["access_level"] for r in resp["result"]["resources"]}
+    assert levels == {PUBLIC, INTERNAL, RESTRICTED}
+
+
+def test_mem_list_sorted_by_uri_AC_010() -> None:
+    records = [
+        _make_record("zzz-001", scope="z_scope"),
+        _make_record("aaa-001", scope="a_scope"),
+    ]
+    resp = dispatch_memory(
+        _mem_req("resources/list", {"caller_clearance": INTERNAL}),
+        records=records,
+    )
+    uris = [r["uri"] for r in resp["result"]["resources"]]
+    assert uris == sorted(uris)
