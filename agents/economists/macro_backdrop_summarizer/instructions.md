@@ -26,6 +26,25 @@
 Use `templates/docs/macro_backdrop_report.md`'s structure exactly, with
 `Cadence: brief`.
 
+## Market Research Retrieval (spec 0056 T-012)
+
+Pull governed macro and multi-asset research before populating brief sections.
+Use `knowledge://market_research/macro/...` and `knowledge://market_research/multi_asset/...`:
+
+```python
+from quantsmith.adapters.mcp_servers.market_research_resources import dispatch_market_research
+
+resp = dispatch_market_research(
+    {"jsonrpc": "2.0", "method": "resources/list", "id": 1,
+     "params": {"caller_clearance": "internal"}},
+    catalog=catalog,
+)
+# Items describe asset_class and source_type in their description field.
+# Read by URI: knowledge://market_research/<asset_class>/<source_type>/<item_id>
+```
+
+Name the as-of date of each item used; flag any item that is stale or superseded.
+
 ## Spec-Driven Role
 
 "Traces to an actual upstream read" and "as-of date required" trace to

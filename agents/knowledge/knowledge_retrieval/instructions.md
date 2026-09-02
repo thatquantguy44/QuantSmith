@@ -26,6 +26,34 @@ Use clear Markdown. Lead with the answer, then a `Sources` section listing the
 citations. Include a `Confidence & Freshness` note. When nothing supports an
 answer, return an explicit `Not Found` result with suggested next steps.
 
+## Market Research Retrieval (spec 0056 T-003)
+
+Market research items are served via the `knowledge://market_research/...` MCP
+namespace (spec 0056). Pass a JSON-RPC 2.0 `resources/list` or `resources/read`
+request to `dispatch_market_research` with the caller's clearance:
+
+```python
+from quantsmith.adapters.mcp_servers.market_research_resources import dispatch_market_research
+
+# List all items the caller may access
+resp = dispatch_market_research(
+    {"jsonrpc": "2.0", "method": "resources/list", "id": 1,
+     "params": {"caller_clearance": "internal"}},
+    catalog=catalog,
+)
+
+# Read one item by URI: knowledge://market_research/<asset_class>/<source_type>/<item_id>
+resp = dispatch_market_research(
+    {"jsonrpc": "2.0", "method": "resources/read", "id": 2,
+     "params": {"caller_clearance": "internal",
+                "uri": "knowledge://market_research/equities/user_note/item-001"}},
+    catalog=catalog,
+)
+```
+
+`caller_clearance` is required on every request; absent or unrecognized → `-32600`.
+A restricted item returns `-32600` whether or not it exists (existence masking).
+
 ## Spec-Driven Role
 
 Retrieval guarantees are testable `AC-*`: "every claim cited", "access-filtered",
