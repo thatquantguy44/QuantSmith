@@ -393,9 +393,14 @@ def dispatch(
         return error_response(req.id, ERR_NOT_FOUND, f"unknown authority {ku.authority!r}").to_dict()
 
     if ku.authority != AUTHORITY_SOURCES:
+        hints = {
+            "memory": "use memory_resources.dispatch_memory (spec 0053)",
+            "market_research": "use market_research_resources.dispatch_market_research (spec 0056 T-003)",
+        }
+        hint = hints.get(ku.authority, "reserved for a future spec")
         return error_response(
             req.id, ERR_NOT_FOUND,
-            f"authority {ku.authority!r} is reserved for future specs (0053/0054)"
+            f"authority {ku.authority!r} not handled here — {hint}"
         ).to_dict()
 
     try:
