@@ -33,6 +33,7 @@ stages.
 | Agent | Supplies | Feeds mainly |
 | --- | --- | --- |
 | `research_analyst/` | Hypothesis → research plan, assumptions, go/no-go | Planning |
+| `quant_factory/` | Parallel model-development lanes → convergence gate → `FactoryDecision`; `best_of_n` / `all_required` / `first_to_pass` modes; append-only JSONL ledger (spec `0061`) | Implementation, Testing |
 | `quant_analyst/` | End-to-end quant workflow routing across research, data, modeling, financing, risk, and runtime handoff | Planning, Design, Implementation |
 | `data_quality/` | Lineage, joins, timestamps, missingness, leakage review | Planning, Design |
 | `feature_engineering/` | Point-in-time features, normalization-leakage review, stability | Design, Implementation |
@@ -423,6 +424,23 @@ guard → report.
 These overlap conceptually with SDK agents (`workflow_orchestrator`,
 `data_ingestion/`, `tooling/`, `testing_validation`) but are a distinct runtime
 pipeline; the SDK agents are design-and-review roles.
+
+## Quant Factory Agent (`quant_factory/`)
+
+Orchestrates **parallel model-development lanes** and converges them at a
+shared quality gate. Used when multiple competing hypotheses must be
+evaluated on equal footing, with the gate — not the analyst's recency bias
+— making the selection decision. Runtime: `src/quantsmith/pipelines/quant_factory.py`
+(spec `0061-quant-model-factory`).
+
+| File | Purpose |
+| --- | --- |
+| `quant_factory/README.md` | Purpose, inputs, outputs, when to use |
+| `quant_factory/instructions.md` | Spec-driven role, lane state machine, gate usage, human review requirement |
+| `quant_factory/prompt.md` | System prompt for the factory orchestrator |
+| `quant_factory/tasks.md` | Per-run checklist (hypothesis → spec → run → review → ship) |
+
+Template: `templates/prompts/factory_run_card.md`.
 
 ## How They Fit Together
 
