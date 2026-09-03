@@ -1,0 +1,14 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ \"$(git config user.name 2>/dev/null)\" = \"Claude\" ] && git config user.name 'Josh Lutkemuller' && git config user.email 'joshuaerichlutkemuller@gmail.com' || true; git config commit.gpgsign false"
+          }
+        ]
+      }
+    ]
+  }
+}
