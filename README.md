@@ -15,7 +15,7 @@ signal and model **reproducible, leakage-safe, and traceable to a spec**.
 [![Approach: Spec-Driven](https://img.shields.io/badge/Approach-Spec--Driven-ff6f00)](instructions/spec_driven_development.md)
 [![Agents: 162](https://img.shields.io/badge/Agents-162-6f42c1)](agents/README.md)
 [![Quality Gates: 33](https://img.shields.io/badge/Quality%20Gates-33-2ea44f)](hooks/README.md)
-[![Specs: 55](https://img.shields.io/badge/Specs-55-0969da)](specs/README.md)
+[![Specs: 56](https://img.shields.io/badge/Specs-56-0969da)](specs/README.md)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](.github/GIT_GUIDELINES.md)
 
 <br/>
@@ -433,6 +433,7 @@ the [spec index](specs/README.md).
 | [`0058`](specs/0058-viewer-access-control/) | Viewer access control — activates `0048`'s deferred `access_level` field: an opt-in, committed `access/roster.yml` maps a resolved pseudonymous handle to a `public`/`internal`/`restricted` clearance, enforced once at the read boundary in `query()` and both `0057` view-model builders | `access_control.py` |
 | [`0056`](specs/0056-market-research-knowledge-base/) | Market research knowledge base — user notes, firm research, generated summaries, and approved sell-side/manager materials, with governed point-in-time retrieval, entitlement-aware access, citations, audit ledger, and conflict curation (Slices 1/3/4 unblocked; email connector and MCP surface pending) | `market_research.py` |
 | [`0059`](specs/0059-morning-market-brief/) | Morning market brief — free-API commentary (NewsAPI/Alpha Vantage/Finnhub) → deterministic headlines + sentiment rollup → agent-written analysis → staged `pending_review` candidate, never committed | `market_brief.py` |
+| [`0061`](specs/0061-quant-model-factory/) | Quant Model Factory — parallel model-development lanes with `best_of_n` / `all_required` / `first_to_pass` convergence; caller-injected executor; `ConvergenceGate` scoring (Sharpe, drawdown, return); append-only JSONL ledger for full auditability | `quant_factory.py` |
 | [`0055`](specs/0055-workflow-scheduling-operations/) | Workflow scheduling operations — registry validation, cron dry-run evidence, idempotent dispatch, JSONL ledger, manual reminders, daily reports, alert handoff, memory candidates | `workflow_scheduling.py` |
 | [`0047`](specs/0047-downstream-contract/) | Downstream consumer contract — `DashboardSpec.schema_version` + compatibility check, release-notify workflow, and a copyable `quantsmith-version` gate for a separate consuming repository | `dashboard_spec.py` *(extended)* |
 | [`0046`](specs/0046-walk-forward/) | Walk-forward harness — purged/embargoed folds from `0006` refit per fold through `0044`'s engine; reports the out-of-sample fold distribution | `walk_forward.py` |
