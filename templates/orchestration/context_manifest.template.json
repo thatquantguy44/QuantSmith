@@ -1,0 +1,47 @@
+{
+  "schema_version": "quantsmith.orchestration.context.v1",
+  "context_id": "ctx-example",
+  "run_id": "run-YYYYMMDD-short-name",
+  "caller": {
+    "id": "pseudonymous-or-agent-id",
+    "clearance": "internal"
+  },
+  "as_of": "YYYY-MM-DDTHH:MM:SSZ",
+  "context_window": {
+    "token_budget": 4096,
+    "character_budget": 16000
+  },
+  "items": [
+    {
+      "context_id": "ctx-item-001",
+      "source_authority": "knowledge://memory",
+      "locator": "relative/path/or/knowledge://uri",
+      "content_hash": "sha256:<64 lowercase hex>",
+      "access_level": "internal",
+      "caller_clearance": "internal",
+      "retrieval_query": "query or selection prompt",
+      "selection_rule": "exact-id",
+      "rank": 1,
+      "budget": {
+        "tokens": 128,
+        "characters": 600
+      },
+      "known_at": "YYYY-MM-DDTHH:MM:SSZ",
+      "effective_at": "YYYY-MM-DDTHH:MM:SSZ",
+      "expires_at": "YYYY-MM-DDTHH:MM:SSZ",
+      "freshness": "current",
+      "citations": [
+        {
+          "label": "source label",
+          "locator": "relative/path/or/knowledge://uri"
+        }
+      ]
+    }
+  ],
+  "exclusions": [
+    {
+      "locator": "restricted-or-stale-source",
+      "reason": "why it was withheld"
+    }
+  ]
+}

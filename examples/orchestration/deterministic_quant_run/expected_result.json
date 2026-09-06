@@ -1,0 +1,13 @@
+{
+  "run_id": "orch-det-0063-golden-repo-specialness",
+  "case_id": "golden.repo.specialness_sign",
+  "status": "pass",
+  "signals": [
+    {
+      "name": "repo_specialness",
+      "value": 35.0,
+      "unit": "bps",
+      "direction": "positive"
+    }
+  ]
+}

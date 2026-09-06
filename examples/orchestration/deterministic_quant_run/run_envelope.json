@@ -1,0 +1,44 @@
+{
+  "schema_version": "quantsmith.orchestration.run.v1",
+  "run_id": "orch-det-0063-golden-repo-specialness",
+  "objective": "Validate a deterministic short-term-markets golden-case result through the 0070 orchestration envelope.",
+  "spec_id": "0070-prompt-context-harness-foundation",
+  "stage": "implementation",
+  "mode": "deterministic",
+  "release_profile": "release_bound",
+  "created_at": "2026-09-06T00:00:04Z",
+  "actor": {
+    "type": "agent",
+    "id": "codex",
+    "clearance": "internal"
+  },
+  "repo_revision": "fixture",
+  "environment": {
+    "python": "3.12",
+    "network": "disabled",
+    "dependencies": ["stdlib"]
+  },
+  "prompt_manifest": {"type": "prompt_manifest", "path": "prompt_manifest.json", "hash": "sha256:9c34282b932ca9820bcb81a72290d2977cb0a0d10a89baaf30d7679fa7073f43"},
+  "context_manifest": {"type": "context_manifest", "path": "context_manifest.json", "hash": "sha256:ba9bc8acae70f0a682a951a37d43cb517d63a7f1b61c4736e80a100ce5931d27"},
+  "assumption_ledger": {"type": "assumption_ledger", "path": "assumptions.jsonl", "hash": "sha256:465cb66cc16def82144b1590bbb30ae4160a545ba94478bf1de93a4a43890af2"},
+  "evaluation_harness": {"type": "evaluation_harness", "path": "evaluation_harness.json", "hash": "sha256:03be609ffcde5a1fc93661f21e9ce3fce29e51bde977be3393c1347d88ee286d"},
+  "audit_events": {"type": "audit_events", "path": "audit_events.jsonl", "hash": "sha256:89b23858147728a4cfbb9cd7ee8379eaaaef8d119a632c453a6f4a2102a692c7"},
+  "gate_results": [
+    {
+      "gate": "orchestration",
+      "status": "pass",
+      "finding_count": 0,
+      "checked_at": "2026-09-06T00:00:04Z"
+    }
+  ],
+  "replay": {
+    "mode": "deterministic",
+    "command": "python -m quantsmith.orchestration replay --envelope run_envelope.json",
+    "expected_outputs": [
+      {"type": "final_artifact", "path": "expected_result.json", "hash": "sha256:f760f83048c719d31ae4b79affb5bb81e01a3a5f78ec0cdcf4e22692d02fece2"}
+    ]
+  },
+  "artifacts": [
+    {"type": "final_artifact", "path": "expected_result.json", "hash": "sha256:f760f83048c719d31ae4b79affb5bb81e01a3a5f78ec0cdcf4e22692d02fece2", "access_class": "public", "producer_event_id": "evt-det-004"}
+  ]
+}

@@ -1,7 +1,7 @@
 # Spec: Prompt / Context / Harness Engineering Foundation
 
 - **ID:** 0070-prompt-context-harness-foundation
-- **Status:** Draft
+- **Status:** Draft (foundation implemented)
 - **Author:** Codex
 - **Approver:**
 - **Last updated:** 2026-09-06
@@ -155,7 +155,7 @@ public metadata, or synthetic content that is explicitly disclosed.
 | RISK-005 | Audit logs accidentally store secrets, prompt bodies containing private data, or licensed context excerpts. | Committed artifacts become a confidentiality or licensing incident. | Store hashes, locators, redacted summaries, and fixture IDs; run `secret-scan`; keep private envelopes local-only when needed. |
 | RISK-006 | Evaluators become shallow checklist passes rather than meaningful harness checks. | The system appears governed while missing layer-specific failures. | REQ-005 and AC-005 require one check or justified exception per layer; future domain specs can add stricter evaluators. |
 
-## Assumptions & Open Questions
+## Assumptions & Resolved Decisions
 
 - Assumption: the first implementation should be standard-library Python plus
   shell gates, matching the repository's dependency-free reference-runtime
@@ -164,13 +164,16 @@ public metadata, or synthetic content that is explicitly disclosed.
   validation; Markdown remains the human-facing explanation layer.
 - Assumption: replay must support deterministic rule-based mode before claiming
   strong guarantees for LLM-backed runs.
-- Open question: should the runtime live under `src/quantsmith/pipelines/` for
-  consistency with previous specs, or under a new `src/quantsmith/orchestration/`
-  package to make the cross-cutting boundary explicit?
-- Open question: should this spec add separate gate names for each manifest type
-  or one composite `orchestration` gate with sub-findings?
-- Open question: what is the minimum required envelope for an exploratory
-  notebook or ad-hoc agent request, versus a release-bound model change?
+- Decision: runtime code lives under `src/quantsmith/orchestration/` because the
+  envelope is a cross-cutting evidence contract rather than a pipeline-specific
+  implementation.
+- Decision: gate coverage uses one composite `orchestration` gate with
+  field-level prompt, context, assumption, evaluation, audit, and replay
+  findings from the Python validator.
+- Decision: the envelope carries a required `release_profile` with
+  `exploratory` and `release_bound` values. Exploratory runs still need a run
+  envelope and audit/replay metadata, while release-bound examples include every
+  manifest and hash-checked artifact.
 
 ## Exceptions
 

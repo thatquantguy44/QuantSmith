@@ -1,0 +1,74 @@
+{
+  "schema_version": "quantsmith.orchestration.run.v1",
+  "run_id": "run-YYYYMMDD-short-name",
+  "objective": "Describe the orchestration objective.",
+  "spec_id": "NNNN-spec-slug",
+  "stage": "implementation",
+  "mode": "deterministic",
+  "release_profile": "release_bound",
+  "created_at": "YYYY-MM-DDTHH:MM:SSZ",
+  "actor": {
+    "type": "agent",
+    "id": "pseudonymous-or-agent-id",
+    "clearance": "internal"
+  },
+  "repo_revision": "git-sha-or-local-revision",
+  "environment": {
+    "python": "3.12",
+    "network": "disabled",
+    "dependencies": ["stdlib"]
+  },
+  "prompt_manifest": {
+    "type": "prompt_manifest",
+    "path": "prompt_manifest.json",
+    "hash": "sha256:<64 lowercase hex>"
+  },
+  "context_manifest": {
+    "type": "context_manifest",
+    "path": "context_manifest.json",
+    "hash": "sha256:<64 lowercase hex>"
+  },
+  "assumption_ledger": {
+    "type": "assumption_ledger",
+    "path": "assumptions.jsonl",
+    "hash": "sha256:<64 lowercase hex>"
+  },
+  "evaluation_harness": {
+    "type": "evaluation_harness",
+    "path": "evaluation_harness.json",
+    "hash": "sha256:<64 lowercase hex>"
+  },
+  "audit_events": {
+    "type": "audit_events",
+    "path": "audit_events.jsonl",
+    "hash": "sha256:<64 lowercase hex>"
+  },
+  "gate_results": [
+    {
+      "gate": "orchestration",
+      "status": "pass",
+      "finding_count": 0,
+      "checked_at": "YYYY-MM-DDTHH:MM:SSZ"
+    }
+  ],
+  "replay": {
+    "mode": "deterministic",
+    "command": "python -m quantsmith.orchestration replay --envelope run_envelope.json",
+    "expected_outputs": [
+      {
+        "type": "final_artifact",
+        "path": "expected_result.json",
+        "hash": "sha256:<64 lowercase hex>"
+      }
+    ]
+  },
+  "artifacts": [
+    {
+      "type": "final_artifact",
+      "path": "expected_result.json",
+      "hash": "sha256:<64 lowercase hex>",
+      "access_class": "public",
+      "producer_event_id": "evt-000"
+    }
+  ]
+}

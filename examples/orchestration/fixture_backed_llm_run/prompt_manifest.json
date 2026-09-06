@@ -1,0 +1,63 @@
+{
+  "schema_version": "quantsmith.orchestration.prompt.v1",
+  "prompt_id": "prompt.market_text.fixture_summary",
+  "version": "1.0.0",
+  "source": {
+    "type": "prompt_source",
+    "path": "prompt.md",
+    "hash": "sha256:588036557f4b416f81da0b13a243cb652ffb0aed3ac52910104267172927ff9b"
+  },
+  "role_layers": [
+    {
+      "role": "system",
+      "source_path": "prompt.md",
+      "hash": "sha256:588036557f4b416f81da0b13a243cb652ffb0aed3ac52910104267172927ff9b"
+    }
+  ],
+  "variables": [
+    {
+      "name": "as_of_date",
+      "required": true
+    },
+    {
+      "name": "source_id",
+      "required": true
+    }
+  ],
+  "rendered_variables": {
+    "as_of_date": "2026-09-06",
+    "source_id": "synthetic_public_market_note"
+  },
+  "model_constraints": {
+    "providers": ["openai", "anthropic", "local", "fixture"],
+    "models": ["frontier-llm-placeholder", "local-llm-placeholder"],
+    "temperature_max": 0.2,
+    "seed_required": false
+  },
+  "allowed_tools": [],
+  "allowed_plugins": [
+    {
+      "name": "llm_runtime.fixture",
+      "type": "fixture_provider",
+      "fixtureable": true
+    }
+  ],
+  "requested_tools": [],
+  "requested_plugins": [
+    {
+      "name": "llm_runtime.fixture"
+    }
+  ],
+  "prohibited_data_classes": ["secret", "credential", "mnpi", "licensed_body"],
+  "safety_policy_refs": [
+    "instructions/point_in_time.md",
+    "adapters/llm_runtime/adapter_contract.md"
+  ],
+  "evaluation_refs": ["evaluation_harness.json#model_outputs"],
+  "owner": "spec0070",
+  "review": {
+    "status": "approved",
+    "reviewer": "codex",
+    "reviewed_at": "2026-09-06"
+  }
+}

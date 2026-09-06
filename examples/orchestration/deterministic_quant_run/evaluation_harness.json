@@ -1,0 +1,47 @@
+{
+  "schema_version": "quantsmith.orchestration.evaluation_harness.v1",
+  "harness_id": "harness-det-0063-golden-repo-specialness",
+  "run_id": "orch-det-0063-golden-repo-specialness",
+  "required_layers": [
+    "envelope",
+    "prompt",
+    "context",
+    "assumptions",
+    "tool_plugin_calls",
+    "model_outputs",
+    "quant_leakage",
+    "final_artifact",
+    "replay"
+  ],
+  "layers": [
+    {"layer": "envelope", "checks": [{"check_id": "envelope-schema", "check_type": "schema", "deterministic": true, "status": "pass"}]},
+    {"layer": "prompt", "checks": [{"check_id": "prompt-hash", "check_type": "hash", "deterministic": true, "status": "pass"}]},
+    {"layer": "context", "checks": [{"check_id": "context-access-pit", "check_type": "access_point_in_time", "deterministic": true, "status": "pass"}]},
+    {"layer": "assumptions", "checks": [{"check_id": "assumption-coverage", "check_type": "ledger_required_fields", "deterministic": true, "status": "pass"}]},
+    {"layer": "tool_plugin_calls", "checks": [{"check_id": "tool-shape", "check_type": "declared_tool_call", "deterministic": true, "status": "pass"}]},
+    {"layer": "model_outputs", "checks": [{"check_id": "no-model-output", "check_type": "deterministic_rule_output", "deterministic": true, "status": "pass"}]},
+    {"layer": "quant_leakage", "checks": [{"check_id": "pit-before-compose", "check_type": "point_in_time", "deterministic": true, "status": "pass"}]},
+    {"layer": "final_artifact", "checks": [{"check_id": "expected-result-hash", "check_type": "hash", "deterministic": true, "status": "pass"}]},
+    {"layer": "replay", "checks": [{"check_id": "deterministic-replay", "check_type": "replay", "deterministic": true, "status": "pass"}]}
+  ],
+  "integration_surfaces": [
+    "instructions/spec_driven_development.md",
+    "instructions/reproducibility.md",
+    "instructions/point_in_time.md",
+    "instructions/data_provenance.md",
+    "instructions/knowledge_base.md",
+    "instructions/model_plugin_integration.md",
+    "adapters/llm_runtime/",
+    "adapters/model_plugin/",
+    "src/quantsmith/adapters/mcp_servers/",
+    "src/quantsmith/pipelines/workflow_memory.py",
+    "src/quantsmith/pipelines/market_research.py",
+    "sources/",
+    "hooks/stages/leakage-check.sh",
+    "hooks/stages/backtest-check.sh",
+    "hooks/stages/repro-check.sh",
+    "hooks/stages/data-contract-check.sh",
+    "hooks/stages/source-catalog-check.sh",
+    "hooks/stages/secret-scan-check.sh"
+  ]
+}

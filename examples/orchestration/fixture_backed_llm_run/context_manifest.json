@@ -1,0 +1,47 @@
+{
+  "schema_version": "quantsmith.orchestration.context.v1",
+  "context_id": "ctx-llm-fixture-market-text",
+  "run_id": "orch-llm-fixture-market-text",
+  "caller": {
+    "id": "codex",
+    "clearance": "internal"
+  },
+  "as_of": "2026-09-06T00:00:00Z",
+  "context_window": {
+    "token_budget": 2048,
+    "character_budget": 12000
+  },
+  "items": [
+    {
+      "context_id": "ctx-llm-001",
+      "source_authority": "knowledge://market_research",
+      "locator": "context_note.md#synthetic-public-headline",
+      "content_hash": "sha256:f3b9138db92b78c165ad3a0c49a1bb6bcae1c20fff7640e5269ca8c2db07a4bf",
+      "access_level": "public",
+      "caller_clearance": "internal",
+      "retrieval_query": "public rates market policy stability text fixture",
+      "selection_rule": "synthetic public fixture selected by ID",
+      "rank": 1,
+      "budget": {
+        "tokens": 54,
+        "characters": 191
+      },
+      "known_at": "2026-09-06T00:00:00Z",
+      "effective_at": "2026-09-06T00:00:00Z",
+      "expires_at": "2027-09-06T00:00:00Z",
+      "freshness": "current",
+      "citations": [
+        {
+          "label": "fixture market note",
+          "locator": "context_note.md#synthetic-public-headline"
+        }
+      ]
+    }
+  ],
+  "exclusions": [
+    {
+      "locator": "private sell-side research body",
+      "reason": "not needed and not committed to fixture examples"
+    }
+  ]
+}

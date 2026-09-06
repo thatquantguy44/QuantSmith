@@ -14,7 +14,7 @@ signal and model **reproducible, leakage-safe, and traceable to a spec**.
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](pyproject.toml)
 [![Approach: Spec-Driven](https://img.shields.io/badge/Approach-Spec--Driven-ff6f00)](instructions/spec_driven_development.md)
 [![Agents: 168](https://img.shields.io/badge/Agents-168-6f42c1)](agents/README.md)
-[![Quality Gates: 33](https://img.shields.io/badge/Quality%20Gates-33-2ea44f)](hooks/README.md)
+[![Quality Gates: 34](https://img.shields.io/badge/Quality%20Gates-34-2ea44f)](hooks/README.md)
 [![Specs: 60](https://img.shields.io/badge/Specs-60-0969da)](specs/README.md)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](.github/GIT_GUIDELINES.md)
 
@@ -65,7 +65,7 @@ signal and model **reproducible, leakage-safe, and traceable to a spec**.
 | 🔎 Catch leakage & time-alignment bugs | Point-in-time standards + `leakage`/`backtest` gates |
 | 📝 Document features, models, backtests | Templates, cards, and reproducible run artifacts |
 | 🤖 Reuse research workflows | 168 narrow, inspectable agent roles across the stack |
-| 🚦 Stop mistakes before commit/push | 33 quality gates, advisory by default, CI-enforceable |
+| 🚦 Stop mistakes before commit/push | 34 quality gates, advisory by default, CI-enforceable |
 | 🗣️ Share a common vocabulary | An [agentic dictionary](agentic_dictionary.md) for the team |
 
 ---
@@ -408,7 +408,7 @@ QF_STAGE_ENFORCE=1 hooks/stages/run-stage.sh spec   # blocking (as CI runs it)
 
 | Category | Gates |
 | --- | --- |
-| 🧭 Cross-cutting | `spec` |
+| 🧭 Cross-cutting | `spec` · `orchestration` |
 | 🔄 Per-stage | `planning` · `design` · `implementation` · `testing` · `deployment` · `maintenance` |
 | 📈 Quant | `leakage` · `backtest` · `repro` · `data-contract` · `pipeline-contract` · `alert-contract` · `monitoring-coverage` · `data-provenance` |
 | 🗃️ Repo | `secret-scan` · `docs-link` · `agent-catalog` · `spec-index` · `readme-sync` · `doc-counts` · `quantsmith-version` · `agent-attribution` · `handoff-sync` · `upstream-drift` · `ownership` · `persistent-knowledge` · `knowledge` · `role-context` · `model-plugin` · `source-catalog` |
@@ -440,6 +440,7 @@ the [spec index](specs/README.md).
 | [`0059`](specs/0059-morning-market-brief/) | Morning market brief — free-API commentary (NewsAPI/Alpha Vantage/Finnhub) → deterministic headlines + sentiment rollup → agent-written analysis → staged `pending_review` candidate, never committed | `market_brief.py` |
 | [`0061`](specs/0061-quant-model-factory/) | Quant Model Factory — parallel model-development lanes with `best_of_n` / `all_required` / `first_to_pass` convergence; caller-injected executor; `ConvergenceGate` scoring (Sharpe, drawdown, return); append-only JSONL ledger for full auditability | `quant_factory.py` |
 | [`0063`](specs/0063-short-term-markets-domain-foundation/) | Short-term markets domain foundation — validates the U.S.-first taxonomy, viewpoints, conventions, lifecycles, evidence rules, coverage matrix, gap register, and golden cases without changing pricing runtimes | `short_term_markets_knowledge.py` |
+| [`0070`](specs/0070-prompt-context-harness-foundation/) | Prompt / Context / Harness Engineering Foundation — typed run envelopes, prompt/context manifests, assumption ledgers, evaluation harnesses, audit events, replay reports, and a composite gate for agentic quant orchestration evidence | `orchestration/` package, `quantsmith-orchestration` CLI, `orchestration` gate |
 | [`0055`](specs/0055-workflow-scheduling-operations/) | Workflow scheduling operations — registry validation, cron dry-run evidence, idempotent dispatch, JSONL ledger, manual reminders, daily reports, alert handoff, memory candidates | `workflow_scheduling.py` |
 | [`0060`](specs/0060-scheduler-monitoring/) | Scheduler monitoring — executable report and alert-preview CLI plus caller-injected alert delivery over the workflow-scheduling runtime | `workflow_scheduling.py` *(extended)*, `workflow_scheduling_cli.py` |
 | [`0047`](specs/0047-downstream-contract/) | Downstream consumer contract — `DashboardSpec.schema_version` + compatibility check, release-notify workflow, and a copyable `quantsmith-version` gate for a separate consuming repository | `dashboard_spec.py` *(extended)* |
