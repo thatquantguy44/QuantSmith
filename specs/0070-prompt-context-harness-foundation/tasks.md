@@ -60,6 +60,9 @@ Status values: `todo` | `in-progress` | `blocked` | `done`.
 - Gate: `hooks/stages/run-stage.sh orchestration`.
 - Examples: `examples/orchestration/deterministic_quant_run/` and
   `examples/orchestration/fixture_backed_llm_run/`.
+- Producer integration: `emit_quant_factory_evidence` in
+  `src/quantsmith/orchestration/producers.py` consumes a real `0061` Quant Model
+  Factory `FactorySpec` and `FactoryDecision` and emits a validated 0070 bundle.
 
 ## Validation Evidence
 
@@ -67,6 +70,8 @@ Status values: `todo` | `in-progress` | `blocked` | `done`.
 - `PYTHONPATH=src python3 -m quantsmith.orchestration replay --envelope examples/orchestration/deterministic_quant_run/run_envelope.json --json` -> status `replayed`, no findings, no non-reproducible dependencies.
 - `PYTHONPATH=src python3 -m quantsmith.orchestration replay --fixture-mode --envelope examples/orchestration/fixture_backed_llm_run/run_envelope.json --json` -> status `replayed`, fixture substitution recorded for `evt-llm-003`.
 - `PYTHONPATH=src pytest -q tests/test_orchestration_foundation.py` -> 12 passed.
+- `PYTHONPATH=src pytest -q tests/test_orchestration_foundation.py` after the
+  Quant Model Factory producer integration -> 13 passed.
 - `QF_STAGE_ENFORCE=1 hooks/stages/run-stage.sh orchestration` -> no findings.
 - `PYTHONPATH=src pytest -q` -> 521 passed, 1 skipped, 4 sandbox-only localhost bind errors; rerun outside sandbox completed 525 passed, 1 skipped.
 - `QF_STAGE_ENFORCE=1 hooks/stages/run-stage.sh spec orchestration docs-link agent-catalog spec-index readme-sync doc-counts handoff-sync ownership persistent-knowledge source-catalog secret-scan` -> no findings.
