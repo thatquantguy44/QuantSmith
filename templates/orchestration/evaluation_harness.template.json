@@ -1,0 +1,49 @@
+{
+  "schema_version": "quantsmith.orchestration.evaluation_harness.v1",
+  "harness_id": "harness-example",
+  "run_id": "run-YYYYMMDD-short-name",
+  "required_layers": [
+    "envelope",
+    "prompt",
+    "context",
+    "assumptions",
+    "tool_plugin_calls",
+    "model_outputs",
+    "quant_leakage",
+    "final_artifact",
+    "replay"
+  ],
+  "layers": [
+    {
+      "layer": "envelope",
+      "checks": [
+        {
+          "check_id": "check-envelope-schema",
+          "check_type": "schema",
+          "deterministic": true,
+          "status": "pass"
+        }
+      ]
+    }
+  ],
+  "integration_surfaces": [
+    "instructions/spec_driven_development.md",
+    "instructions/reproducibility.md",
+    "instructions/point_in_time.md",
+    "instructions/data_provenance.md",
+    "instructions/knowledge_base.md",
+    "instructions/model_plugin_integration.md",
+    "adapters/llm_runtime/",
+    "adapters/model_plugin/",
+    "src/quantsmith/adapters/mcp_servers/",
+    "src/quantsmith/pipelines/workflow_memory.py",
+    "src/quantsmith/pipelines/market_research.py",
+    "sources/",
+    "hooks/stages/leakage-check.sh",
+    "hooks/stages/backtest-check.sh",
+    "hooks/stages/repro-check.sh",
+    "hooks/stages/data-contract-check.sh",
+    "hooks/stages/source-catalog-check.sh",
+    "hooks/stages/secret-scan-check.sh"
+  ]
+}

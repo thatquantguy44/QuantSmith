@@ -1,0 +1,45 @@
+{
+  "schema_version": "quantsmith.orchestration.prompt.v1",
+  "prompt_id": "prompt.example",
+  "version": "1.0.0",
+  "source": {
+    "type": "prompt_source",
+    "path": "prompt.md",
+    "hash": "sha256:<64 lowercase hex>"
+  },
+  "role_layers": [
+    {
+      "role": "system",
+      "source_path": "prompt.md",
+      "hash": "sha256:<64 lowercase hex>"
+    }
+  ],
+  "variables": [
+    {
+      "name": "as_of_date",
+      "required": true
+    }
+  ],
+  "rendered_variables": {
+    "as_of_date": "YYYY-MM-DD"
+  },
+  "model_constraints": {
+    "providers": ["deterministic"],
+    "models": ["rule-based"],
+    "temperature_max": 0.0,
+    "seed_required": true
+  },
+  "allowed_tools": [],
+  "allowed_plugins": [],
+  "requested_tools": [],
+  "requested_plugins": [],
+  "prohibited_data_classes": ["secret", "credential", "mnpi", "licensed_body"],
+  "safety_policy_refs": ["instructions/point_in_time.md"],
+  "evaluation_refs": ["evaluation_harness.json#prompt"],
+  "owner": "spec-or-team-owner",
+  "review": {
+    "status": "approved",
+    "reviewer": "pseudonymous-reviewer",
+    "reviewed_at": "YYYY-MM-DD"
+  }
+}

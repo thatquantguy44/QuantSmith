@@ -8,7 +8,7 @@
 #
 # Stages: spec planning design implementation testing deployment maintenance
 #   (spec is the cross-cutting spec-driven traceability check; it runs first)
-# Quant gates: leakage backtest repro data-contract pipeline-contract
+# Quant gates: leakage backtest repro orchestration data-contract pipeline-contract
 #   alert-contract monitoring-coverage
 #   (quant-specific checks; heuristic and advisory, run after the SDLC stages)
 # Repo gates: secret-scan docs-link agent-catalog spec-index readme-sync doc-counts
@@ -33,7 +33,7 @@
 
 DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 
-ALL="spec planning design implementation testing deployment maintenance leakage backtest repro data-contract pipeline-contract alert-contract monitoring-coverage secret-scan docs-link agent-catalog spec-index readme-sync doc-counts quantsmith-version agent-attribution handoff-sync upstream-drift ownership persistent-knowledge knowledge memory access role-context data-provenance model-plugin source-catalog"
+ALL="spec planning design implementation testing deployment maintenance leakage backtest repro orchestration data-contract pipeline-contract alert-contract monitoring-coverage secret-scan docs-link agent-catalog spec-index readme-sync doc-counts quantsmith-version agent-attribution handoff-sync upstream-drift ownership persistent-knowledge knowledge memory access role-context data-provenance model-plugin source-catalog"
 stages="$*"
 [ -z "$stages" ] && stages="$ALL"
 

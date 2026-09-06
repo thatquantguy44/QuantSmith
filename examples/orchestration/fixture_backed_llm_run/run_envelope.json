@@ -1,0 +1,44 @@
+{
+  "schema_version": "quantsmith.orchestration.run.v1",
+  "run_id": "orch-llm-fixture-market-text",
+  "objective": "Validate an LLM-eligible market text signal with provider metadata and a local fixture response.",
+  "spec_id": "0070-prompt-context-harness-foundation",
+  "stage": "implementation",
+  "mode": "fixture_backed_llm",
+  "release_profile": "release_bound",
+  "created_at": "2026-09-06T00:00:04Z",
+  "actor": {
+    "type": "agent",
+    "id": "codex",
+    "clearance": "internal"
+  },
+  "repo_revision": "fixture",
+  "environment": {
+    "python": "3.12",
+    "network": "disabled",
+    "dependencies": ["stdlib"]
+  },
+  "prompt_manifest": {"type": "prompt_manifest", "path": "prompt_manifest.json", "hash": "sha256:2e8c6098b9a4cfbb76d3ca6734083c12c0335689c5918dec920150e786e6ee6a"},
+  "context_manifest": {"type": "context_manifest", "path": "context_manifest.json", "hash": "sha256:6187ae5adeb8ea04dac2c38fbcfa724d1cf7a6566e022858c8a38fafec2f5141"},
+  "assumption_ledger": {"type": "assumption_ledger", "path": "assumptions.jsonl", "hash": "sha256:b61d88c6398d858fc10d878ca6bc99172f02d745f9802716550acd2b31b6b249"},
+  "evaluation_harness": {"type": "evaluation_harness", "path": "evaluation_harness.json", "hash": "sha256:d4446fefd8c9c7806e5b8677701187fb921200c2b5232cfc35d6cee498a4ad6d"},
+  "audit_events": {"type": "audit_events", "path": "audit_events.jsonl", "hash": "sha256:b1ad8cc84c589dc4c12f6c338bcf1df794f8bae069bcb4441e46f058126404fd"},
+  "gate_results": [
+    {
+      "gate": "orchestration",
+      "status": "pass",
+      "finding_count": 0,
+      "checked_at": "2026-09-06T00:00:04Z"
+    }
+  ],
+  "replay": {
+    "mode": "fixture",
+    "command": "python -m quantsmith.orchestration replay --fixture-mode --envelope run_envelope.json",
+    "expected_outputs": [
+      {"type": "final_artifact", "path": "expected_result.json", "hash": "sha256:b6de91202607a64c06451770b2f5dac665eec2cb3e01aa64b2d025c821721dca"}
+    ]
+  },
+  "artifacts": [
+    {"type": "final_artifact", "path": "expected_result.json", "hash": "sha256:b6de91202607a64c06451770b2f5dac665eec2cb3e01aa64b2d025c821721dca", "access_class": "public", "producer_event_id": "evt-llm-004"}
+  ]
+}
