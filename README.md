@@ -13,9 +13,9 @@ signal and model **reproducible, leakage-safe, and traceable to a spec**.
 [![CI](https://github.com/joshualutkemuller/QuantSmith/actions/workflows/ci.yml/badge.svg)](https://github.com/joshualutkemuller/QuantSmith/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](pyproject.toml)
 [![Approach: Spec-Driven](https://img.shields.io/badge/Approach-Spec--Driven-ff6f00)](instructions/spec_driven_development.md)
-[![Agents: 162](https://img.shields.io/badge/Agents-162-6f42c1)](agents/README.md)
+[![Agents: 168](https://img.shields.io/badge/Agents-168-6f42c1)](agents/README.md)
 [![Quality Gates: 33](https://img.shields.io/badge/Quality%20Gates-33-2ea44f)](hooks/README.md)
-[![Specs: 56](https://img.shields.io/badge/Specs-56-0969da)](specs/README.md)
+[![Specs: 57](https://img.shields.io/badge/Specs-57-0969da)](specs/README.md)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](.github/GIT_GUIDELINES.md)
 
 <br/>
@@ -64,7 +64,7 @@ signal and model **reproducible, leakage-safe, and traceable to a spec**.
 | 🧠 Plan research from a hypothesis | Spec-driven planning agents + traceable requirements |
 | 🔎 Catch leakage & time-alignment bugs | Point-in-time standards + `leakage`/`backtest` gates |
 | 📝 Document features, models, backtests | Templates, cards, and reproducible run artifacts |
-| 🤖 Reuse research workflows | 162 narrow, inspectable agent roles across the stack |
+| 🤖 Reuse research workflows | 168 narrow, inspectable agent roles across the stack |
 | 🚦 Stop mistakes before commit/push | 33 quality gates, advisory by default, CI-enforceable |
 | 🗣️ Share a common vocabulary | An [agentic dictionary](agentic_dictionary.md) for the team |
 
@@ -287,6 +287,8 @@ each. Uses the catalog as its routing table.
 
 **Formulaic alphas** (`agents/formulaic_alphas/`) — `alpha_construction/`, `alpha_combination/`, `alpha_evaluation/`: operationalize the methodology of *101 Formulaic Alphas* (Kakushadze, 2016) — build tradable signals from an operator library, combine weakly-correlated alphas, and evaluate holding period, turnover, correlation, and capacity.
 
+**Test engineering** (`agents/test_engineering/`) — `test_engineering_orchestrator/`, `python_test_engineer/`, `cpp_test_fuzz_engineer/`, `javascript_test_engineer/`, `typescript_test_engineer/`: language-specific test authoring — pytest, GoogleTest/Catch2 plus libFuzzer/AFL++ fuzzing (authorized targets only), Jest/Vitest/Mocha, and TypeScript type-level tests, with an orchestrator that routes by detected stack. Writes and reviews the tests and fuzz harnesses only; `testing_validation` decides whether they close an acceptance criterion and `quality-guard-agent` decides whether a stage may release (spec `0062`).
+
 </details>
 
 ---
@@ -355,6 +357,7 @@ Reusable standards and behavioral rules that agents follow.
 - [`role_operations.md`](instructions/role_operations.md)
 - [`data_provenance.md`](instructions/data_provenance.md)
 - [`data_source_catalog.md`](instructions/data_source_catalog.md)
+- [`test_engineering.md`](instructions/test_engineering.md)
 
 </td></tr>
 </table>
