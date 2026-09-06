@@ -8,6 +8,11 @@ standard behind the `agents/securities_financing/` group. The goal is that finan
 cost and risk are accounted for as first-class parts of a strategy's economics, not
 omitted as back-office detail.
 
+For U.S. short-term-markets terms, roles, signs, day counts, settlement, source
+authority, and golden cases, retrieve `knowledge/short_term_markets/` through
+`instructions/short_term_markets.md`. Local summaries below are routing guidance,
+not replacements for the canonical 0063 foundation.
+
 ## Required Inputs
 
 - The positions (long, short, financed) and the financing they require.
@@ -30,8 +35,10 @@ omitted as back-office detail.
 - **Point-in-time financing data.** Borrow rates, hard-to-borrow status, and repo
   rates change and are a leakage surface; use what was knowable at the trade date.
   See `instructions/point_in_time.md`.
-- **General collateral vs specials.** Distinguish cheap general collateral from
-  expensive specials in both stock loan and repo; specials can exceed the alpha.
+- **General collateral vs specials.** Distinguish repo specialness from
+  stock-loan specialness by viewpoint. Repo specialness is positive when `GC repo
+  rate - specific collateral repo rate` is positive; stock-loan specialness uses
+  borrow-fee/rebate economics under the borrower/lender viewpoint.
 - **Counterparty and rehypothecation risk are named.** Financing creates exposure
   to a counterparty and to reuse of posted collateral; make both explicit.
 - **Capacity reflects availability.** Hard-to-borrow names and scarce funding cap
@@ -43,7 +50,8 @@ omitted as back-office detail.
 
 - Are borrow, rebate, funding, and margin all netted from returns?
 - Are financing inputs point-in-time, not hindsight?
-- Are general collateral and specials distinguished?
+- Are general collateral and specials distinguished by product and viewpoint,
+  using `knowledge/short_term_markets/`?
 - Are counterparty and rehypothecation exposures named?
 - Is capacity limited by borrow availability and funding, with recall/roll risk?
 - Are the relevant regulatory requirements flagged?

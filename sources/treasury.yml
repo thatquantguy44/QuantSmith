@@ -1,0 +1,33 @@
+source_id: "treasury"
+name: "U.S. Treasury Fiscal Data and TreasuryDirect"
+type: api
+owner: "quant-research"
+description: >
+  Public U.S. Treasury rates, auction, security, debt, and fiscal datasets used
+  as source metadata for Treasury bill, short-dated Treasury cashflow, and
+  collateral eligibility research.
+
+domain: ["short_term_markets", "fixed_income_rates", "cash_products"]
+access_level: public
+
+quality:
+  completeness: high
+  timeliness: "varies by dataset; auction and rates data follow Treasury publication schedules"
+  known_issues:
+    - "record date, auction date, issue date, settlement date, and maturity date are distinct and must not be collapsed"
+    - "endpoint defaults and pagination can omit rows unless retrieval parameters are recorded"
+  last_assessed: "2026-09-06"
+
+point_in_time:
+  supports_asof: true
+  revision_policy: "public datasets expose dated records; consumers must snapshot retrieval parameters and publication timing for backtests"
+
+connection:
+  method: rest_api
+  endpoint_or_host: "https://api.fiscaldata.treasury.gov/services/api/fiscal_service"
+  credential_ref: "not_required_public_access"
+
+documentation_uri: "https://fiscaldata.treasury.gov/api-documentation/"
+status: evaluating
+
+data_contract_refs: ["specs/0063-short-term-markets-domain-foundation/"]

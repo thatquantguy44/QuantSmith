@@ -1,0 +1,260 @@
+{
+  "schema_version": "0063.1",
+  "required_domains": [
+    "repo_reverse_repo",
+    "securities_lending",
+    "collateral_margin_substitution",
+    "treasury_cash_products",
+    "approved_cash_product_universe",
+    "clearing_settlement_reporting_regulatory",
+    "financing_portfolio_backtest_risk_liquidity_capacity"
+  ],
+  "capabilities": [
+    {
+      "id": "capability.repo.reverse_repo_foundation",
+      "record_type": "capability",
+      "name": "Repo and reverse-repo taxonomy, viewpoints, conventions, and lifecycle",
+      "capability_domain": "repo_reverse_repo",
+      "product_ids": ["product.repo", "product.reverse_repo"],
+      "topic": "Repo/reverse repo roles, GC-versus-specific specialness, ACT/360 accrual, haircut, settlement, roll, fail, default, and termination states",
+      "coverage_level": "contract_only",
+      "artifact_paths": [
+        "knowledge/short_term_markets/taxonomy.json",
+        "knowledge/short_term_markets/conventions.json",
+        "knowledge/short_term_markets/lifecycles.json",
+        "agents/securities_financing/repo_financing/instructions.md"
+      ],
+      "test_paths": ["tests/test_short_term_markets_knowledge.py"],
+      "source_readiness": "registered_public_metadata_only",
+      "validation_status": "structural_and_golden_case_validation",
+      "limitations": [
+        "No repo pricing, financing cashflow engine, term/open roll model, margin model, settlement fail economics, or GC/specific data ingestion ships in 0063",
+        "Repo runtime remains reserved for 0064"
+      ],
+      "owner_spec": "0064",
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-06",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": ["source.ny_fed", "source.dtcc_ficc", "source.sifma"],
+      "review_status": "draft",
+      "review": null,
+      "supersedes": []
+    },
+    {
+      "id": "capability.seclend.foundation_and_current_runtime",
+      "record_type": "capability",
+      "name": "Securities-lending foundation and current demo runtime",
+      "capability_domain": "securities_lending",
+      "product_ids": ["product.securities_lending"],
+      "topic": "Loan roles, borrow fee, rebate, GC/WARM/HTB classification, inventory allocation, concentration risk, recall, buy-in, and corporate-action lifecycle",
+      "coverage_level": "reference_runtime",
+      "artifact_paths": [
+        "knowledge/short_term_markets/taxonomy.json",
+        "knowledge/short_term_markets/conventions.json",
+        "knowledge/short_term_markets/lifecycles.json",
+        "src/quantsmith/quant/agentic_quant/sec_lending.py",
+        "src/quantsmith/quant/agentic_quant/sec_lending_workflow.py",
+        "agents/securities_financing/securities_lending/instructions.md"
+      ],
+      "test_paths": [
+        "tests/test_sec_lending_workflow.py",
+        "tests/test_short_term_markets_knowledge.py"
+      ],
+      "source_readiness": "registered_public_metadata_only",
+      "validation_status": "current_runtime_validates_0023_only; 0063 compatibility gaps recorded",
+      "limitations": [
+        "Current runtime uses fixed GC/WARM/HTB thresholds and ACT/252 fee approximations",
+        "Counterparty concentration is analyzed after allocation but not enforced inside the allocation optimizer",
+        "0063 does not change existing runtime behavior"
+      ],
+      "owner_spec": "0066",
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-06",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": ["source.sec", "source.finra", "source.sifma"],
+      "review_status": "draft",
+      "review": null,
+      "supersedes": []
+    },
+    {
+      "id": "capability.collateral.margin_substitution_foundation",
+      "record_type": "capability",
+      "name": "Collateral, haircut, margin, and substitution foundation",
+      "capability_domain": "collateral_margin_substitution",
+      "product_ids": ["product.repo", "product.securities_lending"],
+      "topic": "Collateral eligibility, haircut ratios, margin amounts, mark-to-market, margin calls, substitution, dispute, return, and close-out states",
+      "coverage_level": "contract_only",
+      "artifact_paths": [
+        "knowledge/short_term_markets/taxonomy.json",
+        "knowledge/short_term_markets/conventions.json",
+        "knowledge/short_term_markets/lifecycles.json",
+        "agents/securities_financing/collateral_management/instructions.md",
+        "agents/optimization/collateral_margin_optimization/instructions.md"
+      ],
+      "test_paths": ["tests/test_short_term_markets_knowledge.py"],
+      "source_readiness": "registered_public_metadata_only",
+      "validation_status": "structural_and_golden_case_validation",
+      "limitations": [
+        "No eligibility engine, collateral optimizer, concentration aggregation, substitution scheduler, or margin-call operations runtime ships in 0063",
+        "Reference optimizer versus model-plugin boundary remains reserved for 0067"
+      ],
+      "owner_spec": "0067",
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-06",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": ["source.sifma", "source.dtcc_ficc"],
+      "review_status": "draft",
+      "review": null,
+      "supersedes": []
+    },
+    {
+      "id": "capability.cash.treasury_bill_short_coupon_foundation",
+      "record_type": "capability",
+      "name": "Treasury bill and short-dated Treasury cash-product foundation",
+      "capability_domain": "treasury_cash_products",
+      "product_ids": ["product.treasury_bill", "product.short_dated_treasury_coupon"],
+      "topic": "T-bill discount-yield/price conversion, price-per-par, ACT/360 accrual, settlement-to-maturity timing, and cash-product lifecycle",
+      "coverage_level": "contract_only",
+      "artifact_paths": [
+        "knowledge/short_term_markets/taxonomy.json",
+        "knowledge/short_term_markets/conventions.json",
+        "knowledge/short_term_markets/lifecycles.json",
+        "agents/asset_classes/fixed_income_rates/instructions.md"
+      ],
+      "test_paths": ["tests/test_short_term_markets_knowledge.py"],
+      "source_readiness": "registered_public_metadata_only",
+      "validation_status": "structural_and_golden_case_validation",
+      "limitations": [
+        "No cash-product pricer, accrual schedule builder, coupon cashflow engine, auction ingestion, or Treasury curve source ingestion ships in 0063",
+        "Cash product pricing remains reserved for 0065"
+      ],
+      "owner_spec": "0065",
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-06",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": ["source.treasury", "source.federal_reserve"],
+      "review_status": "draft",
+      "review": null,
+      "supersedes": []
+    },
+    {
+      "id": "capability.cash.approved_institutional_universe",
+      "record_type": "capability",
+      "name": "Approved institutional cash-product universe",
+      "capability_domain": "approved_cash_product_universe",
+      "product_ids": [
+        "product.treasury_bill",
+        "product.short_dated_treasury_coupon",
+        "product.commercial_paper",
+        "product.certificate_of_deposit",
+        "product.money_market_fund_shares"
+      ],
+      "topic": "U.S.-first cash-product admission list and explicit future gates for non-Treasury products",
+      "coverage_level": "contract_only",
+      "artifact_paths": [
+        "knowledge/short_term_markets/README.md",
+        "knowledge/short_term_markets/taxonomy.json",
+        "knowledge/short_term_markets/coverage.json"
+      ],
+      "test_paths": ["tests/test_short_term_markets_knowledge.py"],
+      "source_readiness": "treasury_registered; non_treasury_product_sources_need_0065_detail",
+      "validation_status": "structural_validation",
+      "limitations": [
+        "Only Treasury bills and short-dated Treasury cashflows have initial convention records",
+        "Commercial paper, certificates of deposit, deposits, agency discount notes, and money-market-fund shares require 0065 admission criteria before pricing support"
+      ],
+      "owner_spec": "0065",
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-06",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": ["source.treasury", "source.federal_reserve", "source.sec"],
+      "review_status": "draft",
+      "review": null,
+      "supersedes": []
+    },
+    {
+      "id": "capability.market_plumbing.source_authority",
+      "record_type": "capability",
+      "name": "Clearing, settlement, reporting, regulatory, and source-authority foundation",
+      "capability_domain": "clearing_settlement_reporting_regulatory",
+      "product_ids": ["product.repo", "product.securities_lending", "product.treasury_bill", "product.money_market_fund_shares"],
+      "topic": "Source hierarchy, jurisdiction, access/license class, effective-time model, clearing/settlement/reporting source locators, and regulatory-context ownership",
+      "coverage_level": "contract_only",
+      "artifact_paths": [
+        "knowledge/short_term_markets/source_policy.md",
+        "sources/treasury.yml",
+        "sources/ny_fed.yml",
+        "sources/federal_reserve.yml",
+        "sources/sec.yml",
+        "sources/finra.yml",
+        "sources/dtcc_ficc.yml",
+        "sources/sifma.yml"
+      ],
+      "test_paths": ["tests/test_short_term_markets_knowledge.py"],
+      "source_readiness": "registered_public_metadata_only",
+      "validation_status": "source_catalog_gate_and_domain_structural_validation",
+      "limitations": [
+        "No live source ingestion or data contracts ship in 0063",
+        "Regulatory/legal knowledge remains informational and reserved for 0069; ingestion remains reserved for 0068"
+      ],
+      "owner_spec": "0068",
+      "jurisdiction": "US",
+      "knowledge_class": "regulatory_policy",
+      "knowledge_as_of": "2026-09-06",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": ["source.treasury", "source.ny_fed", "source.federal_reserve", "source.sec", "source.finra", "source.dtcc_ficc", "source.sifma"],
+      "review_status": "draft",
+      "review": null,
+      "supersedes": []
+    },
+    {
+      "id": "capability.financing.backtest_risk_bridge",
+      "record_type": "capability",
+      "name": "Financing-aware portfolio, backtest, risk, liquidity, and capacity bridge",
+      "capability_domain": "financing_portfolio_backtest_risk_liquidity_capacity",
+      "product_ids": ["product.repo", "product.securities_lending", "product.treasury_bill"],
+      "topic": "Financing legs, net cost of carry, backtest drag, capacity limits, specials sensitivity, and handoff to risk/backtest review",
+      "coverage_level": "reference_runtime",
+      "artifact_paths": [
+        "src/quantsmith/pipelines/financing_cost_analysis.py",
+        "src/quantsmith/pipelines/backtesting.py",
+        "agents/securities_financing/financing_cost_analysis/instructions.md",
+        "agents/backtest_review/instructions.md",
+        "agents/risk/instructions.md"
+      ],
+      "test_paths": [
+        "tests/test_financing_cost_analysis.py",
+        "tests/test_backtesting.py",
+        "tests/test_short_term_markets_knowledge.py"
+      ],
+      "source_readiness": "current_runtime_accepts_supplied_inputs; source backing deferred",
+      "validation_status": "current_runtime_validates_0028_only; 0063 compatibility gaps recorded",
+      "limitations": [
+        "Financing-cost runtime uses fixed notional over the period and ACT/360 for all legs",
+        "Point-in-time check catches rates known after period end but does not segment rates by when they became knowable inside the holding period",
+        "0063 adds validation fixtures but does not change pricing or allocation outputs"
+      ],
+      "owner_spec": "0066",
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-06",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": ["source.ny_fed", "source.federal_reserve", "source.sifma"],
+      "review_status": "draft",
+      "review": null,
+      "supersedes": []
+    }
+  ]
+}

@@ -2,8 +2,13 @@
 
 ## Operating Rules
 
+- Use `instructions/short_term_markets.md` and `knowledge/short_term_markets/`
+  for U.S. securities-lending roles, borrow-fee/rebate signs, GC/special
+  distinctions, point-in-time source rules, lifecycles, and current gap records.
 - Net the borrow fee and short rebate from short returns; never assume a free short.
-- Distinguish general collateral from specials; specials can dwarf the alpha.
+- Distinguish general collateral from stock-loan specials by borrower/lender
+  viewpoint; do not import the repo-special sign convention without an explicit
+  conversion.
 - Use point-in-time borrow rates and hard-to-borrow status, not today's values.
 - Treat recall risk as a constraint: a recalled borrow can force a buy-in.
 - Handle corporate actions on loaned stock: manufactured dividends and lost votes.
@@ -32,5 +37,6 @@ and specials risk become `RISK-*`. Point-in-time borrow data is enforced by
 `instructions/point_in_time.md`; short-cost realism by the `backtest` gate's
 financing theme. See `instructions/securities_financing.md`. The classification,
 inventory-optimization, and concentration-risk mechanics have a tested runtime in
-`specs/0023-securities-lending-workflow/`. Hands off to `financing_cost_analysis`,
-`backtest_review`, and `risk`.
+`specs/0023-securities-lending-workflow/`. For the canonical 0063 foundation, see
+`instructions/short_term_markets.md` and `knowledge/short_term_markets/`. Hands
+off to `financing_cost_analysis`, `backtest_review`, and `risk`.

@@ -1,0 +1,33 @@
+source_id: "ny_fed"
+name: "Federal Reserve Bank of New York Markets Data"
+type: api
+owner: "quant-research"
+description: >
+  Public NY Fed markets, SOFR, repo, primary dealer, Treasury market, and survey
+  datasets used as source metadata for repo, funding, liquidity, and
+  point-in-time market observation records.
+
+domain: ["short_term_markets", "repo", "fixed_income_rates", "funding"]
+access_level: public
+
+quality:
+  completeness: high
+  timeliness: "varies by dataset and release calendar"
+  known_issues:
+    - "observation dates and publication dates can differ and must be stored separately"
+    - "methodology changes and missing-publication behavior need dataset-specific handling"
+  last_assessed: "2026-09-06"
+
+point_in_time:
+  supports_asof: true
+  revision_policy: "preserve publication date or release timestamp separately from observation date; snapshot pulls used in research"
+
+connection:
+  method: rest_api
+  endpoint_or_host: "https://markets.newyorkfed.org/api"
+  credential_ref: "not_required_public_access"
+
+documentation_uri: "https://markets.newyorkfed.org/"
+status: evaluating
+
+data_contract_refs: ["specs/0063-short-term-markets-domain-foundation/"]

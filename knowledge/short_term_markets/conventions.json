@@ -1,0 +1,404 @@
+{
+  "schema_version": "0063.1",
+  "scope": {
+    "jurisdiction": "US",
+    "effective_interval_policy": "effective_from inclusive, effective_to exclusive",
+    "status": "draft_structural_contract"
+  },
+  "conventions": [
+    {
+      "id": "convention.repo.rate_act360_simple",
+      "record_type": "convention",
+      "name": "Repo rate ACT/360 simple accrual",
+      "quantity": "financing_rate",
+      "quote_style": "decimal_rate",
+      "unit": "decimal",
+      "day_count": "ACT/360",
+      "compounding": "simple",
+      "calendar": "US_GOVERNMENT_SECURITIES_BUSINESS_DAY",
+      "business_day_adjustment": "following_unless_contract_overrides",
+      "settlement": {
+        "lag": "contractual",
+        "start_inclusion": "include_start_exclude_end",
+        "timing": "cash and securities exchange according to repo start and end settlement terms"
+      },
+      "rounding": {"precision": 0.00000001, "method": "half_even", "applies_at": "output_boundary"},
+      "viewpoint_ids": ["role.repo_cash_provider", "role.repo_cash_taker"],
+      "sign_convention": {
+        "role.repo_cash_provider": "positive rate income",
+        "role.repo_cash_taker": "positive financing cost"
+      },
+      "formula": {
+        "id": "formula.simple_accrual",
+        "expression": "amount * annual_rate * days / day_count_basis",
+        "inputs": ["amount", "annual_rate", "days", "day_count_basis"],
+        "outputs": ["accrued_amount"]
+      },
+      "jurisdiction": "US",
+      "knowledge_class": "contractual_convention",
+      "knowledge_as_of": "2026-09-06",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": ["source.ny_fed", "source.dtcc_ficc"],
+      "review_status": "draft",
+      "review": null,
+      "supersedes": []
+    },
+    {
+      "id": "convention.repo.specialness_bps",
+      "record_type": "convention",
+      "name": "Repo specialness in basis points",
+      "quantity": "repo_specialness",
+      "quote_style": "basis_points",
+      "unit": "basis_points",
+      "day_count": "not_applicable",
+      "compounding": "not_applicable",
+      "calendar": "not_applicable",
+      "business_day_adjustment": "not_applicable",
+      "settlement": {
+        "lag": "not_applicable",
+        "start_inclusion": "not_applicable",
+        "timing": "comparison of two repo-rate observations with the same term and as-of date"
+      },
+      "rounding": {"precision": 0.0001, "method": "half_even", "applies_at": "output_boundary"},
+      "viewpoint_ids": ["role.repo_cash_provider", "role.repo_cash_taker"],
+      "sign_convention": {
+        "positive": "GC repo rate - specific collateral repo rate is positive when specific collateral trades below GC on the repo-rate axis",
+        "role.repo_cash_provider": "lower specific-collateral rate means lower rate income versus GC",
+        "role.repo_cash_taker": "lower specific-collateral rate means lower funding cost versus GC"
+      },
+      "formula": {
+        "id": "formula.repo_specialness_bps",
+        "expression": "(gc_repo_rate - specific_collateral_repo_rate) * 10000",
+        "inputs": ["gc_repo_rate", "specific_collateral_repo_rate"],
+        "outputs": ["specialness_bps"]
+      },
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-06",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": ["source.ny_fed"],
+      "review_status": "draft",
+      "review": null,
+      "supersedes": []
+    },
+    {
+      "id": "convention.seclend.borrow_fee_act360_simple",
+      "record_type": "convention",
+      "name": "Securities-lending borrow fee ACT/360 simple accrual",
+      "quantity": "borrow_fee",
+      "quote_style": "basis_points",
+      "unit": "basis_points",
+      "day_count": "ACT/360",
+      "compounding": "simple",
+      "calendar": "US_EQUITY_BUSINESS_DAY",
+      "business_day_adjustment": "following_unless_loan_terms_override",
+      "settlement": {
+        "lag": "loan_terms",
+        "start_inclusion": "include_start_exclude_end",
+        "timing": "fee accrues while borrow is open under stated loan terms"
+      },
+      "rounding": {"precision": 0.01, "method": "half_even", "applies_at": "cashflow_output"},
+      "viewpoint_ids": ["role.securities_borrower", "role.securities_lender", "role.short_seller"],
+      "sign_convention": {
+        "role.securities_borrower": "positive borrow-fee cost",
+        "role.securities_lender": "positive borrow-fee income",
+        "role.short_seller": "positive cost reduces short alpha"
+      },
+      "formula": {
+        "id": "formula.simple_accrual",
+        "expression": "notional * rate_bps / 10000 * days / day_count_basis",
+        "inputs": ["notional", "rate_bps", "days", "day_count_basis"],
+        "outputs": ["fee_amount"]
+      },
+      "jurisdiction": "US",
+      "knowledge_class": "contractual_convention",
+      "knowledge_as_of": "2026-09-06",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": ["source.sifma", "source.sec"],
+      "review_status": "draft",
+      "review": null,
+      "supersedes": []
+    },
+    {
+      "id": "convention.seclend.rebate_act360_simple",
+      "record_type": "convention",
+      "name": "Securities-lending rebate ACT/360 simple accrual",
+      "quantity": "rebate_rate",
+      "quote_style": "basis_points",
+      "unit": "basis_points",
+      "day_count": "ACT/360",
+      "compounding": "simple",
+      "calendar": "US_EQUITY_BUSINESS_DAY",
+      "business_day_adjustment": "following_unless_loan_terms_override",
+      "settlement": {
+        "lag": "loan_terms",
+        "start_inclusion": "include_start_exclude_end",
+        "timing": "rebate is credited or charged according to collateral and loan terms"
+      },
+      "rounding": {"precision": 0.01, "method": "half_even", "applies_at": "cashflow_output"},
+      "viewpoint_ids": ["role.securities_borrower", "role.securities_lender", "role.short_seller"],
+      "sign_convention": {
+        "role.securities_borrower": "positive rebate income when credited; negative if loan terms charge a negative rebate",
+        "role.securities_lender": "rebate is a cost when paid on cash collateral",
+        "role.short_seller": "rebate offsets borrow-fee cost only when same period and viewpoint are declared"
+      },
+      "formula": {
+        "id": "formula.simple_accrual",
+        "expression": "notional * rebate_bps / 10000 * days / day_count_basis",
+        "inputs": ["notional", "rebate_bps", "days", "day_count_basis"],
+        "outputs": ["rebate_amount"]
+      },
+      "jurisdiction": "US",
+      "knowledge_class": "contractual_convention",
+      "knowledge_as_of": "2026-09-06",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": ["source.sifma", "source.sec"],
+      "review_status": "draft",
+      "review": null,
+      "supersedes": []
+    },
+    {
+      "id": "convention.tbill.discount_yield_act360",
+      "record_type": "convention",
+      "name": "Treasury bill bank discount yield ACT/360",
+      "quantity": "discount_yield",
+      "quote_style": "discount_yield",
+      "unit": "decimal",
+      "day_count": "ACT/360",
+      "compounding": "discount",
+      "calendar": "US_TREASURY_BUSINESS_DAY",
+      "business_day_adjustment": "auction_and_settlement_calendar",
+      "settlement": {
+        "lag": "auction_or_secondary_market_terms",
+        "start_inclusion": "settlement_to_maturity",
+        "timing": "discount yield is tied to days from settlement to maturity"
+      },
+      "rounding": {"precision": 0.00000001, "method": "half_even", "applies_at": "output_boundary"},
+      "viewpoint_ids": ["role.cash_provider"],
+      "sign_convention": {
+        "role.cash_provider": "positive yield income when price is below par and security matures at par"
+      },
+      "formula": {
+        "id": "formula.tbill_discount_yield_to_price",
+        "expression": "price = par * (1 - discount_yield * days_to_maturity / 360)",
+        "inputs": ["par", "discount_yield", "days_to_maturity"],
+        "outputs": ["price"]
+      },
+      "jurisdiction": "US",
+      "knowledge_class": "contractual_convention",
+      "knowledge_as_of": "2026-09-06",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": ["source.treasury"],
+      "review_status": "draft",
+      "review": null,
+      "supersedes": []
+    },
+    {
+      "id": "convention.tbill.price_per_100",
+      "record_type": "convention",
+      "name": "Treasury bill price per 100 par",
+      "quantity": "price",
+      "quote_style": "price_per_par",
+      "unit": "currency_per_100_par",
+      "day_count": "not_applicable",
+      "compounding": "not_applicable",
+      "calendar": "US_TREASURY_BUSINESS_DAY",
+      "business_day_adjustment": "auction_and_settlement_calendar",
+      "settlement": {
+        "lag": "auction_or_secondary_market_terms",
+        "start_inclusion": "not_applicable",
+        "timing": "cash paid on settlement, par received at maturity"
+      },
+      "rounding": {"precision": 0.000001, "method": "half_even", "applies_at": "price_output"},
+      "viewpoint_ids": ["role.cash_provider"],
+      "sign_convention": {
+        "role.cash_provider": "cash outflow at purchase price; par cash inflow at maturity"
+      },
+      "formula": {
+        "id": "formula.price_per_100",
+        "expression": "quoted_price is amount paid per 100 par",
+        "inputs": ["quoted_price", "par_amount"],
+        "outputs": ["cash_amount"]
+      },
+      "jurisdiction": "US",
+      "knowledge_class": "contractual_convention",
+      "knowledge_as_of": "2026-09-06",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": ["source.treasury"],
+      "review_status": "draft",
+      "review": null,
+      "supersedes": []
+    },
+    {
+      "id": "convention.money_market.accrual_act360_simple",
+      "record_type": "convention",
+      "name": "Money-market simple accrual ACT/360",
+      "quantity": "accrual_amount",
+      "quote_style": "decimal_rate",
+      "unit": "currency",
+      "day_count": "ACT/360",
+      "compounding": "simple",
+      "calendar": "US_BUSINESS_DAY",
+      "business_day_adjustment": "following_unless_product_overrides",
+      "settlement": {
+        "lag": "product_terms",
+        "start_inclusion": "include_start_exclude_end",
+        "timing": "interest or financing accrues across declared holding days"
+      },
+      "rounding": {"precision": 0.01, "method": "half_even", "applies_at": "cashflow_output"},
+      "viewpoint_ids": ["role.cash_provider", "role.cash_taker"],
+      "sign_convention": {
+        "role.cash_provider": "positive accrued income",
+        "role.cash_taker": "positive financing cost"
+      },
+      "formula": {
+        "id": "formula.simple_accrual",
+        "expression": "notional * annual_rate * days / day_count_basis",
+        "inputs": ["notional", "annual_rate", "days", "day_count_basis"],
+        "outputs": ["accrual_amount"]
+      },
+      "jurisdiction": "US",
+      "knowledge_class": "contractual_convention",
+      "knowledge_as_of": "2026-09-06",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": ["source.federal_reserve", "source.treasury"],
+      "review_status": "draft",
+      "review": null,
+      "supersedes": []
+    },
+    {
+      "id": "convention.collateral.haircut_ratio",
+      "record_type": "convention",
+      "name": "Collateral haircut ratio",
+      "quantity": "haircut",
+      "quote_style": "ratio",
+      "unit": "decimal",
+      "day_count": "not_applicable",
+      "compounding": "not_applicable",
+      "calendar": "not_applicable",
+      "business_day_adjustment": "not_applicable",
+      "settlement": {
+        "lag": "collateral_schedule",
+        "start_inclusion": "not_applicable",
+        "timing": "haircut applies to valuation date and collateral schedule"
+      },
+      "rounding": {"precision": 0.000001, "method": "half_even", "applies_at": "eligibility_output"},
+      "viewpoint_ids": ["role.cash_provider", "role.cash_taker", "role.securities_provider", "role.securities_receiver"],
+      "sign_convention": {
+        "haircut_amount": "collateral_market_value * haircut",
+        "max_cash_advance": "collateral_market_value * (1 - haircut)"
+      },
+      "formula": {
+        "id": "formula.haircut_amount",
+        "expression": "haircut_amount = collateral_market_value * haircut",
+        "inputs": ["collateral_market_value", "haircut"],
+        "outputs": ["haircut_amount", "max_cash_advance"]
+      },
+      "jurisdiction": "US",
+      "knowledge_class": "contractual_convention",
+      "knowledge_as_of": "2026-09-06",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": ["source.sifma", "source.dtcc_ficc"],
+      "review_status": "draft",
+      "review": null,
+      "supersedes": []
+    },
+    {
+      "id": "convention.collateral.margin_amount",
+      "record_type": "convention",
+      "name": "Collateral margin amount",
+      "quantity": "margin_amount",
+      "quote_style": "amount",
+      "unit": "currency",
+      "day_count": "not_applicable",
+      "compounding": "not_applicable",
+      "calendar": "US_BUSINESS_DAY",
+      "business_day_adjustment": "following_unless_contract_overrides",
+      "settlement": {
+        "lag": "margin_call_terms",
+        "start_inclusion": "not_applicable",
+        "timing": "margin amount is due by the call deadline declared in the agreement or operating procedure"
+      },
+      "rounding": {"precision": 0.01, "method": "half_even", "applies_at": "margin_call_output"},
+      "viewpoint_ids": ["role.cash_provider", "role.cash_taker", "role.securities_provider", "role.securities_receiver"],
+      "sign_convention": {
+        "payer": "positive cash or collateral outflow",
+        "receiver": "positive collateral or cash inflow"
+      },
+      "formula": {
+        "id": "formula.margin_amount",
+        "expression": "margin_amount is derived from exposure, marks, collateral value, and haircut schedule",
+        "inputs": ["exposure", "mark", "collateral_value", "haircut"],
+        "outputs": ["margin_amount"]
+      },
+      "jurisdiction": "US",
+      "knowledge_class": "contractual_convention",
+      "knowledge_as_of": "2026-09-06",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": ["source.sifma", "source.dtcc_ficc"],
+      "review_status": "draft",
+      "review": null,
+      "supersedes": []
+    },
+    {
+      "id": "convention.seclend.demo_classification_thresholds",
+      "record_type": "convention",
+      "name": "Demo securities-lending GC/WARM/HTB thresholds",
+      "quantity": "borrow_fee_classification_threshold",
+      "quote_style": "basis_points",
+      "unit": "basis_points",
+      "day_count": "not_applicable",
+      "compounding": "not_applicable",
+      "calendar": "not_applicable",
+      "business_day_adjustment": "not_applicable",
+      "settlement": {
+        "lag": "not_applicable",
+        "start_inclusion": "not_applicable",
+        "timing": "classification uses a single borrow-fee observation in the existing demo runtime"
+      },
+      "rounding": {"precision": 1.0, "method": "not_applicable", "applies_at": "classification_boundary"},
+      "viewpoint_ids": ["role.securities_borrower", "role.short_seller"],
+      "sign_convention": {
+        "higher_borrow_fee_bps": "higher positive cost to the securities borrower and short seller"
+      },
+      "formula": {
+        "id": "formula.demo_gc_warm_htb_thresholds",
+        "expression": "GC if fee <= gc_upper_bps; WARM if fee <= warm_upper_bps; HTB otherwise",
+        "inputs": ["rate_bps", "gc_upper_bps", "warm_upper_bps"],
+        "outputs": ["classification"]
+      },
+      "thresholds": [
+        {
+          "name": "gc_upper_bps",
+          "value": 50.0,
+          "basis": "parameterized_model_assumption",
+          "artifact_path": "src/quantsmith/quant/agentic_quant/sec_lending.py:103"
+        },
+        {
+          "name": "warm_upper_bps",
+          "value": 200.0,
+          "basis": "parameterized_model_assumption",
+          "artifact_path": "src/quantsmith/quant/agentic_quant/sec_lending.py:104"
+        }
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "model_assumption",
+      "knowledge_as_of": "2026-09-06",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [],
+      "review_status": "draft",
+      "review": null,
+      "supersedes": []
+    }
+  ]
+}
