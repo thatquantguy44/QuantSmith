@@ -14,18 +14,19 @@ The SDK now has a working v1 built on a spec-driven engineering framework:
   (`instructions/engineering_principles.md`), the SDD method
   (`instructions/spec_driven_development.md`), per-feature specs under `specs/`, and
   a worked example (`specs/0001-daily-momentum-signal/`).
-- **162 agents** in `agents/`, indexed by the catalog `agents/README.md` (the
+- **168 agents** in `agents/`, indexed by the catalog `agents/README.md` (the
   live count — this file is a roadmap, not the source of truth): an
   orchestrator, six lifecycle agents (one per SDLC stage), core domain agents, and
-  18 grouped categories — `optimization/`, `machine_learning/`,
+  19 grouped categories — `optimization/`, `machine_learning/`,
   `deep_learning/`, `portfolio_management/`, `role_operations/`, `tooling/`,
   `economists/`, `trading_strategies/`, `data_engineering/`, `asset_classes/`,
   `analytics/`, `knowledge/`, `secrets_management/`, `securities_financing/`,
-  `alerts/`, `data_ingestion/`, `formulaic_alphas/`, and `monitoring/`.
+  `alerts/`, `data_ingestion/`, `formulaic_alphas/`, `monitoring/`, and
+  `test_engineering/`.
 - **33 quality gates** in `hooks/stages/` (SDLC stages, quant gates, and repo
   gates) driven by `run-stage.sh`; advisory by default, blocking under
   `QF_STAGE_ENFORCE=1`.
-- **33 instruction standards** and a prompt/template library covering specs, run
+- **34 instruction standards** and a prompt/template library covering specs, run
   cards, data contracts, monitoring plans, alert policies, synthetic-data
   disclosure, and postmortems.
 - **`adapters/`** is a first-class SDK surface (6 groups: `alert_delivery/`,
@@ -353,6 +354,16 @@ operations, data provenance):
   (`adapters/model_plugin/`, spec `0026`). Open follow-up: an executable
   dispatcher under `src/quantsmith/adapters/model_plugin/` once a concrete
   invocation target exists to build and test against.
+- `agents/test_engineering/` — done (spec `0062`). Five agents
+  (`test_engineering_orchestrator`, `python_test_engineer`,
+  `cpp_test_fuzz_engineer`, `javascript_test_engineer`,
+  `typescript_test_engineer`) giving language-specific test-authoring
+  expertise — pytest, GoogleTest/Catch2 plus libFuzzer/AFL++ fuzzing
+  (authorized targets only), Jest/Vitest/Mocha, and TypeScript type-level
+  testing — routed by a detected-stack orchestrator. Backed by
+  `instructions/test_engineering.md`; hands off to `testing_validation` and
+  `quality-guard-agent` rather than duplicating either's AC-coverage or
+  release-gate decision.
 
 ## Open Decisions
 

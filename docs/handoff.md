@@ -3,8 +3,8 @@
 ## Snapshot
 
 The SDK has a working v1: a **spec-driven engineering framework** over the six
-software-development stages, **162 agents** in `agents/`,
-**33 quality gates**, **33 instruction standards**, and CI that
+software-development stages, **168 agents** in `agents/`,
+**33 quality gates**, **34 instruction standards**, and CI that
 enforces the deterministic gates. It remains primarily a scaffold to be copied
 into quant repos, with `src/quantsmith/pipelines/` holding runnable, dependency-free
 reference pipelines for most specs (see `specs/README.md`'s index for the current
@@ -27,7 +27,7 @@ it via stable IDs (`REQ`/`NFR`/`AC`/`RISK`/`T`).
 - `specs/NNNN-slug/{spec,plan,tasks}.md` from `templates/spec/`; worked example at
   `specs/0001-daily-momentum-signal/`.
 
-**Agents (162, verified by the `agent-catalog` gate — treat `agents/README.md`
+**Agents (168, verified by the `agent-catalog` gate — treat `agents/README.md`
 as the live count, not the number here)** — all on the four-file contract
 (`README`/`prompt`/`instructions`/`tasks`) with a `Spec-Driven Role`:
 
@@ -38,10 +38,11 @@ as the live count, not the number here)** — all on the four-file contract
   `backtest_review`, `risk`, `git_release`.
 - Groups (largest first): `optimization/`, `deep_learning/`, `machine_learning/`,
   `tooling/`, `data_engineering/`, `trading_strategies/`, `asset_classes/`,
-  `secrets_management/`, `securities_financing/`, `knowledge/`, `analytics/`,
-  `role_operations/`, `monitoring/`, `alerts/`, `data_ingestion/`,
-  `formulaic_alphas/` — see `agents/README.md` for per-group membership and
-  counts, which change more often than this file is refreshed.
+  `secrets_management/`, `securities_financing/`, `economists/`, `knowledge/`,
+  `analytics/`, `role_operations/`, `monitoring/`, `alerts/`, `data_ingestion/`,
+  `formulaic_alphas/`, `test_engineering/` — see `agents/README.md` for
+  per-group membership and counts, which change more often than this file is
+  refreshed.
 
 **Gates (33)** in `hooks/stages/`, driven by `run-stage.sh`; advisory by default,
 `QF_STAGE_ENFORCE=1` blocks:
@@ -55,7 +56,7 @@ as the live count, not the number here)** — all on the four-file contract
   `doc-counts`, `quantsmith-version`, `agent-attribution`, `handoff-sync`, `upstream-drift`, `ownership`, `persistent-knowledge`, `knowledge`, `memory`, `access`, `role-context`,
   `model-plugin`, `source-catalog`.
 
-**Instructions (33)** — constitution, SDD method, point-in-time, and the domain
+**Instructions (34)** — constitution, SDD method, point-in-time, and the domain
 standards; see `README.md`'s "Public Instructions" table for the current list
 (this file lists categories, not every filename, to avoid drifting again).
 
@@ -565,7 +566,7 @@ still open (enforceable vs. advisory deployment; a `workflow_scheduling_cli`).
     as real sources come into use.
 
 14. **P1 Generalization & Team Onboarding — making QuantSmith self-serve across
-    domains.** QuantSmith is now a comprehensive framework (162 agents, 52 specs,
+    domains.** QuantSmith is now a comprehensive framework (168 agents, 52 specs,
     33 gates, 33 standards); the next phase is reducing discovery friction and
     enabling team-intuitive adoption without deep codebase reading.
     - **P0 Phase 1a: Role profiles** (`roles/{portfolio_manager,risk_manager,quant_researcher,data_engineer,compliance_officer}.md`):
@@ -908,6 +909,28 @@ still open (enforceable vs. advisory deployment; a `workflow_scheduling_cli`).
       explicit `caller_clearance` rather than relying on the default meant for
       a local, already-trusted process.
 
+19. **Quant Model Factory — done** (spec `0061`,
+    `src/quantsmith/pipelines/quant_factory.py`). Orchestrates parallel
+    model-development lanes converging at a shared `ConvergenceGate`
+    (Sharpe, drawdown, return) under `best_of_n`/`all_required`/
+    `first_to_pass` modes; an append-only JSONL `FactoryLedger` records
+    every run so the selection decision is reproducible from the ledger
+    alone, not an analyst's recency bias. `agents/quant_factory/` is the
+    orchestrator-facing contract; feeds Implementation and Testing.
+20. **Test engineering agent group — done** (spec `0062`). Five agents
+    (`test_engineering_orchestrator`, `python_test_engineer`,
+    `cpp_test_fuzz_engineer`, `javascript_test_engineer`,
+    `typescript_test_engineer`) giving language-specific test-authoring
+    expertise — pytest, GoogleTest/Catch2 plus libFuzzer/AFL++ fuzzing
+    (authorized, sandboxed targets only), Jest/Vitest/Mocha, and TypeScript
+    type-level testing — with an orchestrator that routes by detected
+    stack. Fills a real gap: neither `testing_validation` (AC-to-test
+    traceability, quant validation) nor `quality-guard-agent` (pipeline
+    release gate) owned language-specific test-authoring mechanics before
+    this. Backed by `instructions/test_engineering.md`. Writes/reviews
+    tests and fuzz harnesses only — hands off to `testing_validation` and
+    `quality-guard-agent` rather than making either's call itself.
+
 ## Open Questions For The Owner
 
 - Copyable scaffold, Python package, or CLI/copier? (Directionally answered in
@@ -923,7 +946,7 @@ still open (enforceable vs. advisory deployment; a `workflow_scheduling_cli`).
 
 ## Risks
 
-- Breadth: 162 agents is useful only if each stays narrow and inspectable.
+- Breadth: 168 agents is useful only if each stays narrow and inspectable.
 - Heuristic gates (`leakage`, `backtest`, `secret-scan` fallback) can false-positive
   or miss; keep them advisory unless a repo's layout makes them reliable.
 - Docs can drift from the code; the `docs-link`, `agent-catalog`, and `spec-index` gates help, but

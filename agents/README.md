@@ -425,6 +425,24 @@ These overlap conceptually with SDK agents (`workflow_orchestrator`,
 `data_ingestion/`, `tooling/`, `testing_validation`) but are a distinct runtime
 pipeline; the SDK agents are design-and-review roles.
 
+## Test Engineering Agents (`test_engineering/`)
+
+Grouped in the `test_engineering/` category folder (see
+[`test_engineering/README.md`](test_engineering/README.md)); language-specific
+test-authoring expertise an orchestrator routes to. Writes/reviews the tests
+and fuzz harnesses; `testing_validation` decides whether they close an
+acceptance criterion and `quality-guard-agent` decides whether a stage may
+release — neither is duplicated here. Backed by
+`instructions/test_engineering.md` (spec `0062`).
+
+| Agent | Handles | Feeds mainly |
+| --- | --- | --- |
+| `test_engineering/test_engineering_orchestrator/` | Detects the stack, routes to the right language agent(s), consolidates their output | `python_test_engineer`, `cpp_test_fuzz_engineer`, `javascript_test_engineer`, `typescript_test_engineer` |
+| `test_engineering/python_test_engineer/` | pytest: fixtures, parametrization, mocking discipline, Hypothesis property tests, honest coverage | `testing_validation` |
+| `test_engineering/cpp_test_fuzz_engineer/` | GoogleTest/Catch2 unit tests, libFuzzer/AFL++ fuzz harnesses, sanitizer discipline, crash triage — authorized targets only | `testing_validation` |
+| `test_engineering/javascript_test_engineer/` | Jest/Vitest/Mocha unit/integration tests, mocking/async discipline, DOM/component testing | `testing_validation` |
+| `test_engineering/typescript_test_engineer/` | Same runtime tooling plus type-level testing (accept/reject cases) and strict-mode discipline | `testing_validation` |
+
 ## Quant Factory Agent (`quant_factory/`)
 
 Orchestrates **parallel model-development lanes** and converges them at a
