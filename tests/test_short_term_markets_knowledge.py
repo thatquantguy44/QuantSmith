@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import re
 
 import pytest
 
@@ -268,7 +269,10 @@ def test_handoff_reserves_child_specs_and_next_number_AC_011():
         assert f"`{spec_id}`" in handoff
         assert not (ROOT / f"specs/{spec_id}").exists()
     assert "Do not draft all six child specs at once" in handoff
-    assert "Next unreserved spec number: `0070`" in handoff
+    next_spec = re.search(r"Next unreserved spec number: `(\d{4})`", handoff)
+    assert next_spec is not None
+    assert int(next_spec.group(1)) > 69
+    assert not any((ROOT / "specs").glob(f"{next_spec.group(1)}-*"))
 
 
 # --- AC-012: relevant agents reference the canonical foundation ---
