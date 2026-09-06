@@ -640,10 +640,21 @@ def _validate_handoff(root: Path, errors: List[str]) -> None:
         "0063-short-term-markets-domain-foundation/",
         "active Draft",
         "Do not draft all six child specs at once",
-        "Next unreserved spec number: `0070`",
     ):
         if required not in text:
             errors.append(f"handoff: missing required activation text {required!r}")
+
+    next_spec = re.search(r"Next unreserved spec number: `(\d{4})`", text)
+    if next_spec is None:
+        errors.append("handoff: missing next unreserved spec number")
+    else:
+        next_spec_id = next_spec.group(1)
+        if int(next_spec_id) <= 69:
+            errors.append("handoff: next unreserved spec must follow reserved spec 0069")
+        if any((root / "specs").glob(f"{next_spec_id}-*")):
+            errors.append(
+                f"handoff: next unreserved spec {next_spec_id} already has a spec directory"
+            )
 
 
 def _validate_gap_register(root: Path, errors: List[str]) -> None:
