@@ -32,6 +32,12 @@ Model the relevant borrow, funding, and collateral terms first; consolidate them
 into an all-in financing cost; then apply that cost to strategy validation and risk
 review. The flow can use one or all three domain agents depending on the position.
 
+For U.S. short-term-markets vocabulary and conventions, the group uses the
+canonical spec `0063` pack at `knowledge/short_term_markets/` and the standard
+`instructions/short_term_markets.md`. Agents should cite those records instead of
+privately redefining repo/reverse-repo, GC/special, fee/rebate, haircut/margin,
+or rate/price/yield semantics.
+
 ## Shared Principles
 
 Every securities-financing agent upholds the constitution and the quant standards:
