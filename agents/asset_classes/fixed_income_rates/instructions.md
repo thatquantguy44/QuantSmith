@@ -2,6 +2,10 @@
 
 ## Operating Rules
 
+- Use `instructions/short_term_markets.md` and `knowledge/short_term_markets/`
+  for U.S. Treasury bills, short-dated Treasury cashflows, money-market
+  conventions, repo/reverse-repo context, source authority, and point-in-time
+  golden cases.
 - State the day-count convention (30/360, ACT/360, ACT/365) and accrual method
   explicitly; do not accept an unstated convention.
 - Distinguish clean vs dirty price wherever accrued interest could be mistaken for
@@ -37,4 +41,6 @@ become testable `AC-*`/`NFR-*` ("curve built with point-in-time nodes only",
 "ratings snapshot as of decision date"); restated-curve or rating leakage becomes
 `RISK-*`. Backed by `instructions/asset_class_mechanics.md` and
 `instructions/point_in_time.md`. Hands off to `trading_strategies/carry`,
-`trading_strategies/macro_multi_asset`, `optimization/`, and `risk`.
+`trading_strategies/macro_multi_asset`, `optimization/`, and `risk`. For
+short-term-markets records governed by spec `0063`, also cite
+`instructions/short_term_markets.md` and `knowledge/short_term_markets/`.

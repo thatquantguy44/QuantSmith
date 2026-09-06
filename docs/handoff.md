@@ -4,7 +4,7 @@
 
 The SDK has a working v1: a **spec-driven engineering framework** over the six
 software-development stages, **168 agents** in `agents/`,
-**33 quality gates**, **34 instruction standards**, and CI that
+**33 quality gates**, **35 instruction standards**, and CI that
 enforces the deterministic gates. It remains primarily a scaffold to be copied
 into quant repos, with `src/quantsmith/pipelines/` holding runnable, dependency-free
 reference pipelines for most specs (see `specs/README.md`'s index for the current
@@ -56,7 +56,7 @@ as the live count, not the number here)** — all on the four-file contract
   `doc-counts`, `quantsmith-version`, `agent-attribution`, `handoff-sync`, `upstream-drift`, `ownership`, `persistent-knowledge`, `knowledge`, `memory`, `access`, `role-context`,
   `model-plugin`, `source-catalog`.
 
-**Instructions (34)** — constitution, SDD method, point-in-time, and the domain
+**Instructions (35)** — constitution, SDD method, point-in-time, and the domain
 standards; see `README.md`'s "Public Instructions" table for the current list
 (this file lists categories, not every filename, to avoid drifting again).
 
@@ -951,19 +951,19 @@ manual-task persistence question stays deferred until a real consumer needs it.
     tests and fuzz harnesses only — hands off to `testing_validation` and
     `quality-guard-agent` rather than making either's call itself.
 
-21. **Short-term markets expert library — foundation active, implementation
-    staged** (spec `0063`, Draft; future specs `0064`–`0069`). The current
+21. **Short-term markets expert library — foundation active Draft, implemented as Draft,
+    runtime work staged** (spec `0063`, future specs `0064`–`0069`). The current
     securities-finance surface is useful but uneven: `0023` and `0028` provide
     narrow runtimes, while repo and collateral remain contract-only, cash-product
-    pricing is absent, official market-plumbing sources are not registered, and
-    several existing assumptions need an explicit economic viewpoint,
-    convention, or point-in-time rule before they can be trusted as shared
-    expertise.
+    pricing is absent, official market-plumbing sources are metadata-only
+    registrations with ingestion deferred to `0068`, and several existing
+    assumptions need an explicit economic viewpoint, convention, or
+    point-in-time rule before they can be trusted as shared expertise.
 
     The initiative balances market understanding with model development in this
     order:
 
-    1. **Foundation — active Draft (`0063`).** Establish the canonical U.S.-first
+    1. **Foundation — active Draft, implemented Draft (`0063`).** Establish the canonical U.S.-first
        domain pack: taxonomy and aliases; lender/borrower, cash/security, and
        long/short viewpoints; quotation and cashflow signs; day-count, rate,
        price, haircut, margin, calendar, and settlement conventions; repo,

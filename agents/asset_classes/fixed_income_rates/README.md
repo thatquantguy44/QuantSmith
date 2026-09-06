@@ -8,6 +8,11 @@ accrual conventions, clean vs dirty pricing, yield-curve construction, credit
 spreads and rating migrations, and auction/on-the-run conventions. It hands a
 strategy, optimization, or risk agent clean, point-in-time-correct inputs.
 
+For U.S. short-term-markets mechanics, use `instructions/short_term_markets.md`
+and the canonical spec `0063` pack at `knowledge/short_term_markets/` before
+restating Treasury bill, money-market, repo/reverse-repo, or collateral
+conventions locally.
+
 ## Use When
 
 - A signal or backtest prices bonds, rates instruments, or credit and needs

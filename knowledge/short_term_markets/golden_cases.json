@@ -1,0 +1,296 @@
+{
+  "schema_version": "0063.1",
+  "golden_cases": [
+    {
+      "id": "golden.repo.specialness_sign",
+      "case_id": "golden.repo.specialness_sign",
+      "record_type": "golden_case",
+      "name": "Repo GC-versus-specific specialness sign",
+      "domain": "repo_reverse_repo",
+      "purpose": "Positive repo specialness is GC repo rate minus specific-collateral repo rate, not the stock-loan higher-fee convention.",
+      "as_of": "2026-09-06",
+      "viewpoint_ids": ["role.repo_cash_provider", "role.repo_cash_taker"],
+      "convention_ids": ["convention.repo.specialness_bps"],
+      "operation": "rate_difference_bps",
+      "inputs": {
+        "gc_repo_rate": {"value": 0.0525, "unit": "decimal", "as_of": "2026-09-06"},
+        "specific_repo_rate": {"value": 0.049, "unit": "decimal", "as_of": "2026-09-06"}
+      },
+      "expected_outputs": {
+        "value": {"value": 35.0, "unit": "basis_points", "tolerance": 0.000001}
+      },
+      "invariants": [
+        "GC rate above specific-collateral rate produces positive repo specialness",
+        "Cash provider earns lower rate income on the specific-collateral repo than on GC",
+        "Stock-loan specialness signs must not be reused without viewpoint conversion"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-06",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": ["source.ny_fed"],
+      "review_status": "draft",
+      "review": null,
+      "supersedes": []
+    },
+    {
+      "id": "golden.seclend.fee_rebate_signs",
+      "case_id": "golden.seclend.fee_rebate_signs",
+      "record_type": "golden_case",
+      "name": "Securities-lending borrow fee and rebate signs",
+      "domain": "securities_lending",
+      "purpose": "Borrow fee is a borrower cost/lender income; rebate offsets borrower cost only under the same period and viewpoint.",
+      "as_of": "2026-09-06",
+      "viewpoint_ids": ["role.securities_borrower", "role.securities_lender", "role.short_seller"],
+      "convention_ids": ["convention.seclend.borrow_fee_act360_simple", "convention.seclend.rebate_act360_simple"],
+      "operation": "securities_lending_fee_rebate_signs",
+      "inputs": {
+        "notional": {"value": 1000000.0, "unit": "USD"},
+        "borrow_fee_bps": {"value": 250.0, "unit": "basis_points"},
+        "rebate_bps": {"value": 50.0, "unit": "basis_points"},
+        "days": {"value": 30, "unit": "days"},
+        "day_count_basis": {"value": 360, "unit": "days"}
+      },
+      "expected_outputs": {
+        "borrower_borrow_fee_cost": {"value": 2083.3333333333, "unit": "USD", "tolerance": 0.000001},
+        "lender_borrow_fee_income": {"value": 2083.3333333333, "unit": "USD", "tolerance": 0.000001},
+        "borrower_rebate_income": {"value": 416.6666666667, "unit": "USD", "tolerance": 0.000001},
+        "lender_rebate_cost": {"value": 416.6666666667, "unit": "USD", "tolerance": 0.000001},
+        "net_borrower_cost": {"value": 1666.6666666666, "unit": "USD", "tolerance": 0.000001}
+      },
+      "invariants": [
+        "Borrower fee cost equals lender fee income",
+        "Borrower rebate income equals lender rebate cost",
+        "Net short-seller cost is fee cost minus rebate income"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-06",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": ["source.sifma"],
+      "review_status": "draft",
+      "review": null,
+      "supersedes": []
+    },
+    {
+      "id": "golden.cash.tbill_discount_yield_price",
+      "case_id": "golden.cash.tbill_discount_yield_price",
+      "record_type": "golden_case",
+      "name": "Treasury bill discount yield to price",
+      "domain": "treasury_cash_products",
+      "purpose": "T-bill bank discount yield conversion is explicit and distinct from add-on yield, money-market yield, and price-per-par.",
+      "as_of": "2026-09-06",
+      "viewpoint_ids": ["role.cash_provider"],
+      "convention_ids": ["convention.tbill.discount_yield_act360", "convention.tbill.price_per_100"],
+      "operation": "tbill_discount_yield_to_price",
+      "inputs": {
+        "par": {"value": 100.0, "unit": "USD per 100 par"},
+        "discount_yield": {"value": 0.0525, "unit": "decimal"},
+        "days_to_maturity": {"value": 91, "unit": "days"},
+        "day_count_basis": {"value": 360, "unit": "days"}
+      },
+      "expected_outputs": {
+        "value": {"value": 98.6729166667, "unit": "USD per 100 par", "tolerance": 0.000001}
+      },
+      "invariants": [
+        "Price is below par when discount yield is positive",
+        "The case does not imply bond-equivalent yield or total-return convention"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-06",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": ["source.treasury"],
+      "review_status": "draft",
+      "review": null,
+      "supersedes": []
+    },
+    {
+      "id": "golden.money_market.act360_accrual",
+      "case_id": "golden.money_market.act360_accrual",
+      "record_type": "golden_case",
+      "name": "ACT/360 simple accrual",
+      "domain": "treasury_cash_products",
+      "purpose": "Day-count accrual is explicit; ACT/252 cannot be silently substituted.",
+      "as_of": "2026-09-06",
+      "viewpoint_ids": ["role.cash_provider", "role.cash_taker"],
+      "convention_ids": ["convention.money_market.accrual_act360_simple"],
+      "operation": "simple_accrual",
+      "inputs": {
+        "notional": {"value": 1000000.0, "unit": "USD"},
+        "annual_rate": {"value": 0.053, "unit": "decimal"},
+        "days": {"value": 30, "unit": "calendar_days"},
+        "day_count_basis": {"value": 360, "unit": "days"}
+      },
+      "expected_outputs": {
+        "value": {"value": 4416.6666666667, "unit": "USD", "tolerance": 0.000001}
+      },
+      "invariants": [
+        "Accrual uses the declared day-count basis and calendar-day count",
+        "A runtime using ACT/252 must declare that convention rather than matching this case"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-06",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": ["source.federal_reserve"],
+      "review_status": "draft",
+      "review": null,
+      "supersedes": []
+    },
+    {
+      "id": "golden.collateral.haircut_amount",
+      "case_id": "golden.collateral.haircut_amount",
+      "record_type": "golden_case",
+      "name": "Collateral haircut and max cash advance",
+      "domain": "collateral_margin_substitution",
+      "purpose": "Haircut ratio and resulting margin/cash amount are distinct quantities with explicit signs.",
+      "as_of": "2026-09-06",
+      "viewpoint_ids": ["role.cash_provider", "role.securities_provider", "role.securities_receiver"],
+      "convention_ids": ["convention.collateral.haircut_ratio"],
+      "operation": "haircut_amount",
+      "inputs": {
+        "collateral_market_value": {"value": 1000000.0, "unit": "USD"},
+        "haircut": {"value": 0.02, "unit": "decimal"}
+      },
+      "expected_outputs": {
+        "haircut_amount": {"value": 20000.0, "unit": "USD", "tolerance": 0.000001},
+        "max_cash_advance": {"value": 980000.0, "unit": "USD", "tolerance": 0.000001}
+      },
+      "invariants": [
+        "Haircut amount plus max cash advance equals collateral market value",
+        "Haircut percentage is not the margin amount"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-06",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": ["source.sifma", "source.dtcc_ficc"],
+      "review_status": "draft",
+      "review": null,
+      "supersedes": []
+    },
+    {
+      "id": "golden.lifecycle.repo_valid_transition",
+      "case_id": "golden.lifecycle.repo_valid_transition",
+      "record_type": "golden_case",
+      "name": "Valid repo lifecycle termination transition",
+      "domain": "repo_reverse_repo",
+      "purpose": "A declared transition is admitted only when lifecycle, from-state, event, and to-state all match.",
+      "as_of": "2026-09-06",
+      "viewpoint_ids": ["role.repo_cash_provider", "role.repo_cash_taker"],
+      "convention_ids": ["convention.repo.rate_act360_simple"],
+      "lifecycle_id": "lifecycle.repo",
+      "operation": "transition_allowed",
+      "inputs": {
+        "lifecycle_id": {"value": "lifecycle.repo", "unit": "id"},
+        "from_state": {"value": "repo.open", "unit": "state_id"},
+        "event_id": {"value": "repo.maturity_or_termination", "unit": "event_id"},
+        "to_state": {"value": "repo.terminated", "unit": "state_id"}
+      },
+      "expected_outputs": {
+        "value": {"value": true, "unit": "boolean", "tolerance": 0}
+      },
+      "invariants": [
+        "Normal termination moves open repo to an explicit terminal state"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-06",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": ["source.dtcc_ficc", "source.sifma"],
+      "review_status": "draft",
+      "review": null,
+      "supersedes": []
+    },
+    {
+      "id": "golden.lifecycle.repo_invalid_transition",
+      "case_id": "golden.lifecycle.repo_invalid_transition",
+      "record_type": "golden_case",
+      "name": "Invalid repo lifecycle transition rejection",
+      "domain": "repo_reverse_repo",
+      "purpose": "An undeclared transition from a terminal state is rejected.",
+      "as_of": "2026-09-06",
+      "viewpoint_ids": ["role.repo_cash_provider", "role.repo_cash_taker"],
+      "convention_ids": ["convention.repo.rate_act360_simple"],
+      "lifecycle_id": "lifecycle.repo",
+      "operation": "transition_allowed",
+      "inputs": {
+        "lifecycle_id": {"value": "lifecycle.repo", "unit": "id"},
+        "from_state": {"value": "repo.terminated", "unit": "state_id"},
+        "event_id": {"value": "repo.periodic_accrual", "unit": "event_id"},
+        "to_state": {"value": "repo.open", "unit": "state_id"}
+      },
+      "expected_outputs": {
+        "value": {"value": false, "unit": "boolean", "tolerance": 0}
+      },
+      "invariants": [
+        "Terminal states do not silently reopen under an undeclared accrual event"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-06",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": ["source.dtcc_ficc", "source.sifma"],
+      "review_status": "draft",
+      "review": null,
+      "supersedes": []
+    },
+    {
+      "id": "golden.temporal.asof_excludes_later_known_rate",
+      "case_id": "golden.temporal.asof_excludes_later_known_rate",
+      "record_type": "golden_case",
+      "name": "As-of query excludes later-known observation",
+      "domain": "clearing_settlement_reporting_regulatory",
+      "purpose": "Knowledge time and effective time are separate; a later-known observation cannot leak into an earlier as-of query even when effective dates overlap.",
+      "as_of": "2026-02-15",
+      "viewpoint_ids": ["role.repo_cash_provider"],
+      "convention_ids": ["convention.repo.rate_act360_simple"],
+      "operation": "point_in_time_admission",
+      "inputs": {
+        "as_of": {"value": "2026-02-15", "unit": "date"},
+        "effective_date": {"value": "2026-02-15", "unit": "date"},
+        "records": {
+          "value": [
+            {
+              "id": "observation.gc_repo_rate_v1",
+              "knowledge_as_of": "2026-01-02",
+              "effective_from": "2026-01-01",
+              "effective_to": "2026-04-01"
+            },
+            {
+              "id": "observation.gc_repo_rate_revision",
+              "knowledge_as_of": "2026-03-01",
+              "effective_from": "2026-01-01",
+              "effective_to": "2026-04-01"
+            }
+          ]
+        }
+      },
+      "expected_outputs": {
+        "included_record_ids": {"value": ["observation.gc_repo_rate_v1"], "unit": "ids", "tolerance": 0},
+        "excluded_record_ids": {"value": ["observation.gc_repo_rate_revision"], "unit": "ids", "tolerance": 0}
+      },
+      "invariants": [
+        "knowledge_as_of must be on or before the query as_of date",
+        "effective intervals alone are insufficient for point-in-time admission"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "market_observation",
+      "knowledge_as_of": "2026-09-06",
+      "effective_from": "2026-01-01",
+      "effective_to": "2026-04-01",
+      "source_refs": ["source.ny_fed"],
+      "review_status": "draft",
+      "review": null,
+      "supersedes": []
+    }
+  ]
+}

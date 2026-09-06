@@ -1,0 +1,33 @@
+source_id: "sec"
+name: "U.S. Securities and Exchange Commission Public Materials"
+type: website
+owner: "quant-research"
+description: >
+  Public SEC rules, releases, market-structure materials, and investor
+  protection resources used as source metadata for securities lending, short
+  selling, money market fund, and regulatory-context records.
+
+domain: ["short_term_markets", "securities_lending", "regulatory_context"]
+access_level: public
+
+quality:
+  completeness: medium
+  timeliness: "varies by rulemaking, release, and dataset"
+  known_issues:
+    - "rules, releases, no-action materials, and datasets have different authority levels"
+    - "legal applicability requires qualified review; this catalog entry is not legal advice"
+  last_assessed: "2026-09-06"
+
+point_in_time:
+  supports_asof: true
+  revision_policy: "record publication date, effective date, and retrieval date for each cited document or dataset"
+
+connection:
+  method: scrape
+  endpoint_or_host: "https://www.sec.gov"
+  credential_ref: "not_required_public_access"
+
+documentation_uri: "https://www.sec.gov/rules-regulations"
+status: evaluating
+
+data_contract_refs: ["specs/0063-short-term-markets-domain-foundation/"]

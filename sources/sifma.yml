@@ -1,0 +1,33 @@
+source_id: "sifma"
+name: "SIFMA Public Resources"
+type: website
+owner: "quant-research"
+description: >
+  Public SIFMA market-structure, operations, securities-lending, financing, and
+  industry-standard resources used as source metadata for conventions and
+  operational context.
+
+domain: ["short_term_markets", "securities_lending", "repo", "collateral", "market_structure"]
+access_level: public
+
+quality:
+  completeness: medium
+  timeliness: "varies by publication and market-practice update"
+  known_issues:
+    - "industry guidance is not the same authority tier as official rules or source datasets"
+    - "agreement or standard text may be licensed or copyright-restricted and must not be copied into the repo"
+  last_assessed: "2026-09-06"
+
+point_in_time:
+  supports_asof: true
+  revision_policy: "record document title, publication or update date, retrieval date, and applicability scope"
+
+connection:
+  method: scrape
+  endpoint_or_host: "https://www.sifma.org"
+  credential_ref: "not_required_public_access"
+
+documentation_uri: "https://www.sifma.org/resources/"
+status: evaluating
+
+data_contract_refs: ["specs/0063-short-term-markets-domain-foundation/"]
