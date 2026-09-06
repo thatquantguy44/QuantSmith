@@ -33,6 +33,7 @@ pattern-based; tune them to your repository.
 | Look-ahead & leakage | `leakage-check.sh` | `instructions/point_in_time.md`, `agents/feature_engineering/` |
 | Backtest integrity | `backtest-check.sh` | `agents/backtest_review/` |
 | Reproducibility | `repro-check.sh` | `templates/docs/run_card.md`, `agents/implementation/` |
+| Prompt/context/harness orchestration | `orchestration-check.sh` | `templates/orchestration/`, `specs/0070-prompt-context-harness-foundation/` |
 | Data contract | `data-contract-check.sh` | `templates/data/data_contract.md`, `agents/data_quality/` |
 | Pipeline contract | `pipeline-contract-check.sh` | `templates/data/pipeline_manifest.md`, `agents/data_engineering/` |
 | Alert contract | `alert-contract-check.sh` | `templates/data/alert_policy.md`, `agents/alerts/` |
@@ -95,6 +96,9 @@ hooks/stages/run-stage.sh spec
   costs, out-of-sample, benchmark, turnover/capacity, and multiple-testing.
 - **`repro-check.sh`** checks for a run manifest (`run_card`), a dependency
   lockfile, and seeded randomness in changed code.
+- **`orchestration-check.sh`** validates committed spec `0070` orchestration
+  envelopes and their prompt/context manifests, assumption ledgers, evaluation
+  harnesses, audit events, and replay metadata through one composite gate.
 - **`data-contract-check.sh`** verifies a data contract declares schema, keys,
   point-in-time rules, and missingness rules.
   pack, including config, draft-pack template, sample fixture, content agent

@@ -1,0 +1,47 @@
+{
+  "schema_version": "quantsmith.orchestration.context.v1",
+  "context_id": "ctx-det-0063-golden-repo-specialness",
+  "run_id": "orch-det-0063-golden-repo-specialness",
+  "caller": {
+    "id": "codex",
+    "clearance": "internal"
+  },
+  "as_of": "2026-09-06T00:00:00Z",
+  "context_window": {
+    "token_budget": 2048,
+    "character_budget": 12000
+  },
+  "items": [
+    {
+      "context_id": "ctx-det-001",
+      "source_authority": "knowledge://short_term_markets",
+      "locator": "context_note.md#repo-specialness",
+      "content_hash": "sha256:d32bfeeb532496bac068f92e0a477f6d024b17cd3b54d592921b16643baafc7a",
+      "access_level": "public",
+      "caller_clearance": "internal",
+      "retrieval_query": "repo specialness sign convention",
+      "selection_rule": "golden-case exact ID",
+      "rank": 1,
+      "budget": {
+        "tokens": 72,
+        "characters": 334
+      },
+      "known_at": "2026-09-06T00:00:00Z",
+      "effective_at": "2026-09-06T00:00:00Z",
+      "expires_at": "2027-09-06T00:00:00Z",
+      "freshness": "current",
+      "citations": [
+        {
+          "label": "0063 golden case",
+          "locator": "specs/0063-short-term-markets-domain-foundation/spec.md#AC-003"
+        }
+      ]
+    }
+  ],
+  "exclusions": [
+    {
+      "locator": "live market data provider",
+      "reason": "not required for deterministic golden-case replay"
+    }
+  ]
+}

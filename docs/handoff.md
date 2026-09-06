@@ -4,7 +4,7 @@
 
 The SDK has a working v1: a **spec-driven engineering framework** over the six
 software-development stages, **168 agents** in `agents/`,
-**33 quality gates**, **35 instruction standards**, and CI that
+**34 quality gates**, **35 instruction standards**, and CI that
 enforces the deterministic gates. It remains primarily a scaffold to be copied
 into quant repos, with `src/quantsmith/pipelines/` holding runnable, dependency-free
 reference pipelines for most specs (see `specs/README.md`'s index for the current
@@ -44,10 +44,10 @@ as the live count, not the number here)** — all on the four-file contract
   per-group membership and counts, which change more often than this file is
   refreshed.
 
-**Gates (33)** in `hooks/stages/`, driven by `run-stage.sh`; advisory by default,
+**Gates (34)** in `hooks/stages/`, driven by `run-stage.sh`; advisory by default,
 `QF_STAGE_ENFORCE=1` blocks:
 
-- Cross-cutting: `spec`. Per stage: `planning`, `design`, `implementation`,
+- Cross-cutting: `spec`, `orchestration`. Per stage: `planning`, `design`, `implementation`,
   `testing`, `deployment`, `maintenance`.
 - Quant: `leakage`, `backtest` (incl. a financing theme for shorts),
   `repro`, `data-contract`, `pipeline-contract`, `alert-contract`,

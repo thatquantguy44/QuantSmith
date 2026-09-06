@@ -29,6 +29,7 @@ dev = [
 quantsmith-knowledge-console = "quantsmith.knowledge_console.__main__:main"
 quantsmith-memory = "quantsmith.pipelines.workflow_memory_cli:main"
 quantsmith-agentic-quant = "quantsmith.quant.agentic_quant.main:main"
+quantsmith-orchestration = "quantsmith.orchestration.replay_cli:main"
 quantsmith-sec-lending = "quantsmith.quant.agentic_quant.cli.sec_lending:main"
 quantsmith-rebalancer = "quantsmith.quant.agentic_quant.cli.rebalancer:main"
 quantsmith-sp500 = "quantsmith.quant.agentic_quant.cli.sp500:main"
