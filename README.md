@@ -15,7 +15,7 @@ signal and model **reproducible, leakage-safe, and traceable to a spec**.
 [![Approach: Spec-Driven](https://img.shields.io/badge/Approach-Spec--Driven-ff6f00)](instructions/spec_driven_development.md)
 [![Agents: 168](https://img.shields.io/badge/Agents-168-6f42c1)](agents/README.md)
 [![Quality Gates: 33](https://img.shields.io/badge/Quality%20Gates-33-2ea44f)](hooks/README.md)
-[![Specs: 57](https://img.shields.io/badge/Specs-57-0969da)](specs/README.md)
+[![Specs: 58](https://img.shields.io/badge/Specs-58-0969da)](specs/README.md)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](.github/GIT_GUIDELINES.md)
 
 <br/>
