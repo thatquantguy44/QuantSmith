@@ -63,14 +63,14 @@ table if it drifts.)*
 
 | | |
 | --- | --- |
-| Records in the store | **5** — `memory/_shared/datasets/example_prices/provenance.yaml` (3), `memory/quant_researcher/index.yaml` (2). All reference examples; no real institutional knowledge captured yet. |
-| Spec `0048` tasks | **6 of 16 done**, 2 in-progress, 8 todo |
-| Acceptance criteria verified | **14 of 23** |
+| Records in the store | **10** — `memory/_shared/datasets/example_prices/provenance.yaml` (5), `memory/quant_researcher/index.yaml` (5). All reference examples; no real institutional knowledge captured yet. |
+| Spec `0048` tasks | **16 of 16 done** |
+| Acceptance criteria verified | **23 of 23** |
 | Runtime functions | `load_records`, `query`, `point_in_time_filter`, `render_context`, `validate` — the full read path |
 
 The honest summary: **the machinery is more mature than the content.** The
 read path and, as of `0049`, the write path are both built and tested; the
-store itself is still five examples. Populating it with real findings —
+store itself is still ten examples. Populating it with real findings —
 now genuinely actionable via `propose`/`promote` rather than only aspirational
 — is the highest-leverage next step, ahead of any further machinery.
 
