@@ -74,8 +74,11 @@ by the `knowledge` gate.
 defines the agentic control plane for cron/jobs/scripts/Python/workflows: a schedule
 registry, scheduler-adapter validation, execution ledger, manual task reminders,
 daily status reports, failure routing, and memory handoff for recurring operational
-learnings. It builds on `adapters/schedulers/`, `0019-pipeline-observability`,
-`0020-alerting`, and `0002-workflow-memory`.
+learnings. Spec `0060-scheduler-monitoring` adds routed-alert delivery through
+caller-injected senders, a real report/alert-preview CLI, and the explicit
+advisory-by-default deployment decision. The chain builds on
+`adapters/schedulers/`, `0019-pipeline-observability`, `0020-alerting`, and
+`0002-workflow-memory`.
 
 ## Conventions To Preserve
 
@@ -99,12 +102,20 @@ learnings. It builds on `adapters/schedulers/`, `0019-pipeline-observability`,
 
 ## What's Next (prioritized)
 
-**Highest priority, in order: (1) the knowledge base, (2) scheduler
-monitoring.** Everything else in this section is real, tracked work, but
-these two are what should get attention first if only one thing can move at
-a time:
+**Highest priority, in order: (1) the short-term-markets domain foundation,
+(2) the knowledge base, (3) scheduler monitoring.** Everything else in this
+section is real, tracked work, but these three are what should get attention
+first if only one thing can move at a time:
 
-1. **Knowledge base (item 15, "Company knowledge over time").** The
+1. **Short-term-markets domain foundation (item 21, spec `0063`, Draft).**
+   Build the shared expert contract before adding more agents or isolated
+   models: U.S.-first product taxonomy, explicit economic viewpoints and sign
+   conventions, rate/price/collateral conventions, lifecycle state models,
+   authoritative-source and point-in-time rules, a current-coverage/gap
+   register, and deterministic golden cases. Follow-on work is deliberately
+   split into bounded specs `0064`–`0069`; their reserved scopes, dependencies,
+   and activation rule are in the Planned specs table below.
+2. **Knowledge base (item 15, "Company knowledge over time").** The
    read/write runtime and both front ends are built (`0048`/`0049`/`0057`),
    and per-person access control now closes the enforcement gap
    (`0058`) — but the store itself is still five reference records
@@ -116,17 +127,15 @@ a time:
    MCP exposure (item 17) is the next step *after* there is real content
    worth a team reaching for over the network — building the server first
    would expose an empty store.
-2. **Scheduler monitoring (spec `0055`).** The control plane itself is built
-   and has a real worked example (`examples/scheduled_daily_report/`), but
-   nothing yet watches it in practice: `alert_handoffs()` returns payloads,
-   not delivered alerts (wiring them to a real `adapters/alert_delivery/`
-   provider is unbuilt), there is no `workflow_scheduling_cli` to render a
-   daily operations report without a bespoke script per team, and the
-   enforceable-vs-advisory deployment decision named in
-   `specs/0055-workflow-scheduling-operations/tasks.md`'s Follow-ups is still
-   open. Until failed/missed runs actually page someone, the scheduling
-   layer records history without doing the "watch it while it runs" job it
-   exists for.
+3. **Scheduler deployment/adoption (specs `0055` and `0060`).** The SDK-level
+   monitoring slice is built: `0060` connects routed alerts to caller-injected
+   delivery senders, provides `workflow_scheduling_cli` report and alert-preview
+   commands, updates the worked example, and resolves deployment as advisory by
+   default. What remains is adopter-owned production wiring—a real scheduler,
+   chosen delivery providers/credentials, escalation ownership, and operating
+   thresholds—plus a future persisted manual-task format only if a concrete
+   consumer needs it. Do not add network or credential ownership to the SDK to
+   make a demonstration look deployed.
 
 ### Planned specs (reserved, not yet written)
 
@@ -139,20 +148,30 @@ nobody noticed.
 
 | Spec | What | Depends on | Tracked in |
 | --- | --- | --- | --- |
-| `0049` | Workflow memory **write path** — `propose_records()` at the runtime boundary, committed `memory/inbox/` staging, `promote()` on human review | `0048` read path (`T-002`/`T-004`) | item 15 |
 | `0050` | **Portable doc-integrity gates** — parameterize against `quantsmith.conf`; collapse `agent-catalog`+`spec-index` into one `catalog-sync` | the three shapes (done, item 16) | item 16 |
 | `0051` | **Conformance levels** — make `QF_CONFORMANCE_LEVEL` verified rather than declared | `0050` config contract | item 16 |
-| `0052` | **MCP adapter contract + resources server** — `adapters/mcp_servers/`, serving `knowledge_sources.yml` over the resources primitive | none (reuses the existing manifest) | item 17 |
-| `0053` | **MCP memory-graph server** — tools over `0048`'s store, with `as_of` honouring the type-aware point-in-time rule | `0048` `T-002`/`T-004`; ideally `0049` | item 17 |
 | `0054` | **MCP RAG server** — vector search with per-access-tier indexes and cited passages | `0052` contract | item 17 |
+| `0064` | **Repo economics and lifecycle runtime** — correct cash/security-side economics, GC/specials, term/open structures, margin, settlement, rolls, fails, and financing cashflows | approved and implemented `0063` taxonomy, convention, lifecycle, and golden-case contracts | item 21 |
+| `0065` | **Cash products and pricing conventions** — Treasury bills and short-dated coupons plus the approved institutional cash universe; price/yield conversions, accrual, settlement, cashflows, and comparative carry | approved and implemented `0063`; exact product universe frozen by its coverage matrix | item 21 |
+| `0066` | **Securities-lending model correction and expansion** — repair economic signs, point-in-time rate use, configurable classifications, accrual conventions, counterparty allocation, recalls, and lifecycle behavior in `0023`/`0028` | approved and implemented `0063`; discrepancy register accepted | item 21 |
+| `0067` | **Collateral, margin, and allocation optimization** — eligibility, haircuts, concentration, substitution, counterparty/netting sets, liquidity costs, and explainable allocation; decide reference optimizer versus plugin boundary explicitly | `0063`; repo/securities-lending interfaces from `0064`/`0066` where consumed | item 21 |
+| `0068` | **Short-term-markets source ingestion and data contracts** — register and ingest approved official benchmark, transaction, issuance, and market-structure sources with vintage/effective-time controls | `0063` source-authority and temporal contracts; may proceed in parallel with `0064`–`0067` after those contracts stabilize | item 21 |
+| `0069` | **Regulatory, legal, and market-structure knowledge pack** — jurisdiction- and effective-date-aware rules, clearing/reporting/settlement structure, master-agreement concepts, and freshness review; informational, not legal advice | `0063` evidence, jurisdiction, review-status, and freshness contracts | item 21 |
 
-**Next free spec number: `0060`.** Reserving a number here does not create the
-directory; run `./scripts/new-spec.sh` (or copy `templates/spec/`) when the work
-actually starts.
+Spec `0063-short-term-markets-domain-foundation/` is written and active as a
+Draft, so it is indexed rather than listed as an unwritten reservation above.
+Specs `0064`–`0069` are **portfolio commitments, not active designs**: create and
+approve one only when `0063` has frozen the contract it consumes and the prior
+dependency named above is satisfied. Do not add agents merely to fill the map;
+prefer a canonical knowledge artifact or tested runtime that an existing agent
+can use. **Next unreserved spec number: `0070`.** Reserving a number here does
+not create the directory; copy `templates/spec/` only when that slice becomes
+active.
 
 
-**Scheduled workflow operations control plane — built** (spec
-`0055-workflow-scheduling-operations/`, `workflow_scheduling.py`). Covers cron
+**Scheduled workflow operations control plane and monitoring — built** (specs
+`0055-workflow-scheduling-operations/` and `0060-scheduler-monitoring/`,
+`workflow_scheduling.py`, `workflow_scheduling_cli.py`). Covers cron
 jobs, Python scripts/modules, QuantSmith pipelines, and agentic workflows as
 deployable scheduled jobs: a registry → scheduler dry-run → dispatcher →
 execution ledger → daily status report loop, with manual task reminders and
@@ -166,9 +185,9 @@ deploy code — the same "spec first, executable providers later" pattern
 example now exists: `examples/scheduled_daily_report/` runs the full loop
 against a real target (a workflow-memory review digest, reusing `0048`'s
 `validate` and `0057`'s `build_review_queue`), with a committed sample output
-and a documented two-cron-entry real deployment. See
-`specs/0055-workflow-scheduling-operations/tasks.md`'s Follow-ups for what's
-still open (enforceable vs. advisory deployment; a `workflow_scheduling_cli`).
+and a documented two-cron-entry deployment. Spec `0060` closed `0055`'s
+alert-delivery, CLI, and enforceable-versus-advisory follow-ups; its remaining
+manual-task persistence question stays deferred until a real consumer needs it.
 
 1. **P0 optimizer-agent workflow expansion — every `0013` solver now has a shipped
    application.** The optimization group has runtimes for the core mathematical
@@ -284,11 +303,13 @@ still open (enforceable vs. advisory deployment; a `workflow_scheduling_cli`).
    applications (cardinality-constrained portfolio, funding ladder,
    multi-period rebalancing — specs `0034`, `0035`, `0036`) are shipped;
    every solver in the `0013` toolkit now has one. A securities-financing
-   LP application remains deliberately not planned:
-   `repo_financing`/`collateral_management` stay agent-contract-only, and
-   that domain routes to an adopter's own optimization models via
-   `agents/optimization/model_plugin_registration/` (spec `0026`) instead
-   of the SDK owning securities-financing optimization logic itself.
+   LP application was previously deliberately left unplanned. Item 21 now
+   supersedes that permanent boundary: `repo_financing` and
+   `collateral_management` remain agent-contract-only **today**, while spec
+   `0067` must decide—against a concrete collateral data contract and golden
+   cases—whether QuantSmith should own a reference optimizer, keep the
+   `0026` model-plugin boundary, or support both. No optimizer is implied until
+   that spec is written and approved.
 6. **Adoption guide** — done. `docs/adoption_guide.md` is a full walkthrough of both
    layers: `pip install quantsmith` + using the runtimes, and copying the scaffold +
    wiring the gates, with per-project-type recipes.
@@ -556,18 +577,17 @@ still open (enforceable vs. advisory deployment; a `workflow_scheduling_cli`).
     the two remaining `P1` `data_engineering` runtimes (`data_modeling`,
     `pipeline_deployment` — the latter is the handoff edge `0042`
     deliberately stops at).
-    `repo_financing`/`collateral_management`
-    stay agent-contract-only by choice — this SDK routes to an adopter's
-    own optimization models via
-    `agents/optimization/model_plugin_registration/` (spec `0026`) rather
-    than owning securities-financing LP/optimization logic itself; an
-    executable dispatcher for `0026` is worth building once a concrete
-    invocation target exists. Otherwise: continuing to populate `sources/`
-    as real sources come into use.
+    `repo_financing`/`collateral_management` remain agent-contract-only in the
+    current tree, but that is no longer an untracked permanent choice. Item 21
+    and reserved specs `0064`/`0067` own the decision and require the shared
+    `0063` domain contract first. `agents/optimization/model_plugin_registration/`
+    (spec `0026`) remains the escape hatch for adopter-owned models unless and
+    until a later approved spec adds a reference runtime. Otherwise: continuing
+    to populate `sources/` as real sources come into use.
 
 14. **P1 Generalization & Team Onboarding — making QuantSmith self-serve across
-    domains.** QuantSmith is now a comprehensive framework (168 agents, 52 specs,
-    33 gates, 33 standards); the next phase is reducing discovery friction and
+    domains.** QuantSmith is now a comprehensive framework (168 agents, 58 specs,
+    33 gates, 34 standards); the next phase is reducing discovery friction and
     enabling team-intuitive adoption without deep codebase reading.
     - **P0 Phase 1a: Role profiles** (`roles/{portfolio_manager,risk_manager,quant_researcher,data_engineer,compliance_officer}.md`):
       Define personas with their workflows, agents, specs, and handoff points. A
@@ -930,6 +950,44 @@ still open (enforceable vs. advisory deployment; a `workflow_scheduling_cli`).
     this. Backed by `instructions/test_engineering.md`. Writes/reviews
     tests and fuzz harnesses only — hands off to `testing_validation` and
     `quality-guard-agent` rather than making either's call itself.
+
+21. **Short-term markets expert library — foundation active, implementation
+    staged** (spec `0063`, Draft; future specs `0064`–`0069`). The current
+    securities-finance surface is useful but uneven: `0023` and `0028` provide
+    narrow runtimes, while repo and collateral remain contract-only, cash-product
+    pricing is absent, official market-plumbing sources are not registered, and
+    several existing assumptions need an explicit economic viewpoint,
+    convention, or point-in-time rule before they can be trusted as shared
+    expertise.
+
+    The initiative balances market understanding with model development in this
+    order:
+
+    1. **Foundation — active Draft (`0063`).** Establish the canonical U.S.-first
+       domain pack: taxonomy and aliases; lender/borrower, cash/security, and
+       long/short viewpoints; quotation and cashflow signs; day-count, rate,
+       price, haircut, margin, calendar, and settlement conventions; repo,
+       securities-lending, cash-product, and collateral lifecycles; source
+       authority, jurisdiction, effective dates, freshness, and review status;
+       a coverage/gap register; and deterministic golden cases.
+    2. **Bounded implementation slices — reserved, not written (`0064`–`0069`).**
+       Repo runtime, cash-product pricing, securities-lending corrections,
+       collateral optimization, source ingestion, and regulatory/legal knowledge
+       each receive their own acceptance criteria and validation evidence. The
+       Planned specs table is the canonical record of their exact boundaries and
+       dependencies.
+    3. **Activation rule.** Do not draft all six child specs at once. Activate
+       one when its `0063` dependency is implemented, its source/data assumptions
+       are knowable, and there is a concrete runtime or knowledge consumer. This
+       keeps each review bounded and prevents another broad agent catalog with
+       duplicated prose but no shared, tested domain truth.
+
+    Initial coverage is intentionally U.S. institutional short-term markets:
+    securities lending, repo/reverse repo, Treasury and approved cash products,
+    collateral/margin, clearing/settlement/reporting structure, and the links
+    from financing economics into portfolio, backtest, risk, liquidity, and
+    capacity decisions. Other jurisdictions and a full derivatives/credit
+    library are later extensions, not silent claims of completeness.
 
 ## Open Questions For The Owner
 
