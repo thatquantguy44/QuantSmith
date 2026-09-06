@@ -195,6 +195,25 @@ Tests: `tests/test_walk_forward.py` (one test per acceptance criterion).
 PYTHONPATH=src python3 -m pytest tests/test_walk_forward.py -q
 ```
 
+## `short_term_markets_knowledge` — spec `0063-short-term-markets-domain-foundation`
+
+A validator for the U.S.-first short-term-markets domain pack under
+`knowledge/short_term_markets/`. It checks the taxonomy, convention registry,
+lifecycle graphs, source references, coverage matrix, gap register, agent links,
+handoff reservations, and deterministic golden cases.
+
+This is explicitly **not** a pricing, trading, allocation, or optimization
+runtime. Repo economics, cash-product pricing, securities-lending corrections,
+collateral optimization, source ingestion, and regulatory/legal knowledge stay
+reserved for specs `0064` through `0069`.
+
+Tests: `tests/test_short_term_markets_knowledge.py` (one test per acceptance
+criterion).
+
+```sh
+PYTHONPATH=src python3 -m pytest tests/test_short_term_markets_knowledge.py -q
+```
+
 ## `fred_point_in_time` — spec `0045-fred-point-in-time`
 
 Closes the gap `0044` left open. The backtest engine guarantees its own loop

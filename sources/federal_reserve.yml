@@ -1,0 +1,33 @@
+source_id: "federal_reserve"
+name: "Federal Reserve Board Statistical Releases"
+type: api
+owner: "quant-research"
+description: >
+  Public Federal Reserve Board statistical releases, bank data, policy-related
+  datasets, and financial-market series used as source metadata for rates,
+  liquidity, and institutional cash-product context.
+
+domain: ["short_term_markets", "fixed_income_rates", "liquidity", "cash_products"]
+access_level: public
+
+quality:
+  completeness: high
+  timeliness: "varies by release and series"
+  known_issues:
+    - "release dates, observation dates, revision dates, and effective dates carry different meanings"
+    - "some series are duplicated through FRED with different metadata timing"
+  last_assessed: "2026-09-06"
+
+point_in_time:
+  supports_asof: true
+  revision_policy: "preserve release and revision markers where available; otherwise snapshot retrieved records used in models"
+
+connection:
+  method: rest_api
+  endpoint_or_host: "https://www.federalreserve.gov/datadownload/"
+  credential_ref: "not_required_public_access"
+
+documentation_uri: "https://www.federalreserve.gov/data.htm"
+status: evaluating
+
+data_contract_refs: ["specs/0063-short-term-markets-domain-foundation/"]

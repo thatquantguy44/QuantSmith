@@ -1,0 +1,33 @@
+source_id: "dtcc_ficc"
+name: "DTCC Fixed Income Clearing Corporation Public Materials"
+type: website
+owner: "quant-research"
+description: >
+  Public DTCC/FICC clearing, settlement, and service materials used as source
+  metadata for repo, Treasury clearing, settlement, and collateral process
+  records.
+
+domain: ["short_term_markets", "repo", "clearing", "settlement", "collateral"]
+access_level: public
+
+quality:
+  completeness: medium
+  timeliness: "varies by service guide, rule filing, and public notice"
+  known_issues:
+    - "service, rule, filing, and notice documents have different authority and effective dates"
+    - "access terms and copyright constraints must be checked before copying text"
+  last_assessed: "2026-09-06"
+
+point_in_time:
+  supports_asof: true
+  revision_policy: "record document version, publication or filing date, effective interval, and retrieval date"
+
+connection:
+  method: scrape
+  endpoint_or_host: "https://www.dtcc.com/clearing-services/ficc"
+  credential_ref: "not_required_public_access"
+
+documentation_uri: "https://www.dtcc.com/clearing-services/ficc"
+status: evaluating
+
+data_contract_refs: ["specs/0063-short-term-markets-domain-foundation/"]

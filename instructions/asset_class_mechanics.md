@@ -15,6 +15,11 @@ strategies (see `agents/trading_strategies/`) or price financing (see
 `agents/securities_financing/`); it hands both clean, well-understood market
 structure and data to build on.
 
+For U.S. short-term rates, Treasury bills, repo/reverse repo, collateral, and
+securities-lending mechanics, use the canonical 0063 foundation at
+`knowledge/short_term_markets/` and the operating rules in
+`instructions/short_term_markets.md` before restating local conventions.
+
 ## Required Inputs
 
 - The asset class and instrument type (equity, bond/note, CDS, FX spot/forward,

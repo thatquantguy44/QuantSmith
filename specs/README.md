@@ -18,7 +18,7 @@ specs/
 
 ## Index
 
-Specs `0001`, `0006`–`0013`, `0015`, `0016`, `0018`–`0021`, `0028`, `0034`–`0036`, `0038`, `0039`, `0041`, `0042`, `0044`–`0049`, `0055`–`0059`, `0061` have dependency-free reference runtimes under
+Specs `0001`, `0006`-`0013`, `0015`, `0016`, `0018`-`0021`, `0028`, `0034`-`0036`, `0038`, `0039`, `0041`, `0042`, `0044`-`0049`, `0055`-`0059`, `0061`, and `0063` have dependency-free reference runtimes or validators under
 `src/quantsmith/pipelines/` (catalogued in
 [`../src/quantsmith/pipelines/README.md`](../src/quantsmith/pipelines/README.md)),
 each with a matching test module under `tests/`.
@@ -82,7 +82,7 @@ each with a matching test module under `tests/`.
 | [0039-ingestion-data-contract](0039-ingestion-data-contract/) | Ingestion data contract emission — validates a pulled row set against a declared schema/key/quality-rule contract and renders a `data_contract.md` populated with real, computed results; closes the worked-example gap `docs/handoff.md` had carried since `0006` | `ingestion_data_contract.py` | `test_ingestion_data_contract.py` | Approved |
 | [0040-readme-sync-gate](0040-readme-sync-gate/) | README index/runtime sync gate — verifies every spec with a tested runtime (a `test_*.py` module named in this index's Tests column) also appears in root `README.md`'s runtime table; the sync check `agent-catalog`/`spec-index` didn't cover | — (gate only) | `readme-sync` gate | Approved |
 | [0062-test-engineering-agents](0062-test-engineering-agents/) | Test engineering agent expansion — language-specific test authoring (Python, C++ unit/fuzz, JavaScript, TypeScript) plus a routing orchestrator, giving `testing_validation`/`quality-guard-agent` tests and fuzz harnesses to map and gate rather than writing them itself | — (agent contracts) | catalog/docs gates | Approved |
-| [0063-short-term-markets-domain-foundation](0063-short-term-markets-domain-foundation/) | Short-term markets domain foundation — U.S.-first taxonomy, explicit economic viewpoints, rate/price/collateral conventions, lifecycle contracts, evidence governance, coverage and gap registers, and deterministic golden cases for repo, securities lending, cash products, and collateral | — (knowledge and validation contracts; no pricing runtime) | planned knowledge validation tests | Draft |
+| [0063-short-term-markets-domain-foundation](0063-short-term-markets-domain-foundation/) | Short-term markets domain foundation — U.S.-first taxonomy, explicit economic viewpoints, rate/price/collateral conventions, lifecycle contracts, evidence governance, coverage and gap registers, and deterministic golden cases for repo, securities lending, cash products, and collateral | `short_term_markets_knowledge.py` (validator only; no pricing runtime) | `test_short_term_markets_knowledge.py` | Draft |
 
 `0001-daily-momentum-signal/` is a filled-in reference showing the ID scheme and
 traceability end to end. Copy its structure, not its content.

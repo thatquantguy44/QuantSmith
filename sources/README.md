@@ -27,6 +27,13 @@ sources/
 | [`bea`](bea.yml) | BEA (GDP, personal income, national accounts) | api | public | active | high |
 | [`census`](census.yml) | U.S. Census Bureau (economic, demographic, housing) | api | public | active | high |
 | [`sec_edgar`](sec_edgar.yml) | SEC EDGAR (filings, XBRL, disclosure metadata) | api | public | active | high |
+| [`treasury`](treasury.yml) | U.S. Treasury Fiscal Data and TreasuryDirect | api | public | evaluating | high |
+| [`ny_fed`](ny_fed.yml) | Federal Reserve Bank of New York Markets Data | api | public | evaluating | high |
+| [`federal_reserve`](federal_reserve.yml) | Federal Reserve Board Statistical Releases | api | public | evaluating | high |
+| [`sec`](sec.yml) | U.S. Securities and Exchange Commission Public Materials | website | public | evaluating | medium |
+| [`finra`](finra.yml) | FINRA Public Data and Rules | api | public | evaluating | medium |
+| [`dtcc_ficc`](dtcc_ficc.yml) | DTCC Fixed Income Clearing Corporation Public Materials | website | public | evaluating | medium |
+| [`sifma`](sifma.yml) | SIFMA Public Resources | website | public | evaluating | medium |
 | [`newsapi`](newsapi.yml) | NewsAPI.org (general news search/headlines) | api | internal | active | medium |
 | [`alpha_vantage_news`](alpha_vantage_news.yml) | Alpha Vantage NEWS_SENTIMENT (ticker-tagged news + sentiment) | api | internal | active | medium |
 | [`finnhub_news`](finnhub_news.yml) | Finnhub Company/Market News (ticker-scoped news) | api | internal | active | medium |
@@ -40,6 +47,12 @@ header instead of a key. `newsapi`, `alpha_vantage_news`, and
 `finnhub_news` back spec `0059`'s morning market brief — each requires a
 free-registration API key, and each has a free-tier caveat worth reading
 before relying on it (see each entry's `quality.known_issues`).
+
+`treasury`, `ny_fed`, `federal_reserve`, `sec`, `finra`, `dtcc_ficc`, and
+`sifma` are public metadata registrations for the short-term-markets
+foundation (`specs/0063-short-term-markets-domain-foundation/`). They do
+not implement live ingestion; source-specific data contracts and retrieval
+snapshots belong to later concrete consumers.
 
 ## How This Connects
 

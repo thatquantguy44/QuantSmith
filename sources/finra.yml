@@ -1,0 +1,33 @@
+source_id: "finra"
+name: "FINRA Public Data and Rules"
+type: api
+owner: "quant-research"
+description: >
+  Public FINRA transparency, reference, short interest, TRACE, OTC, and market
+  regulation datasets used as source metadata for short interest, fixed-income
+  transparency, market-structure, and surveillance-adjacent research.
+
+domain: ["short_term_markets", "securities_lending", "fixed_income_rates", "market_structure"]
+access_level: public
+
+quality:
+  completeness: medium
+  timeliness: "varies by dataset, publication delay, and correction policy"
+  known_issues:
+    - "publication dates, trade dates, and settlement dates must be stored separately"
+    - "dataset-level redistribution and usage terms vary and must be checked before publication"
+  last_assessed: "2026-09-06"
+
+point_in_time:
+  supports_asof: true
+  revision_policy: "record source file or endpoint, publication date when available, and retrieval timestamp"
+
+connection:
+  method: rest_api
+  endpoint_or_host: "https://api.finra.org"
+  credential_ref: "not_required_public_access"
+
+documentation_uri: "https://developer.finra.org/"
+status: evaluating
+
+data_contract_refs: ["specs/0063-short-term-markets-domain-foundation/"]
