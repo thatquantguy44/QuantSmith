@@ -31,6 +31,7 @@ from .foundation import (
     validate_run_envelope,
     validate_run_envelope_file,
 )
+from .producers import emit_quant_factory_evidence
 
 __all__ = [
     "ACCESS_LEVELS",
@@ -50,6 +51,7 @@ __all__ = [
     "ValidationReport",
     "append_audit_event",
     "discover_envelopes",
+    "emit_quant_factory_evidence",
     "load_json",
     "load_jsonl",
     "replay_envelope_file",

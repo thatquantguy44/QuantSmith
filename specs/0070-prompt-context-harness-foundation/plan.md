@@ -42,6 +42,7 @@ Planned implementation surfaces:
 | --- | --- |
 | `src/quantsmith/orchestration/` | Dataclasses, parsers, schema validators, hash checks, audit helpers, replay report builder. The package is separate from `pipelines/` because the envelope governs cross-cutting orchestration evidence. |
 | `src/quantsmith/orchestration/replay_cli.py` | CLI entry point for loading an envelope, validating references, and producing a replay report. |
+| `src/quantsmith/orchestration/producers.py` | Producer adapters that turn real runtime outputs into 0070 evidence bundles without making those runtimes import the orchestration package. First producer: `emit_quant_factory_evidence`. |
 | `templates/orchestration/` | Template envelope, prompt manifest, context manifest, assumption ledger, evaluation harness, and audit events. |
 | `examples/orchestration/` | One deterministic quant example and one fixture-backed LLM-eligible example. |
 | `hooks/stages/orchestration-check.sh` | Composite gate coverage for prompt, context, assumptions, evaluation harness, audit events, and replay metadata, wired through `run-stage.sh`. |
@@ -175,6 +176,9 @@ Roll out in two slices:
 
 1. Contracts, templates, validators, tests, and examples.
 2. Gate/CLI wiring once the validators are stable.
+3. Producer integrations that let existing runtimes emit validated envelopes.
+   The first producer consumes `0061` Quant Model Factory decisions and writes
+   the 0070 bundle beside caller-owned runtime artifacts.
 
 All new artifacts are additive. A release should publish the new envelope schema,
 gate names, example runs, and replay command. Rollback is reverting the
