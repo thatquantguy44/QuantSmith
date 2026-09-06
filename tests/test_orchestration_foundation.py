@@ -7,6 +7,7 @@ import json
 import os
 import shutil
 import subprocess
+import tempfile
 from pathlib import Path
 
 from quantsmith.orchestration import (
@@ -15,6 +16,7 @@ from quantsmith.orchestration import (
     discover_envelopes,
     load_json,
     load_jsonl,
+    emit_quant_factory_evidence,
     replay_envelope_file,
     sha256_file,
     validate_assumption_ledger,
@@ -24,6 +26,13 @@ from quantsmith.orchestration import (
     validate_evaluation_harness,
     validate_prompt_manifest,
     validate_run_envelope_file,
+)
+from quantsmith.pipelines.quant_factory import (
+    ConvergenceGate,
+    FactoryRunner,
+    FactorySpec,
+    LaneResult,
+    LaneSpec,
 )
 
 
@@ -275,3 +284,84 @@ def test_orchestration_cli_validates_examples_offline_AC_012():
 
     assert result.returncode == 0, result.stdout + result.stderr
     assert "ok - validated 2 orchestration envelope(s)" in result.stdout
+
+
+def test_quant_factory_producer_emits_valid_orchestration_envelope():
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        ledger = root / "factory_ledger.jsonl"
+        spec = FactorySpec(
+            run_id="factory-run-0070-producer",
+            convergence_mode="best_of_n",
+            gate=ConvergenceGate(
+                min_sharpe=0.8,
+                max_drawdown=-0.15,
+                min_annual_return=0.05,
+                n_best=1,
+                pass_threshold=0.6,
+            ),
+            lanes=(
+                LaneSpec(
+                    lane_id="lane_a",
+                    hypothesis="momentum continuation",
+                    feature_set=("mom_252_21",),
+                    model_tag="ridge",
+                    backtest_config={"rebalance": "monthly"},
+                ),
+                LaneSpec(
+                    lane_id="lane_b",
+                    hypothesis="mean reversion",
+                    feature_set=("zscore_20",),
+                    model_tag="ridge",
+                    backtest_config={"rebalance": "monthly"},
+                ),
+            ),
+            seed=42,
+            ledger_path=ledger,
+        )
+        decision = FactoryRunner().run(
+            spec,
+            (
+                LaneResult(
+                    lane_id="lane_a",
+                    status="gate_pending",
+                    sharpe=1.4,
+                    max_drawdown=-0.08,
+                    annual_return=0.12,
+                    gate_score=None,
+                    leakage_flags=(),
+                    elapsed_seconds=4.0,
+                    error=None,
+                ),
+                LaneResult(
+                    lane_id="lane_b",
+                    status="gate_pending",
+                    sharpe=0.2,
+                    max_drawdown=-0.35,
+                    annual_return=0.01,
+                    gate_score=None,
+                    leakage_flags=(),
+                    elapsed_seconds=3.0,
+                    error=None,
+                ),
+            ),
+        )
+
+        envelope = emit_quant_factory_evidence(
+            spec,
+            decision,
+            root / "orchestration",
+            actor_id="test-agent",
+            started_at="2026-09-06T12:00:00Z",
+            repo_revision="test-revision",
+        )
+        validation = validate_run_envelope_file(envelope)
+        replay = replay_envelope_file(envelope)
+        factory_artifact = load_json(root / "orchestration" / "factory_decision.json")
+
+        assert validation.ok, [finding.to_dict() for finding in validation.findings]
+        assert replay.status == "replayed"
+        assert replay.non_reproducible_dependencies == ()
+        assert factory_artifact["producer"] == "quantsmith.pipelines.quant_factory.FactoryRunner.run"
+        assert factory_artifact["decision"]["approved_lanes"] == ["lane_a"]
+        assert factory_artifact["factory_spec"]["convergence_mode"] == "best_of_n"
