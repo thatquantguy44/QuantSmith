@@ -82,6 +82,7 @@ each with a matching test module under `tests/`.
 | [0039-ingestion-data-contract](0039-ingestion-data-contract/) | Ingestion data contract emission — validates a pulled row set against a declared schema/key/quality-rule contract and renders a `data_contract.md` populated with real, computed results; closes the worked-example gap `docs/handoff.md` had carried since `0006` | `ingestion_data_contract.py` | `test_ingestion_data_contract.py` | Approved |
 | [0040-readme-sync-gate](0040-readme-sync-gate/) | README index/runtime sync gate — verifies every spec with a tested runtime (a `test_*.py` module named in this index's Tests column) also appears in root `README.md`'s runtime table; the sync check `agent-catalog`/`spec-index` didn't cover | — (gate only) | `readme-sync` gate | Approved |
 | [0062-test-engineering-agents](0062-test-engineering-agents/) | Test engineering agent expansion — language-specific test authoring (Python, C++ unit/fuzz, JavaScript, TypeScript) plus a routing orchestrator, giving `testing_validation`/`quality-guard-agent` tests and fuzz harnesses to map and gate rather than writing them itself | — (agent contracts) | catalog/docs gates | Approved |
+| [0063-short-term-markets-domain-foundation](0063-short-term-markets-domain-foundation/) | Short-term markets domain foundation — U.S.-first taxonomy, explicit economic viewpoints, rate/price/collateral conventions, lifecycle contracts, evidence governance, coverage and gap registers, and deterministic golden cases for repo, securities lending, cash products, and collateral | — (knowledge and validation contracts; no pricing runtime) | planned knowledge validation tests | Draft |
 
 `0001-daily-momentum-signal/` is a filled-in reference showing the ID scheme and
 traceability end to end. Copy its structure, not its content.
@@ -100,14 +101,13 @@ traceability end to end. Copy its structure, not its content.
   worked example at `examples/scheduled_daily_report/`) → scheduler adapters
   (`cron`, GitHub Actions, Airflow, Dagster/Prefect — contract-only, not yet
   executable) → `0020` alerting/manual follow-up → `0002` workflow memory.
-- **Securities financing:** `0022` asset-class mechanics (equities shorts) → `0023` securities lending workflow → `0028` financing cost analysis (`repo_financing`/`collateral_management` remain agent-contract only) → `backtest_review`/`risk`.
+- **Short-term markets and securities financing:** `0022` asset-class mechanics (equities shorts) → `0023` securities lending workflow → `0028` financing cost analysis → `0063` shared domain foundation (taxonomy, viewpoints, conventions, lifecycles, evidence, and golden cases) → staged implementation specs `0064`–`0069` recorded in `docs/handoff.md` → `backtest_review`/`risk`. `repo_financing` and `collateral_management` remain agent-contract-only until their bounded follow-on specs are approved and implemented.
 - **Macro & economics:** `0027` source catalog (FRED/BLS/BEA/Census/EIA) → `0033` economists agents (indicators → policy → regime → cross-asset/scenario → brief/outlook reports) → `trading_strategies/macro_multi_asset`, `portfolio_management/allocation_policy`, `risk`.
 - **Test engineering:** `0062` test engineering agents (orchestrator routes to `python_test_engineer`/`cpp_test_fuzz_engineer`/`javascript_test_engineer`/`typescript_test_engineer` by detected stack) → `testing_validation` (AC-to-test traceability, quant validation) → `quality-guard-agent` (release gate).
 - **Cross-cutting:** `0002` workflow memory (`0048` read runtime → `0049` write path → `0058` per-person viewer access control, closing `0048`'s deferred `access_level` enforcement); `0004` agent expansion; `0022` asset-class mechanics agents (feed `trading_strategies/` and `securities_financing/`); `0056` market-research knowledge base (same MCP retrieval interface, separate governed storage/access for market color, tagged email color, and research — `0058`'s roster enforces its `access_level` too, through `0057`'s research view-model builder); `0052` MCP adapter contract + knowledge resources server (stdlib-only JSON-RPC 2.0 adapter; `caller_clearance` required on every request; `knowledge://` URI scheme; unblocks `0053`, `0054`, and `0056 T-003`) → `0053` memory-graph server (wraps `0048`; `knowledge://memory/<scope>/<record_id>`; built) → `0054` RAG server (cited passages, one index per access tier, no post-retrieval leakage); `0024` role-operations agents Phase 1 → `0025` data-provenance guardrail (real-data-first + synthetic-data disclosure, backing `0024`'s `rapid_scaffolder` and cross-referenced by `dashboard_design`/`data_storytelling`) → `0029` role-operations agents Phase 2 → `0030` role-operations agents Phase 3 (governance-adjacent: model card, decision log, governance readiness, backtest pre-check, build handoff, alert triage — hands off to `backtest_review`/`alert_router`/`incident_notification` rather than replacing them). Fourteen-agent roster complete, configurable via a local-only `role_context.yml`.
 
-**Next free spec number: `0063`** (`0003`/`0005` belong to the local-only pack).
-`0050`–`0054` are **reserved** — `0052` (MCP adapter contract + resources
-server) and `0053` (memory-graph MCP server) are now written; `0050`,
-`0051`, `0054` are not yet written. See the *Planned specs* table in
-[`../docs/handoff.md`](../docs/handoff.md) for what each covers and what it
-depends on.
+**Next unreserved spec number: `0070`** (`0003`/`0005` belong to the
+local-only pack). `0050`, `0051`, `0054`, and `0064`–`0069` are
+**reserved but not yet written**. See the *Planned specs* table in
+[`../docs/handoff.md`](../docs/handoff.md) for what each covers, its activation
+boundary, and what it depends on.
