@@ -104,8 +104,9 @@ advisory-by-default deployment decision. The chain builds on
 
 **Highest priority, in order: (1) the short-term-markets domain foundation,
 (2) the knowledge base, (3) scheduler monitoring, (4) prompt/context/harness
-engineering.** Everything else in this section is real, tracked work, but these
-four are what should get attention first if only one thing can move at a time:
+engineering, (5) NLP/LLM quant text intelligence.** Everything else in this
+section is real, tracked work, but these five are what should get attention first
+if only one thing can move at a time:
 
 1. **Short-term-markets domain foundation (item 21, spec `0063`, Draft).**
    Build the shared expert contract before adding more agents or isolated
@@ -144,6 +145,16 @@ four are what should get attention first if only one thing can move at a time:
    validating every orchestration layer, auditing decisions, detecting
    prompt/context leakage, and reproducing deterministic or fixture-backed
    agentic quant runs. It does not activate or draft `0064`–`0069`.
+5. **NLP, LLM, and Quant Text Intelligence Foundation (spec `0071`, Draft).**
+   Compose the existing knowledge agents, `llm_runtime` adapters, MCP resources
+   and planned `0054` RAG work, `0056` market-research knowledge base, and
+   `sources/` catalog into one governed text-intelligence layer. Add typed
+   corpus and transformation lineage, provider-neutral frontier/local model and
+   embedding/reranking/training-plugin capabilities, access-tier index
+   snapshots, structured text tasks, leakage-aware evaluation, auditable
+   text-derived signals, and `0070` replay integration. This is a Draft
+   foundation only; it does not select a provider/backend, train a model,
+   implement `0054`, or activate `0064`–`0069`.
 
 ### Planned specs (reserved, not yet written)
 
@@ -166,14 +177,15 @@ nobody noticed.
 | `0068` | **Short-term-markets source ingestion and data contracts** — register and ingest approved official benchmark, transaction, issuance, and market-structure sources with vintage/effective-time controls | `0063` source-authority and temporal contracts; may proceed in parallel with `0064`–`0067` after those contracts stabilize | item 21 |
 | `0069` | **Regulatory, legal, and market-structure knowledge pack** — jurisdiction- and effective-date-aware rules, clearing/reporting/settlement structure, master-agreement concepts, and freshness review; informational, not legal advice | `0063` evidence, jurisdiction, review-status, and freshness contracts | item 21 |
 
-Specs `0063-short-term-markets-domain-foundation/` and
-`0070-prompt-context-harness-foundation/` are written and active as Drafts, so
-they are indexed rather than listed as unwritten reservations above.
+Specs `0063-short-term-markets-domain-foundation/`,
+`0070-prompt-context-harness-foundation/`, and
+`0071-nlp-llm-quant-text-intelligence-foundation/` are written and active as
+Drafts, so they are indexed rather than listed as unwritten reservations above.
 Specs `0064`–`0069` are **portfolio commitments, not active designs**: create and
 approve one only when `0063` has frozen the contract it consumes and the prior
 dependency named above is satisfied. Do not add agents merely to fill the map;
 prefer a canonical knowledge artifact or tested runtime that an existing agent
-can use. **Next unreserved spec number: `0071`.** Reserving a number here does
+can use. **Next unreserved spec number: `0072`.** Reserving a number here does
 not create the directory; copy `templates/spec/` only when that slice becomes
 active.
 
@@ -595,7 +607,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
     to populate `sources/` as real sources come into use.
 
 14. **P1 Generalization & Team Onboarding — making QuantSmith self-serve across
-    domains.** QuantSmith is now a comprehensive framework (168 agents, 59 specs,
+    domains.** QuantSmith is now a comprehensive framework (168 agents, 60 specs,
     33 gates, 35 standards); the next phase is reducing discovery friction and
     enabling team-intuitive adoption without deep codebase reading.
     - **P0 Phase 1a: Role profiles** (`roles/{portfolio_manager,risk_manager,quant_researcher,data_engineer,compliance_officer}.md`):
