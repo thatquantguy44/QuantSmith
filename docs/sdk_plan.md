@@ -23,7 +23,7 @@ The SDK now has a working v1 built on a spec-driven engineering framework:
   `analytics/`, `knowledge/`, `secrets_management/`, `securities_financing/`,
   `alerts/`, `data_ingestion/`, `formulaic_alphas/`, `monitoring/`, and
   `test_engineering/`.
-- **33 quality gates** in `hooks/stages/` (SDLC stages, quant gates, and repo
+- **34 quality gates** in `hooks/stages/` (SDLC stages, quant gates, and repo
   gates) driven by `run-stage.sh`; advisory by default, blocking under
   `QF_STAGE_ENFORCE=1`.
 - **35 instruction standards** and a prompt/template library covering specs, run

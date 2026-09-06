@@ -1,7 +1,7 @@
 # Plan: Prompt / Context / Harness Engineering Foundation
 
 - **Spec:** 0070-prompt-context-harness-foundation (`spec.md`)
-- **Status:** Draft
+- **Status:** Draft (foundation implemented)
 - **Author:** Codex
 - **Last updated:** 2026-09-06
 
@@ -40,11 +40,11 @@ Planned implementation surfaces:
 
 | Component | Responsibility |
 | --- | --- |
-| `src/quantsmith/pipelines/orchestration_foundation.py` or `src/quantsmith/orchestration/` | Dataclasses, parsers, schema validators, hash checks, audit helpers, replay report builder. Final location is an open question in `spec.md`. |
-| `src/quantsmith/pipelines/orchestration_replay_cli.py` or equivalent | CLI entry point for loading an envelope and producing a replay report. |
-| `templates/orchestration/` | Example envelope, prompt manifest, context manifest, assumption ledger, evaluation harness, audit events, and replay manifest. |
-| `examples/orchestration/` | One deterministic quant pipeline example and one fixture-backed LLM-eligible example. |
-| `hooks/stages/` additions | Gate coverage for prompt, context, assumptions, evaluation harness, audit events, and replay metadata, wired through `run-stage.sh`. |
+| `src/quantsmith/orchestration/` | Dataclasses, parsers, schema validators, hash checks, audit helpers, replay report builder. The package is separate from `pipelines/` because the envelope governs cross-cutting orchestration evidence. |
+| `src/quantsmith/orchestration/replay_cli.py` | CLI entry point for loading an envelope, validating references, and producing a replay report. |
+| `templates/orchestration/` | Template envelope, prompt manifest, context manifest, assumption ledger, evaluation harness, and audit events. |
+| `examples/orchestration/` | One deterministic quant example and one fixture-backed LLM-eligible example. |
+| `hooks/stages/orchestration-check.sh` | Composite gate coverage for prompt, context, assumptions, evaluation harness, audit events, and replay metadata, wired through `run-stage.sh`. |
 | `tests/test_orchestration_foundation.py` and CLI/gate tests | Acceptance-criterion evidence for schema validation, layer failures, fixture replay, and gate discoverability. |
 
 ## Interfaces & Data Contracts
@@ -182,11 +182,11 @@ implementation commit and removing the gate names from `run-stage.sh`; existing
 quant runtimes and adapters should continue to work because this foundation
 observes and validates their evidence rather than changing their execution path.
 
-## Open Questions
+## Resolved Decisions
 
-- Should runtime code live under `src/quantsmith/pipelines/` for consistency or
-  a new `src/quantsmith/orchestration/` package for architectural clarity?
-- Should gate coverage be one composite `orchestration` gate or separate
-  manifest-specific gates?
-- What is the smallest envelope acceptable for exploratory work that is not yet
-  release-bound?
+- Runtime code lives under `src/quantsmith/orchestration/`.
+- Gate coverage is exposed through one composite `orchestration` gate with
+  field-level sub-findings.
+- The smallest exploratory run still needs an envelope, actor, objective,
+  environment, audit/replay metadata, and an explicit `release_profile`; richer
+  manifests are required for release-bound examples and validated references.

@@ -23,16 +23,16 @@
 
 | ID | Task | Covers | Status | Notes |
 | --- | --- | --- | --- | --- |
-| T-001 | Implement the typed orchestration run envelope schema, parser, serializer, reference validator, and artifact-hash checks. | REQ-001, REQ-009, REQ-010, NFR-001, NFR-002, NFR-005 | todo | Resolve the package-location open question before coding. |
-| T-002 | Implement the prompt manifest schema, examples, validator, and field-level failure fixtures. | REQ-002, REQ-010, NFR-001, NFR-005, NFR-006 | todo | Include prompt role layers, variables, hashes, provider constraints, and allowed tools/plugins. |
-| T-003 | Implement the context manifest schema, examples, validator, access checks, as-of/effective-time checks, freshness checks, and exclusion records. | REQ-003, REQ-009, NFR-001, NFR-002, NFR-003, NFR-006 | todo | Reuse existing knowledge, memory, market-research, MCP, and source-catalog semantics by reference. |
-| T-004 | Implement the assumption ledger schema, validator, disposition history, review/expiry checks, and dependent-artifact checks. | REQ-004, NFR-001 | todo | Assumptions must have owner, evidence, confidence/status, review/expiry, and invalidation trigger. |
-| T-005 | Implement the evaluation harness schema and runner for layer-specific checks over envelope, prompt, context, assumptions, tool/plugin calls, model outputs, quant gates, and final artifacts. | REQ-005, REQ-009, REQ-010, NFR-001 | todo | Each layer needs either a deterministic check or an explicit exception. |
-| T-006 | Implement the audit event schema, JSONL validator, event relationship checks, and helper for append-only event emission. | REQ-006, REQ-010, NFR-001, NFR-004, NFR-005, NFR-006 | todo | Overrides and approvals require actor and reason; payloads should be locators/hashes/redacted metadata. |
-| T-007 | Implement the reproducible replay command and replay report contract, including fixture mode and non-reproducible dependency reporting. | REQ-007, REQ-010, NFR-001, NFR-002, NFR-005 | todo | Do not claim exact replay for hosted LLM calls without a captured fixture or deterministic local path. |
-| T-008 | Add gate coverage through `hooks/stages/run-stage.sh` for prompt manifests, context manifests, assumption ledgers, evaluation harnesses, audit events, and replay metadata. | REQ-002, REQ-003, REQ-004, REQ-005, REQ-006, REQ-008, REQ-009, NFR-001, NFR-003, NFR-004, NFR-006 | todo | Choose composite or separate gate names before implementation. |
-| T-009 | Add templates, examples, README/spec/handoff documentation, and integration notes for deterministic and fixture-backed LLM-eligible runs. | REQ-009, REQ-011 | todo | Examples should not require network access, credentials, private prompts, or private data. |
-| T-010 | Add acceptance tests and validation evidence for every AC, run targeted gates, `git diff --check`, and full pytest if runtime or CLI code changes. | NFR-001, NFR-006 | todo | Record exact commands and outcomes here when implementation is complete. |
+| T-001 | Implement the typed orchestration run envelope schema, parser, serializer, reference validator, and artifact-hash checks. | REQ-001, REQ-009, REQ-010, NFR-001, NFR-002, NFR-005 | done | Implemented in `src/quantsmith/orchestration/`; package-location decision resolved in `spec.md` and `plan.md`. |
+| T-002 | Implement the prompt manifest schema, examples, validator, and field-level failure fixtures. | REQ-002, REQ-010, NFR-001, NFR-005, NFR-006 | done | Covers prompt role layers, variables, hashes, provider constraints, allowed tools/plugins, and unauthorized request failures. |
+| T-003 | Implement the context manifest schema, examples, validator, access checks, as-of/effective-time checks, freshness checks, and exclusion records. | REQ-003, REQ-009, NFR-001, NFR-002, NFR-003, NFR-006 | done | Reuses existing access/source/PIT semantics by reference; context validates before prompt composition. |
+| T-004 | Implement the assumption ledger schema, validator, disposition history, review/expiry checks, and dependent-artifact checks. | REQ-004, NFR-001 | done | Assumptions require owner, evidence, confidence/status, review or expiry, dependents, invalidation trigger, and disposition history. |
+| T-005 | Implement the evaluation harness schema and runner for layer-specific checks over envelope, prompt, context, assumptions, tool/plugin calls, model outputs, quant gates, and final artifacts. | REQ-005, REQ-009, REQ-010, NFR-001 | done | Each required layer needs a deterministic check, fixture-backed check, or explicit exception. |
+| T-006 | Implement the audit event schema, JSONL validator, event relationship checks, and helper for append-only event emission. | REQ-006, REQ-010, NFR-001, NFR-004, NFR-005, NFR-006 | done | JSONL events validate IDs, monotonic timestamps, parent references, fixture hashes, and override/approval reasons. |
+| T-007 | Implement the reproducible replay command and replay report contract, including fixture mode and non-reproducible dependency reporting. | REQ-007, REQ-010, NFR-001, NFR-002, NFR-005 | done | `quantsmith-orchestration replay` distinguishes deterministic replay, fixture substitution, and non-reproducible provider calls. |
+| T-008 | Add gate coverage through `hooks/stages/run-stage.sh` for prompt manifests, context manifests, assumption ledgers, evaluation harnesses, audit events, and replay metadata. | REQ-002, REQ-003, REQ-004, REQ-005, REQ-006, REQ-008, REQ-009, NFR-001, NFR-003, NFR-004, NFR-006 | done | Composite `orchestration` gate wired into `run-stage.sh`; validator emits field-level sub-findings. |
+| T-009 | Add templates, examples, README/spec/handoff documentation, and integration notes for deterministic and fixture-backed LLM-eligible runs. | REQ-009, REQ-011 | done | Added `templates/orchestration/`, two hash-checked examples, README/spec index/handoff updates, and gate-count sync. |
+| T-010 | Add acceptance tests and validation evidence for every AC, run targeted gates, `git diff --check`, and full pytest if runtime or CLI code changes. | NFR-001, NFR-006 | done | Evidence recorded below. |
 
 Status values: `todo` | `in-progress` | `blocked` | `done`.
 
@@ -40,29 +40,35 @@ Status values: `todo` | `in-progress` | `blocked` | `done`.
 
 | Acceptance criterion | Test(s) | Status |
 | --- | --- | --- |
-| AC-001 | `test_run_envelope_resolves_artifacts_and_hashes_AC_001` | todo |
-| AC-002 | `test_prompt_manifest_rejects_unversioned_hashless_or_unauthorized_AC_002` | todo |
-| AC-003 | `test_context_manifest_blocks_access_stale_and_future_known_context_AC_003` | todo |
-| AC-004 | `test_assumption_ledger_requires_owner_evidence_review_and_dependents_AC_004` | todo |
-| AC-005 | `test_evaluation_harness_covers_every_required_layer_AC_005` | todo |
-| AC-006 | `test_audit_events_reject_malformed_relationships_and_unreasoned_overrides_AC_006` | todo |
-| AC-007 | `test_replay_command_reproduces_deterministic_fixture_AC_007` | todo |
-| AC-008 | `test_replay_uses_llm_fixture_or_reports_non_reproducible_call_AC_008` | todo |
-| AC-009 | `test_orchestration_gates_are_discoverable_through_run_stage_AC_009` | todo |
-| AC-010 | `test_foundation_references_existing_surfaces_without_owning_them_AC_010` | todo |
-| AC-011 | `test_examples_include_deterministic_and_fixture_backed_envelopes_AC_011` | todo |
-| AC-012 | Repository gate evidence: `spec`, `docs-link`, `spec-index`, `doc-counts`, `handoff-sync`, `secret-scan`, targeted tests, and full pytest if applicable | todo |
+| AC-001 | `test_run_envelope_resolves_artifacts_and_hashes_AC_001` | done |
+| AC-002 | `test_prompt_manifest_rejects_unversioned_hashless_or_unauthorized_AC_002` | done |
+| AC-003 | `test_context_manifest_blocks_access_stale_and_future_known_context_AC_003` | done |
+| AC-004 | `test_assumption_ledger_requires_owner_evidence_review_and_dependents_AC_004` | done |
+| AC-005 | `test_evaluation_harness_covers_every_required_layer_AC_005` | done |
+| AC-006 | `test_audit_events_reject_malformed_relationships_and_unreasoned_overrides_AC_006` | done |
+| AC-007 | `test_replay_command_reproduces_deterministic_fixture_AC_007` | done |
+| AC-008 | `test_replay_uses_llm_fixture_or_reports_non_reproducible_call_AC_008` | done |
+| AC-009 | `test_orchestration_gates_are_discoverable_through_run_stage_AC_009` | done |
+| AC-010 | `test_foundation_references_existing_surfaces_without_owning_them_AC_010` | done |
+| AC-011 | `test_examples_include_deterministic_and_fixture_backed_envelopes_AC_011` | done |
+| AC-012 | Repository gate evidence: `spec`, `docs-link`, `spec-index`, `doc-counts`, `handoff-sync`, `secret-scan`, targeted tests, and full pytest if applicable | done |
 
-## Draft Notes
+## Implementation Notes
 
-This task list starts implementation work but does not claim completion. The
-current change creates the Draft spec package and roadmap/index entries only.
+- Runtime package: `src/quantsmith/orchestration/`.
+- CLI: `python -m quantsmith.orchestration` and `quantsmith-orchestration`.
+- Gate: `hooks/stages/run-stage.sh orchestration`.
+- Examples: `examples/orchestration/deterministic_quant_run/` and
+  `examples/orchestration/fixture_backed_llm_run/`.
 
-## Follow-ups
+## Validation Evidence
 
-- Decide package location before implementation: `src/quantsmith/pipelines/` for
-  consistency or `src/quantsmith/orchestration/` for a cleaner cross-cutting
-  boundary.
-- Decide whether gate coverage should be one composite gate or separate
-  prompt/context/assumption/evaluation/audit/replay gates.
-- Decide the minimum envelope profile for exploratory, non-release-bound work.
+- `PYTHONPATH=src python3 -m quantsmith.orchestration validate --discover examples/orchestration` -> validated 2 orchestration envelopes.
+- `PYTHONPATH=src python3 -m quantsmith.orchestration replay --envelope examples/orchestration/deterministic_quant_run/run_envelope.json --json` -> status `replayed`, no findings, no non-reproducible dependencies.
+- `PYTHONPATH=src python3 -m quantsmith.orchestration replay --fixture-mode --envelope examples/orchestration/fixture_backed_llm_run/run_envelope.json --json` -> status `replayed`, fixture substitution recorded for `evt-llm-003`.
+- `PYTHONPATH=src pytest -q tests/test_orchestration_foundation.py` -> 12 passed.
+- `QF_STAGE_ENFORCE=1 hooks/stages/run-stage.sh orchestration` -> no findings.
+- `PYTHONPATH=src pytest -q` -> 521 passed, 1 skipped, 4 sandbox-only localhost bind errors; rerun outside sandbox completed 525 passed, 1 skipped.
+- `QF_STAGE_ENFORCE=1 hooks/stages/run-stage.sh spec orchestration docs-link agent-catalog spec-index readme-sync doc-counts handoff-sync ownership persistent-knowledge source-catalog secret-scan` -> no findings.
+- `git diff --check` -> no whitespace findings.
+- `python3 -m py_compile src/quantsmith/orchestration/foundation.py src/quantsmith/orchestration/replay_cli.py src/quantsmith/orchestration/__init__.py src/quantsmith/orchestration/__main__.py` -> no syntax findings.

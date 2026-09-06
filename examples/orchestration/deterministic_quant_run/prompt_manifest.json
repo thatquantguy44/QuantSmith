@@ -1,0 +1,63 @@
+{
+  "schema_version": "quantsmith.orchestration.prompt.v1",
+  "prompt_id": "prompt.short_term_markets.golden_case",
+  "version": "1.0.0",
+  "source": {
+    "type": "prompt_source",
+    "path": "prompt.md",
+    "hash": "sha256:fd3f60441095dd285f16269d3dda7e598bef67608a1451ea58c452565ab86134"
+  },
+  "role_layers": [
+    {
+      "role": "system",
+      "source_path": "prompt.md",
+      "hash": "sha256:fd3f60441095dd285f16269d3dda7e598bef67608a1451ea58c452565ab86134"
+    }
+  ],
+  "variables": [
+    {
+      "name": "as_of_date",
+      "required": true
+    },
+    {
+      "name": "case_id",
+      "required": true
+    }
+  ],
+  "rendered_variables": {
+    "as_of_date": "2026-09-06",
+    "case_id": "golden.repo.specialness_sign"
+  },
+  "model_constraints": {
+    "providers": ["deterministic"],
+    "models": ["quantsmith.short_term_markets_knowledge"],
+    "temperature_max": 0.0,
+    "seed_required": false
+  },
+  "allowed_tools": [
+    {
+      "name": "quantsmith.pipelines.short_term_markets_knowledge.run_golden_cases",
+      "type": "python",
+      "fixtureable": true
+    }
+  ],
+  "allowed_plugins": [],
+  "requested_tools": [
+    {
+      "name": "quantsmith.pipelines.short_term_markets_knowledge.run_golden_cases"
+    }
+  ],
+  "requested_plugins": [],
+  "prohibited_data_classes": ["secret", "credential", "mnpi", "licensed_body"],
+  "safety_policy_refs": [
+    "instructions/point_in_time.md",
+    "instructions/reproducibility.md"
+  ],
+  "evaluation_refs": ["evaluation_harness.json#prompt"],
+  "owner": "spec0070",
+  "review": {
+    "status": "approved",
+    "reviewer": "codex",
+    "reviewed_at": "2026-09-06"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "run_id": "orch-llm-fixture-market-text",
+  "source_id": "synthetic_public_market_note",
+  "status": "pass",
+  "text_signal": {
+    "theme": "policy_stability",
+    "sentiment": "neutral",
+    "confidence": "medium",
+    "fixture_backed": true
+  }
+}

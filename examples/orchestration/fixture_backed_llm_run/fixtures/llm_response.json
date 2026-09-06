@@ -1,0 +1,10 @@
+{
+  "provider": "fixture",
+  "model": "frontier-llm-placeholder",
+  "response_id": "fixture-llm-0070-001",
+  "content": {
+    "theme": "policy_stability",
+    "sentiment": "neutral",
+    "confidence": "medium"
+  }
+}

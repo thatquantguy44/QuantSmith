@@ -18,12 +18,13 @@ specs/
 
 ## Index
 
-Specs `0001`, `0006`-`0013`, `0015`, `0016`, `0018`-`0021`, `0028`, `0034`-`0036`, `0038`, `0039`, `0041`, `0042`, `0044`-`0049`, `0055`-`0059`, `0061`, and `0063` have dependency-free reference runtimes or validators under
-`src/quantsmith/pipelines/` (catalogued in
+Specs `0001`, `0006`-`0013`, `0015`, `0016`, `0018`-`0021`, `0028`, `0034`-`0036`, `0038`, `0039`, `0041`, `0042`, `0044`-`0049`, `0055`-`0059`, `0061`, `0063`, and `0070` have dependency-free reference runtimes or validators under
+`src/quantsmith/pipelines/`, `src/quantsmith/orchestration/`, or adapter
+packages (pipeline runtimes are catalogued in
 [`../src/quantsmith/pipelines/README.md`](../src/quantsmith/pipelines/README.md)),
 each with a matching test module under `tests/`.
 
-| ID | Feature | Runtime (`src/quantsmith/pipelines/`) | Tests (`tests/`) | Status |
+| ID | Feature | Runtime / package | Tests (`tests/`) | Status |
 | --- | --- | --- | --- | --- |
 | [0001-daily-momentum-signal](0001-daily-momentum-signal/) | Daily cross-sectional momentum signal | `momentum_signal.py` | `test_momentum_signal.py` | Approved (reference) |
 | [0002-workflow-memory](0002-workflow-memory/) | Persistent workflow memory scaffold | `memory/` scaffold | `memory` gate | Approved |
@@ -42,7 +43,7 @@ each with a matching test module under `tests/`.
 | [0061-quant-model-factory](0061-quant-model-factory/) | Quant Model Factory — multi-agent parallel model-development lanes with `best_of_n`, `all_required`, and `first_to_pass` convergence modes; each lane is scored by a shared `ConvergenceGate` (Sharpe, drawdown, return); an append-only JSONL `FactoryLedger` records every run for full auditability; caller-injected lane executor keeps the runtime import-cycle-free | `quant_factory.py` | `test_quant_factory.py` | Approved |
 | [0052-mcp-adapter-contract](0052-mcp-adapter-contract/) | MCP adapter contract + knowledge resources server — stdlib-only JSON-RPC 2.0 adapter contract for all three knowledge-domain MCP servers (resources/0052, memory-graph/0053, RAG/0054); implements the `resources` primitive for `knowledge_sources.yml` entries with `caller_clearance` enforcement, credential scan, path-traversal protection, and the `knowledge://` URI scheme unblocking 0053/0054/0056 T-003 | `adapters/mcp_servers/` *(not `pipelines/`)* | `test_mcp_servers.py` | Draft |
 | [0053-memory-graph-mcp-server](0053-memory-graph-mcp-server/) | Memory-graph MCP server — wires the `knowledge://memory/<scope>/<record_id>` authority to the 0048 workflow-memory runtime; `caller_clearance` enforced; existence masking for restricted/missing records; no I/O in the adapter | `adapters/mcp_servers/memory_resources.py` | `test_mcp_servers.py` | Draft |
-| [0070-prompt-context-harness-foundation](0070-prompt-context-harness-foundation/) | Prompt / Context / Harness Engineering Foundation — typed orchestration run envelope plus prompt manifest, context manifest, assumption ledger, evaluation harness, audit event schema, reproducible replay command, and gate coverage for agentic quant runs | — (draft foundation; runtime/gates not yet implemented) | — (planned) | Draft |
+| [0070-prompt-context-harness-foundation](0070-prompt-context-harness-foundation/) | Prompt / Context / Harness Engineering Foundation — typed orchestration run envelope plus prompt manifest, context manifest, assumption ledger, evaluation harness, audit event schema, reproducible replay command, and gate coverage for agentic quant runs | `orchestration/` package, `quantsmith-orchestration` CLI, `orchestration` gate | `test_orchestration_foundation.py` | Draft (foundation implemented) |
 | [0071-nlp-llm-quant-text-intelligence-foundation](0071-nlp-llm-quant-text-intelligence-foundation/) | NLP, LLM, and Quant Text Intelligence Foundation — governed corpus and transformation lineage, pluggable frontier/local model capabilities, embeddings and access-tier index snapshots, structured text tasks, leakage-aware evaluation, auditable text-derived signals, and reproducible replay through `0070` | — (draft foundation; runtime/gates not yet implemented) | — (planned) | Draft |
 | [0046-walk-forward](0046-walk-forward/) | Walk-forward backtest harness — composes `0006`'s purged/embargoed `make_folds` with `0044`'s engine, refitting per fold and evaluating on held-out periods; reports the fold distribution (dispersion, positive fraction) rather than one in-sample number | `walk_forward.py` | `test_walk_forward.py` | Approved |
 | [0045-fred-point-in-time](0045-fred-point-in-time/) | FRED point-in-time panel adapter — reads `gold_fred_point_in_time` from the FRED bronze-to-gold pipeline's local SQLite output and answers vintage-correct questions via `realtime_start`/`realtime_end`, so a revision published later can never leak backwards into an earlier as-of date | `fred_point_in_time.py` | `test_fred_point_in_time.py` | Approved |
