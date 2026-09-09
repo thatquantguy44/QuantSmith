@@ -4,7 +4,7 @@
 
 The SDK has a working v1: a **spec-driven engineering framework** over the six
 software-development stages, **168 agents** in `agents/`,
-**35 quality gates**, **35 instruction standards**, and CI that
+**35 quality gates**, **36 instruction standards**, and CI that
 enforces the deterministic gates. It remains primarily a scaffold to be copied
 into quant repos, with `src/quantsmith/pipelines/`, `src/quantsmith/orchestration/`,
 and `src/quantsmith/text_intelligence/` holding runnable, dependency-light
@@ -57,7 +57,7 @@ as the live count, not the number here)** — all on the four-file contract
   `doc-counts`, `quantsmith-version`, `agent-attribution`, `handoff-sync`, `upstream-drift`, `ownership`, `persistent-knowledge`, `knowledge`, `memory`, `access`, `role-context`,
   `model-plugin`, `source-catalog`.
 
-**Instructions (35)** — constitution, SDD method, point-in-time, and the domain
+**Instructions (36)** — constitution, SDD method, point-in-time, and the domain
 standards; see `README.md`'s "Public Instructions" table for the current list
 (this file lists categories, not every filename, to avoid drifting again).
 
@@ -108,10 +108,11 @@ advisory-by-default deployment decision. The chain builds on
 > **This is the SDK's first deliberate expansion beyond the investment side of
 > a financial institution, and it is the largest open strategic question on this
 > roadmap.** Credit is where most bank model inventory, most regulatory
-> scrutiny, and most current AI-deployment demand actually sit, and the SDK has
-> no canonical contract for any of it. Spec `0072` is written and indexed as a
-> **Draft spec chain only** — no credit artifact, validator, test, or agent
-> exists yet, and every task except the two roadmap tasks is honestly `todo`.
+> scrutiny, and most current AI-deployment demand actually sit, and the SDK had
+> no canonical contract for any of it. Spec `0072` is a **Draft whose knowledge
+> pack and validator are built**: 107 records, a standard-library validator, and
+> 49 acceptance tests — but every record is `draft`, no credit agent exists, and
+> no measurement runtime exists.
 >
 > It follows `0063`'s foundation-first shape (knowledge pack + agent-group
 > charter + reserved bounded children `0073`–`0079`) and adds the two things
@@ -125,9 +126,10 @@ advisory-by-default deployment decision. The chain builds on
 >
 > **The owner's decision, not the agent's:** where `0072` ranks against the five
 > priorities below. It is deliberately listed apart from them rather than
-> inserted into their order. It is also the one item here that is blocked on a
-> person rather than on work — no record can reach `reviewed` without a named
-> credit-domain reviewer (see item 24 and the spec's open questions).
+> inserted into their order. It is also the one item here now blocked on a
+> person rather than on work — the pack is built, and no record can reach
+> `reviewed` without a named credit-domain reviewer (see item 24 and the spec's
+> open questions).
 
 **Highest priority, in order: (1) the short-term-markets domain foundation,
 (2) the knowledge base, (3) scheduler monitoring, (4) prompt/context/harness
@@ -1108,8 +1110,8 @@ manual-task persistence question stays deferred until a real consumer needs it.
     runtime) remains the next candidate in this domain — highest-severity
     gap-register item not blocked by an open decision.
 
-24. **Credit risk domain foundation — Draft spec chain only, nothing
-    implemented** (spec `0072`). The SDK's first deliberate expansion beyond the
+24. **Credit risk domain foundation — knowledge pack and validator built,
+    Draft awaiting approval and a named reviewer** (spec `0072`). The SDK's first deliberate expansion beyond the
     investment side of a financial institution, broadening it from quant
     research into the credit half of a bank. `0072` follows `0063`'s
     foundation-first shape rather than inventing a second pattern: a canonical
@@ -1142,26 +1144,44 @@ manual-task persistence question stays deferred until a real consumer needs it.
     coverage matrix is likewise a computed predicate over SR 11-7 artifacts, not
     a flag an author can set.
 
-    **State, stated honestly:** `spec.md`, `plan.md`, and `tasks.md` exist and
-    are indexed. `T-001` (spec chain) and `T-002` (indexing and reservations)
-    are done. Everything else — the JSON pack, the validator, the tests, the
-    agent charter, `instructions/credit_risk.md` — is `todo`, and `T-016`
-    (two-part human review) is `blocked`. No credit code, agent, or fixture
-    exists on this branch, and no existing runtime was touched.
+    **State, stated honestly:** the knowledge pack is built and validated.
+    `knowledge/credit_risk/` holds 107 records — 53 concepts, 13 conventions,
+    3 lifecycle graphs (32 states, 45 transitions), 7 decision paths, 7
+    governance artifacts, 6 workflows, 8 capabilities, and 10 golden cases —
+    behind a standard-library validator
+    (`src/quantsmith/pipelines/credit_risk_knowledge.py`) and a 49-test
+    acceptance module. Five public sources are registered locator-only, and
+    `instructions/credit_risk.md` is the shared operating standard.
+    15 of 17 tasks are `done`.
 
-    **Next pickup, in order:** (a) review and approve the Draft spec chain,
-    paying most attention to REQ-002's term distinctions, REQ-014's decision
-    contract, and REQ-016's evidence boundary; (b) name a credit-domain reviewer
-    — a credit risk officer, model validator, or CECL/IFRS 9 owner — because no
+    **What is NOT built, and should not be assumed:** no credit agent exists —
+    `T-011` is `todo` by design, and a test currently asserts that
+    `agents/credit_risk/` does not exist, because the charter gates creation on
+    a coverage-matrix row. No measurement, scoring, ECL, capital, or monitoring
+    runtime exists; all 8 capabilities sit honestly at `contract_only`, and the
+    validator rejects a `reference_runtime` claim with no runtime module behind
+    it. **All 107 records are `draft`** and a test asserts that count so it
+    cannot drift quietly: `T-016` is `blocked` on a named credit-domain
+    reviewer. No existing runtime's numerical output changed; the full suite
+    moved from 547 to 596 passing with nothing else altered.
+
+    **Next pickup, in order:** (a) review and approve the Draft spec chain and
+    the built pack, paying most attention to REQ-002's term distinctions,
+    REQ-014's decision contract, and REQ-016's evidence boundary — these are
+    where a reviewer's judgement is worth most, and where the structural tests
+    can only prove shape, not correctness; (b) name a credit-domain reviewer —
+    a credit risk officer, model validator, or CECL/IFRS 9 owner — because no
     record can reach `reviewed` without one and structural review by the
-    repository owner is not a substitute; (c) decide which pillar has the first
-    real consumer, which selects the first child to activate (`0077` is the
-    current expectation, since `0070` and `0071` are already built; `0073` if a
-    portfolio consumer appears first); (d) build the knowledge pack and
-    validator (`T-003`–`T-010`) before any agent is created. Do not create
-    `agents/credit_risk/` agents ahead of the coverage matrix that justifies
-    them, and do not commit real credit data — the pack is synthetic-fixtures-
-    only by NFR-006, permanently.
+    repository owner is not a substitute; this is the only thing blocking the
+    whole pack from moving past `draft`; (c) decide which pillar has the first
+    real consumer, which selects the first child to activate (`0077` remains
+    the expectation, since `0070` and `0071` are already built and the
+    admission boundary is now written and tested; `0073` if a portfolio
+    consumer appears first); (d) only then create `agents/credit_risk/` agents,
+    each against the coverage row that justifies it. Do not create agents ahead
+    of that matrix, do not let a capability's coverage level rise without a
+    named runtime and test, and do not commit real credit data — the pack is
+    synthetic-fixtures-only by NFR-006, permanently.
 
 
 ## Open Questions For The Owner

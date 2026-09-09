@@ -5,9 +5,10 @@
 - **Author:** Joshua Lutkemuller, CFA
 - **Last updated:** 2026-09-09
 
-> This is the proposed HOW for review alongside the Draft spec. Implementation
-> does not begin until the spec is approved. Nothing in this plan changes an
-> existing runtime.
+> The HOW for review alongside the Draft spec. The knowledge pack, validator,
+> and acceptance tests described below are built; the agent charter and the
+> human review are not (see `tasks.md` for per-task status). Nothing in this
+> plan changes an existing runtime.
 
 ## Approach
 
@@ -67,6 +68,7 @@ knowledge/credit_risk/
   lifecycles.json           credit state, approval/limit, model lifecycle
   decision_paths.json       consumer-decision contracts + fairness obligations
   governance.json           SR 11-7 artifact requirements + deployability rule
+  workflows.json            six end-to-end workflows, agents, runtime boundary
   coverage.json             capability -> artifact -> owner -> status map
   golden_cases.json         deterministic cases and identities
   gap_register.md           evidence, severity, disposition, owning spec
@@ -96,6 +98,7 @@ knowledge/credit_risk/
 | `lifecycles.json` | Three transition graphs — credit state, approval/limit, and SR 11-7 model lifecycle — each transition naming its initiating role and produced artifact. |
 | `decision_paths.json` | Per-workflow consumer-decision classification and the REQ-014 obligations; the validator refuses a consumer-facing path that cannot derive reason codes. |
 | `governance.json` | The credit model card extension and the deployability predicate; a model entry is deployable only when every required governance artifact resolves. |
+| `workflows.json` | The six end-to-end workflows: stages, participating agents, required inputs, produced artifacts, gates, human decision points, and each capability's runtime boundary. |
 | `coverage.json` | Capability surface mapped to current agents, instructions, runtimes, sources, tests, limitations, and future owning specs, at five coverage levels. |
 | `golden_cases.json` | Small deterministic cases pinning EL, EAD/CCF, 12-month vs lifetime ECL with EIR discounting, IRB risk weight, points-to-odds and cutoff, adverse action ranking, migration-matrix row stochasticity, and a rejected outcome-window violation. |
 | `gap_register.md` | Observed mismatches with evidence paths, severity, affected consumers, disposition, and owning spec; identification is never recorded as correction. |
@@ -217,7 +220,7 @@ against and why.
 | REQ-009 | `coverage.json` levels + `gap_register.md` | T-008 |
 | REQ-010 | `golden_cases.json` and validator arithmetic | T-010 |
 | REQ-011 | `agents/credit_risk/` charter with gated creation | T-011 |
-| REQ-012 | Six named end-to-end workflow contracts | T-012 |
+| REQ-012 | `workflows.json` — six named end-to-end workflow contracts | T-012 |
 | REQ-013 | Runtime boundary classification (in-SDK / `0026` plugin / knowledge-only) | T-012, T-013 |
 | REQ-014 | `decision_paths.json` consumer-decision obligations | T-007 |
 | REQ-015 | `governance.json` model card extension + deployability predicate | T-013 |

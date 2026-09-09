@@ -1,0 +1,238 @@
+{
+  "schema_version": "0072.1",
+  "scope": {
+    "jurisdiction": "US",
+    "status": "draft_structural_contract"
+  },
+  "obligations": {
+    "when": "consumer_decision is true",
+    "required": [
+      "reason_codes.derivable is true",
+      "reason_codes.excludes_protected_attributes is true",
+      "policy_version_field is set",
+      "cutoff_field is set",
+      "override_log_ref is set",
+      "protected_attributes_in_features is empty",
+      "disparate_impact_hook is set"
+    ],
+    "otherwise": "the record is only valid as consumer_decision true with sole_basis_adverse_action_permitted false, or as a non-consumer path; a consumer path with an unmet obligation and sole basis permitted is rejected by the validator",
+    "rationale": "0072 REQ-014 and P4: the unsafe configuration is unrepresentable rather than discouraged. Guidance is skipped under delivery pressure; a validation failure is not."
+  },
+  "protected_attribute_registry": {
+    "note": "Named so a feature set can be checked against them mechanically. Listing an attribute here does NOT authorize collecting it; where an institution lawfully holds it, it is used for segregated fairness testing only, never as a model feature.",
+    "attribute_ids": [
+      "attr.race",
+      "attr.color",
+      "attr.religion",
+      "attr.national_origin",
+      "attr.sex",
+      "attr.marital_status",
+      "attr.age",
+      "attr.receipt_of_public_assistance",
+      "attr.exercise_of_ccpa_rights"
+    ],
+    "source_refs": [
+      "cfpb"
+    ]
+  },
+  "decision_paths": [
+    {
+      "id": "path.retail_underwriting_decision",
+      "record_type": "decision_path",
+      "name": "Retail underwriting decision",
+      "jurisdiction": "US",
+      "knowledge_class": "regulatory_supervisory_rule",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "cfpb"
+      ],
+      "review_status": "draft",
+      "review": null,
+      "supersedes": [],
+      "workflow_id": "workflow.retail_underwriting_decision",
+      "consumer_decision": true,
+      "reason_codes": {
+        "derivable": true,
+        "convention_id": "convention.adverse_action.reason_ranking",
+        "policy_ref": "policy.adverse_action.retail_v1",
+        "max_reasons_param": "param.adverse_action.max_reasons",
+        "excludes_protected_attributes": true
+      },
+      "policy_version_field": "decision_policy_version",
+      "cutoff_field": "decision_cutoff",
+      "override_log_ref": "artifact.override_log.retail_underwriting",
+      "protected_attributes_in_features": [],
+      "disparate_impact_hook": "hook.disparate_impact.retail_underwriting",
+      "sole_basis_adverse_action_permitted": true,
+      "rationale": "A decline here is an adverse action against an identifiable consumer. Every obligation in 0072 REQ-014 must hold before this path may be the sole basis for that action."
+    },
+    {
+      "id": "path.retail_account_management",
+      "record_type": "decision_path",
+      "name": "Retail behavioural account management",
+      "jurisdiction": "US",
+      "knowledge_class": "regulatory_supervisory_rule",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "cfpb"
+      ],
+      "review_status": "draft",
+      "review": null,
+      "supersedes": [],
+      "workflow_id": "workflow.retail_account_management",
+      "consumer_decision": true,
+      "reason_codes": {
+        "derivable": true,
+        "convention_id": "convention.adverse_action.reason_ranking",
+        "policy_ref": "policy.adverse_action.account_management_v1",
+        "max_reasons_param": "param.adverse_action.max_reasons",
+        "excludes_protected_attributes": true
+      },
+      "policy_version_field": "decision_policy_version",
+      "cutoff_field": "decision_cutoff",
+      "override_log_ref": "artifact.override_log.account_management",
+      "protected_attributes_in_features": [],
+      "disparate_impact_hook": "hook.disparate_impact.account_management",
+      "sole_basis_adverse_action_permitted": true,
+      "rationale": "A limit reduction or account closure on credit grounds is also an adverse action; the obligations do not attach only at origination."
+    },
+    {
+      "id": "path.credit_document_intelligence",
+      "record_type": "decision_path",
+      "name": "Credit document intelligence",
+      "jurisdiction": "US",
+      "knowledge_class": "regulatory_supervisory_rule",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "cfpb",
+        "occ"
+      ],
+      "review_status": "draft",
+      "review": null,
+      "supersedes": [],
+      "workflow_id": "workflow.credit_document_intelligence",
+      "consumer_decision": false,
+      "reason_codes": null,
+      "policy_version_field": null,
+      "cutoff_field": null,
+      "override_log_ref": null,
+      "protected_attributes_in_features": [],
+      "disparate_impact_hook": null,
+      "sole_basis_adverse_action_permitted": false,
+      "rationale": "Extracted covenants, spread financials, and early-warning signals are derived evidence under 0072 REQ-016. This path cannot derive principal reasons from a scored model, so it is decision_support_only and is prohibited from being the sole basis of an adverse action. A human credit decision may cite it; the path may not make one."
+    },
+    {
+      "id": "path.wholesale_obligor_review",
+      "record_type": "decision_path",
+      "name": "Wholesale obligor review and rating",
+      "jurisdiction": "US",
+      "knowledge_class": "regulatory_supervisory_rule",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel",
+        "occ"
+      ],
+      "review_status": "draft",
+      "review": null,
+      "supersedes": [],
+      "workflow_id": "workflow.wholesale_obligor_review",
+      "consumer_decision": false,
+      "reason_codes": null,
+      "policy_version_field": "rating_policy_version",
+      "cutoff_field": null,
+      "override_log_ref": "artifact.override_log.rating",
+      "protected_attributes_in_features": [],
+      "disparate_impact_hook": null,
+      "sole_basis_adverse_action_permitted": false,
+      "rationale": "The subject is a legal entity, not a consumer, so ECOA adverse action obligations do not attach. Rating overrides are still logged: the requirement is credit-administration discipline, not only fair lending."
+    },
+    {
+      "id": "path.counterparty_limit_review",
+      "record_type": "decision_path",
+      "name": "Counterparty limit and concentration review",
+      "jurisdiction": "US",
+      "knowledge_class": "regulatory_supervisory_rule",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel",
+        "occ"
+      ],
+      "review_status": "draft",
+      "review": null,
+      "supersedes": [],
+      "workflow_id": "workflow.counterparty_limit_review",
+      "consumer_decision": false,
+      "reason_codes": null,
+      "policy_version_field": "limit_policy_version",
+      "cutoff_field": null,
+      "override_log_ref": "artifact.override_log.limit_exception",
+      "protected_attributes_in_features": [],
+      "disparate_impact_hook": null,
+      "sole_basis_adverse_action_permitted": false,
+      "rationale": "Institutional counterparties; no consumer decision. Limit exceptions are logged with approver and expiry per the approval lifecycle."
+    },
+    {
+      "id": "path.ecl_measurement",
+      "record_type": "decision_path",
+      "name": "Expected credit loss measurement",
+      "jurisdiction": "US",
+      "knowledge_class": "regulatory_supervisory_rule",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "ifrs_foundation",
+        "fasb"
+      ],
+      "review_status": "draft",
+      "review": null,
+      "supersedes": [],
+      "workflow_id": "workflow.ecl_measurement",
+      "consumer_decision": false,
+      "reason_codes": null,
+      "policy_version_field": "ecl_policy_version",
+      "cutoff_field": null,
+      "override_log_ref": "artifact.override_log.ecl_management_adjustment",
+      "protected_attributes_in_features": [],
+      "disparate_impact_hook": null,
+      "sole_basis_adverse_action_permitted": false,
+      "rationale": "A measurement, not a decision about a person. Management adjustments and overlays are overrides and are logged as such."
+    },
+    {
+      "id": "path.stress_capital_planning",
+      "record_type": "decision_path",
+      "name": "Supervisory stress and capital planning",
+      "jurisdiction": "US",
+      "knowledge_class": "regulatory_supervisory_rule",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "federal_reserve"
+      ],
+      "review_status": "draft",
+      "review": null,
+      "supersedes": [],
+      "workflow_id": "workflow.stress_capital_planning",
+      "consumer_decision": false,
+      "reason_codes": null,
+      "policy_version_field": "scenario_policy_version",
+      "cutoff_field": null,
+      "override_log_ref": "artifact.override_log.stress_overlay",
+      "protected_attributes_in_features": [],
+      "disparate_impact_hook": null,
+      "sole_basis_adverse_action_permitted": false,
+      "rationale": "Scenario-conditioned projection. Scenario vintage is the control that matters here, not adverse action."
+    }
+  ]
+}
