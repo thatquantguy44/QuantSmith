@@ -103,15 +103,16 @@ advisory-by-default deployment decision. The chain builds on
 
 ## What's Next (prioritized)
 
-> ### New direction — Credit Risk Domain Foundation (spec `0072`, Draft)
+> ### New direction — Credit Risk Domain Foundation (spec `0072`, Approved)
 >
 > **This is the SDK's first deliberate expansion beyond the investment side of
 > a financial institution, and it is the largest open strategic question on this
 > roadmap.** Credit is where most bank model inventory, most regulatory
 > scrutiny, and most current AI-deployment demand actually sit, and the SDK had
-> no canonical contract for any of it. Spec `0072` is a **Draft whose knowledge
-> pack and validator are built**: 107 records, a standard-library validator, and
-> 49 acceptance tests — but every record is `draft`, no credit agent exists, and
+> no canonical contract for any of it. Spec `0072` is **Approved, with its
+> knowledge pack and validator built**: 109 records, a standard-library
+> validator, and 60 acceptance tests — but every individual record is still
+> `draft` pending a named credit-domain reviewer, no credit agent exists, and
 > no measurement runtime exists.
 >
 > It follows `0063`'s foundation-first shape (knowledge pack + agent-group
@@ -139,7 +140,7 @@ engineering, (5) NLP/LLM quant text intelligence.** Everything else in this
 section is real, tracked work, but these five are what should get attention first
 if only one thing can move at a time:
 
-1. **Short-term-markets domain foundation (item 21, spec `0063`, Draft).**
+1. **Short-term-markets domain foundation (item 21, spec `0063`, Approved).**
    Build the shared expert contract before adding more agents or isolated
    models: U.S.-first product taxonomy, explicit economic viewpoints and sign
    conventions, rate/price/collateral conventions, lifecycle state models,
@@ -168,7 +169,7 @@ if only one thing can move at a time:
    thresholds—plus a future persisted manual-task format only if a concrete
    consumer needs it. Do not add network or credential ownership to the SDK to
    make a demonstration look deployed.
-4. **Prompt / Context / Harness Engineering Foundation (spec `0070`, implemented Draft).**
+4. **Prompt / Context / Harness Engineering Foundation (spec `0070`, Approved, foundation implemented).**
    The typed run envelope, prompt/context manifests, assumption ledger,
    evaluation harness, audit schema, replay engine/CLI, composite gate, two
    examples, and Quant Model Factory producer are built. Spec `0071` now proves
@@ -177,7 +178,7 @@ if only one thing can move at a time:
    approve the Draft contract, then require new agentic producers to emit a
    `0070` envelope rather than adding another orchestration ledger. Do not
    activate `0064`–`0069` through this cross-cutting work.
-5. **NLP, LLM, and Quant Text Intelligence Foundation (spec `0071`, implemented Draft).**
+5. **NLP, LLM, and Quant Text Intelligence Foundation (spec `0071`, Approved, foundation implemented).**
    The standard-library `text_intelligence` package, CLI, templates, source
    fixture, synthetic disclosure, composite gate, 16-AC test module, and two
    committed examples are built. They cover immutable corpora/source spans,
@@ -222,15 +223,19 @@ nobody noticed.
 Specs `0063-short-term-markets-domain-foundation/`,
 `0066-securities-lending-model-correction/`,
 `0067-collateral-margin-optimizer-contract/`,
-`0070-prompt-context-harness-foundation/`, and
-`0071-nlp-llm-quant-text-intelligence-foundation/` are written, implemented,
-and active (`0072-credit-risk-domain-foundation/` is written as a Draft spec
-chain but **not** implemented — see item 24) — `0066` and `0067` **Approved** (`0066`: five `0063` gap-register
-discrepancies corrected in place, reviewed by Joshua Lutkemuller, CFA,
-2026-09-09; `0067`: contract-only, same reviewer/date, the
-reference-optimizer-versus-plugin-boundary question resolved plugin-only),
-the other three still Drafts awaiting contract approval — so they are
-indexed rather than listed as unwritten reservations above.
+`0070-prompt-context-harness-foundation/`,
+`0071-nlp-llm-quant-text-intelligence-foundation/`, and
+`0072-credit-risk-domain-foundation/` are written, implemented, and **all
+Approved**, reviewed by Joshua Lutkemuller, CFA, 2026-09-09 (`0066`: five
+`0063` gap-register discrepancies corrected in place; `0067`: contract-only,
+the reference-optimizer-versus-plugin-boundary question resolved
+plugin-only; `0063`, `0070`, `0071` approved as foundations with their
+implemented state noted in `specs/README.md`'s Status column; `0072`
+approved as a foundation whose knowledge pack and validator are built but
+whose 109 records remain individually `draft` pending a named
+credit-domain reviewer per its own `0072` REQ-019 — approving the spec
+chain is not the same act as promoting its records, see item 24) — so they
+are indexed here rather than listed as unwritten reservations above.
 Specs `0064`–`0065`, `0068`–`0069` (short-term markets) and `0073`–`0079`
 (credit risk) are **portfolio commitments, not active designs**: create and
 approve one only when the foundation it consumes — `0063` or `0072` — has frozen
@@ -1023,8 +1028,9 @@ manual-task persistence question stays deferred until a real consumer needs it.
     tests and fuzz harnesses only — hands off to `testing_validation` and
     `quality-guard-agent` rather than making either's call itself.
 
-21. **Short-term markets expert library — foundation active Draft, implemented as Draft,
-    runtime work staged** (spec `0063`, future specs `0064`–`0069`). The current
+21. **Short-term markets expert library — foundation Approved and implemented,
+    runtime work staged** (spec `0063`, future specs `0064`–`0069`). Reviewed and
+    approved by Joshua Lutkemuller, CFA, 2026-09-09. The current
     securities-finance surface is useful but uneven: `0023` and `0028` provide
     narrow runtimes, while repo and collateral remain contract-only, cash-product
     pricing is absent, official market-plumbing sources are metadata-only
@@ -1035,7 +1041,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
     The initiative balances market understanding with model development in this
     order:
 
-    1. **Foundation — active Draft, implemented Draft (`0063`).** Establish the canonical U.S.-first
+    1. **Foundation — Approved and implemented (`0063`).** Establish the canonical U.S.-first
        domain pack: taxonomy and aliases; lender/borrower, cash/security, and
        long/short viewpoints; quotation and cashflow signs; day-count, rate,
        price, haircut, margin, calendar, and settlement conventions; repo,
@@ -1112,8 +1118,13 @@ manual-task persistence question stays deferred until a real consumer needs it.
     runtime) remains the next candidate in this domain — highest-severity
     gap-register item not blocked by an open decision.
 
-24. **Credit risk domain foundation — knowledge pack and validator built,
-    Draft awaiting approval and a named reviewer** (spec `0072`). The SDK's first deliberate expansion beyond the
+24. **Credit risk domain foundation — Approved, knowledge pack and validator
+    built, individual records still awaiting a named reviewer** (spec `0072`).
+    Reviewed and approved by Joshua Lutkemuller, CFA, 2026-09-09 — approving
+    the spec chain and approving the pack's 109 individual records are
+    different acts (`0072` REQ-019 requires a *named credit-domain*
+    reviewer for the latter, distinct from spec approval); see below. The
+    SDK's first deliberate expansion beyond the
     investment side of a financial institution, broadening it from quant
     research into the credit half of a bank. `0072` follows `0063`'s
     foundation-first shape rather than inventing a second pattern: a canonical
@@ -1173,23 +1184,20 @@ manual-task persistence question stays deferred until a real consumer needs it.
     reviewer. No existing runtime's numerical output changed; the full suite
     moved from 547 to 607 passing with nothing else altered.
 
-    **Next pickup, in order:** (a) review and approve the Draft spec chain and
-    the built pack, paying most attention to REQ-002's term distinctions,
-    REQ-014's decision contract, and REQ-016's evidence boundary — these are
-    where a reviewer's judgement is worth most, and where the structural tests
-    can only prove shape, not correctness; (b) name a credit-domain reviewer —
-    a credit risk officer, model validator, or CECL/IFRS 9 owner — because no
-    record can reach `reviewed` without one and structural review by the
-    repository owner is not a substitute; this is the only thing blocking the
-    whole pack from moving past `draft`; (c) decide which pillar has the first
-    real consumer, which selects the first child to activate (`0077` remains
-    the expectation, since `0070` and `0071` are already built and the
-    admission boundary is now written and tested; `0073` if a portfolio
-    consumer appears first); (d) only then create `agents/credit_risk/` agents,
-    each against the coverage row that justifies it. Do not create agents ahead
-    of that matrix, do not let a capability's coverage level rise without a
-    named runtime and test, and do not commit real credit data — the pack is
-    synthetic-fixtures-only by NFR-006, permanently.
+    **Next pickup, in order:** (a) name a credit-domain reviewer — a credit
+    risk officer, model validator, or CECL/IFRS 9 owner — because no individual
+    record can reach `reviewed` without one and repository-owner approval of
+    the spec chain is not a substitute; this is now the only thing blocking the
+    pack's 109 records from moving past `draft`, since the spec chain itself is
+    Approved; (b) decide which pillar has the first real consumer, which
+    selects the first child to activate (`0077` remains the expectation, since
+    `0070` and `0071` are already built and the admission boundary is now
+    written and tested; `0073` if a portfolio consumer appears first); (c) only
+    then create `agents/credit_risk/` agents, each against the coverage row
+    that justifies it. Do not create agents ahead of that matrix, do not let a
+    capability's coverage level rise without a named runtime and test, and do
+    not commit real credit data — the pack is synthetic-fixtures-only by
+    NFR-006, permanently.
 
 
 ## Open Questions For The Owner

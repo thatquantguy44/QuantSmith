@@ -554,7 +554,7 @@ Researcher, Quant Model Build, Securities Financing, Data Analyst, Data Engineer
 Production Pipeline, Optimization, Portfolio Management, Machine Learning, Deep
 Learning, Analytics Pipeline, workflow-memory, and knowledge workflows as ordered
 agent + gate chains, all on the Spec-Driven Development backbone. The newest
-cross-cutting chain is `0070` orchestration evidence feeding implemented-Draft `0071` text
+cross-cutting chain is `0070` orchestration evidence feeding Approved, implemented `0071` text
 intelligence, so LLM/plugin/local-model outputs can be governed like any other
 quant artifact.
 

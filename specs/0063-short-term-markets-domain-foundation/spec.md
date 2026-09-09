@@ -1,10 +1,10 @@
 # Spec: Short-Term Markets Domain Foundation
 
 - **ID:** 0063-short-term-markets-domain-foundation
-- **Status:** Draft
+- **Status:** Approved
 - **Author:** Codex
-- **Approver:**
-- **Last updated:** 2026-09-05
+- **Approver:** Joshua Lutkemuller, CFA
+- **Last updated:** 2026-09-09
 
 ## Problem & Context
 

@@ -1,9 +1,9 @@
 # Spec: NLP, LLM, and Quant Text Intelligence Foundation
 
 - **ID:** 0071-nlp-llm-quant-text-intelligence-foundation
-- **Status:** Draft (foundation implemented)
+- **Status:** Approved (foundation implemented)
 - **Author:** Codex
-- **Approver:**
+- **Approver:** Joshua Lutkemuller, CFA
 - **Last updated:** 2026-09-09
 
 ## Problem & Context
