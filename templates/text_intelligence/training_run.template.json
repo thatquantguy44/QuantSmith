@@ -1,0 +1,18 @@
+{
+  "schema_version": "quantsmith.text_intelligence.training.v1",
+  "training_run_id": "training-<id>",
+  "base_model_capability_id": "<capability-id>",
+  "corpus_snapshot_id": "corpus-<id>-v1",
+  "labels": {"ontology": "<version>", "count": 0},
+  "split_policy": {"group_before_split": true, "temporal": true},
+  "label_provenance": "<source and review>",
+  "objective": "<bounded training objective>",
+  "seeds": [7],
+  "environment": {"network": "disabled", "dependencies": []},
+  "hardware": {"type": "<approved target>"},
+  "checkpoint_refs": [{"path": "<checkpoint>", "hash": "sha256:<64-hex>"}],
+  "metrics": {},
+  "contamination_checks": {"status": "<status>", "findings": []},
+  "model_card_ref": {"path": "<model-card>", "hash": "sha256:<64-hex>"},
+  "fixture_only": true
+}

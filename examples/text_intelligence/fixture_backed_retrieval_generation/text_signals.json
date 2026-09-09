@@ -1,0 +1,68 @@
+{
+  "schema_version": "quantsmith.text_intelligence.signals.v1",
+  "signal_set_id": "signals-text-fixture-funding-001",
+  "signals": [
+    {
+      "aggregation_rule": "mean supported task confidence; one fixture observation",
+      "availability_lag_seconds": 60,
+      "calibration": {
+        "method": "fixture_declared",
+        "production_calibrated": false
+      },
+      "confidence": 0.8,
+      "contributing_span_ids": [
+        "span-doc-funding-001-001",
+        "span-doc-collateral-001-001"
+      ],
+      "decision_time": "2026-09-07T13:00:12Z",
+      "downstream_backtest_refs": [
+        "backtest://fixture/text-fixture-funding-001"
+      ],
+      "downstream_dataset_refs": [
+        "dataset://fixture/text-fixture-funding-001"
+      ],
+      "entity_instrument_mapping": [
+        {
+          "entity_id": "issuer-beta",
+          "instrument_id": "fixture-instrument",
+          "mapping_as_of": "2026-09-07T13:00:12Z"
+        }
+      ],
+      "horizon": "5_business_days",
+      "missingness_policy": "abstain; never impute absent text as neutral",
+      "model_capability_ids": [
+        "cap-text-fixture-funding-001-embedding",
+        "cap-text-fixture-funding-001-hosted",
+        "cap-text-fixture-funding-001-rerank"
+      ],
+      "observation_time": "2026-09-07T13:00:11Z",
+      "publication_state": "fixture_only",
+      "review": {
+        "escalation_conditions": [
+          "any production, client, trading, or restricted-data use"
+        ],
+        "overrides": [],
+        "owner": "spec0071",
+        "rejected_alternatives": [
+          "represent fixture output as production evidence"
+        ],
+        "reviewed_at": "2026-09-07T13:00:11Z",
+        "reviewer": "text-intelligence-fixture",
+        "status": "fixture_approved",
+        "uncertainty": "Synthetic fixture demonstrates contracts only; no investment conclusion is approved."
+      },
+      "revision_policy": "append new signal version; never rewrite a historical decision",
+      "signal_id": "signal-text-fixture-funding-001-funding-outlook",
+      "task_result_ids": [
+        "result-text-fixture-funding-001-retrieval",
+        "result-text-fixture-funding-001-rerank",
+        "result-text-fixture-funding-001-summary",
+        "result-text-fixture-funding-001-synthesis"
+      ],
+      "universe": [
+        "issuer-beta"
+      ],
+      "value": 1.0
+    }
+  ]
+}

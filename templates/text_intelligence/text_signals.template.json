@@ -1,0 +1,5 @@
+{
+  "schema_version": "quantsmith.text_intelligence.signals.v1",
+  "signal_set_id": "signals-<run-id>",
+  "signals": [{"signal_id": "<id>", "observation_time": "YYYY-MM-DDTHH:MM:SSZ", "decision_time": "YYYY-MM-DDTHH:MM:SSZ", "availability_lag_seconds": 0, "universe": ["<entity>"], "entity_instrument_mapping": [{"entity_id": "<entity>", "instrument_id": "<instrument>", "mapping_as_of": "YYYY-MM-DDTHH:MM:SSZ"}], "horizon": "<horizon>", "aggregation_rule": "<rule>", "missingness_policy": "abstain", "task_result_ids": ["<result-id>"], "model_capability_ids": ["<capability-id>"], "contributing_span_ids": ["<span-id>"], "confidence": 0.0, "calibration": {"method": "<method>", "production_calibrated": false}, "revision_policy": "append-only", "downstream_dataset_refs": [], "downstream_backtest_refs": [], "review": {"status": "pending", "owner": "<owner>", "reviewer": "<reviewer>", "timestamp": "YYYY-MM-DDTHH:MM:SSZ", "uncertainty": "<limits>", "override": null, "rejected_alternatives": [], "escalation": "<conditions>"}, "publication_state": "not_published", "value": null}]
+}

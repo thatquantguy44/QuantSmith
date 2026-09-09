@@ -1,0 +1,9 @@
+{
+  "content_retained_outside_model_context": true,
+  "document_id": "doc-injection-001",
+  "flags": [
+    "ignore-instructions",
+    "undeclared-tool-request"
+  ],
+  "status": "quarantined"
+}

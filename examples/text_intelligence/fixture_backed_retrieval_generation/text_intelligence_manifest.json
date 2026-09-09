@@ -1,0 +1,84 @@
+{
+  "audit_correlation_id": "evt-text-fixture-funding-001-corpus",
+  "corpus_snapshot": {
+    "hash": "sha256:8c6b0a764dca491beafb009b7f405ed2182a34d9ae1cd2675889244a7eb55d20",
+    "path": "corpus_snapshot.json",
+    "type": "corpus_snapshot"
+  },
+  "decision_time": "2026-09-07T13:00:12Z",
+  "downstream_consumers": [
+    "agents/knowledge/knowledge_retrieval",
+    "agents/research_analyst",
+    "agents/economists",
+    "agents/portfolio_management",
+    "agents/risk",
+    "agents/trading_strategies"
+  ],
+  "embedding_artifact": {
+    "hash": "sha256:3ad5a604fd49aac89b90d5b1834678d3f0f4e48e63832d349aab0b10efbcd4c0",
+    "path": "embedding_artifact.json",
+    "type": "embedding_artifact"
+  },
+  "evaluation_suite": {
+    "hash": "sha256:538eead991bf462b74f09dd5002d38c74b692d661e52de2dd922c3a1bf3a4dc9",
+    "path": "text_evaluation.json",
+    "type": "evaluation_suite"
+  },
+  "index_snapshot": {
+    "hash": "sha256:beb9720d5a25ed9befecb3c74a10f37ff66d2e3a8fd57f5e224ef59d70824e56",
+    "path": "index_snapshot.json",
+    "type": "index_snapshot"
+  },
+  "manifest_id": "text-manifest-text-fixture-funding-001",
+  "model_capabilities": {
+    "hash": "sha256:3a7bf4200208b3285e5762daf4063d5c876ae44a719d941875e5b129f3659efe",
+    "path": "model_capabilities.json",
+    "type": "model_capabilities"
+  },
+  "orchestration": {
+    "path": "run_envelope.json",
+    "run_id": "text-fixture-funding-001",
+    "schema_version": "quantsmith.orchestration.run.v1"
+  },
+  "purpose": "Validate governed, point-in-time quant text intelligence with source-span lineage.",
+  "replay_class": "fixture_backed",
+  "review": {
+    "escalation_conditions": [
+      "any production, client, trading, or restricted-data use"
+    ],
+    "overrides": [],
+    "owner": "spec0071",
+    "rejected_alternatives": [
+      "represent fixture output as production evidence"
+    ],
+    "reviewed_at": "2026-09-07T13:00:11Z",
+    "reviewer": "text-intelligence-fixture",
+    "status": "fixture_approved",
+    "uncertainty": "Synthetic fixture demonstrates contracts only; no investment conclusion is approved."
+  },
+  "run_id": "text-fixture-funding-001",
+  "schema_version": "quantsmith.text_intelligence.manifest.v1",
+  "signal_artifacts": [
+    {
+      "hash": "sha256:a66d88e031038908a28b264d5b977b8c252ee03faca242ef57db2305c05a6d9c",
+      "path": "text_signals.json",
+      "type": "text_signals"
+    }
+  ],
+  "task_results": {
+    "hash": "sha256:4b795442afeee026b593dc3cfb7a5d0f6abd6401f14094550bd9473b9bbf2e97",
+    "path": "task_results.json",
+    "type": "task_results"
+  },
+  "task_schema_version": "quantsmith.text_intelligence.task.v1",
+  "training_run": {
+    "hash": "sha256:38038e6735596b9b4920b21e1913e23dd1583f7661e4e35c089435becbd357d2",
+    "path": "training_run.json",
+    "type": "training_run"
+  },
+  "transform_chain": {
+    "hash": "sha256:76e781c58cf2416dfbd5078bcfa20668e86e71475bf5f36ae703592af622eb74",
+    "path": "transform_chain.json",
+    "type": "transform_chain"
+  }
+}

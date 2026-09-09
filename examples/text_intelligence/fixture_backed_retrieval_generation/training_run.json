@@ -1,0 +1,47 @@
+{
+  "base_model_capability_id": "cap-text-fixture-funding-001-training",
+  "checkpoint_refs": [
+    {
+      "hash": "sha256:847413e9eb1d2bd5661901f34c6ace246d575ff27d00f1f0f735c493139d3853",
+      "path": "fixtures/checkpoint.fixture"
+    }
+  ],
+  "contamination_checks": {
+    "fixture_only": true,
+    "status": "pass"
+  },
+  "corpus_snapshot_id": "corpus-text-fixture-funding-001-v1",
+  "environment": {
+    "dependencies": [
+      "stdlib"
+    ],
+    "network": "disabled"
+  },
+  "fixture_only": true,
+  "hardware": {
+    "reason": "fixture contract only",
+    "type": "none"
+  },
+  "label_provenance": "hand-authored synthetic fixture labels",
+  "labels": {
+    "count": 2,
+    "ontology": "fixture-funding-v1"
+  },
+  "metrics": {
+    "not_applicable": true
+  },
+  "model_card_ref": {
+    "hash": "sha256:d8af68977c1d7c8f7fef52e878a218078b1c5697fac69408592d981c97c999be",
+    "path": "fixtures/model_card.md"
+  },
+  "objective": "Validate training evidence fields; no training is performed.",
+  "schema_version": "quantsmith.text_intelligence.training.v1",
+  "seeds": [
+    7
+  ],
+  "split_policy": {
+    "group_before_split": true,
+    "temporal": true
+  },
+  "training_run_id": "training-text-fixture-funding-001-fixture"
+}

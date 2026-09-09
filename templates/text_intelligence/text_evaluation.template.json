@@ -1,0 +1,8 @@
+{
+  "schema_version": "quantsmith.text_intelligence.evaluation.v1",
+  "suite_id": "text-evaluation-<run-id>",
+  "manifest_id": "text-manifest-<run-id>",
+  "required_layers": ["corpus_integrity", "temporal_correctness", "duplicate_overlap", "benchmark_contamination", "task_quality", "retrieval_quality", "reranking_quality", "calibration", "citation_coverage", "faithfulness", "robustness", "prompt_injection", "unsafe_tool_use", "privacy_access", "latency_cost", "signal_stability"],
+  "checks": [{"check_id": "<id>", "layer": "<required-layer>", "status": "pass", "deterministic": true, "metrics": {}, "findings": [], "exception": null}],
+  "promotion_status": "review_required"
+}

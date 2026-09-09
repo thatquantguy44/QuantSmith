@@ -1,0 +1,57 @@
+{
+  "allowed_plugins": [],
+  "allowed_tools": [],
+  "evaluation_refs": [
+    "text_evaluation.json"
+  ],
+  "model_constraints": {
+    "providers": [
+      "deterministic"
+    ],
+    "source_delimiting_required": true,
+    "temperature_max": 0
+  },
+  "owner": "spec0071",
+  "prohibited_data_classes": [
+    "secret",
+    "credential",
+    "pii",
+    "mnpi",
+    "licensed_body"
+  ],
+  "prompt_id": "prompt-text-lexical-liquidity-001",
+  "rendered_variables": {
+    "manifest_id": "text-manifest-text-lexical-liquidity-001"
+  },
+  "requested_plugins": [],
+  "requested_tools": [],
+  "review": {
+    "reviewer": "text-intelligence-fixture",
+    "status": "fixture_approved"
+  },
+  "role_layers": [
+    {
+      "hash": "sha256:44d7d5ef0edb46b5bd422796f9b8f8b8d9930ff430749c32a8c922a18eac39c9",
+      "role": "system",
+      "source_path": "prompt.md"
+    }
+  ],
+  "safety_policy_refs": [
+    "instructions/point_in_time.md",
+    "instructions/data_provenance.md",
+    "specs/0071-nlp-llm-quant-text-intelligence-foundation/spec.md#req-017"
+  ],
+  "schema_version": "quantsmith.orchestration.prompt.v1",
+  "source": {
+    "hash": "sha256:44d7d5ef0edb46b5bd422796f9b8f8b8d9930ff430749c32a8c922a18eac39c9",
+    "path": "prompt.md",
+    "type": "prompt_source"
+  },
+  "variables": [
+    {
+      "name": "manifest_id",
+      "required": true
+    }
+  ],
+  "version": "1.0.0"
+}

@@ -1,0 +1,16 @@
+{
+  "schema_version": "quantsmith.text_intelligence.index.v1",
+  "index_snapshot_id": "index-<id>-public-v1",
+  "embedding_id": "embedding-<id>-v1",
+  "access_tier": "public",
+  "entitlements": [],
+  "algorithm": "<algorithm>",
+  "config": {},
+  "distance_metric": "cosine",
+  "vector_ids": ["<vector-id>"],
+  "vector_set_hash": "sha256:<64-hex>",
+  "build_version": "1.0.0",
+  "corpus_cutoff": "YYYY-MM-DDTHH:MM:SSZ",
+  "source_license_eligibility": ["<license>"],
+  "immutable": true
+}

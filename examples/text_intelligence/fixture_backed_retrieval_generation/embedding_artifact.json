@@ -1,0 +1,37 @@
+{
+  "corpus_snapshot_id": "corpus-text-fixture-funding-001-v1",
+  "created_at": "2026-09-07T13:00:07Z",
+  "dimension": 4,
+  "embedding_id": "embedding-text-fixture-funding-001-v1",
+  "model_capability_id": "cap-text-fixture-funding-001-embedding",
+  "normalization": "none",
+  "pooling": "sha256-fixture",
+  "preprocessing_hash": "sha256:66e10638d795df08c80d21e7dfbde9b0855b7215685ca34e32f4cc2c45a24bd7",
+  "quantization": "float32-fixture",
+  "schema_version": "quantsmith.text_intelligence.embeddings.v1",
+  "tokenizer": "unicode-whitespace-v1",
+  "vectors": [
+    {
+      "access_level": "public",
+      "span_id": "span-doc-funding-001-001",
+      "values": [
+        0.192157,
+        -0.145098,
+        0.035294,
+        -0.152941
+      ],
+      "vector_id": "vector-span-doc-funding-001-001"
+    },
+    {
+      "access_level": "public",
+      "span_id": "span-doc-collateral-001-001",
+      "values": [
+        -0.003922,
+        0.34902,
+        0.592157,
+        0.505882
+      ],
+      "vector_id": "vector-span-doc-collateral-001-001"
+    }
+  ]
+}

@@ -72,3 +72,7 @@ knowledge://<authority>/<path>
 
 - **0054** — RAG server: semantic search with citations, one index per access
   tier, no post-retrieval leakage. Uses the same adapter contract.
+- **0071** — Text-intelligence foundation: defines immutable embedding/index
+  metadata and selects an eligible access tier *before* retrieval. The current
+  implementation is fixture-only; live semantic retrieval remains owned by
+  `0054` and must return cited source-span IDs into `0071` task artifacts.
