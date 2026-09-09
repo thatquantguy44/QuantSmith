@@ -1,9 +1,9 @@
 # Spec: Credit Risk Domain Foundation
 
 - **ID:** 0072-credit-risk-domain-foundation
-- **Status:** Draft
+- **Status:** Approved
 - **Author:** Joshua Lutkemuller, CFA
-- **Approver:**
+- **Approver:** Joshua Lutkemuller, CFA
 - **Last updated:** 2026-09-09
 
 ## Problem & Context
