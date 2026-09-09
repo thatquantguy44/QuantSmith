@@ -1,10 +1,10 @@
 # Spec: NLP, LLM, and Quant Text Intelligence Foundation
 
 - **ID:** 0071-nlp-llm-quant-text-intelligence-foundation
-- **Status:** Draft
+- **Status:** Draft (foundation implemented)
 - **Author:** Codex
 - **Approver:**
-- **Last updated:** 2026-09-06
+- **Last updated:** 2026-09-09
 
 ## Problem & Context
 
@@ -188,7 +188,7 @@ private model artifacts must remain in adopter-controlled storage.
 | RISK-009 | Licensed research or PII is copied into fixtures, indexes, or audit events. | Compliance, privacy, or vendor breach. | Commit metadata and fictional fixtures only; inherit source entitlements; minimize audit payloads; run secret and access gates. |
 | RISK-010 | Rich embeddings or LLMs replace simpler text baselines without evidence. | Cost and complexity increase without durable signal value. | Require lexical/rules-based baselines and task-appropriate lift, calibration, robustness, and stability evidence. |
 
-## Assumptions & Open Questions
+## Assumptions & Resolved Foundation Decisions
 
 - Assumption: `0071` is a domain extension to `0070`; a text-intelligence run
   has one shared orchestration envelope, not a second run ledger.
@@ -198,26 +198,28 @@ private model artifacts must remain in adopter-controlled storage.
   manifests use JSON/JSONL for deterministic reference validation.
 - Assumption: a minimal lexical or rules-based baseline is required before an
   embedding model or LLM can claim task value.
-- Open question: which embedding model, tokenizer, dimension, and local runtime
-  should be the first supported reference profile?
-- Open question: which vector/index backend should implement `0054`, and which
-  immutable snapshot behavior can it guarantee?
-- Open question: which local model licenses, quantization formats, and hardware
-  targets are approved for inference or adaptation?
-- Open question: which model adaptation methods are in scope first: supervised
-  fine-tuning, parameter-efficient tuning, continued pretraining, or none?
-- Open question: which source-specific timestamp is authoritative for each text
-  class, especially amended filings, embargoed releases, news corrections, and
-  transcripts?
-- Open question: which licensed sources permit full-text embedding, transient
-  retrieval, metadata-only indexing, or no model use?
-- Open question: which canonical taxonomies should govern entities, events,
-  sentiment/stance, themes, instruments, and source reliability?
-- Open question: what review threshold separates exploratory text features from
-  production research evidence or a signal eligible for backtesting?
-- Open question: should the first executable slice live in a dedicated
-  `src/quantsmith/text_intelligence/` package or follow the existing pipelines
-  layout?
+- Decision: the executable foundation lives in the dedicated
+  `src/quantsmith/text_intelligence/` package and remains standard-library only.
+- Decision: the reference embedding is an explicitly non-semantic,
+  four-dimensional SHA-256 fixture with a whitespace-tokenizer declaration. It
+  validates lineage and index contracts and makes no production model claim.
+- Decision: no live vector/index backend is selected. `0054` remains the owner
+  of cited semantic retrieval and must preserve `0071`'s immutable,
+  pre-retrieval access-tier contract when activated.
+- Decision: hosted, pinned-local, fixture-backed, and unpinned-external model
+  capabilities are represented as provider-neutral profiles. No live model,
+  weights, license, hardware target, quantization, or adaptation method is
+  approved by this foundation.
+- Decision: the first source is `text_intelligence_fixture`, with immutable
+  synthetic timestamps and content hashes. Each real source class requires a
+  bounded consumer spec to approve availability, revision, retention, license,
+  and entitlement rules.
+- Decision: fixture ontologies use versioned funding/liquidity labels solely to
+  test schema behavior. Production entity, event, stance, theme, instrument,
+  and reliability taxonomies remain consumer-owned decisions.
+- Decision: every reference output is `fixture_only`, human-reviewed in its
+  evidence record, and prohibited from production, client, trading, or real
+  backtest use. Promotion thresholds belong to a bounded adopter spec.
 
 ## Exceptions
 

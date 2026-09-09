@@ -1,0 +1,6 @@
+{
+  "schema_version": "quantsmith.text_intelligence.transforms.v1",
+  "chain_id": "transforms-<run-id>-v1",
+  "corpus_snapshot_id": "corpus-<id>-v1",
+  "transforms": [{"transform_id": "<id>", "operation": "normalization", "implementation": "<qualified implementation>", "config_version": "1.0.0", "parameters": {}, "input_refs": [{"path": "<input>", "hash": "sha256:<64-hex>"}], "output_refs": [{"path": "<output>", "hash": "sha256:<64-hex>"}], "timestamp": "YYYY-MM-DDTHH:MM:SSZ", "deterministic": true, "lineage_order": 1, "security_scan": {"status": "pass", "flags": [], "quarantine_action": "none"}}]
+}

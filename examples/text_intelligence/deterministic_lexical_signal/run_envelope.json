@@ -1,0 +1,106 @@
+{
+  "actor": {
+    "clearance": "internal",
+    "id": "text-intelligence-fixture",
+    "type": "runtime"
+  },
+  "artifacts": [
+    {
+      "access_class": "public",
+      "hash": "sha256:7a052a74c136818764c235241814071214f5493b1774d83e32208152e91bf58e",
+      "path": "text_intelligence_manifest.json",
+      "producer_event_id": "evt-text-lexical-liquidity-001-published",
+      "type": "text_intelligence_manifest"
+    },
+    {
+      "access_class": "public",
+      "hash": "sha256:6b44ed70217400828895cee862f4a70e8bca297ed429deba45cb2bbef5b07aae",
+      "path": "task_results.json",
+      "producer_event_id": "evt-text-lexical-liquidity-001-published",
+      "type": "task_results"
+    },
+    {
+      "access_class": "public",
+      "hash": "sha256:22e29a6fa625798b9d58170ee1c501bcf4aa9e3fd47d81e79b5d48f90d5ace58",
+      "path": "text_signals.json",
+      "producer_event_id": "evt-text-lexical-liquidity-001-published",
+      "type": "text_signals"
+    }
+  ],
+  "assumption_ledger": {
+    "hash": "sha256:e1da7f9d180f6bc4ae3aa82e520d7b7dffd65b81a82a5a507bbd01437f3c546d",
+    "path": "assumptions.jsonl",
+    "type": "assumption_ledger"
+  },
+  "audit_events": {
+    "hash": "sha256:b3443851bf1cc6484efde5663bc3a426156c1a6d48661c4b0b8f7d78b2fd2fdd",
+    "path": "audit_events.jsonl",
+    "type": "audit_events"
+  },
+  "context_manifest": {
+    "hash": "sha256:dce9250ed12f283c0b8b97fffb129c84662b0d1fb106b4bcdc2975f9d55e7969",
+    "path": "context_manifest.json",
+    "type": "context_manifest"
+  },
+  "created_at": "2026-09-07T12:00:20Z",
+  "environment": {
+    "dependencies": [
+      "stdlib"
+    ],
+    "network": "disabled",
+    "producer": "quantsmith.text_intelligence"
+  },
+  "evaluation_harness": {
+    "hash": "sha256:aa15de751ac60478cbb3f3fdaf541966670384e819838bd127feee4619c78f25",
+    "path": "evaluation_harness.json",
+    "type": "evaluation_harness"
+  },
+  "gate_results": [
+    {
+      "checked_at": "2026-09-07T12:00:20Z",
+      "finding_count": 0,
+      "gate": "orchestration",
+      "status": "pass"
+    },
+    {
+      "checked_at": "2026-09-07T12:00:20Z",
+      "finding_count": 0,
+      "gate": "text-intelligence",
+      "status": "pass"
+    }
+  ],
+  "mode": "deterministic",
+  "objective": "Produce governed text intelligence with point-in-time lineage, evaluation, audit, and replay evidence.",
+  "prompt_manifest": {
+    "hash": "sha256:370166f580e9b8209148dee58e492d6da7ed76e38dd1875017c0f6f4edc4a70e",
+    "path": "prompt_manifest.json",
+    "type": "prompt_manifest"
+  },
+  "release_profile": "exploratory",
+  "replay": {
+    "command": "python -m quantsmith.text_intelligence replay --manifest text_intelligence_manifest.json",
+    "expected_outputs": [
+      {
+        "hash": "sha256:7a052a74c136818764c235241814071214f5493b1774d83e32208152e91bf58e",
+        "path": "text_intelligence_manifest.json",
+        "type": "text_intelligence_manifest"
+      },
+      {
+        "hash": "sha256:6b44ed70217400828895cee862f4a70e8bca297ed429deba45cb2bbef5b07aae",
+        "path": "task_results.json",
+        "type": "task_results"
+      },
+      {
+        "hash": "sha256:22e29a6fa625798b9d58170ee1c501bcf4aa9e3fd47d81e79b5d48f90d5ace58",
+        "path": "text_signals.json",
+        "type": "text_signals"
+      }
+    ],
+    "mode": "deterministic"
+  },
+  "repo_revision": "fixture",
+  "run_id": "text-lexical-liquidity-001",
+  "schema_version": "quantsmith.orchestration.run.v1",
+  "spec_id": "0071-nlp-llm-quant-text-intelligence-foundation",
+  "stage": "implementation"
+}

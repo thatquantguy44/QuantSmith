@@ -37,6 +37,7 @@ sources/
 | [`newsapi`](newsapi.yml) | NewsAPI.org (general news search/headlines) | api | internal | active | medium |
 | [`alpha_vantage_news`](alpha_vantage_news.yml) | Alpha Vantage NEWS_SENTIMENT (ticker-tagged news + sentiment) | api | internal | active | medium |
 | [`finnhub_news`](finnhub_news.yml) | Finnhub Company/Market News (ticker-scoped news) | api | internal | active | medium |
+| [`text_intelligence_fixture`](text_intelligence_fixture.yml) | QuantSmith Synthetic Text-Intelligence Fixtures | file_feed | public | active | high |
 
 `fred.yml` is a filled-in reference showing the schema in use — the same
 role `specs/0001-daily-momentum-signal/` plays for the spec format. Copy
@@ -53,6 +54,10 @@ before relying on it (see each entry's `quality.known_issues`).
 foundation (`specs/0063-short-term-markets-domain-foundation/`). They do
 not implement live ingestion; source-specific data contracts and retrieval
 snapshots belong to later concrete consumers.
+
+`text_intelligence_fixture` is the offline-only source for spec `0071`'s
+committed examples. Its fictional bodies exercise governance and replay
+contracts; they are explicitly not market or investment evidence.
 
 ## How This Connects
 

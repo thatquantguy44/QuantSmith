@@ -1,0 +1,193 @@
+{
+  "promotion_policy": {
+    "fixture_only": true,
+    "minimum_citation_coverage": 1.0,
+    "production_use": "prohibited",
+    "requires_review": true
+  },
+  "result_set_id": "results-text-fixture-funding-001",
+  "results": [
+    {
+      "calibration": {
+        "bucket": "0.75-1.00",
+        "method": "fixture_declared"
+      },
+      "confidence": 0.8,
+      "corpus_snapshot_id": "corpus-text-fixture-funding-001-v1",
+      "error_code": null,
+      "evidence_span_ids": [
+        "span-doc-funding-001-001",
+        "span-doc-collateral-001-001"
+      ],
+      "index_snapshot_id": "index-text-fixture-funding-001-public-v1",
+      "model_capability_id": "cap-text-fixture-funding-001-embedding",
+      "output": {
+        "query": "funding and collateral",
+        "ranked_spans": [
+          {
+            "citation": "text://span-doc-funding-001-001",
+            "rank": 1,
+            "score": 1.0,
+            "span_id": "span-doc-funding-001-001"
+          },
+          {
+            "citation": "text://span-doc-collateral-001-001",
+            "rank": 2,
+            "score": 0.5,
+            "span_id": "span-doc-collateral-001-001"
+          }
+        ]
+      },
+      "result_id": "result-text-fixture-funding-001-retrieval",
+      "review": {
+        "escalation_conditions": [
+          "any production, client, trading, or restricted-data use"
+        ],
+        "overrides": [],
+        "owner": "spec0071",
+        "rejected_alternatives": [
+          "represent fixture output as production evidence"
+        ],
+        "reviewed_at": "2026-09-07T13:00:11Z",
+        "reviewer": "text-intelligence-fixture",
+        "status": "fixture_approved",
+        "uncertainty": "Synthetic fixture demonstrates contracts only; no investment conclusion is approved."
+      },
+      "status": "supported",
+      "task_type": "semantic_retrieval",
+      "uncertainty": "Reference fixture; not production-calibrated."
+    },
+    {
+      "calibration": {
+        "bucket": "0.75-1.00",
+        "method": "fixture_declared"
+      },
+      "confidence": 0.8,
+      "corpus_snapshot_id": "corpus-text-fixture-funding-001-v1",
+      "error_code": null,
+      "evidence_span_ids": [
+        "span-doc-funding-001-001",
+        "span-doc-collateral-001-001"
+      ],
+      "index_snapshot_id": "index-text-fixture-funding-001-public-v1",
+      "model_capability_id": "cap-text-fixture-funding-001-rerank",
+      "output": {
+        "ranked_spans": [
+          {
+            "citation": "text://span-doc-funding-001-001",
+            "rank": 1,
+            "score": 1.0,
+            "span_id": "span-doc-funding-001-001"
+          },
+          {
+            "citation": "text://span-doc-collateral-001-001",
+            "rank": 2,
+            "score": 0.5,
+            "span_id": "span-doc-collateral-001-001"
+          }
+        ],
+        "tie_break": "span_id"
+      },
+      "result_id": "result-text-fixture-funding-001-rerank",
+      "review": {
+        "escalation_conditions": [
+          "any production, client, trading, or restricted-data use"
+        ],
+        "overrides": [],
+        "owner": "spec0071",
+        "rejected_alternatives": [
+          "represent fixture output as production evidence"
+        ],
+        "reviewed_at": "2026-09-07T13:00:11Z",
+        "reviewer": "text-intelligence-fixture",
+        "status": "fixture_approved",
+        "uncertainty": "Synthetic fixture demonstrates contracts only; no investment conclusion is approved."
+      },
+      "status": "supported",
+      "task_type": "reranking",
+      "uncertainty": "Reference fixture; not production-calibrated."
+    },
+    {
+      "calibration": {
+        "bucket": "0.75-1.00",
+        "method": "fixture_declared"
+      },
+      "confidence": 0.8,
+      "corpus_snapshot_id": "corpus-text-fixture-funding-001-v1",
+      "error_code": null,
+      "evidence_span_ids": [
+        "span-doc-funding-001-001",
+        "span-doc-collateral-001-001"
+      ],
+      "model_capability_id": "cap-text-fixture-funding-001-hosted",
+      "output": {
+        "claim_type": "model_synthesis",
+        "summary": "Issuer Beta describes stable funding access and more available collateral."
+      },
+      "result_id": "result-text-fixture-funding-001-summary",
+      "review": {
+        "escalation_conditions": [
+          "any production, client, trading, or restricted-data use"
+        ],
+        "overrides": [],
+        "owner": "spec0071",
+        "rejected_alternatives": [
+          "represent fixture output as production evidence"
+        ],
+        "reviewed_at": "2026-09-07T13:00:11Z",
+        "reviewer": "text-intelligence-fixture",
+        "status": "fixture_approved",
+        "uncertainty": "Synthetic fixture demonstrates contracts only; no investment conclusion is approved."
+      },
+      "status": "supported",
+      "task_type": "summarization",
+      "uncertainty": "Reference fixture; not production-calibrated."
+    },
+    {
+      "calibration": {
+        "bucket": "0.75-1.00",
+        "method": "fixture_declared"
+      },
+      "confidence": 0.8,
+      "corpus_snapshot_id": "corpus-text-fixture-funding-001-v1",
+      "error_code": null,
+      "evidence_span_ids": [
+        "span-doc-funding-001-001",
+        "span-doc-collateral-001-001"
+      ],
+      "model_capability_id": "cap-text-fixture-funding-001-hosted",
+      "output": {
+        "claims": [
+          {
+            "citation_span_ids": [
+              "span-doc-funding-001-001",
+              "span-doc-collateral-001-001"
+            ],
+            "claim_type": "model_synthesis",
+            "text": "Issuer Beta describes stable funding access and more available collateral."
+          }
+        ]
+      },
+      "result_id": "result-text-fixture-funding-001-synthesis",
+      "review": {
+        "escalation_conditions": [
+          "any production, client, trading, or restricted-data use"
+        ],
+        "overrides": [],
+        "owner": "spec0071",
+        "rejected_alternatives": [
+          "represent fixture output as production evidence"
+        ],
+        "reviewed_at": "2026-09-07T13:00:11Z",
+        "reviewer": "text-intelligence-fixture",
+        "status": "fixture_approved",
+        "uncertainty": "Synthetic fixture demonstrates contracts only; no investment conclusion is approved."
+      },
+      "status": "supported",
+      "task_type": "evidence_synthesis",
+      "uncertainty": "Reference fixture; not production-calibrated."
+    }
+  ],
+  "schema_version": "quantsmith.text_intelligence.results.v1",
+  "task_schema_version": "quantsmith.text_intelligence.task.v1"
+}
