@@ -1,0 +1,63 @@
+{
+  "schema_version": "0067-collateral-margin-optimizer-problem/v1",
+  "knowledge_pack_ref": "0063@{taxonomy/conventions/lifecycles version or commit used to frame this problem}",
+  "as_of": "{ISO-8601 decision timestamp}",
+  "correlation_id": "{string}",
+
+  "inventory": [
+    {
+      "asset_id": "{string}",
+      "issuer_id": "{string}",
+      "product_id": "{a 0063 product.* id, e.g. product.treasury_bill}",
+      "market_value": { "amount": 0.0, "currency": "{ISO 4217, e.g. USD}" },
+      "eligibility": {
+        "eligible": true,
+        "eligibility_rule_ref": "{adopter-owned local rule id}",
+        "reason_if_ineligible": null
+      },
+      "haircut": {
+        "convention_ref": "convention.collateral.haircut_ratio",
+        "haircut": 0.0
+      },
+      "concentration_group_ids": ["{issuer, sector, or asset-class bucket id}"],
+      "netting_set_id": "{string, optional}",
+      "liquidity_cost_bps": 0.0,
+      "custody_account_id": "{string, optional}"
+    }
+  ],
+
+  "obligations": [
+    {
+      "obligation_id": "{string}",
+      "counterparty_id": "{string}",
+      "netting_set_id": "{string, optional}",
+      "process_ref": "process.collateral_margin",
+      "exposure_amount": { "amount": 0.0, "currency": "{ISO 4217}" },
+      "margin_convention_ref": "convention.collateral.margin_amount",
+      "required_margin_amount": { "amount": 0.0, "currency": "{ISO 4217}" },
+      "call_deadline": "{ISO-8601 timestamp, per margin_call_terms}",
+      "lifecycle_state_ref": "lifecycle.collateral#collateral.margin_call_pending"
+    }
+  ],
+
+  "constraints": {
+    "concentration_limits": [
+      { "group_id": "{concentration_group_id}", "max_market_value": 0.0, "max_pct_of_pool": null }
+    ],
+    "counterparty_netting": [
+      { "netting_set_id": "{string}", "net_exposure_rule": "{adopter-declared, e.g. net_by_counterparty}" }
+    ],
+    "substitution_rules": [
+      {
+        "rule_id": "{string}",
+        "description": "{adopter-declared}",
+        "lifecycle_state_ref": "lifecycle.collateral#collateral.substitution_pending"
+      }
+    ]
+  },
+
+  "objective": {
+    "primary": "{adopter-declared, e.g. minimize_liquidity_cost | maximize_hqla_retained | minimize_number_of_moves}",
+    "weights": {}
+  }
+}

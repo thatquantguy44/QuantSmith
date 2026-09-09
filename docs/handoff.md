@@ -180,22 +180,25 @@ nobody noticed.
 | `0064` | **Repo economics and lifecycle runtime** — correct cash/security-side economics, GC/specials, term/open structures, margin, settlement, rolls, fails, and financing cashflows | approved and implemented `0063` taxonomy, convention, lifecycle, and golden-case contracts | item 21 |
 | `0065` | **Cash products and pricing conventions** — Treasury bills and short-dated coupons plus the approved institutional cash universe; price/yield conversions, accrual, settlement, cashflows, and comparative carry | approved and implemented `0063`; exact product universe frozen by its coverage matrix | item 21 |
 | `0066` | **Securities-lending model correction and expansion** — repair economic signs, point-in-time rate use, configurable classifications, accrual conventions, counterparty allocation, recalls, and lifecycle behavior in `0023`/`0028` | approved and implemented `0063`; discrepancy register accepted | item 21 |
-| `0067` | **Collateral, margin, and allocation optimization** — eligibility, haircuts, concentration, substitution, counterparty/netting sets, liquidity costs, and explainable allocation; decide reference optimizer versus plugin boundary explicitly | `0063`; repo/securities-lending interfaces from `0064`/`0066` where consumed | item 21 |
 | `0068` | **Short-term-markets source ingestion and data contracts** — register and ingest approved official benchmark, transaction, issuance, and market-structure sources with vintage/effective-time controls | `0063` source-authority and temporal contracts; may proceed in parallel with `0064`–`0067` after those contracts stabilize | item 21 |
 | `0069` | **Regulatory, legal, and market-structure knowledge pack** — jurisdiction- and effective-date-aware rules, clearing/reporting/settlement structure, master-agreement concepts, and freshness review; informational, not legal advice | `0063` evidence, jurisdiction, review-status, and freshness contracts | item 21 |
 
 Specs `0063-short-term-markets-domain-foundation/`,
+`0067-collateral-margin-optimizer-contract/`,
 `0070-prompt-context-harness-foundation/`, and
 `0071-nlp-llm-quant-text-intelligence-foundation/` are written, implemented,
-and active as Drafts awaiting contract approval, so they are indexed rather
-than listed as unwritten reservations above.
-Specs `0064`–`0069` are **portfolio commitments, not active designs**: create and
-approve one only when `0063` has frozen the contract it consumes and the prior
-dependency named above is satisfied. Do not add agents merely to fill the map;
-prefer a canonical knowledge artifact or tested runtime that an existing agent
-can use. **Next unreserved spec number: `0072`.** Reserving a number here does
-not create the directory; copy `templates/spec/` only when that slice becomes
-active.
+and active — `0067` **Approved** (contract-only, reviewed by Joshua
+Lutkemuller, CFA, 2026-09-09; the reference-optimizer-versus-plugin-boundary
+question is resolved: plugin-only), the other three still Drafts awaiting
+contract approval — so they are indexed rather than listed as unwritten
+reservations above.
+Specs `0064`–`0066`, `0068`–`0069` are **portfolio commitments, not active
+designs**: create and approve one only when `0063` has frozen the contract it
+consumes and the prior dependency named above is satisfied. Do not add agents
+merely to fill the map; prefer a canonical knowledge artifact or tested
+runtime that an existing agent can use. **Next unreserved spec number: `0072`.**
+Reserving a number here does not create the directory; copy `templates/spec/`
+only when that slice becomes active.
 
 
 **Scheduled workflow operations control plane and monitoring — built** (specs
@@ -1017,6 +1020,30 @@ manual-task persistence question stays deferred until a real consumer needs it.
     from financing economics into portfolio, backtest, risk, liquidity, and
     capacity decisions. Other jurisdictions and a full derivatives/credit
     library are later extensions, not silent claims of completeness.
+
+22. **Collateral & margin allocation optimizer contract — done, Approved**
+    (spec `0067`, `templates/optimization/collateral_margin_optimizer_contract.md`).
+    Reviewed by Joshua Lutkemuller, CFA, 2026-09-09, who resolved `0067`'s own
+    open boundary question directly: no reference collateral/margin optimizer
+    ships in this SDK; a real optimizer is being built externally and needs a
+    stable contract to fit against. Composes `0026`'s registration/invocation
+    envelope unchanged with a new domain-specific problem/solution payload
+    shape, grounding every field (haircut, margin amount, eligibility,
+    concentration, counterparty/netting, substitution) in `0063`'s canonical
+    taxonomy and convention IDs rather than inventing new vocabulary. Placed
+    in `templates/optimization/` rather than `adapters/model_plugin/`, since
+    that directory's own Design Rule holds registration/invocation shape only,
+    never domain objective/constraint content. `agents/optimization/
+    collateral_margin_optimization/` now names this contract and the `0026`
+    plugin path as how a real optimizer enters the SDK. This also resolved
+    two more of `0063`'s five original open Draft Decisions (see
+    `knowledge/short_term_markets/README.md`): the named reviewer is Joshua
+    Lutkemuller, CFA, and the licensed-materials policy is public citation
+    only. Two decisions remain open: `0065`'s first non-Treasury cash-product
+    consumer (candidate order recorded: commercial paper, then certificate of
+    deposit, then money market fund shares) and whether a future MCP server
+    exposes `0063` directly or via `0052`'s existing resource-discovery
+    pattern (recommendation on record: via `0052`).
 
 ## Open Questions For The Owner
 

@@ -61,20 +61,29 @@ Status values: `todo` | `in-progress` | `blocked` | `done`.
 
 ## Draft Decision Review
 
-Reviewed `spec.md` and `plan.md` before implementation. The Draft still leaves
-these decisions unresolved, and this implementation does not answer them by
-accident:
+Reviewed `spec.md` and `plan.md` before implementation. Status as of
+2026-09-09 (reviewer Joshua Lutkemuller, CFA, per
+`knowledge/short_term_markets/README.md`'s Draft Decisions):
 
-- Named practitioner reviewer for viewpoints, conventions, and lifecycles:
-  blocked by T-010; all initial records remain `draft`.
-- Licensed industry/master-agreement material policy: blocked by T-010/T-012;
-  this pack stores public locators and derived structure only.
-- `0067` optimizer boundary: unresolved; `0063` supplies inputs and golden cases
-  but does not choose reference optimizer, plugin-only boundary, or both.
-- First non-Treasury `0065` cash-product consumer: unresolved; admitted products
-  are listed as coverage items, not priced runtimes.
-- Direct MCP/resource-server exposure: unresolved; future exposure should choose
-  between direct pack access and the existing `0052` resource discovery pattern.
+- Named practitioner/data-quant reviewer: **resolved** — Joshua Lutkemuller,
+  CFA. This names the reviewer and unblocks the review process; it is not
+  itself a per-record `reviewed` promotion for all 65 draft records, which
+  still requires individual scope/date/evidence per `README.md`'s Review
+  Status rules. T-010 therefore remains `blocked` for full per-record
+  promotion, with the reviewer now named.
+- Licensed industry/master-agreement material policy: **resolved** — public
+  citation only (name/link/date to a public source), never verbatim licensed
+  text. This pack continues to store public locators and derived structure
+  only.
+- `0067` optimizer boundary: **resolved** — contract-only, no reference
+  optimizer; a real, externally-built optimizer registers through `0026`
+  using the new `0067-collateral-margin-optimizer-contract` schema.
+- First non-Treasury `0065` cash-product consumer: still open. Candidate
+  order recorded for when `0065` is activated: commercial paper, certificate
+  of deposit, money market fund shares.
+- Direct MCP/resource-server exposure: still open. Recommendation on record:
+  route through the existing `0052` resource discovery pattern rather than a
+  new direct-access path.
 
 ## Validation Evidence
 
