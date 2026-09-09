@@ -103,6 +103,32 @@ advisory-by-default deployment decision. The chain builds on
 
 ## What's Next (prioritized)
 
+> ### New direction — Credit Risk Domain Foundation (spec `0072`, Draft)
+>
+> **This is the SDK's first deliberate expansion beyond the investment side of
+> a financial institution, and it is the largest open strategic question on this
+> roadmap.** Credit is where most bank model inventory, most regulatory
+> scrutiny, and most current AI-deployment demand actually sit, and the SDK has
+> no canonical contract for any of it. Spec `0072` is written and indexed as a
+> **Draft spec chain only** — no credit artifact, validator, test, or agent
+> exists yet, and every task except the two roadmap tasks is honestly `todo`.
+>
+> It follows `0063`'s foundation-first shape (knowledge pack + agent-group
+> charter + reserved bounded children `0073`–`0079`) and adds the two things
+> credit needs that a pure measurement contract does not: a **decision
+> contract** — reason codes, policy versioning, protected-attribute
+> segregation, and a disparate-impact hook are structurally required on any
+> consumer-facing path, with the unsafe configuration made unrepresentable
+> rather than merely discouraged — and an **LLM evidence admission boundary**,
+> so document-derived values enter through `0071` corpora inside a `0070`
+> envelope as labeled derived evidence, never as unattributed decision inputs.
+>
+> **The owner's decision, not the agent's:** where `0072` ranks against the five
+> priorities below. It is deliberately listed apart from them rather than
+> inserted into their order. It is also the one item here that is blocked on a
+> person rather than on work — no record can reach `reviewed` without a named
+> credit-domain reviewer (see item 24 and the spec's open questions).
+
 **Highest priority, in order: (1) the short-term-markets domain foundation,
 (2) the knowledge base, (3) scheduler monitoring, (4) prompt/context/harness
 engineering, (5) NLP/LLM quant text intelligence.** Everything else in this
@@ -181,23 +207,32 @@ nobody noticed.
 | `0065` | **Cash products and pricing conventions** — Treasury bills and short-dated coupons plus the approved institutional cash universe; price/yield conversions, accrual, settlement, cashflows, and comparative carry | approved and implemented `0063`; exact product universe frozen by its coverage matrix; first non-Treasury consumer order resolved: commercial paper, then certificate of deposit, then money market fund shares | item 21 |
 | `0068` | **Short-term-markets source ingestion and data contracts** — register and ingest approved official benchmark, transaction, issuance, and market-structure sources with vintage/effective-time controls | `0063` source-authority and temporal contracts; may proceed in parallel with `0064`–`0067` after those contracts stabilize | item 21 |
 | `0069` | **Regulatory, legal, and market-structure knowledge pack** — jurisdiction- and effective-date-aware rules, clearing/reporting/settlement structure, master-agreement concepts, and freshness review; informational, not legal advice | `0063` evidence, jurisdiction, review-status, and freshness contracts | item 21 |
+| `0073` | **Wholesale credit measurement runtime** — obligor and facility rating, PD/LGD/EAD measurement, drawn and undrawn exposure, limits and concentration | approved and implemented `0072` taxonomy, convention, lifecycle, and golden-case contracts | item 24 |
+| `0074` | **Retail underwriting and fair-lending runtime** — application and behavioral scorecards, cutoffs, adverse action reason codes, disparate-impact testing, reject inference | approved `0072`, and specifically its REQ-014 decision-path contract; the open question of whether any in-SDK reference scorecard ships at all must be resolved first | item 24 |
+| `0075` | **IFRS 9 / CECL expected credit loss engine** — staging, twelve-month versus lifetime measurement, effective-interest discounting, macro scenario overlays | approved `0072`; scenario vintage controls depend on `0078` for real sources | item 24 |
+| `0076` | **Regulatory capital and supervisory stress testing** — IRB risk weights, scenario expansion, capital planning inputs | approved `0072` plus `0075` for the ECL inputs it shares | item 24 |
+| `0077` | **Credit document intelligence** — credit memos, covenant extraction, financial spreading, early warning from filings and news | approved `0072` REQ-016 admission boundary, over built `0070` and `0071`; the likely first child to activate, since its dependencies already exist | item 24 |
+| `0078` | **Credit data sources and ingestion contracts** — register and ingest approved public regulatory, accounting, supervisory-scenario, and macro sources with vintage and effective-time controls | `0072` source-authority and temporal contracts; may proceed in parallel with `0073`–`0077` once those stabilize | item 24 |
+| `0079` | **Credit model risk management and monitoring runtime** — SR 11-7 model lifecycle, validation evidence, challenger comparison, drift and calibration monitoring, override logging | approved `0072` REQ-015 governance predicate; open question whether it should be credit-specific or generalized across the SDK's whole model inventory | item 24 |
 
 Specs `0063-short-term-markets-domain-foundation/`,
 `0066-securities-lending-model-correction/`,
 `0067-collateral-margin-optimizer-contract/`,
 `0070-prompt-context-harness-foundation/`, and
 `0071-nlp-llm-quant-text-intelligence-foundation/` are written, implemented,
-and active — `0066` and `0067` **Approved** (`0066`: five `0063` gap-register
+and active (`0072-credit-risk-domain-foundation/` is written as a Draft spec
+chain but **not** implemented — see item 24) — `0066` and `0067` **Approved** (`0066`: five `0063` gap-register
 discrepancies corrected in place, reviewed by Joshua Lutkemuller, CFA,
 2026-09-09; `0067`: contract-only, same reviewer/date, the
 reference-optimizer-versus-plugin-boundary question resolved plugin-only),
 the other three still Drafts awaiting contract approval — so they are
 indexed rather than listed as unwritten reservations above.
-Specs `0064`–`0065`, `0068`–`0069` are **portfolio commitments, not active
-designs**: create and approve one only when `0063` has frozen the contract it
-consumes and the prior dependency named above is satisfied. Do not add agents
-merely to fill the map; prefer a canonical knowledge artifact or tested
-runtime that an existing agent can use. **Next unreserved spec number: `0072`.**
+Specs `0064`–`0065`, `0068`–`0069` (short-term markets) and `0073`–`0079`
+(credit risk) are **portfolio commitments, not active designs**: create and
+approve one only when the foundation it consumes — `0063` or `0072` — has frozen
+that contract and the prior dependency named above is satisfied. Do not add
+agents merely to fill the map; prefer a canonical knowledge artifact or tested
+runtime that an existing agent can use. **Next unreserved spec number: `0080`.**
 Reserving a number here does not create the directory; copy `templates/spec/`
 only when that slice becomes active.
 
@@ -1072,6 +1107,62 @@ manual-task persistence question stays deferred until a real consumer needs it.
     updated for every corrected row. `0064` (repo economics/lifecycle
     runtime) remains the next candidate in this domain — highest-severity
     gap-register item not blocked by an open decision.
+
+24. **Credit risk domain foundation — Draft spec chain only, nothing
+    implemented** (spec `0072`). The SDK's first deliberate expansion beyond the
+    investment side of a financial institution, broadening it from quant
+    research into the credit half of a bank. `0072` follows `0063`'s
+    foundation-first shape rather than inventing a second pattern: a canonical
+    U.S.-first knowledge pack (`knowledge/credit_risk/`), an agent-group charter
+    whose agents are *gated* on a coverage-matrix row showing a distinct
+    workflow, six named end-to-end workflows, an explicit runtime boundary
+    between in-SDK reference runtimes and adopter models registered through
+    `0026`, and seven bounded children `0073`–`0079`.
+
+    It spans four pillars whose vocabularies collide: wholesale/counterparty
+    credit, retail underwriting, IFRS 9 / CECL and Basel IRB / stress testing,
+    and LLM-native credit document intelligence. The load-bearing problem is
+    that "PD", "LGD", "EAD", "exposure", and "default" each mean several
+    different things across those four and are not interchangeable in any
+    formula — so REQ-002's non-interchangeable sets and REQ-004's convention
+    registry (horizon, conditioning, default definition, collateral treatment,
+    discounting basis) are the spec's centre of gravity, not its paperwork.
+
+    Two things make it different from `0063`, and they are the parts worth
+    reviewing first. **A decision contract:** any workflow supporting a decision
+    about an identifiable consumer must derive principal reason codes, record
+    policy version, cutoff and overrides, keep protected attributes out of
+    features while permitting segregated fairness testing, and expose a
+    disparate-impact hook — and a path that cannot do those is only
+    representable as `decision_support_only`, prohibited from sole-basis adverse
+    action. **An LLM evidence boundary:** text-derived values arrive as `0071`
+    artifacts inside a `0070` envelope with resolvable source spans, an
+    assumption-ledger entry, and replay, labeled `derived_evidence`, and require
+    named human review before becoming a decision input. Deployability in the
+    coverage matrix is likewise a computed predicate over SR 11-7 artifacts, not
+    a flag an author can set.
+
+    **State, stated honestly:** `spec.md`, `plan.md`, and `tasks.md` exist and
+    are indexed. `T-001` (spec chain) and `T-002` (indexing and reservations)
+    are done. Everything else — the JSON pack, the validator, the tests, the
+    agent charter, `instructions/credit_risk.md` — is `todo`, and `T-016`
+    (two-part human review) is `blocked`. No credit code, agent, or fixture
+    exists on this branch, and no existing runtime was touched.
+
+    **Next pickup, in order:** (a) review and approve the Draft spec chain,
+    paying most attention to REQ-002's term distinctions, REQ-014's decision
+    contract, and REQ-016's evidence boundary; (b) name a credit-domain reviewer
+    — a credit risk officer, model validator, or CECL/IFRS 9 owner — because no
+    record can reach `reviewed` without one and structural review by the
+    repository owner is not a substitute; (c) decide which pillar has the first
+    real consumer, which selects the first child to activate (`0077` is the
+    current expectation, since `0070` and `0071` are already built; `0073` if a
+    portfolio consumer appears first); (d) build the knowledge pack and
+    validator (`T-003`–`T-010`) before any agent is created. Do not create
+    `agents/credit_risk/` agents ahead of the coverage matrix that justifies
+    them, and do not commit real credit data — the pack is synthetic-fixtures-
+    only by NFR-006, permanently.
+
 
 ## Open Questions For The Owner
 
