@@ -34,6 +34,11 @@ sources/
 | [`finra`](finra.yml) | FINRA Public Data and Rules | api | public | evaluating | medium |
 | [`dtcc_ficc`](dtcc_ficc.yml) | DTCC Fixed Income Clearing Corporation Public Materials | website | public | evaluating | medium |
 | [`sifma`](sifma.yml) | SIFMA Public Resources | website | public | evaluating | medium |
+| [`cfpb`](cfpb.yml) | CFPB Regulation B / ECOA materials | document | public | evaluating | high |
+| [`fasb`](fasb.yml) | FASB ASC Topic 326 (CECL) materials | document | public | evaluating | medium |
+| [`ifrs_foundation`](ifrs_foundation.yml) | IFRS Foundation — IFRS 9 Financial Instruments | document | public | evaluating | medium |
+| [`bis_basel`](bis_basel.yml) | BIS Consolidated Basel Framework | document | public | evaluating | high |
+| [`occ`](occ.yml) | OCC supervisory bulletins and handbooks | document | public | evaluating | medium |
 | [`newsapi`](newsapi.yml) | NewsAPI.org (general news search/headlines) | api | internal | active | medium |
 | [`alpha_vantage_news`](alpha_vantage_news.yml) | Alpha Vantage NEWS_SENTIMENT (ticker-tagged news + sentiment) | api | internal | active | medium |
 | [`finnhub_news`](finnhub_news.yml) | Finnhub Company/Market News (ticker-scoped news) | api | internal | active | medium |
@@ -54,6 +59,21 @@ before relying on it (see each entry's `quality.known_issues`).
 foundation (`specs/0063-short-term-markets-domain-foundation/`). They do
 not implement live ingestion; source-specific data contracts and retrieval
 snapshots belong to later concrete consumers.
+
+`cfpb`, `fasb`, `ifrs_foundation`, `bis_basel`, and `occ` are public
+metadata registrations for the credit risk foundation
+(`specs/0072-credit-risk-domain-foundation/`), alongside reuse of
+`federal_reserve` (model risk management guidance, supervisory stress
+scenarios) and `fred` (macro scenario drivers). They are locator-only: the
+credit pack stores concept definitions, effective intervals, and public
+links, never reproduced regulation, standard, or codification text — several
+of these bodies license their full text. As with the short-term-markets
+registrations, they do not implement live ingestion; that is spec `0078`.
+
+**None of these is a compliance determination.** They identify authoritative
+material so a derived rule can cite it with a jurisdiction and an effective
+interval. Whether a rule applies to a particular institution, product, or
+exposure is a decision for a qualified owner, not for this catalog.
 
 `text_intelligence_fixture` is the offline-only source for spec `0071`'s
 committed examples. Its fictional bodies exercise governance and replay

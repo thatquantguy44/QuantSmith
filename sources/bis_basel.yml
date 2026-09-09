@@ -1,0 +1,36 @@
+source_id: "bis_basel"
+name: "Bank for International Settlements — Basel Framework"
+type: document
+owner: "credit-risk"
+description: >
+  Public Bank for International Settlements consolidated Basel Framework,
+  registered by spec 0072 as the authority for internal-ratings-based credit
+  risk-weight concepts, regulatory parameter definitions, and the reference
+  default definition. Locator-only registration; national implementation
+  differs and is recorded separately per jurisdiction.
+
+domain: ["credit_risk", "regulatory_capital"]
+access_level: public
+
+quality:
+  completeness: high
+  timeliness: "the consolidated framework is versioned with effective dates per chapter"
+  known_issues:
+    - "the international framework is not the applicable rule for any institution; national implementation governs and can differ materially"
+    - "IRB regulatory PD/LGD/EAD definitions differ from accounting and internal-management definitions of the same names"
+    - "chapter effective dates differ; a framework-level date does not apply to every provision"
+  last_assessed: "2026-09-09"
+
+point_in_time:
+  supports_asof: true
+  revision_policy: "the consolidated framework exposes dated versions; a historical capital question must resolve the chapter version in force for that reporting date"
+
+connection:
+  method: manual_download
+  endpoint_or_host: "https://www.bis.org/baselframework/"
+  credential_ref: "not_required_public_access"
+
+documentation_uri: "https://www.bis.org/baselframework/"
+status: evaluating
+
+data_contract_refs: ["specs/0072-credit-risk-domain-foundation/"]

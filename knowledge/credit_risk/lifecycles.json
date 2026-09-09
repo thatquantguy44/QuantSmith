@@ -1,0 +1,766 @@
+{
+  "schema_version": "0072.1",
+  "scope": {
+    "jurisdiction": "US",
+    "effective_interval_policy": "effective_from inclusive, effective_to exclusive",
+    "status": "draft_structural_contract"
+  },
+  "lifecycles": [
+    {
+      "id": "lifecycle.credit_exposure",
+      "record_type": "lifecycle",
+      "name": "Credit exposure lifecycle",
+      "domain": "credit_exposure",
+      "initial_state_ids": [
+        "credit.applied"
+      ],
+      "terminal_state_ids": [
+        "credit.declined",
+        "credit.repaid",
+        "credit.written_off"
+      ],
+      "states": [
+        {
+          "id": "credit.applied",
+          "name": "Application received",
+          "invariants": [
+            "applicant identified",
+            "decision date recorded before any outcome is observable"
+          ]
+        },
+        {
+          "id": "credit.originated",
+          "name": "Originated / performing",
+          "invariants": [
+            "facility terms, limit, and rating assigned",
+            "no default trigger met"
+          ]
+        },
+        {
+          "id": "credit.watch",
+          "name": "Watch list",
+          "invariants": [
+            "internal deterioration signal raised",
+            "NOT a default: PD calibration must not treat this state as a default outcome"
+          ]
+        },
+        {
+          "id": "credit.significant_increase",
+          "name": "Significant increase in credit risk",
+          "invariants": [
+            "accounting staging trigger met",
+            "measurement basis moves from twelve-month to lifetime expected credit loss"
+          ]
+        },
+        {
+          "id": "credit.forborne",
+          "name": "Forbearance / modification granted",
+          "invariants": [
+            "contractual terms modified for credit reasons",
+            "modification is not automatically a cure and not automatically a default"
+          ]
+        },
+        {
+          "id": "credit.defaulted",
+          "name": "Defaulted",
+          "invariants": [
+            "a named default definition's trigger is met",
+            "which definition applied is recorded, since definitions are not interchangeable"
+          ]
+        },
+        {
+          "id": "credit.workout",
+          "name": "Workout / collection",
+          "invariants": [
+            "recovery actions underway",
+            "workout costs and timing accrue to LGD"
+          ]
+        },
+        {
+          "id": "credit.cured",
+          "name": "Cured",
+          "invariants": [
+            "default trigger no longer met and any probation period satisfied"
+          ]
+        },
+        {
+          "id": "credit.charged_off",
+          "name": "Charged off",
+          "invariants": [
+            "balance removed from carrying value",
+            "recoveries may still follow: charge-off is not the end of economic loss measurement"
+          ]
+        },
+        {
+          "id": "credit.written_off",
+          "name": "Written off",
+          "invariants": [
+            "no reasonable expectation of recovery",
+            "asset derecognized"
+          ]
+        },
+        {
+          "id": "credit.repaid",
+          "name": "Repaid / closed",
+          "invariants": [
+            "obligation discharged in full"
+          ]
+        },
+        {
+          "id": "credit.declined",
+          "name": "Application declined",
+          "invariants": [
+            "adverse action obligations attach where the applicant is a consumer"
+          ]
+        }
+      ],
+      "transitions": [
+        {
+          "id": "t.credit.decline",
+          "from": "credit.applied",
+          "to": "credit.declined",
+          "event": "underwriting_decision_negative",
+          "initiating_role_id": "role.lender",
+          "produces_artifact": "adverse_action_notice_with_principal_reasons",
+          "preconditions": [
+            "reason codes derivable from model inputs",
+            "decision policy version recorded"
+          ]
+        },
+        {
+          "id": "t.credit.originate",
+          "from": "credit.applied",
+          "to": "credit.originated",
+          "event": "underwriting_decision_positive",
+          "initiating_role_id": "role.lender",
+          "produces_artifact": "credit_agreement_and_initial_rating",
+          "preconditions": []
+        },
+        {
+          "id": "t.credit.watch",
+          "from": "credit.originated",
+          "to": "credit.watch",
+          "event": "deterioration_signal",
+          "initiating_role_id": "role.lender",
+          "produces_artifact": "watch_list_entry",
+          "preconditions": []
+        },
+        {
+          "id": "t.credit.sicr",
+          "from": "credit.originated",
+          "to": "credit.significant_increase",
+          "event": "staging_trigger_met",
+          "initiating_role_id": "role.lender",
+          "produces_artifact": "stage_transition_record",
+          "preconditions": []
+        },
+        {
+          "id": "t.credit.watch_sicr",
+          "from": "credit.watch",
+          "to": "credit.significant_increase",
+          "event": "staging_trigger_met",
+          "initiating_role_id": "role.lender",
+          "produces_artifact": "stage_transition_record",
+          "preconditions": []
+        },
+        {
+          "id": "t.credit.watch_recover",
+          "from": "credit.watch",
+          "to": "credit.originated",
+          "event": "deterioration_resolved",
+          "initiating_role_id": "role.lender",
+          "produces_artifact": "credit_review_memo",
+          "preconditions": []
+        },
+        {
+          "id": "t.credit.sicr_recover",
+          "from": "credit.significant_increase",
+          "to": "credit.originated",
+          "event": "staging_trigger_no_longer_met",
+          "initiating_role_id": "role.lender",
+          "produces_artifact": "stage_transition_record",
+          "preconditions": []
+        },
+        {
+          "id": "t.credit.forbear",
+          "from": "credit.significant_increase",
+          "to": "credit.forborne",
+          "event": "modification_granted",
+          "initiating_role_id": "role.lender",
+          "produces_artifact": "modification_agreement",
+          "preconditions": []
+        },
+        {
+          "id": "t.credit.forbear_from_watch",
+          "from": "credit.watch",
+          "to": "credit.forborne",
+          "event": "modification_granted",
+          "initiating_role_id": "role.lender",
+          "produces_artifact": "modification_agreement",
+          "preconditions": []
+        },
+        {
+          "id": "t.credit.default_from_sicr",
+          "from": "credit.significant_increase",
+          "to": "credit.defaulted",
+          "event": "default_trigger_met",
+          "initiating_role_id": "role.lender",
+          "produces_artifact": "default_record_naming_definition",
+          "preconditions": [
+            "default_definition_id recorded"
+          ]
+        },
+        {
+          "id": "t.credit.default_from_forborne",
+          "from": "credit.forborne",
+          "to": "credit.defaulted",
+          "event": "default_trigger_met",
+          "initiating_role_id": "role.lender",
+          "produces_artifact": "default_record_naming_definition",
+          "preconditions": [
+            "default_definition_id recorded"
+          ]
+        },
+        {
+          "id": "t.credit.default_direct",
+          "from": "credit.originated",
+          "to": "credit.defaulted",
+          "event": "default_trigger_met",
+          "initiating_role_id": "role.lender",
+          "produces_artifact": "default_record_naming_definition",
+          "preconditions": [
+            "default_definition_id recorded"
+          ]
+        },
+        {
+          "id": "t.credit.forbear_cure",
+          "from": "credit.forborne",
+          "to": "credit.cured",
+          "event": "terms_performing_again",
+          "initiating_role_id": "role.borrower",
+          "produces_artifact": "cure_record",
+          "preconditions": []
+        },
+        {
+          "id": "t.credit.workout",
+          "from": "credit.defaulted",
+          "to": "credit.workout",
+          "event": "collection_commenced",
+          "initiating_role_id": "role.servicer",
+          "produces_artifact": "workout_plan",
+          "preconditions": []
+        },
+        {
+          "id": "t.credit.cure",
+          "from": "credit.workout",
+          "to": "credit.cured",
+          "event": "default_trigger_cleared",
+          "initiating_role_id": "role.borrower",
+          "produces_artifact": "cure_record",
+          "preconditions": [
+            "probation period satisfied"
+          ]
+        },
+        {
+          "id": "t.credit.cured_perform",
+          "from": "credit.cured",
+          "to": "credit.originated",
+          "event": "returned_to_performing",
+          "initiating_role_id": "role.lender",
+          "produces_artifact": "rating_reassessment",
+          "preconditions": []
+        },
+        {
+          "id": "t.credit.charge_off",
+          "from": "credit.workout",
+          "to": "credit.charged_off",
+          "event": "deemed_uncollectible",
+          "initiating_role_id": "role.lender",
+          "produces_artifact": "charge_off_entry",
+          "preconditions": []
+        },
+        {
+          "id": "t.credit.recovery_after_charge_off",
+          "from": "credit.charged_off",
+          "to": "credit.repaid",
+          "event": "post_charge_off_recovery_in_full",
+          "initiating_role_id": "role.servicer",
+          "produces_artifact": "recovery_record",
+          "preconditions": []
+        },
+        {
+          "id": "t.credit.write_off",
+          "from": "credit.charged_off",
+          "to": "credit.written_off",
+          "event": "no_reasonable_expectation_of_recovery",
+          "initiating_role_id": "role.lender",
+          "produces_artifact": "derecognition_entry",
+          "preconditions": []
+        },
+        {
+          "id": "t.credit.repay",
+          "from": "credit.originated",
+          "to": "credit.repaid",
+          "event": "obligation_discharged",
+          "initiating_role_id": "role.borrower",
+          "produces_artifact": "closure_record",
+          "preconditions": []
+        },
+        {
+          "id": "t.credit.repay_from_cured",
+          "from": "credit.cured",
+          "to": "credit.repaid",
+          "event": "obligation_discharged",
+          "initiating_role_id": "role.borrower",
+          "produces_artifact": "closure_record",
+          "preconditions": []
+        }
+      ],
+      "notes": "Watch-list status is deliberately a separate state from default. Collapsing them is a common and quiet error that inflates observed default rates and corrupts any PD calibrated on them.",
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel",
+        "ifrs_foundation",
+        "fasb",
+        "cfpb"
+      ],
+      "review_status": "draft",
+      "review": null,
+      "supersedes": []
+    },
+    {
+      "id": "lifecycle.credit_approval_limit",
+      "record_type": "lifecycle",
+      "name": "Credit approval and limit management lifecycle",
+      "domain": "credit_approval",
+      "initial_state_ids": [
+        "limit.requested"
+      ],
+      "terminal_state_ids": [
+        "limit.rejected",
+        "limit.expired",
+        "limit.withdrawn"
+      ],
+      "states": [
+        {
+          "id": "limit.requested",
+          "name": "Limit requested",
+          "invariants": [
+            "requested amount, tenor, and purpose recorded"
+          ]
+        },
+        {
+          "id": "limit.under_analysis",
+          "name": "Under credit analysis",
+          "invariants": [
+            "analyst assigned; spreading underway"
+          ]
+        },
+        {
+          "id": "limit.pending_approval",
+          "name": "Pending approval authority",
+          "invariants": [
+            "required approval authority level determined by size and risk"
+          ]
+        },
+        {
+          "id": "limit.approved",
+          "name": "Approved",
+          "invariants": [
+            "approved amount, conditions, and expiry recorded"
+          ]
+        },
+        {
+          "id": "limit.rejected",
+          "name": "Rejected",
+          "invariants": [
+            "rationale recorded"
+          ]
+        },
+        {
+          "id": "limit.active",
+          "name": "Active and utilizable",
+          "invariants": [
+            "utilization measurable against limit"
+          ]
+        },
+        {
+          "id": "limit.breached",
+          "name": "Limit breached",
+          "invariants": [
+            "utilization exceeds approved limit",
+            "breach is an exception requiring disposition, not a silent state"
+          ]
+        },
+        {
+          "id": "limit.exception_granted",
+          "name": "Exception granted",
+          "invariants": [
+            "named approver, rationale, and expiry recorded"
+          ]
+        },
+        {
+          "id": "limit.under_review",
+          "name": "Under periodic review",
+          "invariants": [
+            "review triggered by calendar or event"
+          ]
+        },
+        {
+          "id": "limit.expired",
+          "name": "Expired",
+          "invariants": [
+            "no further utilization permitted"
+          ]
+        },
+        {
+          "id": "limit.withdrawn",
+          "name": "Withdrawn",
+          "invariants": [
+            "limit cancelled before expiry"
+          ]
+        }
+      ],
+      "transitions": [
+        {
+          "id": "t.limit.analyse",
+          "from": "limit.requested",
+          "to": "limit.under_analysis",
+          "event": "analysis_commenced",
+          "initiating_role_id": "role.lender",
+          "produces_artifact": "credit_analysis_working_file",
+          "preconditions": []
+        },
+        {
+          "id": "t.limit.submit",
+          "from": "limit.under_analysis",
+          "to": "limit.pending_approval",
+          "event": "recommendation_submitted",
+          "initiating_role_id": "role.lender",
+          "produces_artifact": "credit_memo",
+          "preconditions": []
+        },
+        {
+          "id": "t.limit.approve",
+          "from": "limit.pending_approval",
+          "to": "limit.approved",
+          "event": "approved",
+          "initiating_role_id": "role.lender",
+          "produces_artifact": "approval_record_with_authority_level",
+          "preconditions": [
+            "approval authority sufficient for size and risk"
+          ]
+        },
+        {
+          "id": "t.limit.reject",
+          "from": "limit.pending_approval",
+          "to": "limit.rejected",
+          "event": "rejected",
+          "initiating_role_id": "role.lender",
+          "produces_artifact": "rejection_rationale",
+          "preconditions": []
+        },
+        {
+          "id": "t.limit.activate",
+          "from": "limit.approved",
+          "to": "limit.active",
+          "event": "conditions_satisfied",
+          "initiating_role_id": "role.lender",
+          "produces_artifact": "limit_record",
+          "preconditions": []
+        },
+        {
+          "id": "t.limit.breach",
+          "from": "limit.active",
+          "to": "limit.breached",
+          "event": "utilization_exceeded_limit",
+          "initiating_role_id": "role.borrower",
+          "produces_artifact": "breach_alert",
+          "preconditions": []
+        },
+        {
+          "id": "t.limit.except",
+          "from": "limit.breached",
+          "to": "limit.exception_granted",
+          "event": "exception_approved",
+          "initiating_role_id": "role.lender",
+          "produces_artifact": "exception_log_entry",
+          "preconditions": [
+            "named approver, rationale, and expiry recorded"
+          ]
+        },
+        {
+          "id": "t.limit.remediate",
+          "from": "limit.breached",
+          "to": "limit.active",
+          "event": "utilization_brought_within_limit",
+          "initiating_role_id": "role.borrower",
+          "produces_artifact": "remediation_record",
+          "preconditions": []
+        },
+        {
+          "id": "t.limit.exception_expire",
+          "from": "limit.exception_granted",
+          "to": "limit.breached",
+          "event": "exception_expired",
+          "initiating_role_id": "role.lender",
+          "produces_artifact": "exception_expiry_notice",
+          "preconditions": []
+        },
+        {
+          "id": "t.limit.review",
+          "from": "limit.active",
+          "to": "limit.under_review",
+          "event": "review_triggered",
+          "initiating_role_id": "role.lender",
+          "produces_artifact": "review_schedule_entry",
+          "preconditions": []
+        },
+        {
+          "id": "t.limit.review_renew",
+          "from": "limit.under_review",
+          "to": "limit.active",
+          "event": "renewed",
+          "initiating_role_id": "role.lender",
+          "produces_artifact": "renewal_approval",
+          "preconditions": []
+        },
+        {
+          "id": "t.limit.review_withdraw",
+          "from": "limit.under_review",
+          "to": "limit.withdrawn",
+          "event": "withdrawn",
+          "initiating_role_id": "role.lender",
+          "produces_artifact": "withdrawal_notice",
+          "preconditions": []
+        },
+        {
+          "id": "t.limit.expire",
+          "from": "limit.active",
+          "to": "limit.expired",
+          "event": "expiry_date_reached",
+          "initiating_role_id": "role.lender",
+          "produces_artifact": "expiry_record",
+          "preconditions": []
+        }
+      ],
+      "notes": "A limit breach is an explicit state with a required disposition. A system that cannot represent a breach cannot report one.",
+      "jurisdiction": "US",
+      "knowledge_class": "regulatory_supervisory_rule",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "occ"
+      ],
+      "review_status": "draft",
+      "review": null,
+      "supersedes": []
+    },
+    {
+      "id": "lifecycle.credit_model",
+      "record_type": "lifecycle",
+      "name": "Credit model lifecycle",
+      "domain": "model_risk_management",
+      "initial_state_ids": [
+        "model.proposed"
+      ],
+      "terminal_state_ids": [
+        "model.retired",
+        "model.rejected"
+      ],
+      "states": [
+        {
+          "id": "model.proposed",
+          "name": "Proposed",
+          "invariants": [
+            "intended use and limitations stated before development"
+          ]
+        },
+        {
+          "id": "model.in_development",
+          "name": "In development",
+          "invariants": [
+            "development data, features, and performance window declared"
+          ]
+        },
+        {
+          "id": "model.pending_validation",
+          "name": "Pending independent validation",
+          "invariants": [
+            "developer has handed over; validator is independent of development"
+          ]
+        },
+        {
+          "id": "model.validation_findings_open",
+          "name": "Validation findings open",
+          "invariants": [
+            "findings recorded with severity and owner"
+          ]
+        },
+        {
+          "id": "model.approved",
+          "name": "Approved for use",
+          "invariants": [
+            "intended use, limitations, and conditions of use recorded"
+          ]
+        },
+        {
+          "id": "model.deployed",
+          "name": "Deployed",
+          "invariants": [
+            "monitoring active with thresholds and a named owner",
+            "fallback or kill-switch policy documented and testable"
+          ]
+        },
+        {
+          "id": "model.under_remediation",
+          "name": "Under remediation",
+          "invariants": [
+            "a monitoring threshold breached or a finding requires change",
+            "continued use requires an explicit, time-bound decision"
+          ]
+        },
+        {
+          "id": "model.retired",
+          "name": "Retired",
+          "invariants": [
+            "no longer in use; records retained"
+          ]
+        },
+        {
+          "id": "model.rejected",
+          "name": "Rejected",
+          "invariants": [
+            "not approved for use; rationale recorded"
+          ]
+        }
+      ],
+      "transitions": [
+        {
+          "id": "t.model.develop",
+          "from": "model.proposed",
+          "to": "model.in_development",
+          "event": "development_commenced",
+          "initiating_role_id": "role.lender",
+          "produces_artifact": "model_development_document",
+          "preconditions": []
+        },
+        {
+          "id": "t.model.handover",
+          "from": "model.in_development",
+          "to": "model.pending_validation",
+          "event": "submitted_for_validation",
+          "initiating_role_id": "role.lender",
+          "produces_artifact": "model_card_and_development_evidence",
+          "preconditions": []
+        },
+        {
+          "id": "t.model.findings",
+          "from": "model.pending_validation",
+          "to": "model.validation_findings_open",
+          "event": "findings_raised",
+          "initiating_role_id": "role.lender",
+          "produces_artifact": "validation_report_with_findings",
+          "preconditions": []
+        },
+        {
+          "id": "t.model.remediate_findings",
+          "from": "model.validation_findings_open",
+          "to": "model.pending_validation",
+          "event": "findings_addressed",
+          "initiating_role_id": "role.lender",
+          "produces_artifact": "remediation_evidence",
+          "preconditions": []
+        },
+        {
+          "id": "t.model.approve",
+          "from": "model.pending_validation",
+          "to": "model.approved",
+          "event": "validation_passed",
+          "initiating_role_id": "role.lender",
+          "produces_artifact": "approval_record_with_conditions_of_use",
+          "preconditions": [
+            "independent validation complete",
+            "challenger or benchmark comparison recorded"
+          ]
+        },
+        {
+          "id": "t.model.reject",
+          "from": "model.pending_validation",
+          "to": "model.rejected",
+          "event": "validation_failed",
+          "initiating_role_id": "role.lender",
+          "produces_artifact": "rejection_rationale",
+          "preconditions": []
+        },
+        {
+          "id": "t.model.deploy",
+          "from": "model.approved",
+          "to": "model.deployed",
+          "event": "deployed",
+          "initiating_role_id": "role.lender",
+          "produces_artifact": "run_card_and_monitoring_plan",
+          "preconditions": [
+            "monitoring thresholds set",
+            "named owner recorded",
+            "fallback policy documented"
+          ]
+        },
+        {
+          "id": "t.model.monitor_breach",
+          "from": "model.deployed",
+          "to": "model.under_remediation",
+          "event": "monitoring_threshold_breached",
+          "initiating_role_id": "role.lender",
+          "produces_artifact": "monitoring_exception_record",
+          "preconditions": []
+        },
+        {
+          "id": "t.model.remediated",
+          "from": "model.under_remediation",
+          "to": "model.deployed",
+          "event": "remediation_accepted",
+          "initiating_role_id": "role.lender",
+          "produces_artifact": "remediation_acceptance",
+          "preconditions": []
+        },
+        {
+          "id": "t.model.retire_from_remediation",
+          "from": "model.under_remediation",
+          "to": "model.retired",
+          "event": "withdrawn_from_use",
+          "initiating_role_id": "role.lender",
+          "produces_artifact": "retirement_record",
+          "preconditions": []
+        },
+        {
+          "id": "t.model.retire",
+          "from": "model.deployed",
+          "to": "model.retired",
+          "event": "superseded_or_withdrawn",
+          "initiating_role_id": "role.lender",
+          "produces_artifact": "retirement_record",
+          "preconditions": []
+        }
+      ],
+      "notes": "Deployment requires monitoring, an owner, and a fallback policy as PRECONDITIONS, not as follow-up work. There is no transition from development straight to deployment: independent validation is structurally unavoidable.",
+      "jurisdiction": "US",
+      "knowledge_class": "regulatory_supervisory_rule",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "federal_reserve",
+        "occ"
+      ],
+      "review_status": "draft",
+      "review": null,
+      "supersedes": []
+    }
+  ]
+}

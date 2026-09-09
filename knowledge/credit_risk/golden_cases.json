@@ -1,0 +1,661 @@
+{
+  "schema_version": "0072.1",
+  "point_in_time_rules": [
+    {
+      "id": "rule.pit.attribute_as_of",
+      "statement": "A feature's as-of date must not be after the decision date."
+    },
+    {
+      "id": "rule.pit.outcome_window_alignment",
+      "statement": "A value whose outcome window closes after the decision date may be a label but never a feature of that decision."
+    },
+    {
+      "id": "rule.pit.reject_inference",
+      "statement": "Any inference about rejected applicants' outcomes is a declared model assumption with a stated method, never an observation."
+    },
+    {
+      "id": "rule.pit.scenario_vintage",
+      "statement": "A macroeconomic scenario may not be used before its publication date, even where its projection period covers the target date."
+    },
+    {
+      "id": "rule.pit.restatement_backfill",
+      "statement": "A restated financial or a re-rating must not be backfilled over the value that was knowable at the decision date."
+    },
+    {
+      "id": "rule.pit.survivorship",
+      "statement": "Closed and charged-off accounts must remain in a population; excluding them biases performance upward."
+    }
+  ],
+  "golden_cases": [
+    {
+      "id": "golden.el.pd_lgd_ead",
+      "case_id": "golden.el.pd_lgd_ead",
+      "record_type": "golden_case",
+      "name": "Expected loss from PD, LGD, and EAD",
+      "domain": "wholesale_rating_pd_lgd_ead",
+      "purpose": "Pins the classic identity and, more importantly, that its operands must share a horizon and default definition.",
+      "as_of": "2026-09-09",
+      "operation": "el_pd_lgd_ead",
+      "convention_ids": [
+        "convention.el.pd_lgd_ead"
+      ],
+      "inputs": {
+        "pd": {
+          "value": 0.02,
+          "unit": "probability",
+          "horizon": "P1Y",
+          "default_definition_id": "defn.default.irb_reference"
+        },
+        "lgd": {
+          "value": 0.45,
+          "unit": "fraction_of_ead",
+          "horizon": "workout_period",
+          "default_definition_id": "defn.default.irb_reference"
+        },
+        "ead": {
+          "value": 1000000.0,
+          "unit": "currency_amount",
+          "currency": "USD"
+        }
+      },
+      "expected_outputs": {
+        "expected_loss": {
+          "value": 9000.0,
+          "unit": "currency_amount",
+          "currency": "USD",
+          "tolerance": 1e-09
+        }
+      },
+      "invariants": [
+        "Expected loss is positive as a cost to the lender",
+        "PD and LGD share a default definition",
+        "Collateral is reflected in LGD only, never also in EAD"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "draft",
+      "review": null,
+      "supersedes": []
+    },
+    {
+      "id": "golden.el.basis_mismatch_rejected",
+      "case_id": "golden.el.basis_mismatch_rejected",
+      "record_type": "golden_case",
+      "name": "Expected loss with mismatched operand bases",
+      "domain": "wholesale_rating_pd_lgd_ead",
+      "purpose": "A one-year PD combined with a lifetime LGD is not an expected loss. The mismatch must be rejected, not silently computed.",
+      "as_of": "2026-09-09",
+      "operation": "el_pd_lgd_ead",
+      "convention_ids": [
+        "convention.el.pd_lgd_ead"
+      ],
+      "inputs": {
+        "pd": {
+          "value": 0.02,
+          "unit": "probability",
+          "horizon": "P1Y",
+          "default_definition_id": "defn.default.irb_reference"
+        },
+        "lgd": {
+          "value": 0.45,
+          "unit": "fraction_of_ead",
+          "horizon": "instrument_life",
+          "default_definition_id": "defn.default.ifrs9_stage3"
+        },
+        "ead": {
+          "value": 1000000.0,
+          "unit": "currency_amount",
+          "currency": "USD"
+        }
+      },
+      "expected_outputs": {
+        "admitted": {
+          "value": false,
+          "unit": "boolean"
+        },
+        "violated_rules": {
+          "value": [
+            "rule.basis.el_operands"
+          ],
+          "unit": "rule_id_list"
+        }
+      },
+      "invariants": [
+        "A basis mismatch is a rejection, not a warning",
+        "The violated rule is named so the failure is diagnostic"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "draft",
+      "review": null,
+      "supersedes": []
+    },
+    {
+      "id": "golden.ead.ccf_undrawn",
+      "case_id": "golden.ead.ccf_undrawn",
+      "record_type": "golden_case",
+      "name": "EAD from drawn balance and credit conversion factor",
+      "domain": "wholesale_rating_pd_lgd_ead",
+      "purpose": "Pins that exposure at default is neither the drawn balance nor the limit.",
+      "as_of": "2026-09-09",
+      "operation": "ead_from_ccf",
+      "convention_ids": [
+        "convention.ead.ccf_undrawn"
+      ],
+      "inputs": {
+        "drawn_balance": {
+          "value": 400000.0,
+          "unit": "currency_amount",
+          "currency": "USD"
+        },
+        "limit": {
+          "value": 1000000.0,
+          "unit": "currency_amount",
+          "currency": "USD"
+        },
+        "ccf": {
+          "value": 0.5,
+          "unit": "fraction"
+        }
+      },
+      "expected_outputs": {
+        "ead": {
+          "value": 700000.0,
+          "unit": "currency_amount",
+          "currency": "USD",
+          "tolerance": 1e-09
+        }
+      },
+      "invariants": [
+        "EAD lies between drawn balance and limit for a CCF in [0, 1]",
+        "EAD equals drawn balance only when CCF is zero",
+        "EAD equals the limit only when CCF is one"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "draft",
+      "review": null,
+      "supersedes": []
+    },
+    {
+      "id": "golden.ecl.twelve_month_vs_lifetime",
+      "case_id": "golden.ecl.twelve_month_vs_lifetime",
+      "record_type": "golden_case",
+      "name": "Twelve-month versus lifetime ECL with EIR discounting",
+      "domain": "ifrs9_cecl_expected_credit_loss",
+      "purpose": "Pins that twelve-month ECL is the first-period slice of the same lifetime measurement, discounted at the effective interest rate \u2014 not a separate twelve-month-horizon expected loss.",
+      "as_of": "2026-09-09",
+      "operation": "ecl_lifetime_eir",
+      "convention_ids": [
+        "convention.ecl.lifetime_eir",
+        "convention.ecl.twelve_month_ifrs9"
+      ],
+      "inputs": {
+        "marginal_pd": {
+          "value": [
+            0.02,
+            0.018,
+            0.015
+          ],
+          "unit": "probability_vector"
+        },
+        "lgd": {
+          "value": 0.4,
+          "unit": "fraction_of_ead"
+        },
+        "ead": {
+          "value": [
+            1000000.0,
+            700000.0,
+            400000.0
+          ],
+          "unit": "currency_amount_vector",
+          "currency": "USD"
+        },
+        "eir": {
+          "value": 0.06,
+          "unit": "decimal_rate"
+        }
+      },
+      "expected_outputs": {
+        "lifetime_ecl": {
+          "value": 14047.838148270048,
+          "unit": "currency_amount",
+          "currency": "USD",
+          "tolerance": 1e-06
+        },
+        "twelve_month_ecl": {
+          "value": 7547.169811320754,
+          "unit": "currency_amount",
+          "currency": "USD",
+          "tolerance": 1e-06
+        }
+      },
+      "invariants": [
+        "Twelve-month ECL is strictly less than lifetime ECL when later-period marginal PD is positive",
+        "Discounting is at the effective interest rate, not a funding or market rate",
+        "Twelve-month ECL equals the first discounted period of the lifetime sum"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "accounting_standard",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "ifrs_foundation",
+        "fasb"
+      ],
+      "review_status": "draft",
+      "review": null,
+      "supersedes": []
+    },
+    {
+      "id": "golden.rwa.irb_risk_weight",
+      "case_id": "golden.rwa.irb_risk_weight",
+      "record_type": "golden_case",
+      "name": "IRB risk-weighted assets from a supplied risk weight",
+      "domain": "basel_irb_regulatory_capital",
+      "purpose": "Pins that the risk weight is an INPUT from the governing national rule, never a constant this pack supplies.",
+      "as_of": "2026-09-09",
+      "operation": "rwa_from_risk_weight",
+      "convention_ids": [
+        "convention.rwa.irb_corporate"
+      ],
+      "inputs": {
+        "risk_weight": {
+          "value": 0.85,
+          "unit": "fraction",
+          "provenance": "supplied by the governing national rule"
+        },
+        "ead": {
+          "value": 700000.0,
+          "unit": "currency_amount",
+          "currency": "USD"
+        }
+      },
+      "expected_outputs": {
+        "rwa": {
+          "value": 595000.0,
+          "unit": "currency_amount",
+          "currency": "USD",
+          "tolerance": 1e-09
+        }
+      },
+      "invariants": [
+        "The risk weight is supplied, not derived by this pack",
+        "National implementation differs from the international framework text"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "regulatory_supervisory_rule",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "draft",
+      "review": null,
+      "supersedes": []
+    },
+    {
+      "id": "golden.score.points_to_odds",
+      "case_id": "golden.score.points_to_odds",
+      "record_type": "golden_case",
+      "name": "Scorecard points-to-odds calibration",
+      "domain": "retail_scoring_underwriting",
+      "purpose": "Pins that a score becomes odds only through explicit institution-specific scaling parameters, and that a score is not itself a probability.",
+      "as_of": "2026-09-09",
+      "operation": "score_points_to_odds",
+      "convention_ids": [
+        "convention.score.points_to_odds"
+      ],
+      "inputs": {
+        "score": {
+          "value": 680.0,
+          "unit": "score_points"
+        },
+        "base_score": {
+          "value": 600.0,
+          "unit": "score_points"
+        },
+        "base_odds": {
+          "value": 20.0,
+          "unit": "odds"
+        },
+        "pdo": {
+          "value": 40.0,
+          "unit": "score_points"
+        }
+      },
+      "expected_outputs": {
+        "odds": {
+          "value": 80.0,
+          "unit": "odds",
+          "tolerance": 1e-09
+        },
+        "implied_probability_of_good": {
+          "value": 0.9876543209876543,
+          "unit": "probability",
+          "tolerance": 1e-09
+        }
+      },
+      "invariants": [
+        "Two PDO increments double the odds twice",
+        "The scaling parameters are inputs; this pack supplies no default"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "cfpb"
+      ],
+      "review_status": "draft",
+      "review": null,
+      "supersedes": []
+    },
+    {
+      "id": "golden.adverse_action.reason_ranking",
+      "case_id": "golden.adverse_action.reason_ranking",
+      "record_type": "golden_case",
+      "name": "Adverse action principal-reason ranking with a tie",
+      "domain": "retail_scoring_underwriting",
+      "purpose": "Pins deterministic ordering, including the tie-break, so two runs on the same application disclose the same principal reasons.",
+      "as_of": "2026-09-09",
+      "operation": "adverse_action_ranking",
+      "convention_ids": [
+        "convention.adverse_action.reason_ranking"
+      ],
+      "inputs": {
+        "feature_points": {
+          "value": {
+            "income": 40.0,
+            "utilization": 20.0,
+            "delinquency": 10.0,
+            "inquiries": 25.0
+          },
+          "unit": "score_points"
+        },
+        "max_attainable_points": {
+          "value": {
+            "income": 100.0,
+            "utilization": 80.0,
+            "delinquency": 60.0,
+            "inquiries": 30.0
+          },
+          "unit": "score_points"
+        },
+        "stable_feature_order": {
+          "value": [
+            "utilization",
+            "income",
+            "delinquency",
+            "inquiries"
+          ],
+          "unit": "feature_order"
+        },
+        "max_reasons": {
+          "value": 3,
+          "unit": "count"
+        }
+      },
+      "expected_outputs": {
+        "ordered_reason_codes": {
+          "value": [
+            "reason.utilization",
+            "reason.income",
+            "reason.delinquency"
+          ],
+          "unit": "reason_code_list"
+        },
+        "points_lost": {
+          "value": {
+            "utilization": 60.0,
+            "income": 60.0,
+            "delinquency": 50.0,
+            "inquiries": 5.0
+          },
+          "unit": "score_points",
+          "tolerance": 1e-09
+        }
+      },
+      "invariants": [
+        "Income and utilization tie at 60 points lost; the declared stable order breaks it",
+        "Ordering never depends on dictionary insertion or float comparison order",
+        "No protected attribute appears among the reasons",
+        "Exactly max_reasons codes are disclosed"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "regulatory_supervisory_rule",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "cfpb"
+      ],
+      "review_status": "draft",
+      "review": null,
+      "supersedes": []
+    },
+    {
+      "id": "golden.migration.row_stochastic",
+      "case_id": "golden.migration.row_stochastic",
+      "record_type": "golden_case",
+      "name": "Annual rating migration matrix row identity",
+      "domain": "wholesale_rating_pd_lgd_ead",
+      "purpose": "Pins that every row of a migration matrix is a probability distribution over end-states including default.",
+      "as_of": "2026-09-09",
+      "operation": "migration_matrix_rows",
+      "convention_ids": [
+        "convention.migration.annual_matrix"
+      ],
+      "inputs": {
+        "grades": {
+          "value": [
+            "A",
+            "B",
+            "C",
+            "D"
+          ],
+          "unit": "grade_list"
+        },
+        "matrix": {
+          "value": [
+            [
+              0.9,
+              0.07,
+              0.02,
+              0.01
+            ],
+            [
+              0.05,
+              0.85,
+              0.08,
+              0.02
+            ],
+            [
+              0.01,
+              0.1,
+              0.8,
+              0.09
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "unit": "probability_matrix"
+        },
+        "absorbing_state": {
+          "value": "D",
+          "unit": "grade"
+        }
+      },
+      "expected_outputs": {
+        "row_sums": {
+          "value": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "unit": "probability",
+          "tolerance": 1e-12
+        },
+        "rows_stochastic": {
+          "value": true,
+          "unit": "boolean"
+        }
+      },
+      "invariants": [
+        "Each row sums to one within tolerance",
+        "Default is an absorbing state",
+        "A matrix whose rows do not sum to one is not a migration matrix"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "empirical_finding",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "draft",
+      "review": null,
+      "supersedes": []
+    },
+    {
+      "id": "golden.temporal.outcome_window_rejected",
+      "case_id": "golden.temporal.outcome_window_rejected",
+      "record_type": "golden_case",
+      "name": "Feature built from an outcome observable only after the decision date",
+      "domain": "credit_model_governance_monitoring",
+      "purpose": "Pins the credit-specific leakage mode: a label whose performance window closes after the decision date cannot be a feature of that decision.",
+      "as_of": "2026-09-09",
+      "operation": "point_in_time_admission",
+      "convention_ids": [],
+      "inputs": {
+        "decision_date": {
+          "value": "2024-01-15",
+          "unit": "date"
+        },
+        "feature_as_of": {
+          "value": "2024-06-30",
+          "unit": "date"
+        },
+        "label_outcome_window_end": {
+          "value": "2025-01-15",
+          "unit": "date"
+        },
+        "used_as": {
+          "value": "feature",
+          "unit": "role"
+        }
+      },
+      "expected_outputs": {
+        "admitted": {
+          "value": false,
+          "unit": "boolean"
+        },
+        "violated_rules": {
+          "value": [
+            "rule.pit.attribute_as_of",
+            "rule.pit.outcome_window_alignment"
+          ],
+          "unit": "rule_id_list"
+        }
+      },
+      "invariants": [
+        "Both violations are reported, not just the first",
+        "A rejection names the rule so the failure is diagnostic",
+        "This is the leakage mode most likely to make a credit model look excellent offline"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "occ"
+      ],
+      "review_status": "draft",
+      "review": null,
+      "supersedes": []
+    },
+    {
+      "id": "golden.temporal.admitted",
+      "case_id": "golden.temporal.admitted",
+      "record_type": "golden_case",
+      "name": "Point-in-time admitted feature",
+      "domain": "credit_model_governance_monitoring",
+      "purpose": "The positive counterpart: an attribute known before the decision date, with the outcome window closing after it, used as a label rather than a feature.",
+      "as_of": "2026-09-09",
+      "operation": "point_in_time_admission",
+      "convention_ids": [],
+      "inputs": {
+        "decision_date": {
+          "value": "2024-01-15",
+          "unit": "date"
+        },
+        "feature_as_of": {
+          "value": "2023-12-31",
+          "unit": "date"
+        },
+        "label_outcome_window_end": {
+          "value": "2025-01-15",
+          "unit": "date"
+        },
+        "used_as": {
+          "value": "label",
+          "unit": "role"
+        }
+      },
+      "expected_outputs": {
+        "admitted": {
+          "value": true,
+          "unit": "boolean"
+        },
+        "violated_rules": {
+          "value": [],
+          "unit": "rule_id_list"
+        }
+      },
+      "invariants": [
+        "A label is expected to mature after the decision date; that is what makes it a label",
+        "The same dates that reject a feature admit a label"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "occ"
+      ],
+      "review_status": "draft",
+      "review": null,
+      "supersedes": []
+    }
+  ]
+}
