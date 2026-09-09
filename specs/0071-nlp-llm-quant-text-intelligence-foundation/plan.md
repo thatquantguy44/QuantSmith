@@ -1,11 +1,12 @@
 # Plan: NLP, LLM, and Quant Text Intelligence Foundation
 
 - **Spec:** 0071-nlp-llm-quant-text-intelligence-foundation (`spec.md`)
-- **Status:** Draft
+- **Status:** Draft (foundation implemented)
 - **Author:** Codex
-- **Last updated:** 2026-09-06
+- **Last updated:** 2026-09-09
 
-> HOW. Implementation begins only after the Draft's open decisions are approved.
+> HOW. The offline foundation is implemented; live providers, models, training,
+> sources, and semantic-search backends still require separate approval.
 > Every requirement in `spec.md` appears in the traceability matrix below.
 
 ## Approach
@@ -59,7 +60,7 @@ Planned implementation surfaces:
 
 | Surface | Responsibility |
 | --- | --- |
-| `src/quantsmith/text_intelligence/` or approved existing package | Dataclasses, parsers, validators, temporal eligibility, transform lineage, model-capability profiles, task results, signal records, and replay extensions. Final package location is an open question. |
+| `src/quantsmith/text_intelligence/` | Dataclasses, validators, temporal eligibility, transform lineage, model-capability profiles, task results, signal records, agent-consumption views, producers, CLI, and replay delegation to `0070`. |
 | `templates/text_intelligence/` | Minimal manifests for source/corpus, transformations, model capabilities, tasks, embeddings/index snapshots, evaluations, and text-derived signals. |
 | `examples/text_intelligence/` | One deterministic extraction/signal flow and one fixture-backed retrieval/generation flow using fictional or public metadata. |
 | `src/quantsmith/adapters/mcp_servers/` | Integration with existing authorities and future `0054` semantic retrieval; no duplicate transport. |
@@ -253,15 +254,19 @@ Historical manifests and audit events remain append-only. Provider integrations
 must have a deterministic or explicitly degraded fallback, and signal consumers
 must support disabling the text feature without changing unrelated models.
 
-## Open Questions
+## Implemented Decisions and Deferred Activation
 
-- Approve the first embedding/tokenizer/local-runtime reference profile.
-- Approve the first `0054` vector/index backend and immutable snapshot behavior.
-- Decide the package location for executable text-intelligence contracts.
-- Approve local model licenses, hardware profiles, and any adaptation methods.
-- Define source-specific information-availability timestamps and licensing
-  policies for the first corpus.
-- Choose canonical entity, event, stance/sentiment, theme, instrument, and source
-  reliability taxonomies.
-- Set promotion thresholds for exploratory outputs, approved research evidence,
-  and production/backtest-eligible text signals.
+- Package location: `src/quantsmith/text_intelligence/`.
+- Reference profiles: deterministic lexical rules, checksum-pinned placeholder
+  capabilities, a non-semantic SHA-256 vector fixture, and a recorded hosted
+  response fixture. These validate contracts; they are not model endorsements.
+- Replay: `0071` deep-validates its domain graph and calls the actual `0070`
+  replay implementation. Its audit events live in the same `0070` JSONL ledger.
+- Retrieval isolation: `select_eligible_index` chooses the highest caller- and
+  entitlement-eligible immutable tier before search. Live search is deferred to
+  reserved spec `0054`.
+- Training: evidence schema and checkpoint/model-card fixtures only. A separate
+  bounded spec must approve any model, license, data, method, and hardware.
+- Sources and promotion: only the registered fictional fixture source is active;
+  all signals are `fixture_only`. Real source rules, taxonomies, model metrics,
+  and production thresholds are deferred to concrete consumer specs.

@@ -1,0 +1,212 @@
+{
+  "capability_set_id": "capabilities-text-fixture-funding-001",
+  "profiles": [
+    {
+      "artifact_checksum": "sha256:3e9fb4ac0f5b8e2dfdbe0c066407c3bec23d7e0cb9f65bd494effc157f1fca27",
+      "capability_id": "cap-text-fixture-funding-001-lexical",
+      "deterministic_settings": {
+        "seed": 0,
+        "temperature": 0
+      },
+      "execution_location": "local_cpu",
+      "fallback": {
+        "behavior": "abstain",
+        "reason": "no lexical evidence"
+      },
+      "license": "Apache-2.0-compatible reference logic",
+      "limits": {
+        "max_characters": 100000,
+        "max_output_items": 1000
+      },
+      "model": "deterministic-keyword-baseline",
+      "operations": [
+        "lexical",
+        "tokenize"
+      ],
+      "privacy_classes": [
+        "public",
+        "internal"
+      ],
+      "provider": "local",
+      "replay_class": "deterministic",
+      "revision": "1.0.0",
+      "runtime": "quantsmith.text_intelligence.lexical.v1"
+    },
+    {
+      "artifact_checksum": "sha256:98b337c3cace373135af4ab2be22cd41b26bf264f12f7b2a8e777427073afec9",
+      "capability_id": "cap-text-fixture-funding-001-local-generation",
+      "deterministic_settings": {
+        "seed": 7,
+        "temperature": 0
+      },
+      "execution_location": "fixture_only",
+      "fallback": {
+        "behavior": "lexical_then_abstain"
+      },
+      "license": "model license must be approved before activation",
+      "limits": {
+        "context_tokens": 4096,
+        "latency_budget_ms": 5000,
+        "output_tokens": 512
+      },
+      "model": "local-generation-placeholder",
+      "operations": [
+        "generation"
+      ],
+      "privacy_classes": [
+        "public",
+        "internal",
+        "restricted"
+      ],
+      "provider": "local",
+      "replay_class": "pinned_local",
+      "revision": "fixture-contract-1",
+      "runtime": "adapters/llm_runtime/local_model"
+    },
+    {
+      "artifact_checksum": "sha256:fbd1c86f534781e6a1ff30a5e9d7f782a659a817b82c14636b48353b7ea8e947",
+      "capability_id": "cap-text-fixture-funding-001-hosted",
+      "deterministic_settings": {
+        "fixture": true,
+        "temperature": 0
+      },
+      "execution_location": "fixture_only",
+      "fallback": {
+        "behavior": "lexical_then_abstain"
+      },
+      "fixture_ref": {
+        "hash": "sha256:fbd1c86f534781e6a1ff30a5e9d7f782a659a817b82c14636b48353b7ea8e947",
+        "path": "fixtures/model_response.json"
+      },
+      "license": "provider terms must be approved before live use",
+      "limits": {
+        "context_tokens": 4096,
+        "output_tokens": 512
+      },
+      "model": "hosted-provider-placeholder",
+      "operations": [
+        "generation"
+      ],
+      "privacy_classes": [
+        "public"
+      ],
+      "provider": "fixture",
+      "replay_class": "fixture_backed",
+      "revision": "fixture-2026-09-07",
+      "runtime": "adapters/llm_runtime"
+    },
+    {
+      "capability_id": "cap-text-fixture-funding-001-external-unpinned",
+      "deterministic_settings": {
+        "equivalence_claim_allowed": false
+      },
+      "execution_location": "external_uninvoked",
+      "fallback": {
+        "behavior": "fixture_then_abstain"
+      },
+      "license": "provider and model terms require approval before activation",
+      "limits": {
+        "context_tokens": 4096,
+        "cost_budget": 0,
+        "output_tokens": 512
+      },
+      "model": "mutable-external-placeholder",
+      "operations": [
+        "generation"
+      ],
+      "privacy_classes": [
+        "public"
+      ],
+      "provider": "external-placeholder",
+      "replay_class": "non_reproducible_external",
+      "revision": "unpinned",
+      "runtime": "adapters/llm_runtime"
+    },
+    {
+      "artifact_checksum": "sha256:78c59d2e6dfc4b4b8c6b2b3889b014fe96f97a6ea19c4b1ae2c9e27c295dcc06",
+      "capability_id": "cap-text-fixture-funding-001-embedding",
+      "deterministic_settings": {
+        "seed": 0
+      },
+      "execution_location": "local_cpu",
+      "fallback": {
+        "behavior": "no_index"
+      },
+      "license": "Apache-2.0-compatible reference logic",
+      "limits": {
+        "dimension": 4
+      },
+      "model": "deterministic-hash-vector",
+      "operations": [
+        "embedding"
+      ],
+      "privacy_classes": [
+        "public",
+        "internal",
+        "restricted"
+      ],
+      "provider": "local",
+      "replay_class": "deterministic",
+      "revision": "1.0.0",
+      "runtime": "quantsmith.text_intelligence.hash_embedding.v1"
+    },
+    {
+      "artifact_checksum": "sha256:d74444977d42ceb53603f83bbcbc1af3001daf8735157b2f600e93df27735308",
+      "capability_id": "cap-text-fixture-funding-001-rerank",
+      "deterministic_settings": {
+        "tie_break": "span_id"
+      },
+      "execution_location": "local_cpu",
+      "fallback": {
+        "behavior": "preserve_retrieval_order"
+      },
+      "license": "Apache-2.0-compatible reference logic",
+      "limits": {
+        "max_candidates": 100
+      },
+      "model": "token-overlap-reranker",
+      "operations": [
+        "rerank"
+      ],
+      "privacy_classes": [
+        "public",
+        "internal",
+        "restricted"
+      ],
+      "provider": "local",
+      "replay_class": "deterministic",
+      "revision": "1.0.0",
+      "runtime": "quantsmith.text_intelligence.lexical_rerank.v1"
+    },
+    {
+      "artifact_checksum": "sha256:0932ab1f1c9fe855655fe188c9d56592943bf2c1b2dbc8d2f7eecf3c06471c6f",
+      "capability_id": "cap-text-fixture-funding-001-training",
+      "deterministic_settings": {
+        "fixture": true,
+        "seeds": [
+          7
+        ]
+      },
+      "execution_location": "fixture_only",
+      "fallback": {
+        "behavior": "reject_live_training"
+      },
+      "license": "no model artifact; contract fixture only",
+      "limits": {
+        "training_enabled": false
+      },
+      "model": "training-contract-placeholder",
+      "operations": [
+        "train_adapt"
+      ],
+      "privacy_classes": [
+        "public"
+      ],
+      "provider": "fixture",
+      "replay_class": "fixture_backed",
+      "revision": "fixture-1",
+      "runtime": "adapters/model_plugin"
+    }
+  ],
+  "schema_version": "quantsmith.text_intelligence.capabilities.v1"
+}

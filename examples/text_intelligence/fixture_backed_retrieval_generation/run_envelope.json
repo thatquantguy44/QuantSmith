@@ -1,0 +1,106 @@
+{
+  "actor": {
+    "clearance": "internal",
+    "id": "text-intelligence-fixture",
+    "type": "runtime"
+  },
+  "artifacts": [
+    {
+      "access_class": "public",
+      "hash": "sha256:3f86acb4bb7bc305c130c0d0dd2ec83a929ec4084fc006c1980d257a19688e9d",
+      "path": "text_intelligence_manifest.json",
+      "producer_event_id": "evt-text-fixture-funding-001-published",
+      "type": "text_intelligence_manifest"
+    },
+    {
+      "access_class": "public",
+      "hash": "sha256:4b795442afeee026b593dc3cfb7a5d0f6abd6401f14094550bd9473b9bbf2e97",
+      "path": "task_results.json",
+      "producer_event_id": "evt-text-fixture-funding-001-published",
+      "type": "task_results"
+    },
+    {
+      "access_class": "public",
+      "hash": "sha256:a66d88e031038908a28b264d5b977b8c252ee03faca242ef57db2305c05a6d9c",
+      "path": "text_signals.json",
+      "producer_event_id": "evt-text-fixture-funding-001-published",
+      "type": "text_signals"
+    }
+  ],
+  "assumption_ledger": {
+    "hash": "sha256:b614a9fab3e20bbc4a0f3b7f776c48f83a64b72a610e81c205be2d7c426c8d80",
+    "path": "assumptions.jsonl",
+    "type": "assumption_ledger"
+  },
+  "audit_events": {
+    "hash": "sha256:719f759900c8b856739f0483816e7ecf4c8478fbd37fe025d076c8931d077bea",
+    "path": "audit_events.jsonl",
+    "type": "audit_events"
+  },
+  "context_manifest": {
+    "hash": "sha256:c6c88aeede89d3b1f63a506412f94ef40afec13779c4f972392be1c094d18419",
+    "path": "context_manifest.json",
+    "type": "context_manifest"
+  },
+  "created_at": "2026-09-07T13:00:20Z",
+  "environment": {
+    "dependencies": [
+      "stdlib"
+    ],
+    "network": "disabled",
+    "producer": "quantsmith.text_intelligence"
+  },
+  "evaluation_harness": {
+    "hash": "sha256:53ed0ac268c14733344086c20b802e3e4b41b0a175572b10ecc369ae77acff1e",
+    "path": "evaluation_harness.json",
+    "type": "evaluation_harness"
+  },
+  "gate_results": [
+    {
+      "checked_at": "2026-09-07T13:00:20Z",
+      "finding_count": 0,
+      "gate": "orchestration",
+      "status": "pass"
+    },
+    {
+      "checked_at": "2026-09-07T13:00:20Z",
+      "finding_count": 0,
+      "gate": "text-intelligence",
+      "status": "pass"
+    }
+  ],
+  "mode": "fixture_backed_llm",
+  "objective": "Produce governed text intelligence with point-in-time lineage, evaluation, audit, and replay evidence.",
+  "prompt_manifest": {
+    "hash": "sha256:b423820b9da38d106887243499e254a02bb680db6db1ee9315b9806eaf427547",
+    "path": "prompt_manifest.json",
+    "type": "prompt_manifest"
+  },
+  "release_profile": "exploratory",
+  "replay": {
+    "command": "python -m quantsmith.text_intelligence replay --manifest text_intelligence_manifest.json --fixture-mode",
+    "expected_outputs": [
+      {
+        "hash": "sha256:3f86acb4bb7bc305c130c0d0dd2ec83a929ec4084fc006c1980d257a19688e9d",
+        "path": "text_intelligence_manifest.json",
+        "type": "text_intelligence_manifest"
+      },
+      {
+        "hash": "sha256:4b795442afeee026b593dc3cfb7a5d0f6abd6401f14094550bd9473b9bbf2e97",
+        "path": "task_results.json",
+        "type": "task_results"
+      },
+      {
+        "hash": "sha256:a66d88e031038908a28b264d5b977b8c252ee03faca242ef57db2305c05a6d9c",
+        "path": "text_signals.json",
+        "type": "text_signals"
+      }
+    ],
+    "mode": "fixture"
+  },
+  "repo_revision": "fixture",
+  "run_id": "text-fixture-funding-001",
+  "schema_version": "quantsmith.orchestration.run.v1",
+  "spec_id": "0071-nlp-llm-quant-text-intelligence-foundation",
+  "stage": "implementation"
+}

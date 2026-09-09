@@ -1,0 +1,72 @@
+{
+  "chain_id": "transforms-text-lexical-liquidity-001-v1",
+  "corpus_snapshot_id": "corpus-text-lexical-liquidity-001-v1",
+  "schema_version": "quantsmith.text_intelligence.transforms.v1",
+  "transforms": [
+    {
+      "config_version": "1.0.0",
+      "deterministic": true,
+      "implementation": "quantsmith.text_intelligence.producers._normalize_text",
+      "input_refs": [
+        {
+          "hash": "sha256:9f1959044e463c0943ed6b701327a924b1d49c75751c903e5e218cc1100c1f94",
+          "path": "documents/doc-liquidity-001.txt"
+        }
+      ],
+      "lineage_order": 1,
+      "operation": "normalization",
+      "output_refs": [
+        {
+          "hash": "sha256:9f1959044e463c0943ed6b701327a924b1d49c75751c903e5e218cc1100c1f94",
+          "path": "transformed/doc-liquidity-001.txt"
+        }
+      ],
+      "parameters": {
+        "source_boundaries": "preserved",
+        "unicode": "NFKC",
+        "whitespace": "collapse"
+      },
+      "security_scan": {
+        "flags": [],
+        "quarantine_action": "none",
+        "status": "pass"
+      },
+      "timestamp": "2026-09-07T12:00:01Z",
+      "transform_id": "transform-doc-liquidity-001"
+    },
+    {
+      "config_version": "1.0.0",
+      "deterministic": true,
+      "implementation": "quantsmith.text_intelligence.producers._normalize_text",
+      "input_refs": [
+        {
+          "hash": "sha256:71603ed25ee3d8635dd9057b3d92bc538a35a0024805b83a9d8e2bb32590be11",
+          "path": "documents/doc-injection-001.txt"
+        }
+      ],
+      "lineage_order": 2,
+      "operation": "filtering",
+      "output_refs": [
+        {
+          "hash": "sha256:096e2e7da55e5e5861f2fa948b4802ac9fed1c018168c1e622dcfc9d244a48fd",
+          "path": "quarantine/doc-injection-001.json"
+        }
+      ],
+      "parameters": {
+        "source_boundaries": "preserved",
+        "unicode": "NFKC",
+        "whitespace": "collapse"
+      },
+      "security_scan": {
+        "flags": [
+          "ignore-instructions",
+          "undeclared-tool-request"
+        ],
+        "quarantine_action": "exclude_before_context_or_model",
+        "status": "quarantined"
+      },
+      "timestamp": "2026-09-07T12:00:02Z",
+      "transform_id": "transform-doc-injection-001"
+    }
+  ]
+}

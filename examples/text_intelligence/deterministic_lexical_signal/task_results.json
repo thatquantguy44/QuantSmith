@@ -1,0 +1,202 @@
+{
+  "promotion_policy": {
+    "fixture_only": true,
+    "minimum_citation_coverage": 1.0,
+    "production_use": "prohibited",
+    "requires_review": true
+  },
+  "result_set_id": "results-text-lexical-liquidity-001",
+  "results": [
+    {
+      "calibration": {
+        "bucket": "0.75-1.00",
+        "method": "fixture_declared"
+      },
+      "confidence": 0.8,
+      "corpus_snapshot_id": "corpus-text-lexical-liquidity-001-v1",
+      "error_code": null,
+      "evidence_span_ids": [
+        "span-doc-liquidity-001-001"
+      ],
+      "model_capability_id": "cap-text-lexical-liquidity-001-lexical",
+      "output": {
+        "label": "improving",
+        "ontology_version": "funding-outlook-v1"
+      },
+      "result_id": "result-text-lexical-liquidity-001-classification",
+      "review": {
+        "escalation_conditions": [
+          "any production, client, trading, or restricted-data use"
+        ],
+        "overrides": [],
+        "owner": "spec0071",
+        "rejected_alternatives": [
+          "represent fixture output as production evidence"
+        ],
+        "reviewed_at": "2026-09-07T12:00:11Z",
+        "reviewer": "text-intelligence-fixture",
+        "status": "fixture_approved",
+        "uncertainty": "Synthetic fixture demonstrates contracts only; no investment conclusion is approved."
+      },
+      "status": "supported",
+      "task_type": "classification",
+      "uncertainty": "Reference fixture; not production-calibrated."
+    },
+    {
+      "calibration": {
+        "bucket": "0.75-1.00",
+        "method": "fixture_declared"
+      },
+      "confidence": 0.8,
+      "corpus_snapshot_id": "corpus-text-lexical-liquidity-001-v1",
+      "error_code": null,
+      "evidence_span_ids": [
+        "span-doc-liquidity-001-001"
+      ],
+      "model_capability_id": "cap-text-lexical-liquidity-001-lexical",
+      "output": {
+        "entities": [
+          {
+            "entity_id": "issuer-alpha",
+            "surface": "Issuer Alpha",
+            "type": "issuer"
+          }
+        ]
+      },
+      "result_id": "result-text-lexical-liquidity-001-entity",
+      "review": {
+        "escalation_conditions": [
+          "any production, client, trading, or restricted-data use"
+        ],
+        "overrides": [],
+        "owner": "spec0071",
+        "rejected_alternatives": [
+          "represent fixture output as production evidence"
+        ],
+        "reviewed_at": "2026-09-07T12:00:11Z",
+        "reviewer": "text-intelligence-fixture",
+        "status": "fixture_approved",
+        "uncertainty": "Synthetic fixture demonstrates contracts only; no investment conclusion is approved."
+      },
+      "status": "supported",
+      "task_type": "entity_extraction",
+      "uncertainty": "Reference fixture; not production-calibrated."
+    },
+    {
+      "calibration": {
+        "bucket": "0.75-1.00",
+        "method": "fixture_declared"
+      },
+      "confidence": 0.8,
+      "corpus_snapshot_id": "corpus-text-lexical-liquidity-001-v1",
+      "error_code": null,
+      "evidence_span_ids": [
+        "span-doc-liquidity-001-001"
+      ],
+      "model_capability_id": "cap-text-lexical-liquidity-001-lexical",
+      "output": {
+        "values": [
+          {
+            "currency": null,
+            "name": "funding_cost_change",
+            "period": "reported",
+            "unit": "basis_points",
+            "value": -25
+          }
+        ]
+      },
+      "result_id": "result-text-lexical-liquidity-001-value",
+      "review": {
+        "escalation_conditions": [
+          "any production, client, trading, or restricted-data use"
+        ],
+        "overrides": [],
+        "owner": "spec0071",
+        "rejected_alternatives": [
+          "represent fixture output as production evidence"
+        ],
+        "reviewed_at": "2026-09-07T12:00:11Z",
+        "reviewer": "text-intelligence-fixture",
+        "status": "fixture_approved",
+        "uncertainty": "Synthetic fixture demonstrates contracts only; no investment conclusion is approved."
+      },
+      "status": "supported",
+      "task_type": "value_extraction",
+      "uncertainty": "Reference fixture; not production-calibrated."
+    },
+    {
+      "calibration": {
+        "bucket": "0.75-1.00",
+        "method": "fixture_declared"
+      },
+      "confidence": 0.8,
+      "corpus_snapshot_id": "corpus-text-lexical-liquidity-001-v1",
+      "error_code": null,
+      "evidence_span_ids": [
+        "span-doc-liquidity-001-001"
+      ],
+      "model_capability_id": "cap-text-lexical-liquidity-001-lexical",
+      "output": {
+        "ontology_version": "liquidity-stance-v1",
+        "stance": "positive_liquidity"
+      },
+      "result_id": "result-text-lexical-liquidity-001-stance",
+      "review": {
+        "escalation_conditions": [
+          "any production, client, trading, or restricted-data use"
+        ],
+        "overrides": [],
+        "owner": "spec0071",
+        "rejected_alternatives": [
+          "represent fixture output as production evidence"
+        ],
+        "reviewed_at": "2026-09-07T12:00:11Z",
+        "reviewer": "text-intelligence-fixture",
+        "status": "fixture_approved",
+        "uncertainty": "Synthetic fixture demonstrates contracts only; no investment conclusion is approved."
+      },
+      "status": "supported",
+      "task_type": "sentiment_stance",
+      "uncertainty": "Reference fixture; not production-calibrated."
+    },
+    {
+      "calibration": {
+        "bucket": "0.75-1.00",
+        "method": "fixture_declared"
+      },
+      "confidence": 0.8,
+      "corpus_snapshot_id": "corpus-text-lexical-liquidity-001-v1",
+      "error_code": null,
+      "evidence_span_ids": [
+        "span-doc-liquidity-001-001"
+      ],
+      "model_capability_id": "cap-text-lexical-liquidity-001-lexical",
+      "output": {
+        "themes": [
+          "liquidity",
+          "short_term_funding"
+        ]
+      },
+      "result_id": "result-text-lexical-liquidity-001-theme",
+      "review": {
+        "escalation_conditions": [
+          "any production, client, trading, or restricted-data use"
+        ],
+        "overrides": [],
+        "owner": "spec0071",
+        "rejected_alternatives": [
+          "represent fixture output as production evidence"
+        ],
+        "reviewed_at": "2026-09-07T12:00:11Z",
+        "reviewer": "text-intelligence-fixture",
+        "status": "fixture_approved",
+        "uncertainty": "Synthetic fixture demonstrates contracts only; no investment conclusion is approved."
+      },
+      "status": "supported",
+      "task_type": "theme_detection",
+      "uncertainty": "Reference fixture; not production-calibrated."
+    }
+  ],
+  "schema_version": "quantsmith.text_intelligence.results.v1",
+  "task_schema_version": "quantsmith.text_intelligence.task.v1"
+}

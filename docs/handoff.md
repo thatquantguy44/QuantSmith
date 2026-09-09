@@ -4,16 +4,17 @@
 
 The SDK has a working v1: a **spec-driven engineering framework** over the six
 software-development stages, **168 agents** in `agents/`,
-**34 quality gates**, **35 instruction standards**, and CI that
+**35 quality gates**, **35 instruction standards**, and CI that
 enforces the deterministic gates. It remains primarily a scaffold to be copied
-into quant repos, with `src/quantsmith/pipelines/` holding runnable, dependency-free
-reference pipelines for most specs (see `specs/README.md`'s index for the current
-list), and `src/quantsmith/quant/agentic_quant/` holding a further runtime (spec
-`0023`) with `numpy`/optional-`scipy` dependencies. `adapters/` is a first-class
+into quant repos, with `src/quantsmith/pipelines/`, `src/quantsmith/orchestration/`,
+and `src/quantsmith/text_intelligence/` holding runnable, dependency-light
+reference foundations (see `specs/README.md`'s index for the current list), and
+`src/quantsmith/quant/agentic_quant/` holding a further runtime (spec `0023`)
+with `numpy`/optional-`scipy` dependencies. `adapters/` is a first-class
 SDK surface (6 groups) — the provider boundary between agent decisions and
 external systems (delivery, scheduling, storage, data access, model runtimes).
 
-- Build-out branch: `claude/dev-stages-hooks-agents-co1sjj` (open as PR #4 into `main`).
+- Current text-foundation branch: `spec0071-nlp-llm-text-intelligence-implementation`.
 - Root `CLAUDE.md` activates the framework by default for any agent in the repo.
 - `agents/README.md` is the agent catalog and the orchestrator's routing table.
 
@@ -44,10 +45,10 @@ as the live count, not the number here)** — all on the four-file contract
   per-group membership and counts, which change more often than this file is
   refreshed.
 
-**Gates (34)** in `hooks/stages/`, driven by `run-stage.sh`; advisory by default,
+**Gates (35)** in `hooks/stages/`, driven by `run-stage.sh`; advisory by default,
 `QF_STAGE_ENFORCE=1` blocks:
 
-- Cross-cutting: `spec`, `orchestration`. Per stage: `planning`, `design`, `implementation`,
+- Cross-cutting: `spec`, `orchestration`, `text-intelligence`. Per stage: `planning`, `design`, `implementation`,
   `testing`, `deployment`, `maintenance`.
 - Quant: `leakage`, `backtest` (incl. a financing theme for shorts),
   `repro`, `data-contract`, `pipeline-contract`, `alert-contract`,
@@ -137,24 +138,30 @@ if only one thing can move at a time:
    thresholds—plus a future persisted manual-task format only if a concrete
    consumer needs it. Do not add network or credential ownership to the SDK to
    make a demonstration look deployed.
-4. **Prompt / Context / Harness Engineering Foundation (spec `0070`, Draft).**
-   Turn the prompt/context/harness review finding into a typed orchestration run
-   envelope plus manifest and gate contracts: prompt manifest, context manifest,
-   assumption ledger, evaluation harness, audit event schema, and reproducible
-   replay command. This is the cross-cutting layer for preserving assumptions,
-   validating every orchestration layer, auditing decisions, detecting
-   prompt/context leakage, and reproducing deterministic or fixture-backed
-   agentic quant runs. It does not activate or draft `0064`–`0069`.
-5. **NLP, LLM, and Quant Text Intelligence Foundation (spec `0071`, Draft).**
-   Compose the existing knowledge agents, `llm_runtime` adapters, MCP resources
-   and planned `0054` RAG work, `0056` market-research knowledge base, and
-   `sources/` catalog into one governed text-intelligence layer. Add typed
-   corpus and transformation lineage, provider-neutral frontier/local model and
-   embedding/reranking/training-plugin capabilities, access-tier index
-   snapshots, structured text tasks, leakage-aware evaluation, auditable
-   text-derived signals, and `0070` replay integration. This is a Draft
-   foundation only; it does not select a provider/backend, train a model,
-   implement `0054`, or activate `0064`–`0069`.
+4. **Prompt / Context / Harness Engineering Foundation (spec `0070`, implemented Draft).**
+   The typed run envelope, prompt/context manifests, assumption ledger,
+   evaluation harness, audit schema, replay engine/CLI, composite gate, two
+   examples, and Quant Model Factory producer are built. Spec `0071` now proves
+   the intended extension path by keeping its domain manifest and events inside
+   one hash-linked `0070` envelope/audit/replay chain. **Next:** review and
+   approve the Draft contract, then require new agentic producers to emit a
+   `0070` envelope rather than adding another orchestration ledger. Do not
+   activate `0064`–`0069` through this cross-cutting work.
+5. **NLP, LLM, and Quant Text Intelligence Foundation (spec `0071`, implemented Draft).**
+   The standard-library `text_intelligence` package, CLI, templates, source
+   fixture, synthetic disclosure, composite gate, 16-AC test module, and two
+   committed examples are built. They cover immutable corpora/source spans,
+   transformations and quarantine, provider-neutral hosted/local/embedding/
+   reranking/training profiles, access-tier index selection, structured tasks,
+   PIT/leakage evaluation, text signals, typed views for six agent domains, and
+   replay delegated to the actual `0070` engine. **Next pickup, in order:**
+   (a) review/approve `0070` and `0071`; (b) choose one real, licensed,
+   source-registered corpus and freeze its availability/revision/entitlement
+   policy in a bounded consumer spec; (c) activate reserved `0054` only when
+   that corpus needs live cited semantic retrieval, preserving pre-search tier
+   isolation; (d) benchmark a lexical baseline against any proposed model and
+   set promotion thresholds. Do not select a provider, train a model, or treat
+   fixture signals as research evidence without those approvals.
 
 ### Planned specs (reserved, not yet written)
 
@@ -179,8 +186,9 @@ nobody noticed.
 
 Specs `0063-short-term-markets-domain-foundation/`,
 `0070-prompt-context-harness-foundation/`, and
-`0071-nlp-llm-quant-text-intelligence-foundation/` are written and active as
-Drafts, so they are indexed rather than listed as unwritten reservations above.
+`0071-nlp-llm-quant-text-intelligence-foundation/` are written, implemented,
+and active as Drafts awaiting contract approval, so they are indexed rather
+than listed as unwritten reservations above.
 Specs `0064`–`0069` are **portfolio commitments, not active designs**: create and
 approve one only when `0063` has frozen the contract it consumes and the prior
 dependency named above is satisfied. Do not add agents merely to fill the map;

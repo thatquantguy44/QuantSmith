@@ -1,0 +1,69 @@
+{
+  "chain_id": "transforms-text-fixture-funding-001-v1",
+  "corpus_snapshot_id": "corpus-text-fixture-funding-001-v1",
+  "schema_version": "quantsmith.text_intelligence.transforms.v1",
+  "transforms": [
+    {
+      "config_version": "1.0.0",
+      "deterministic": true,
+      "implementation": "quantsmith.text_intelligence.producers._normalize_text",
+      "input_refs": [
+        {
+          "hash": "sha256:74681691a254c6888512d1a6eed16cfc9a005da4766b8ba09e2a37fa2d972d51",
+          "path": "documents/doc-funding-001.txt"
+        }
+      ],
+      "lineage_order": 1,
+      "operation": "normalization",
+      "output_refs": [
+        {
+          "hash": "sha256:74681691a254c6888512d1a6eed16cfc9a005da4766b8ba09e2a37fa2d972d51",
+          "path": "transformed/doc-funding-001.txt"
+        }
+      ],
+      "parameters": {
+        "source_boundaries": "preserved",
+        "unicode": "NFKC",
+        "whitespace": "collapse"
+      },
+      "security_scan": {
+        "flags": [],
+        "quarantine_action": "none",
+        "status": "pass"
+      },
+      "timestamp": "2026-09-07T13:00:01Z",
+      "transform_id": "transform-doc-funding-001"
+    },
+    {
+      "config_version": "1.0.0",
+      "deterministic": true,
+      "implementation": "quantsmith.text_intelligence.producers._normalize_text",
+      "input_refs": [
+        {
+          "hash": "sha256:bdc21ddb376627a2f482504a13f30d6733393f7edde567f4e4af1beded82a70c",
+          "path": "documents/doc-collateral-001.txt"
+        }
+      ],
+      "lineage_order": 2,
+      "operation": "normalization",
+      "output_refs": [
+        {
+          "hash": "sha256:bdc21ddb376627a2f482504a13f30d6733393f7edde567f4e4af1beded82a70c",
+          "path": "transformed/doc-collateral-001.txt"
+        }
+      ],
+      "parameters": {
+        "source_boundaries": "preserved",
+        "unicode": "NFKC",
+        "whitespace": "collapse"
+      },
+      "security_scan": {
+        "flags": [],
+        "quarantine_action": "none",
+        "status": "pass"
+      },
+      "timestamp": "2026-09-07T13:00:02Z",
+      "transform_id": "transform-doc-collateral-001"
+    }
+  ]
+}
