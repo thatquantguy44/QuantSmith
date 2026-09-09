@@ -104,16 +104,34 @@ Promotion to `reviewed` requires:
 
 ## Draft Decisions
 
-The Draft spec leaves these decisions unresolved:
+- **Resolved 2026-09-09, reviewer Joshua Lutkemuller, CFA:** named
+  practitioner and data/quant reviewer for this pack is Joshua Lutkemuller,
+  CFA. This names the reviewer; it does not by itself promote the 65 draft
+  records to `reviewed` — per-record promotion still requires the scope,
+  date, and evidence refs `README.md`'s own Review Status section requires
+  for each record.
+- **Resolved 2026-09-09, reviewer Joshua Lutkemuller, CFA:** licensed
+  industry/agreement materials policy is public citation only — name, link,
+  and date to a public regulatory/industry source (SEC, FRBNY, SIFMA,
+  DTCC-FICC, Treasury); no verbatim licensed clause text (ISDA/MRA/MSLA
+  body text) or paywalled content is ever committed. Matches
+  `instructions/data_provenance.md`'s existing real-data-first standard.
+- **Resolved 2026-09-09, reviewer Joshua Lutkemuller, CFA:** `0067` is
+  contract-only — no reference optimizer ships in this SDK. A real
+  collateral/margin optimizer is being built externally and registers
+  through `0026`'s model-plugin adapter using
+  `templates/optimization/collateral_margin_optimizer_contract.md`'s
+  problem/solution schema. See `specs/0067-collateral-margin-optimizer-contract/`.
+- **Open:** which non-Treasury cash product has the first real `0065`
+  consumer. Candidate order (nearest to `0063`'s existing Treasury-bill
+  discount/yield conventions first): commercial paper, then certificate of
+  deposit, then money market fund shares (NAV-based, deferred last as a
+  different modeling problem).
+- **Open:** whether a future MCP/resource server should expose this pack
+  directly or via the existing `0052` resource discovery pattern
+  (recommended: via `0052`, mirroring `0053`'s `knowledge://memory/...`
+  wiring, to reuse its `caller_clearance` enforcement rather than
+  duplicating it).
 
-- Named practitioner reviewer for viewpoints, conventions, and lifecycles.
-- Which industry or agreement materials can be used without copying licensed
-  text.
-- Whether `0067` owns a small reference optimizer, a model-plugin-only boundary,
-  or both.
-- Which non-Treasury cash product has the first real `0065` consumer.
-- Whether a future MCP/resource server should expose this pack directly or via
-  the existing `0052` resource discovery pattern.
-
-This implementation records those as blocked follow-up tasks rather than
-silently answering them.
+Two of the five original open decisions remain unresolved and are carried as
+blocked follow-up tasks rather than silently answered.

@@ -1,0 +1,44 @@
+{
+  "schema_version": "0067-collateral-margin-optimizer-solution/v1",
+  "status": "completed",
+  "correlation_id": "{must match the problem payload's correlation_id}",
+
+  "allocations": [
+    {
+      "obligation_id": "{string}",
+      "asset_id": "{string}",
+      "allocated_market_value": 0.0,
+      "haircut_applied": 0.0,
+      "margin_value_after_haircut": 0.0
+    }
+  ],
+
+  "unmet_obligations": [
+    { "obligation_id": "{string}", "shortfall_amount": 0.0, "reason": "{adopter-declared}" }
+  ],
+
+  "substitutions": [
+    {
+      "obligation_id": "{string}",
+      "replaced_asset_id": "{string}",
+      "new_asset_id": "{string}",
+      "reason": "{adopter-declared}",
+      "concentration_impact": "{adopter-declared, unverified until reviewed}"
+    }
+  ],
+
+  "explainability": {
+    "binding_constraints": ["{constraint id or description}"],
+    "rejected_alternatives": [
+      { "asset_id": "{string}", "obligation_id": "{string}", "reason": "{adopter-declared}" }
+    ]
+  },
+
+  "objective_value": null,
+  "liquidity_cost_total_bps": null,
+  "diagnostics_uri": null,
+  "timestamp_utc": "{ISO-8601}",
+  "retryable": false,
+  "error_code": null,
+  "error_message_redacted": null
+}
