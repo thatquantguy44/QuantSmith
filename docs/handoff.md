@@ -118,11 +118,13 @@ advisory-by-default deployment decision. The chain builds on
 > charter + reserved bounded children `0073`–`0079`) and adds the two things
 > credit needs that a pure measurement contract does not: a **decision
 > contract** — reason codes, policy versioning, protected-attribute
-> segregation, and a disparate-impact hook are structurally required on any
-> consumer-facing path, with the unsafe configuration made unrepresentable
-> rather than merely discouraged — and an **LLM evidence admission boundary**,
-> so document-derived values enter through `0071` corpora inside a `0070`
-> envelope as labeled derived evidence, never as unattributed decision inputs.
+> segregation, a disparity metric measured at the applied cutoff, per-feature
+> proxy visibility, and a less-discriminatory-alternative search on breach, all
+> structurally required on any consumer-facing path, with the unsafe
+> configuration made unrepresentable rather than merely discouraged — and an
+> **LLM evidence admission boundary**, so document-derived values enter through
+> `0071` corpora inside a `0070` envelope as labeled derived evidence, never as
+> unattributed decision inputs.
 >
 > **The owner's decision, not the agent's:** where `0072` ranks against the five
 > priorities below. It is deliberately listed apart from them rather than
@@ -1133,11 +1135,17 @@ manual-task persistence question stays deferred until a real consumer needs it.
     Two things make it different from `0063`, and they are the parts worth
     reviewing first. **A decision contract:** any workflow supporting a decision
     about an identifiable consumer must derive principal reason codes, record
-    policy version, cutoff and overrides, keep protected attributes out of
-    features while permitting segregated fairness testing, and expose a
-    disparate-impact hook — and a path that cannot do those is only
-    representable as `decision_support_only`, prohibited from sole-basis adverse
-    action. **An LLM evidence boundary:** text-derived values arrive as `0071`
+    policy version, cutoff and overrides, and keep protected attributes out of
+    features — and, because that last check is trivially satisfiable and
+    certifies nothing on its own, must also declare substantive fairness
+    testing: a protected-class testing basis (an estimate of which is itself
+    never a feature), an outcome-disparity metric with an institution-supplied
+    threshold measured at the cutoff actually applied, per-feature proxy
+    association, and a less-discriminatory-alternative search on breach. A path
+    that cannot do those is only representable as `decision_support_only`,
+    prohibited from sole-basis adverse action. That second half (REQ-020) was
+    added after implementation, by audit of the first: `G-0072-011` records the
+    gap rather than erasing it. **An LLM evidence boundary:** text-derived values arrive as `0071`
     artifacts inside a `0070` envelope with resolvable source spans, an
     assumption-ledger entry, and replay, labeled `derived_evidence`, and require
     named human review before becoming a decision input. Deployability in the
@@ -1145,14 +1153,14 @@ manual-task persistence question stays deferred until a real consumer needs it.
     a flag an author can set.
 
     **State, stated honestly:** the knowledge pack is built and validated.
-    `knowledge/credit_risk/` holds 107 records — 53 concepts, 13 conventions,
+    `knowledge/credit_risk/` holds 109 records — 53 concepts, 14 conventions,
     3 lifecycle graphs (32 states, 45 transitions), 7 decision paths, 7
-    governance artifacts, 6 workflows, 8 capabilities, and 10 golden cases —
+    governance artifacts, 6 workflows, 8 capabilities, and 11 golden cases —
     behind a standard-library validator
-    (`src/quantsmith/pipelines/credit_risk_knowledge.py`) and a 49-test
+    (`src/quantsmith/pipelines/credit_risk_knowledge.py`) and a 60-test
     acceptance module. Five public sources are registered locator-only, and
     `instructions/credit_risk.md` is the shared operating standard.
-    15 of 17 tasks are `done`.
+    16 of 18 tasks are `done`.
 
     **What is NOT built, and should not be assumed:** no credit agent exists —
     `T-011` is `todo` by design, and a test currently asserts that
@@ -1160,10 +1168,10 @@ manual-task persistence question stays deferred until a real consumer needs it.
     a coverage-matrix row. No measurement, scoring, ECL, capital, or monitoring
     runtime exists; all 8 capabilities sit honestly at `contract_only`, and the
     validator rejects a `reference_runtime` claim with no runtime module behind
-    it. **All 107 records are `draft`** and a test asserts that count so it
+    it. **All 109 records are `draft`** and a test asserts that count so it
     cannot drift quietly: `T-016` is `blocked` on a named credit-domain
     reviewer. No existing runtime's numerical output changed; the full suite
-    moved from 547 to 596 passing with nothing else altered.
+    moved from 547 to 607 passing with nothing else altered.
 
     **Next pickup, in order:** (a) review and approve the Draft spec chain and
     the built pack, paying most attention to REQ-002's term distinctions,

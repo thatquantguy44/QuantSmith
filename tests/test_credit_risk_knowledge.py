@@ -15,6 +15,8 @@ import pytest
 
 from quantsmith.pipelines.credit_risk_knowledge import (
     CONSUMER_DECISION_OBLIGATIONS,
+    FAIRNESS_TESTING_OBLIGATIONS,
+    adverse_impact_ratio,
     REQUIRED_CAPABILITY_DOMAINS,
     REQUIRED_GOVERNANCE_ARTIFACTS,
     CreditRiskValidationError,
@@ -673,6 +675,140 @@ def test_instructions_and_agents_cite_canonical_pack_AC_019():
     text = instructions.read_text(encoding="utf-8")
     assert "knowledge/credit_risk" in text
     assert "0072" in text
+
+
+# --- AC-023 / AC-024: substantive fairness testing --------------------------
+
+
+def test_consumer_paths_declare_substantive_fairness_testing_AC_023():
+    for path in _pack()["decision_paths"]["decision_paths"]:
+        fairness = path["fairness_testing"]
+        if not path["consumer_decision"]:
+            assert fairness is None, path["id"]
+            continue
+        for field in FAIRNESS_TESTING_OBLIGATIONS:
+            assert fairness[field], (path["id"], field)
+        assert fairness["measured_at_applied_cutoff"] is True
+        assert fairness["versioned_with_model"] is True
+        lda = fairness["less_discriminatory_alternative"]
+        assert lda["required_when"] == "disparity_threshold_breached"
+        assert set(lda["outcome_required"]) == {
+            "alternative_adopted", "business_need_rationale",
+        }
+
+
+@pytest.mark.parametrize("missing", FAIRNESS_TESTING_OBLIGATIONS)
+def test_missing_fairness_obligation_blocks_sole_basis_AC_023(missing):
+    """Each obligation is load-bearing: dropping any one must be rejected."""
+
+    path = copy.deepcopy(
+        next(
+            p for p in _pack()["decision_paths"]["decision_paths"]
+            if p["id"] == "path.retail_underwriting_decision"
+        )
+    )
+    path["fairness_testing"][missing] = None
+
+    errors: list[str] = []
+    _validate_decision_paths({"decision_paths": [path]}, errors)
+    assert any("sole-basis adverse action" in e for e in errors), missing
+
+    # decision_support_only remains the valid restatement.
+    path["sole_basis_adverse_action_permitted"] = False
+    errors = []
+    _validate_decision_paths({"decision_paths": [path]}, errors)
+    assert not errors
+
+
+def test_attribute_absence_alone_is_not_enough_AC_023():
+    """The gap this amendment closes: an empty feature list must not suffice."""
+
+    path = copy.deepcopy(
+        next(
+            p for p in _pack()["decision_paths"]["decision_paths"]
+            if p["id"] == "path.retail_underwriting_decision"
+        )
+    )
+    # Procedurally perfect and no protected attribute in features...
+    assert path["protected_attributes_in_features"] == []
+    for field in CONSUMER_DECISION_OBLIGATIONS:
+        assert path[field]
+    # ...but with no substantive fairness testing it is still rejected.
+    path["fairness_testing"] = None
+
+    errors: list[str] = []
+    _validate_decision_paths({"decision_paths": [path]}, errors)
+    assert any("fairness_testing" in e for e in errors)
+
+
+def test_protected_class_estimate_cannot_be_a_feature_AC_024():
+    path = copy.deepcopy(
+        next(
+            p for p in _pack()["decision_paths"]["decision_paths"]
+            if p["id"] == "path.retail_underwriting_decision"
+        )
+    )
+    path["fairness_testing"]["estimation_use"] = "feature_and_testing"
+
+    errors: list[str] = []
+    _validate_decision_paths({"decision_paths": [path]}, errors)
+    assert any("testing only" in e for e in errors)
+
+
+def test_disparity_breach_requires_an_lda_record_AC_024():
+    breach = adverse_impact_ratio(
+        approved_protected=180, total_protected=500,
+        approved_reference=600, total_reference=1000,
+        disparity_threshold=0.8,
+    )
+    assert breach["selection_rate_protected"] == pytest.approx(0.36)
+    assert breach["selection_rate_reference"] == pytest.approx(0.60)
+    assert breach["adverse_impact_ratio"] == pytest.approx(0.6)
+    assert breach["threshold_breached"] is True
+    assert breach["less_discriminatory_alternative_required"] is True
+
+    clear = adverse_impact_ratio(
+        approved_protected=290, total_protected=500,
+        approved_reference=600, total_reference=1000,
+        disparity_threshold=0.8,
+    )
+    assert clear["threshold_breached"] is False
+    assert clear["less_discriminatory_alternative_required"] is False
+
+
+def test_disparity_threshold_is_supplied_not_builtin_AC_024():
+    """The four-fifths ratio is a screening convention, not a constant we own."""
+
+    args = dict(approved_protected=180, total_protected=500,
+                approved_reference=600, total_reference=1000)
+    assert adverse_impact_ratio(disparity_threshold=0.8, **args)["threshold_breached"] is True
+    assert adverse_impact_ratio(disparity_threshold=0.5, **args)["threshold_breached"] is False
+
+    params = {
+        p["id"]: p
+        for conv in _pack()["conventions"]["conventions"]
+        for p in conv["parameters"]
+    }
+    for pid in ("param.fairness.disparity_threshold",
+                "param.fairness.protected_class_estimation_method"):
+        assert params[pid]["required"] is True
+        assert params[pid]["default"] is None
+
+
+def test_deployability_requires_fairness_testing_AC_024():
+    pack = _pack()
+    governance, paths = pack["governance"], pack["decision_paths"]
+    entry = {
+        "governance_evidence": [{"artifact_id": a} for a in REQUIRED_GOVERNANCE_ARTIFACTS],
+        "decision_path_id": "path.retail_underwriting_decision",
+    }
+    assert is_deployable(entry, governance, paths) is True
+
+    stripped = copy.deepcopy(paths)
+    for path in stripped["decision_paths"]:
+        if path["id"] == "path.retail_underwriting_decision":
+            path["fairness_testing"] = None
+    assert is_deployable(entry, governance, stripped) is False
 
 
 # --- AC-021 / AC-022: fixtures and a clean offline run ----------------------

@@ -48,6 +48,7 @@
 | T-014 | Implement the LLM evidence admission boundary over `0070` envelopes and `0071` artifacts: source spans, prompt/context manifest, assumption-ledger entry, replay reference, and `derived_evidence` labeling. | REQ-016, NFR-007 | done | Admission requires all six of artifact ref, source spans, envelope ref, manifest, assumption-ledger entry, and replay ref; each missing field is proven to block admission. Promotion to `decision_input` requires named human review and no automated path performs it. |
 | T-015 | Add `instructions/credit_risk.md` and update touching agents to cite the canonical pack instead of redefining shared terms. | REQ-018 | done | `instructions/credit_risk.md` added. Instruction-count truth moved 35 to 36; `README.md`, `docs/handoff.md`, and `docs/sdk_plan.md` updated in the same change and `doc-counts` is clean. |
 | T-016 | Complete two-part human review — credit practitioner review of measures, conventions, lifecycles, and decision paths, and a model-validation review of temporal and numerical cases — recording reviewer handles, scope, dates, and dispositions. | REQ-019, NFR-003, NFR-004 | blocked | Unchanged and genuinely blocked. All 107 records remain `draft`; `test_every_committed_record_is_still_draft_AC_020` asserts that rather than letting the count drift quietly. Resolution is a named credit-domain reviewer, which no automation here can substitute. |
+| T-018 | Close the REQ-014 proxy gap: add REQ-020, the fairness-testing convention and per-path obligations, the disparity golden case, validator enforcement, and AC-023/AC-024 tests. | REQ-014, REQ-020, NFR-008 | done | Found by auditing the built pack, not before implementation. Recorded as G-0072-011 rather than quietly fixed: the register keeps what was wrong and when. Every obligation has a per-field negative test, so each is provably load-bearing. |
 | T-017 | Run the credit validation module, full `pytest`, and the required repository gates (`spec`, `docs-link`, `spec-index`, `doc-counts`, `handoff-sync`, `source-catalog`, `data-provenance`, `secret-scan`, `agent-catalog`, `readme-sync`), and record exact evidence. | NFR-001, NFR-006 | done | Evidence recorded below. |
 
 Status values: `todo` | `in-progress` | `blocked` | `done`.
@@ -80,6 +81,8 @@ names its criterion in the test name, following `0063`'s convention.
 | AC-019 | `test_instructions_and_agents_cite_canonical_pack_AC_019` | done |
 | AC-020 | `test_review_promotion_rejects_missing_reviewer_or_high_gap_AC_020` | done |
 | AC-021 | `test_no_real_credit_data_is_committed_AC_021` (mechanical: committed JSON carries no personal-data keys) plus release-review diff inspection for the unchanged-runtime half | done |
+| AC-023 | `test_consumer_paths_declare_substantive_fairness_testing_AC_023`, `test_missing_fairness_obligation_blocks_sole_basis_AC_023` (parametrized over every obligation), `test_attribute_absence_alone_is_not_enough_AC_023` | done |
+| AC-024 | `test_protected_class_estimate_cannot_be_a_feature_AC_024`, `test_disparity_breach_requires_an_lda_record_AC_024`, `test_disparity_threshold_is_supplied_not_builtin_AC_024`, `test_deployability_requires_fairness_testing_AC_024` | done |
 | AC-022 | Credit validation module + `spec`, `docs-link`, `spec-index`, `doc-counts`, `handoff-sync`, `source-catalog`, `data-provenance`, `secret-scan` gates; full `pytest -q`; `git diff --check` | done |
 
 ## Validation Evidence
@@ -87,12 +90,12 @@ names its criterion in the test name, following `0063`'s convention.
 Captured 2026-09-09 on `claude/credit-risk-agents-spec-zttp6c`.
 
 - `PYTHONPATH=src python3 -m quantsmith.pipelines.credit_risk_knowledge` ->
-  `credit-risk validation OK (capabilities=8, concepts=53, conventions=13,
-  decision_paths=7, draft=107, golden_cases=10, lifecycles=3, records=107,
+  `credit-risk validation OK (capabilities=8, concepts=53, conventions=14,
+  decision_paths=7, draft=109, golden_cases=11, lifecycles=3, records=109,
   reviewed=0, workflows=6)`
-- `PYTHONPATH=src pytest -q tests/test_credit_risk_knowledge.py` -> `49 passed`
-- `PYTHONPATH=src pytest -q` -> `596 passed, 1 skipped` (was `547 passed, 1
-  skipped` before this change; no existing test changed behaviour)
+- `PYTHONPATH=src pytest -q tests/test_credit_risk_knowledge.py` -> `60 passed`
+- `PYTHONPATH=src pytest -q` -> `607 passed, 1 skipped` (was `547 passed, 1
+  skipped` before this spec; no existing test changed behaviour)
 - `hooks/stages/run-stage.sh spec spec-index handoff-sync doc-counts docs-link
   source-catalog data-provenance secret-scan agent-catalog readme-sync` ->
   clean except one pre-existing `readme-sync` finding for spec `0066`, which

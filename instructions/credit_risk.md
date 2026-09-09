@@ -50,9 +50,33 @@ borrower, the obligations in `decision_paths.json` are structural, not advisory:
   lawfully holds them, they are for segregated fairness testing only;
 - a callable disparate-impact hook.
 
-A path that cannot meet all four is **decision-support-only** and must not be the
-sole basis of an adverse action. This is not a judgement call to make per
+**Attribute absence is necessary, not sufficient, and must never be described as
+fair-lending compliance.** Disparate impact arises from facially neutral features
+that correlate with protected class — geography, education, employer, device,
+tenure. A model containing none of the nine registered attributes can still
+produce a decline pattern that fails an exam. So a consumer path additionally
+declares:
+
+- a protected-class testing basis: observed, or estimated by a named method
+  whose limitations are recorded. **An estimate of a protected attribute is a
+  protected attribute for feature purposes** — testing only, never an input;
+- an outcome-disparity metric with an institution-supplied threshold, measured
+  at the cutoff *actually applied*, not one chosen for the study;
+- per-feature association with that basis, so a proxy is visible rather than
+  hidden;
+- a less-discriminatory-alternative search when the threshold is breached,
+  recording either the alternative adopted or the business-need rationale for
+  retaining the model.
+
+A path that cannot meet all of this is **decision-support-only** and must not be
+the sole basis of an adverse action. This is not a judgement call to make per
 request: the validator rejects the unsafe configuration.
+
+The disparity threshold is an input, never a number this SDK supplies. The
+four-fifths ratio is a widely used *screening* convention — not a legal
+threshold and not a safe harbour. A breach says where to look; it never
+establishes that a model is lawful, and no agent may report it as though it
+does.
 
 Adverse action reason ordering must be deterministic. Ties break on a declared
 stable feature order, never on dictionary insertion or raw float comparison —
