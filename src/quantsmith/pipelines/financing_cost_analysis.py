@@ -27,8 +27,10 @@ Guarantees held by construction:
   quantified by re-decomposing under the shock, not assumed linear.
 * REQ-005 / AC-005 — capacity findings are keyed by borrow classification
   (GC/WARM/HTB), flagging where requested notional exceeds available.
-* NFR-001 / AC-006 — a financing leg whose rate was "known" after its position's
-  period ended is flagged as a look-ahead risk.
+* NFR-001 / AC-006 — a financing leg whose rate was not knowable by its
+  position's *period start* (not just after period end; a mid-period rate
+  applied retroactively is caught too, per spec `0066`) is flagged as a
+  look-ahead risk.
 """
 
 from __future__ import annotations
@@ -58,17 +60,27 @@ class FinancingLeg:
 
     ``kind`` is one of ``borrow_fee``, ``rebate``, ``funding``, ``margin``.
     ``rebate`` is income (netted against cost), the other three are cost.
+
+    ``day_count_basis`` defaults to :data:`_DAY_COUNT_BASIS` (ACT/360,
+    matching ``knowledge/short_term_markets``'s registered conventions) and
+    is explicit per leg rather than a single hardcoded global, per
+    ``specs/0066-securities-lending-model-correction/`` (gap D-0063-006).
+    Variable notional and a full cashflow-scheduling engine remain out of
+    scope; only the day-count basis itself is made explicit and overridable.
     """
 
     kind: str
     rate_bps: float
     rate_asof: str  # ISO date the rate was known as of (point-in-time)
+    day_count_basis: float = _DAY_COUNT_BASIS
 
     def __post_init__(self) -> None:
         if self.kind not in _LEG_KINDS:
             raise ValueError(f"unknown leg kind {self.kind!r}; must be one of {_LEG_KINDS}")
         if self.rate_bps < 0:
             raise ValueError("rate_bps must be non-negative; sign is handled by leg kind")
+        if self.day_count_basis <= 0:
+            raise ValueError("day_count_basis must be positive")
 
 
 @dataclass(frozen=True)
@@ -115,7 +127,7 @@ def _leg_cost(position: FinancedPosition, kind: str) -> float:
     total = 0.0
     for leg in position.legs:
         if leg.kind == kind:
-            total += position.notional * (leg.rate_bps / 10_000.0) * (position.days / _DAY_COUNT_BASIS)
+            total += position.notional * (leg.rate_bps / 10_000.0) * (position.days / leg.day_count_basis)
     return total
 
 
@@ -233,15 +245,30 @@ def capacity_limit(
 
 
 def check_point_in_time(positions: Sequence[FinancedPosition]) -> List[str]:
-    """Flags a financing leg whose rate was known after its position's period ended."""
+    """Flags a financing leg whose rate was not known at its position's inception.
+
+    A leg's rate is applied to the *whole* period from ``period_start``, so
+    it must be knowable by ``period_start`` -- matching
+    ``knowledge/short_term_markets``'s own
+    ``golden.temporal.asof_excludes_later_known_rate`` rule ("knowledge_as_of
+    must be on or before the query as_of date"). A rate first known partway
+    through the period (after ``period_start`` but before ``period_end``)
+    still leaks: applying it to the days before it was known back-dates
+    information. See ``specs/0066-securities-lending-model-correction/``
+    (gap D-0063-005). Segmenting a leg into sub-periods so a mid-period rate
+    change could be admitted for its own later sub-period only is
+    deliberately out of scope here -- a mid-period rate is flagged, not
+    partially admitted.
+    """
     findings = []
     for p in positions:
-        period_end = _parse_date(p.period_end)
+        period_start = _parse_date(p.period_start)
         for leg in p.legs:
-            if _parse_date(leg.rate_asof) > period_end:
+            if _parse_date(leg.rate_asof) > period_start:
                 findings.append(
                     f"{p.position_id}: {leg.kind} rate_asof {leg.rate_asof} is after "
-                    f"period_end {p.period_end} -- look-ahead risk"
+                    f"period_start {p.period_start} -- not known at position inception, "
+                    f"look-ahead risk"
                 )
     return findings
 

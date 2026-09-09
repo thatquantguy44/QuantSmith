@@ -8,7 +8,11 @@
 - Net the borrow fee and short rebate from short returns; never assume a free short.
 - Distinguish general collateral from stock-loan specials by borrower/lender
   viewpoint; do not import the repo-special sign convention without an explicit
-  conversion.
+  conversion. `concept.stock_loan_special` (higher-borrow-cost viewpoint) and
+  `concept.repo_special` (GC-minus-specific-rate viewpoint) are distinct
+  records in `knowledge/short_term_markets/taxonomy.json` for exactly this
+  reason — see `golden.repo.specialness_sign`'s invariant that "stock-loan
+  specialness signs must not be reused without viewpoint conversion."
 - Use point-in-time borrow rates and hard-to-borrow status, not today's values.
 - Treat recall risk as a constraint: a recalled borrow can force a buy-in.
 - Handle corporate actions on loaned stock: manufactured dividends and lost votes.

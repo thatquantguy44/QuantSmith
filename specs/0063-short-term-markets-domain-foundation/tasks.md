@@ -78,12 +78,16 @@ Reviewed `spec.md` and `plan.md` before implementation. Status as of
 - `0067` optimizer boundary: **resolved** — contract-only, no reference
   optimizer; a real, externally-built optimizer registers through `0026`
   using the new `0067-collateral-margin-optimizer-contract` schema.
-- First non-Treasury `0065` cash-product consumer: still open. Candidate
-  order recorded for when `0065` is activated: commercial paper, certificate
-  of deposit, money market fund shares.
-- Direct MCP/resource-server exposure: still open. Recommendation on record:
-  route through the existing `0052` resource discovery pattern rather than a
-  new direct-access path.
+- First non-Treasury `0065` cash-product consumer: **resolved** — commercial
+  paper, then certificate of deposit, then money market fund shares last.
+- Direct MCP/resource-server exposure: **resolved** — route through the
+  existing `0052` resource discovery pattern rather than a new direct-access
+  path.
+
+All five original Draft Decisions are now resolved (see
+`knowledge/short_term_markets/README.md`). T-010's full per-record
+practitioner/data-quant review of the 65 `draft` records remains separately
+open and blocked.
 
 ## Validation Evidence
 
