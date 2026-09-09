@@ -189,7 +189,7 @@ Grouped in the `optimization/` category folder; these agents classify constraine
 | `optimization/routing_scheduling/` | Routing, scheduling, order batching, job/crew allocation, market windows, and latency-aware placement. |
 | `optimization/inventory_supply_chain/` | Replenishment, allocation, service levels, safety stock, and multi-echelon supply decisions. |
 | `optimization/portfolio_construction/` | Portfolio weights, factor/risk constraints, turnover, tax lots, capacity, and rebalancing. |
-| `optimization/collateral_margin_optimization/` | Eligibility, haircuts, margin, cheapest-to-deliver, substitutions, liquidity buffers, and regulation. |
+| `optimization/collateral_margin_optimization/` | Eligibility, haircuts, margin, cheapest-to-deliver, substitutions, liquidity buffers, and regulation. Contract-only: no reference optimizer ships; a real optimizer registers through `0026` using the `0067` problem/solution schema grounded in `0063`'s taxonomy. |
 | `optimization/execution_optimization/` | Trading schedules, participation, venue choice, order slicing, impact, slippage, and fill-risk trade-offs. |
 | `optimization/resource_capacity_optimization/` | Compute, staffing, capital, balance-sheet, quota, cloud, API, and throughput allocation. |
 | `optimization/pricing_revenue_optimization/` | Bid/ask, rebates, fee schedules, markdowns, elasticity, acceptance probabilities, and revenue risk. |
