@@ -365,7 +365,12 @@ also has a tested runtime (spec `0028-financing-cost-analysis`):
 `src/quantsmith/pipelines/financing_cost_analysis.py` — cost-of-carry
 decomposition, financing-aware returns, understated-backtest flags,
 rate-shock sensitivity, and capacity findings, reconciling with
-`securities_lending`'s rate/classification vocabulary by value.
+`securities_lending`'s rate/classification vocabulary by value. Both
+runtimes had five gap-register discrepancies against `0063`'s canonical
+domain pack corrected in place (configurable classification thresholds,
+ACT/360 accrual, an honest — not fabricated — counterparty-concentration
+boundary, a tightened point-in-time check, and an explicit day-count basis)
+by spec `0066-securities-lending-model-correction`.
 
 ## Formulaic Alpha Agents (`formulaic_alphas/`)
 

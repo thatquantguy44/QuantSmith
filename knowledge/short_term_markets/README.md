@@ -122,16 +122,17 @@ Promotion to `reviewed` requires:
   through `0026`'s model-plugin adapter using
   `templates/optimization/collateral_margin_optimizer_contract.md`'s
   problem/solution schema. See `specs/0067-collateral-margin-optimizer-contract/`.
-- **Open:** which non-Treasury cash product has the first real `0065`
-  consumer. Candidate order (nearest to `0063`'s existing Treasury-bill
-  discount/yield conventions first): commercial paper, then certificate of
-  deposit, then money market fund shares (NAV-based, deferred last as a
-  different modeling problem).
-- **Open:** whether a future MCP/resource server should expose this pack
-  directly or via the existing `0052` resource discovery pattern
-  (recommended: via `0052`, mirroring `0053`'s `knowledge://memory/...`
-  wiring, to reuse its `caller_clearance` enforcement rather than
-  duplicating it).
+- **Resolved 2026-09-09, reviewer Joshua Lutkemuller, CFA:** first
+  non-Treasury `0065` cash-product consumer is commercial paper (nearest to
+  `0063`'s existing Treasury-bill discount/yield conventions), then
+  certificate of deposit, then money market fund shares last (NAV-based,
+  a different modeling problem, deferred).
+- **Resolved 2026-09-09, reviewer Joshua Lutkemuller, CFA:** a future MCP/
+  resource server exposes this pack via the existing `0052` resource
+  discovery pattern (`knowledge://short_term_markets/...`, mirroring `0053`'s
+  `knowledge://memory/...` wiring), not a new direct-access path — reuses
+  `0052`'s `caller_clearance` enforcement rather than duplicating it.
 
-Two of the five original open decisions remain unresolved and are carried as
-blocked follow-up tasks rather than silently answered.
+All five original open decisions are now resolved. Per-record promotion of
+the 65 `draft` records to `reviewed` (T-010's full practitioner/data-quant
+pass) remains separately open.
