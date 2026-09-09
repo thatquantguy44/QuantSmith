@@ -1,0 +1,72 @@
+{
+  "as_of": "2026-09-07T13:00:12Z",
+  "caller": {
+    "clearance": "internal",
+    "id": "text-intelligence-fixture"
+  },
+  "context_id": "context-text-fixture-funding-001",
+  "context_window": {
+    "character_budget": 16000,
+    "token_budget": 4096
+  },
+  "exclusions": [
+    {
+      "locator": "quarantined fixture inputs",
+      "reason": "unsafe text is excluded before prompt composition"
+    }
+  ],
+  "items": [
+    {
+      "access_level": "public",
+      "budget": {
+        "characters": 512,
+        "tokens": 128
+      },
+      "caller_clearance": "internal",
+      "citations": [
+        {
+          "label": "doc-funding-001",
+          "locator": "documents/doc-funding-001.txt"
+        }
+      ],
+      "content_hash": "sha256:74681691a254c6888512d1a6eed16cfc9a005da4766b8ba09e2a37fa2d972d51",
+      "context_id": "context-doc-funding-001",
+      "effective_at": "2026-09-02T13:00:00Z",
+      "expires_at": "2027-09-07T13:00:20Z",
+      "freshness": "current",
+      "known_at": "2026-09-02T13:01:00Z",
+      "locator": "documents/doc-funding-001.txt",
+      "rank": 1,
+      "retrieval_query": "funding liquidity collateral",
+      "selection_rule": "immutable corpus snapshot and caller-eligible source",
+      "source_authority": "source-catalog://text_intelligence_fixture"
+    },
+    {
+      "access_level": "public",
+      "budget": {
+        "characters": 512,
+        "tokens": 128
+      },
+      "caller_clearance": "internal",
+      "citations": [
+        {
+          "label": "doc-collateral-001",
+          "locator": "documents/doc-collateral-001.txt"
+        }
+      ],
+      "content_hash": "sha256:bdc21ddb376627a2f482504a13f30d6733393f7edde567f4e4af1beded82a70c",
+      "context_id": "context-doc-collateral-001",
+      "effective_at": "2026-09-02T13:02:00Z",
+      "expires_at": "2027-09-07T13:00:20Z",
+      "freshness": "current",
+      "known_at": "2026-09-02T13:03:00Z",
+      "locator": "documents/doc-collateral-001.txt",
+      "rank": 2,
+      "retrieval_query": "funding liquidity collateral",
+      "selection_rule": "immutable corpus snapshot and caller-eligible source",
+      "source_authority": "source-catalog://text_intelligence_fixture"
+    }
+  ],
+  "run_id": "text-fixture-funding-001",
+  "schema_version": "quantsmith.orchestration.context.v1"
+}

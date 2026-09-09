@@ -1,0 +1,24 @@
+{
+  "access_tier": "public",
+  "algorithm": "flat-fixture",
+  "build_version": "1.0.0",
+  "config": {
+    "backend": "in-memory-metadata-only",
+    "ordering": "vector_id"
+  },
+  "corpus_cutoff": "2026-09-07T13:00:12Z",
+  "distance_metric": "cosine",
+  "embedding_id": "embedding-text-fixture-funding-001-v1",
+  "entitlements": [],
+  "immutable": true,
+  "index_snapshot_id": "index-text-fixture-funding-001-public-v1",
+  "schema_version": "quantsmith.text_intelligence.index.v1",
+  "source_license_eligibility": [
+    "synthetic_fixture"
+  ],
+  "vector_ids": [
+    "vector-span-doc-funding-001-001",
+    "vector-span-doc-collateral-001-001"
+  ],
+  "vector_set_hash": "sha256:c3055d36d2df84c4d08aa14b2ea0b4405d98fa8c5f5acbb5e313bbe02ff4edba"
+}

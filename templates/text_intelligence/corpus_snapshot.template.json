@@ -1,0 +1,14 @@
+{
+  "schema_version": "quantsmith.text_intelligence.corpus.v1",
+  "snapshot_id": "corpus-<id>-v1",
+  "created_at": "YYYY-MM-DDTHH:MM:SSZ",
+  "decision_cutoff": "YYYY-MM-DDTHH:MM:SSZ",
+  "immutable": true,
+  "source_policy": {"registered_source_ids": ["<sources-id>"], "allowed_access_levels": ["public"], "allowed_license_classes": ["<license>"], "credentials_by_reference": true, "raw_credentials_prohibited": true},
+  "documents": [{"document_id": "<id>", "source_id": "<source-id>", "content_ref": {"path": "documents/<id>.txt", "hash": "sha256:<64-hex>"}, "publication_time": "YYYY-MM-DDTHH:MM:SSZ", "observation_time": "YYYY-MM-DDTHH:MM:SSZ", "ingestion_time": "YYYY-MM-DDTHH:MM:SSZ", "available_at": "YYYY-MM-DDTHH:MM:SSZ", "revision_group_id": "<id>", "revision_number": 1, "supersession_state": "current", "language": "en", "content_type": "text/plain", "access_level": "public", "entitlement": "public", "license_class": "<license>", "split": "backtest", "canonical_group_id": "<group>", "near_duplicate_group_id": "<group>", "security_status": "accepted"}],
+  "spans": [{"span_id": "<id>", "document_id": "<id>", "start": 0, "end": 1, "content_ref": {"path": "transformed/<id>.txt", "hash": "sha256:<64-hex>"}, "transform_version": "1.0.0", "access_level": "public", "split": "backtest"}],
+  "deduplication_policy": {"exact": "content_hash", "near_duplicate": "declared_group_before_split", "version": "1.0.0"},
+  "split_policy": {"group_before_split": true, "temporal_cutoff": "YYYY-MM-DDTHH:MM:SSZ", "allowed": ["train", "validation", "test", "retrieval", "backtest", "none"]},
+  "exclusions": [],
+  "snapshot_hash": "sha256:<64-hex>"
+}

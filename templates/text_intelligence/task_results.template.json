@@ -1,0 +1,7 @@
+{
+  "schema_version": "quantsmith.text_intelligence.results.v1",
+  "result_set_id": "results-<run-id>",
+  "task_schema_version": "quantsmith.text_intelligence.task.v1",
+  "results": [{"result_id": "<id>", "task_type": "classification", "status": "supported", "model_capability_id": "<capability-id>", "corpus_snapshot_id": "corpus-<id>-v1", "evidence_span_ids": ["<span-id>"], "output": {"label": "<label>"}, "confidence": 0.0, "calibration": {"method": "<method>"}, "uncertainty": "<limits>", "error_code": null, "review": {"status": "pending", "owner": "<owner>", "reviewer": "<reviewer>", "timestamp": "YYYY-MM-DDTHH:MM:SSZ", "uncertainty": "<limits>", "override": null, "rejected_alternatives": [], "escalation": "<conditions>"}}],
+  "promotion_policy": {"fixture_only": true, "requires_review": true, "minimum_citation_coverage": 1.0, "production_use": "prohibited"}
+}

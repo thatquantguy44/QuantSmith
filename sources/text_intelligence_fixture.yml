@@ -1,0 +1,34 @@
+source_id: "text_intelligence_fixture"
+name: "QuantSmith Synthetic Text-Intelligence Fixtures"
+type: file_feed
+owner: "spec0071"
+description: >
+  Version-controlled, fictional text used only to validate spec 0071 corpus,
+  transformation, task, signal, audit, and replay contracts offline. It is not
+  market evidence and must never be promoted as a production source.
+
+domain: ["nlp_llm", "quant_text_intelligence"]
+access_level: public
+
+quality:
+  completeness: high
+  timeliness: "fixed synthetic timestamps committed with each fixture"
+  known_issues:
+    - "synthetic examples cannot support investment or market conclusions"
+    - "no live source availability, revision behavior, or entitlement behavior is exercised"
+  last_assessed: "2026-09-07"
+
+point_in_time:
+  supports_asof: true
+  revision_policy: "fixtures are immutable within a run and versioned through git plus content hashes"
+
+connection:
+  method: file_feed
+  endpoint_or_host: "examples/text_intelligence"
+  credential_ref: "NOT_REQUIRED"
+
+documentation_uri: "examples/text_intelligence/README.md"
+status: active
+
+data_contract_refs:
+  - "specs/0071-nlp-llm-quant-text-intelligence-foundation/spec.md"

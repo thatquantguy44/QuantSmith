@@ -1,0 +1,6 @@
+{
+  "claim_type": "model_synthesis",
+  "status": "supported",
+  "summary": "Issuer Beta describes stable funding access and more available collateral.",
+  "uncertainty": "Fixture response; no live provider inference was performed."
+}

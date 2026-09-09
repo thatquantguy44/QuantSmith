@@ -1,0 +1,47 @@
+{
+  "as_of": "2026-09-07T12:00:12Z",
+  "caller": {
+    "clearance": "internal",
+    "id": "text-intelligence-fixture"
+  },
+  "context_id": "context-text-lexical-liquidity-001",
+  "context_window": {
+    "character_budget": 16000,
+    "token_budget": 4096
+  },
+  "exclusions": [
+    {
+      "locator": "quarantined fixture inputs",
+      "reason": "unsafe text is excluded before prompt composition"
+    }
+  ],
+  "items": [
+    {
+      "access_level": "public",
+      "budget": {
+        "characters": 512,
+        "tokens": 128
+      },
+      "caller_clearance": "internal",
+      "citations": [
+        {
+          "label": "doc-liquidity-001",
+          "locator": "documents/doc-liquidity-001.txt"
+        }
+      ],
+      "content_hash": "sha256:9f1959044e463c0943ed6b701327a924b1d49c75751c903e5e218cc1100c1f94",
+      "context_id": "context-doc-liquidity-001",
+      "effective_at": "2026-09-01T12:00:00Z",
+      "expires_at": "2027-09-07T12:00:20Z",
+      "freshness": "current",
+      "known_at": "2026-09-01T12:01:00Z",
+      "locator": "documents/doc-liquidity-001.txt",
+      "rank": 1,
+      "retrieval_query": "funding liquidity collateral",
+      "selection_rule": "immutable corpus snapshot and caller-eligible source",
+      "source_authority": "source-catalog://text_intelligence_fixture"
+    }
+  ],
+  "run_id": "text-lexical-liquidity-001",
+  "schema_version": "quantsmith.orchestration.context.v1"
+}

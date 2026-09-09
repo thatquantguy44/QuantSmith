@@ -14,7 +14,7 @@ signal and model **reproducible, leakage-safe, and traceable to a spec**.
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](pyproject.toml)
 [![Approach: Spec-Driven](https://img.shields.io/badge/Approach-Spec--Driven-ff6f00)](instructions/spec_driven_development.md)
 [![Agents: 168](https://img.shields.io/badge/Agents-168-6f42c1)](agents/README.md)
-[![Quality Gates: 34](https://img.shields.io/badge/Quality%20Gates-34-2ea44f)](hooks/README.md)
+[![Quality Gates: 35](https://img.shields.io/badge/Quality%20Gates-35-2ea44f)](hooks/README.md)
 [![Specs: 60](https://img.shields.io/badge/Specs-60-0969da)](specs/README.md)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](.github/GIT_GUIDELINES.md)
 
@@ -66,7 +66,7 @@ signal and model **reproducible, leakage-safe, and traceable to a spec**.
 | 🔎 Catch leakage & time-alignment bugs | Point-in-time standards + `leakage`/`backtest` gates |
 | 📝 Document features, models, backtests | Templates, cards, and reproducible run artifacts |
 | 🤖 Reuse research workflows | 168 narrow, inspectable agent roles across the stack |
-| 🚦 Stop mistakes before commit/push | 34 quality gates, advisory by default, CI-enforceable |
+| 🚦 Stop mistakes before commit/push | 35 quality gates, advisory by default, CI-enforceable |
 | 🗣️ Share a common vocabulary | An [agentic dictionary](agentic_dictionary.md) for the team |
 
 ---
@@ -133,6 +133,8 @@ Useful entry points:
 | --- | --- |
 | `quantsmith-orchestration validate --discover examples/orchestration` | Validate all committed `0070` run envelopes. |
 | `quantsmith-orchestration replay --fixture-mode --envelope examples/orchestration/fixture_backed_llm_run/run_envelope.json` | Replay a fixture-backed LLM-eligible run without calling a provider. |
+| `quantsmith-text-intelligence validate --discover examples/text_intelligence` | Validate `0071` corpora, model/task/signal evidence, and their `0070` envelopes. |
+| `quantsmith-text-intelligence replay --manifest examples/text_intelligence/fixture_backed_retrieval_generation/text_intelligence_manifest.json --fixture-mode` | Replay a text run through the authoritative `0070` engine without a provider call. |
 | `quantsmith-memory` | Read, stage, promote, or discard workflow-memory records (`0048`/`0049`). |
 | `quantsmith-knowledge-console` | Serve or snapshot the read-only memory and market-research console (`0057`). |
 | `quantsmith-sec-lending`, `quantsmith-rebalancer`, `quantsmith-sp500` | Run the agentic quant CLI examples under `quant/agentic_quant/`. |
@@ -290,7 +292,7 @@ each. Uses the catalog as its routing table.
 
 **Knowledge** (`agents/knowledge/`) — `knowledge_ingestion/`, `knowledge_curation/`, `knowledge_retrieval/`, `institutional_memory/`: absorb, organize, retrieve, and persist institutional knowledge across domains — grounded, cited answers, access control and information barriers, provenance, and durable memory. Spec `0056` extends this into a market-research knowledge base: the same MCP retrieval surface, with separate governed storage and entitlement-aware access for user notes, firm research, tagged email market color, and approved external-manager materials.
 
-**Prompt/context/harness & text intelligence** — spec `0070` adds a typed orchestration evidence layer around agentic runs: prompt manifest, context manifest, assumption ledger, evaluation harness, audit events, replay command, templates, examples, and a Quant Model Factory producer. Draft spec `0071` composes the knowledge agents, `llm_runtime` adapters, MCP/RAG work, market-research knowledge base, and source catalog into one governed NLP/LLM/text-intelligence layer for embeddings, extraction, synthesis, and text-derived quant signals.
+**Prompt/context/harness & text intelligence** — spec `0070` adds a typed orchestration evidence layer around agentic runs: prompt manifest, context manifest, assumption ledger, evaluation harness, audit events, replay command, templates, examples, and a Quant Model Factory producer. Spec `0071` now composes that evidence layer with the knowledge agents, `llm_runtime` adapters, MCP/RAG boundary, market-research knowledge base, and source catalog through a tested offline foundation for corpora, embeddings, extraction, synthesis, and text-derived quant signals.
 
 **Role operations** (`agents/role_operations/`) — `meeting_to_action/`, `status_rollup/`, `rapid_scaffolder/`, `prior_art_scanner/`, `demo_narrative_packager/`, `tough_question_rehearsal/`, `experiment_ledger/`, `model_card_drafter/`, `audit_trail_keeper/`, `governance_readiness_checklist/`, `second_look_backtest_reviewer/`, `build_handoff_writer/`, `alert_triage/`: absorb a quant/data-science lead's operational overhead — meeting follow-ups, status updates, prototype setup, first-pass research scans, demo prep, and governance-adjacent drafting — so more time goes to model scoping and research. Configurable via a local, **gitignored** `role_context.yml`; this repository never carries real platform, client, or personal data, enforced by the `role-context` gate. All three phases of the four-pillar roster are shipped (specs `0024`, `0029`, `0030`) — fourteen agents in total; `second_look_backtest_reviewer` and `alert_triage` hand off to `backtest_review` and `alert_router`/`incident_notification` rather than replacing them.
 
@@ -343,13 +345,23 @@ audit JSONL, produced artifacts, hashes, policy metadata, and replay mode.
 - CLI: `quantsmith-orchestration validate` and `quantsmith-orchestration replay`
 - Producer: `emit_quant_factory_evidence` captures real `0061` Quant Model Factory decisions as validated `0070` bundles.
 
-Draft spec `0071` is the next text layer: governed corpora, source spans,
-transform lineage, model-capability profiles for frontier/local LLMs and
-embeddings, index snapshots, task result schemas, leakage-aware evaluations,
-review state, and text-derived signal lineage. It composes existing knowledge
-agents, `llm_runtime` adapters, MCP/RAG contracts, the market-research knowledge
-base, and the source catalog; it does not activate a provider, vector database,
-training system, or licensed-content store yet.
+Spec `0071` supplies the implemented offline text layer: governed corpora,
+source spans, transform lineage, provider-neutral capability profiles for
+frontier/local LLMs, embeddings, rerankers, and training plugins, access-tier
+index snapshots, task and signal schemas, leakage/safety evaluation, typed agent
+consumption, and its own composite gate and CLI.
+
+- Runtime: [`src/quantsmith/text_intelligence/`](src/quantsmith/text_intelligence/)
+- Templates: [`templates/text_intelligence/`](templates/text_intelligence/)
+- Examples: [`examples/text_intelligence/`](examples/text_intelligence/)
+- Gate: `hooks/stages/run-stage.sh text-intelligence`
+- CLI: `quantsmith-text-intelligence validate` and `quantsmith-text-intelligence replay`
+- Replay ownership: every `0071` manifest resolves one `0070` run envelope and
+  delegates replay to `quantsmith.orchestration`; no second audit/replay system exists.
+
+This foundation remains a Draft and deliberately does not activate a provider,
+vector database, live `0054` RAG server, training system, or licensed-content
+store. Those choices require bounded follow-on approval.
 
 ---
 
@@ -453,7 +465,7 @@ QF_STAGE_ENFORCE=1 hooks/stages/run-stage.sh spec   # blocking (as CI runs it)
 
 | Category | Gates |
 | --- | --- |
-| 🧭 Cross-cutting | `spec` · `orchestration` |
+| 🧭 Cross-cutting | `spec` · `orchestration` · `text-intelligence` |
 | 🔄 Per-stage | `planning` · `design` · `implementation` · `testing` · `deployment` · `maintenance` |
 | 📈 Quant | `leakage` · `backtest` · `repro` · `data-contract` · `pipeline-contract` · `alert-contract` · `monitoring-coverage` · `data-provenance` |
 | 🗃️ Repo | `secret-scan` · `docs-link` · `agent-catalog` · `spec-index` · `readme-sync` · `doc-counts` · `quantsmith-version` · `agent-attribution` · `handoff-sync` · `upstream-drift` · `ownership` · `persistent-knowledge` · `knowledge` · `role-context` · `model-plugin` · `source-catalog` |
@@ -486,7 +498,7 @@ the [spec index](specs/README.md).
 | [`0061`](specs/0061-quant-model-factory/) | Quant Model Factory — parallel model-development lanes with `best_of_n` / `all_required` / `first_to_pass` convergence; caller-injected executor; `ConvergenceGate` scoring (Sharpe, drawdown, return); append-only JSONL ledger for full auditability | `quant_factory.py` |
 | [`0063`](specs/0063-short-term-markets-domain-foundation/) | Short-term markets domain foundation — validates the U.S.-first taxonomy, viewpoints, conventions, lifecycles, evidence rules, coverage matrix, gap register, and golden cases without changing pricing runtimes | `short_term_markets_knowledge.py` |
 | [`0070`](specs/0070-prompt-context-harness-foundation/) | Prompt / Context / Harness Engineering Foundation — typed run envelopes, prompt/context manifests, assumption ledgers, evaluation harnesses, audit events, replay reports, a Quant Model Factory producer, and a composite gate for agentic quant orchestration evidence | `orchestration/` package, `quantsmith-orchestration` CLI, `orchestration` gate |
-| [`0071`](specs/0071-nlp-llm-quant-text-intelligence-foundation/) | NLP, LLM, and Quant Text Intelligence Foundation — governed corpora, transformations, model capabilities, embeddings/index snapshots, structured text tasks, leakage-aware evaluation, review state, and auditable text-derived signals that replay through `0070` | Draft spec only; runtime/gates planned |
+| [`0071`](specs/0071-nlp-llm-quant-text-intelligence-foundation/) | NLP, LLM, and Quant Text Intelligence Foundation — governed corpora, transformations, model capabilities, embeddings/index snapshots, structured text tasks, leakage-aware evaluation, review state, and auditable text-derived signals that replay through `0070` | `text_intelligence/` package, `quantsmith-text-intelligence` CLI, `text-intelligence` gate |
 | [`0055`](specs/0055-workflow-scheduling-operations/) | Workflow scheduling operations — registry validation, cron dry-run evidence, idempotent dispatch, JSONL ledger, manual reminders, daily reports, alert handoff, memory candidates | `workflow_scheduling.py` |
 | [`0060`](specs/0060-scheduler-monitoring/) | Scheduler monitoring — executable report and alert-preview CLI plus caller-injected alert delivery over the workflow-scheduling runtime | `workflow_scheduling.py` *(extended)*, `workflow_scheduling_cli.py` |
 | [`0047`](specs/0047-downstream-contract/) | Downstream consumer contract — `DashboardSpec.schema_version` + compatibility check, release-notify workflow, and a copyable `quantsmith-version` gate for a separate consuming repository | `dashboard_spec.py` *(extended)* |
@@ -541,7 +553,7 @@ Researcher, Quant Model Build, Securities Financing, Data Analyst, Data Engineer
 Production Pipeline, Optimization, Portfolio Management, Machine Learning, Deep
 Learning, Analytics Pipeline, workflow-memory, and knowledge workflows as ordered
 agent + gate chains, all on the Spec-Driven Development backbone. The newest
-cross-cutting chain is `0070` orchestration evidence feeding draft `0071` text
+cross-cutting chain is `0070` orchestration evidence feeding implemented-Draft `0071` text
 intelligence, so LLM/plugin/local-model outputs can be governed like any other
 quant artifact.
 
@@ -572,6 +584,7 @@ From inside `quantsmith`, run:
 | [`sources/README.md`](sources/README.md) | The data source catalog — every API/DB/feed with quality, point-in-time, and credential-pointer metadata |
 | [`docs/workflows.md`](docs/workflows.md) | The workflow map — role and scenario workflows as agent + gate chains |
 | [`templates/orchestration/README.md`](templates/orchestration/README.md) | Prompt/context/harness templates for `0070` run envelopes and evidence bundles |
+| [`templates/text_intelligence/README.md`](templates/text_intelligence/README.md) | Governed corpus, model capability, task, signal, evaluation, and `0070` replay-link templates for `0071` |
 | [`examples/orchestration/`](examples/orchestration/) | Hash-checked deterministic and fixture-backed examples for orchestration replay |
 | [`docs/adoption_guide.md`](docs/adoption_guide.md) | How to adopt the SDK — package + scaffold — into an existing quant repo |
 | [`docs/packaging.md`](docs/packaging.md) | Packaging & distribution decision record (hybrid: package + template) |

@@ -34,6 +34,7 @@ pattern-based; tune them to your repository.
 | Backtest integrity | `backtest-check.sh` | `agents/backtest_review/` |
 | Reproducibility | `repro-check.sh` | `templates/docs/run_card.md`, `agents/implementation/` |
 | Prompt/context/harness orchestration | `orchestration-check.sh` | `templates/orchestration/`, `specs/0070-prompt-context-harness-foundation/` |
+| NLP/LLM/text-intelligence evidence | `text-intelligence-check.sh` | `templates/text_intelligence/`, `specs/0071-nlp-llm-quant-text-intelligence-foundation/` |
 | Data contract | `data-contract-check.sh` | `templates/data/data_contract.md`, `agents/data_quality/` |
 | Pipeline contract | `pipeline-contract-check.sh` | `templates/data/pipeline_manifest.md`, `agents/data_engineering/` |
 | Alert contract | `alert-contract-check.sh` | `templates/data/alert_policy.md`, `agents/alerts/` |
@@ -99,6 +100,9 @@ hooks/stages/run-stage.sh spec
 - **`orchestration-check.sh`** validates committed spec `0070` orchestration
   envelopes and their prompt/context manifests, assumption ledgers, evaluation
   harnesses, audit events, and replay metadata through one composite gate.
+- **`text-intelligence-check.sh`** validates committed spec `0071` corpora,
+  transformations, capabilities, task/signal/evaluation evidence, source and
+  access controls, and the hash-linked spec `0070` envelope/audit/replay chain.
 - **`data-contract-check.sh`** verifies a data contract declares schema, keys,
   point-in-time rules, and missingness rules.
   pack, including config, draft-pack template, sample fixture, content agent

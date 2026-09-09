@@ -1,0 +1,23 @@
+{
+  "schema_version": "quantsmith.text_intelligence.manifest.v1",
+  "manifest_id": "text-manifest-<run-id>",
+  "run_id": "<run-id>",
+  "purpose": "<bounded decision or research purpose>",
+  "decision_time": "YYYY-MM-DDTHH:MM:SSZ",
+  "orchestration": {
+    "path": "run_envelope.json",
+    "run_id": "<run-id>",
+    "schema_version": "quantsmith.orchestration.run.v1"
+  },
+  "corpus_snapshot": {"path": "corpus_snapshot.json", "hash": "sha256:<64-hex>"},
+  "transform_chain": {"path": "transform_chain.json", "hash": "sha256:<64-hex>"},
+  "model_capabilities": {"path": "model_capabilities.json", "hash": "sha256:<64-hex>"},
+  "task_schema_version": "quantsmith.text_intelligence.task.v1",
+  "task_results": {"path": "task_results.json", "hash": "sha256:<64-hex>"},
+  "evaluation_suite": {"path": "text_evaluation.json", "hash": "sha256:<64-hex>"},
+  "signal_artifacts": [{"path": "text_signals.json", "hash": "sha256:<64-hex>"}],
+  "audit_correlation_id": "evt-<run-id>-corpus",
+  "downstream_consumers": ["agents/research_analyst"],
+  "review": {"status": "pending", "owner": "<owner>", "reviewer": "<reviewer>", "timestamp": "YYYY-MM-DDTHH:MM:SSZ", "uncertainty": "<known limits>", "override": null, "rejected_alternatives": [], "escalation": "<conditions>"},
+  "replay_class": "deterministic"
+}

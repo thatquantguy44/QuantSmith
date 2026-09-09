@@ -1,0 +1,5 @@
+{
+  "schema_version": "quantsmith.text_intelligence.capabilities.v1",
+  "capability_set_id": "capabilities-<run-id>",
+  "profiles": [{"capability_id": "<id>", "operations": ["generation"], "provider": "<provider-or-fixture>", "runtime": "adapters/llm_runtime", "model": "<model>", "revision": "<immutable revision>", "artifact_checksum": "sha256:<64-hex>", "license": "<approved terms>", "execution_location": "<location>", "privacy_classes": ["public"], "deterministic_settings": {"temperature": 0, "seed": 0}, "limits": {"context_tokens": 4096}, "fallback": {"behavior": "abstain"}, "replay_class": "fixture_backed"}]
+}
