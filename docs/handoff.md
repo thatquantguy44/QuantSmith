@@ -178,21 +178,22 @@ nobody noticed.
 | `0051` | **Conformance levels** — make `QF_CONFORMANCE_LEVEL` verified rather than declared | `0050` config contract | item 16 |
 | `0054` | **MCP RAG server** — vector search with per-access-tier indexes and cited passages | `0052` contract | item 17 |
 | `0064` | **Repo economics and lifecycle runtime** — correct cash/security-side economics, GC/specials, term/open structures, margin, settlement, rolls, fails, and financing cashflows | approved and implemented `0063` taxonomy, convention, lifecycle, and golden-case contracts | item 21 |
-| `0065` | **Cash products and pricing conventions** — Treasury bills and short-dated coupons plus the approved institutional cash universe; price/yield conversions, accrual, settlement, cashflows, and comparative carry | approved and implemented `0063`; exact product universe frozen by its coverage matrix | item 21 |
-| `0066` | **Securities-lending model correction and expansion** — repair economic signs, point-in-time rate use, configurable classifications, accrual conventions, counterparty allocation, recalls, and lifecycle behavior in `0023`/`0028` | approved and implemented `0063`; discrepancy register accepted | item 21 |
+| `0065` | **Cash products and pricing conventions** — Treasury bills and short-dated coupons plus the approved institutional cash universe; price/yield conversions, accrual, settlement, cashflows, and comparative carry | approved and implemented `0063`; exact product universe frozen by its coverage matrix; first non-Treasury consumer order resolved: commercial paper, then certificate of deposit, then money market fund shares | item 21 |
 | `0068` | **Short-term-markets source ingestion and data contracts** — register and ingest approved official benchmark, transaction, issuance, and market-structure sources with vintage/effective-time controls | `0063` source-authority and temporal contracts; may proceed in parallel with `0064`–`0067` after those contracts stabilize | item 21 |
 | `0069` | **Regulatory, legal, and market-structure knowledge pack** — jurisdiction- and effective-date-aware rules, clearing/reporting/settlement structure, master-agreement concepts, and freshness review; informational, not legal advice | `0063` evidence, jurisdiction, review-status, and freshness contracts | item 21 |
 
 Specs `0063-short-term-markets-domain-foundation/`,
+`0066-securities-lending-model-correction/`,
 `0067-collateral-margin-optimizer-contract/`,
 `0070-prompt-context-harness-foundation/`, and
 `0071-nlp-llm-quant-text-intelligence-foundation/` are written, implemented,
-and active — `0067` **Approved** (contract-only, reviewed by Joshua
-Lutkemuller, CFA, 2026-09-09; the reference-optimizer-versus-plugin-boundary
-question is resolved: plugin-only), the other three still Drafts awaiting
-contract approval — so they are indexed rather than listed as unwritten
-reservations above.
-Specs `0064`–`0066`, `0068`–`0069` are **portfolio commitments, not active
+and active — `0066` and `0067` **Approved** (`0066`: five `0063` gap-register
+discrepancies corrected in place, reviewed by Joshua Lutkemuller, CFA,
+2026-09-09; `0067`: contract-only, same reviewer/date, the
+reference-optimizer-versus-plugin-boundary question resolved plugin-only),
+the other three still Drafts awaiting contract approval — so they are
+indexed rather than listed as unwritten reservations above.
+Specs `0064`–`0065`, `0068`–`0069` are **portfolio commitments, not active
 designs**: create and approve one only when `0063` has frozen the contract it
 consumes and the prior dependency named above is satisfied. Do not add agents
 merely to fill the map; prefer a canonical knowledge artifact or tested
@@ -1039,11 +1040,38 @@ manual-task persistence question stays deferred until a real consumer needs it.
     two more of `0063`'s five original open Draft Decisions (see
     `knowledge/short_term_markets/README.md`): the named reviewer is Joshua
     Lutkemuller, CFA, and the licensed-materials policy is public citation
-    only. Two decisions remain open: `0065`'s first non-Treasury cash-product
-    consumer (candidate order recorded: commercial paper, then certificate of
-    deposit, then money market fund shares) and whether a future MCP server
-    exposes `0063` directly or via `0052`'s existing resource-discovery
-    pattern (recommendation on record: via `0052`).
+    only. The remaining two of `0063`'s five original Draft Decisions were
+    resolved the same day: `0065`'s first non-Treasury cash-product consumer
+    is commercial paper, then certificate of deposit, then money market fund
+    shares last; a future MCP server exposes `0063` via `0052`'s existing
+    resource-discovery pattern rather than a new direct-access path. All
+    five are now resolved (see `knowledge/short_term_markets/README.md`);
+    per-record promotion of the 65 `draft` records to `reviewed` remains
+    separately open.
+
+23. **Securities-lending model correction — done, Approved** (spec `0066`,
+    `sec_lending.py`, `financing_cost_analysis.py`). Reviewed by Joshua
+    Lutkemuller, CFA, 2026-09-09. Corrects five of `0063`'s six
+    gap-register discrepancies in place, each grounded in a `0063` `golden.*`
+    record rather than an invented number: GC/WARM/HTB classification
+    thresholds are now configurable (default values unchanged); fee/rebate
+    accrual moved from an ACT/252 approximation to ACT/360, matching
+    `financing_cost_analysis.py` and reproducing
+    `golden.seclend.fee_rebate_signs`'s exact numbers; the point-in-time
+    check now catches a rate first known mid-period and back-dated to
+    `period_start`, not only one known after `period_end`, matching
+    `golden.temporal.asof_excludes_later_known_rate`; and `FinancingLeg`
+    carries an explicit, overridable `day_count_basis`. `0063`'s own
+    "honest fix" scoping call: `InventoryOptimizationAgent`'s docstring and
+    a placeholder `"BEST_AVAILABLE"` counterparty field falsely implied a
+    per-counterparty LP constraint that was never implemented; the false
+    claim is removed rather than answered by fabricating per-counterparty
+    demand data the SQL schema doesn't have — `SecLendingRiskAgent`
+    (unchanged, already correct) remains the real, tested counterparty-
+    concentration enforcement point. `gap_register.md`'s disposition is
+    updated for every corrected row. `0064` (repo economics/lifecycle
+    runtime) remains the next candidate in this domain — highest-severity
+    gap-register item not blocked by an open decision.
 
 ## Open Questions For The Owner
 

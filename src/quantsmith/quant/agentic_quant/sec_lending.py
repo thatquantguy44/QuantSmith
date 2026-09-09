@@ -78,13 +78,20 @@ class SecLendingUniverse:
 
 @dataclass(frozen=True)
 class OptimizedAllocation:
-    """Result of inventory-optimization for a single security."""
+    """Result of inventory-optimization for a single security.
+
+    ``counterparty`` is always ``None``: this LP allocates by security only
+    (see ``InventoryOptimizationAgent``'s docstring) and does not decide
+    which counterparty receives a loan -- that assignment, and its
+    concentration limit, is ``SecLendingRiskAgent``'s job, checked against
+    the actually-booked ``LendingPosition`` entries.
+    """
 
     cusip: str
     ticker: str
     allocated_qty: int
     expected_fee: float
-    counterparty: str
+    counterparty: Optional[str] = None
 
 
 @dataclass
@@ -98,17 +105,34 @@ class InventoryOptimizationResult:
 
 
 # ---------------------------------------------------------------------------
-# HTB classification thresholds (basis points)
+# HTB classification thresholds (basis points) and day-count basis
 # ---------------------------------------------------------------------------
-_GC_THRESHOLD = 50      # general collateral: fee <= 50 bps
-_WARM_THRESHOLD = 200   # warm: 50 < fee <= 200 bps
-                         # hard-to-borrow: > 200 bps
+# Default GC/WARM/HTB cutoffs. These are a stated, overridable model
+# assumption (knowledge/short_term_markets: convention.seclend.
+# demo_classification_thresholds), not sourced market truth -- see
+# specs/0066-securities-lending-model-correction/ (gap D-0063-002). A caller
+# who has a real classification policy should pass it to
+# SecLendingUniverseAgent rather than relying on these defaults.
+_DEFAULT_GC_THRESHOLD_BPS = 50.0      # general collateral: fee <= 50 bps
+_DEFAULT_WARM_THRESHOLD_BPS = 200.0   # warm: 50 < fee <= 200 bps
+                                        # hard-to-borrow: > 200 bps
+
+# Securities-lending fee/rebate accrual day-count basis. ACT/360, matching
+# knowledge/short_term_markets: convention.seclend.borrow_fee_act360_simple
+# and convention.seclend.rebate_act360_simple, and financing_cost_analysis.
+# py's own _DAY_COUNT_BASIS -- not the /252 trading-day approximation this
+# module used before spec 0066 (gap D-0063-003).
+_DAY_COUNT_BASIS = 360.0
 
 
-def _classify(rate_bps: float) -> str:
-    if rate_bps <= _GC_THRESHOLD:
+def _classify(
+    rate_bps: float,
+    gc_threshold_bps: float = _DEFAULT_GC_THRESHOLD_BPS,
+    warm_threshold_bps: float = _DEFAULT_WARM_THRESHOLD_BPS,
+) -> str:
+    if rate_bps <= gc_threshold_bps:
         return "GC"
-    if rate_bps <= _WARM_THRESHOLD:
+    if rate_bps <= warm_threshold_bps:
         return "WARM"
     return "HTB"
 
@@ -125,10 +149,21 @@ class SecLendingUniverseAgent:
     in demo mode without a real database) it generates synthetic data instead.
     """
 
-    def __init__(self, synthetic_n: int = 10, seed: int = 42) -> None:
+    def __init__(
+        self,
+        synthetic_n: int = 10,
+        seed: int = 42,
+        gc_threshold_bps: float = _DEFAULT_GC_THRESHOLD_BPS,
+        warm_threshold_bps: float = _DEFAULT_WARM_THRESHOLD_BPS,
+    ) -> None:
         self.name = "sec_lending_universe_agent"
         self._synthetic_n = synthetic_n
         self._seed = seed
+        self._gc_threshold_bps = gc_threshold_bps
+        self._warm_threshold_bps = warm_threshold_bps
+
+    def _classify(self, rate_bps: float) -> str:
+        return _classify(rate_bps, self._gc_threshold_bps, self._warm_threshold_bps)
 
     # ------------------------------------------------------------------
     def run(self, blackboard: Blackboard) -> None:
@@ -164,7 +199,7 @@ class SecLendingUniverseAgent:
                 utilization=float(rows["utilization"]),
                 rate_30d_avg=float(arr.mean()),
                 rate_30d_vol=float(arr.std(ddof=1)) if len(arr) > 1 else 0.0,
-                classification=_classify(rate),
+                classification=self._classify(rate),
             )
             securities.append(sec)
 
@@ -244,7 +279,7 @@ class SecLendingUniverseAgent:
                 utilization=float(np.clip(util_base + rng.normal(0, 0.03), 0.05, 0.99)),
                 rate_30d_avg=float(rate_history.mean()),
                 rate_30d_vol=float(rate_history.std(ddof=1)),
-                classification=_classify(rate),
+                classification=self._classify(rate),
             )
             securities.append(sec)
 
@@ -255,7 +290,7 @@ class SecLendingUniverseAgent:
                 qty = int(rng.integers(5_000, 200_000))
                 price = float(rng.uniform(50, 800))
                 balance = qty * price
-                fee = balance * (rate / 10_000) / 252
+                fee = balance * (rate / 10_000) / _DAY_COUNT_BASIS
                 book.append(
                     LendingPosition(
                         cusip=cusip,
@@ -377,7 +412,7 @@ class BorrowRateAnalysisAgent:
 # ---------------------------------------------------------------------------
 
 class InventoryOptimizationAgent:
-    """Maximizes fee revenue subject to inventory and counterparty constraints.
+    """Maximizes fee revenue subject to a balance-sheet limit.
 
     Formulation
     -----------
@@ -386,7 +421,19 @@ class InventoryOptimizationAgent:
     Constraints:
       - 0 <= x_i <= 1  (can't lend more than available)
       - sum_i  avail_i * price_i * x_i  <= max_book_size  (balance sheet limit)
-      - For each counterparty c: exposure_c <= max_cp_concentration * total_book
+
+    Security-level only -- this LP has no counterparty dimension in its
+    decision variables (``x`` is indexed by security, not by security x
+    counterparty), and the SQL data model
+    (:mod:`quantsmith.quant.agentic_quant.sql_data`) carries no
+    per-security, per-counterparty demand to allocate against. Earlier
+    versions of this docstring and ``max_cp_concentration`` implied a
+    per-counterparty constraint that was never actually enforced here; see
+    ``specs/0066-securities-lending-model-correction/`` (gap D-0063-004) for
+    why that claim was removed rather than answered with fabricated
+    per-counterparty demand data. Counterparty concentration remains
+    ``SecLendingRiskAgent``'s job, checked against the actually-booked
+    ``LendingPosition`` entries after allocation, not predicted here.
 
     Uses scipy.optimize.linprog when available; falls back to a greedy
     heuristic ranked by fee per unit of inventory.
@@ -404,6 +451,10 @@ class InventoryOptimizationAgent:
             raise ValueError("max_cp_concentration must be in (0, 1]")
         self.name = "inventory_optimization_agent"
         self._max_book = max_book_size
+        # Accepted, not used: kept only so this agent shares a constructor
+        # shape with SecLendingRiskAgent in sec_lending_workflow.py's
+        # pipeline wiring. See the class docstring -- this LP has no
+        # counterparty dimension to constrain.
         self._max_cp_conc = max_cp_concentration
         self._price = assumed_price
 
@@ -424,7 +475,9 @@ class InventoryOptimizationAgent:
     def _optimize(self, secs: List[BorrowSecurity]) -> InventoryOptimizationResult:
         # Notional value and fee rate per share
         notional = np.array([s.availability * self._price for s in secs], dtype=float)
-        fee_per_notional = np.array([s.rate_bps / 10_000 / 252 for s in secs], dtype=float)
+        fee_per_notional = np.array(
+            [s.rate_bps / 10_000 / _DAY_COUNT_BASIS for s in secs], dtype=float
+        )
 
         try:
             from scipy.optimize import linprog  # type: ignore
@@ -464,7 +517,6 @@ class InventoryOptimizationAgent:
                     ticker=sec.ticker,
                     allocated_qty=alloc_qty,
                     expected_fee=exp_fee,
-                    counterparty="BEST_AVAILABLE",
                 )
             )
             total_fee += exp_fee
@@ -586,7 +638,7 @@ class SecLendingReportAgent:
         lines.append(f"Total book balance:  ${universe.total_book_balance:>15,.0f}")
         lines.append(f"Daily fee revenue:   ${universe.total_daily_fee:>15,.2f}")
         lines.append(
-            f"Annualised estimate: ${universe.total_daily_fee * 252:>15,.0f}"
+            f"Annualised estimate: ${universe.total_daily_fee * _DAY_COUNT_BASIS:>15,.0f}"
         )
         lines.append(f"Open recalls:        {universe.recall_count}")
 

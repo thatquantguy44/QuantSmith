@@ -166,6 +166,57 @@ def test_check_point_in_time_flags_lookahead_AC_006():
     assert "look-ahead" in findings[0]
 
 
+# --- Spec 0066 corrections (gap_register.md discrepancies D-0063-005/006) ---
+
+
+def test_check_point_in_time_flags_midperiod_lookahead_D_0063_005():
+    # period_start=2026-07-01, period_end=2026-07-31. A rate first known
+    # 2026-07-15 -- after period_start but before period_end -- is the case
+    # the old check (rate_asof > period_end only) missed: applying it to the
+    # whole period back-dates information into the first 14 days, before it
+    # was actually knowable.
+    midperiod = _position(
+        legs=(FinancingLeg(kind="borrow_fee", rate_bps=250.0, rate_asof="2026-07-15"),)
+    )
+    findings = check_point_in_time([midperiod])
+    assert len(findings) == 1
+    assert "not known at position inception" in findings[0]
+
+    # A rate known exactly at period_start remains clean (boundary is
+    # inclusive, matching golden.temporal.asof_excludes_later_known_rate's
+    # "on or before" rule).
+    at_start = _position(
+        legs=(FinancingLeg(kind="borrow_fee", rate_bps=250.0, rate_asof="2026-07-01"),)
+    )
+    assert check_point_in_time([at_start]) == []
+
+
+def test_leg_day_count_basis_is_explicit_and_overridable_D_0063_006():
+    # Default (360) reproduces existing results unchanged.
+    default_leg = FinancingLeg(kind="borrow_fee", rate_bps=250.0, rate_asof="2026-06-30")
+    assert default_leg.day_count_basis == 360.0
+
+    pos_default = _position(legs=(default_leg,))
+    [d_default] = decompose([pos_default])
+    assert d_default.borrow_fee_cost == pytest.approx(1_000_000.0 * 0.025 * 30 / 360)
+
+    # An explicit alternate basis (e.g. ACT/365) changes the computed cost,
+    # proving the basis is now a real per-leg input, not a hidden global.
+    pos_365 = _position(
+        legs=(
+            FinancingLeg(
+                kind="borrow_fee", rate_bps=250.0, rate_asof="2026-06-30", day_count_basis=365.0
+            ),
+        )
+    )
+    [d_365] = decompose([pos_365])
+    assert d_365.borrow_fee_cost == pytest.approx(1_000_000.0 * 0.025 * 30 / 365)
+    assert d_365.borrow_fee_cost != d_default.borrow_fee_cost
+
+    with pytest.raises(ValueError):
+        FinancingLeg(kind="borrow_fee", rate_bps=250.0, rate_asof="2026-06-30", day_count_basis=0.0)
+
+
 # --- Reconciliation with the securities-lending runtime's vocabulary (0023) ---
 
 
