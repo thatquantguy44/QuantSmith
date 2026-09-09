@@ -656,6 +656,74 @@
       "review_status": "draft",
       "review": null,
       "supersedes": []
+    },
+    {
+      "id": "golden.fairness.adverse_impact_ratio",
+      "case_id": "golden.fairness.adverse_impact_ratio",
+      "record_type": "golden_case",
+      "name": "Adverse impact ratio at the applied cutoff, with a threshold breach",
+      "domain": "retail_scoring_underwriting",
+      "purpose": "Pins that disparity is measured at the cutoff actually applied, that the threshold is a supplied input rather than a built-in rule, and that a breach mechanically obliges a less-discriminatory-alternative record.",
+      "as_of": "2026-09-09",
+      "operation": "adverse_impact_ratio",
+      "convention_ids": [
+        "convention.fairness.disparity_testing"
+      ],
+      "inputs": {
+        "approved_protected": {
+          "value": 180,
+          "unit": "count"
+        },
+        "total_protected": {
+          "value": 500,
+          "unit": "count"
+        },
+        "approved_reference": {
+          "value": 600,
+          "unit": "count"
+        },
+        "total_reference": {
+          "value": 1000,
+          "unit": "count"
+        },
+        "disparity_threshold": {
+          "value": 0.8,
+          "unit": "ratio",
+          "provenance": "supplied by the institution; the four-fifths ratio is a screening convention, not a legal threshold and not a safe harbour"
+        }
+      },
+      "expected_outputs": {
+        "adverse_impact_ratio": {
+          "value": 0.6,
+          "unit": "ratio",
+          "tolerance": 1e-09
+        },
+        "threshold_breached": {
+          "value": true,
+          "unit": "boolean"
+        },
+        "less_discriminatory_alternative_required": {
+          "value": true,
+          "unit": "boolean"
+        }
+      },
+      "invariants": [
+        "Selection rates are 0.36 and 0.60; the ratio is 0.6",
+        "The threshold is an input, never a constant supplied by this pack",
+        "A breach obliges a recorded LDA search outcome, not merely a warning",
+        "The ratio is a screen indicating where to look, never a determination of lawfulness"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "regulatory_supervisory_rule",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "cfpb"
+      ],
+      "review_status": "draft",
+      "review": null,
+      "supersedes": []
     }
   ]
 }

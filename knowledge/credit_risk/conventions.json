@@ -35,6 +35,14 @@
         "collateral_counted_once": true
       },
       "rationale": "Collateral reflected in both EAD and LGD double-counts recovery."
+    },
+    {
+      "id": "rule.basis.disparity_cutoff",
+      "applies_to": "convention.fairness.disparity_testing",
+      "requires": {
+        "measured_at_applied_cutoff": true
+      },
+      "rationale": "A disparity measured at a cutoff other than the one applied is not the disparity the decision produced."
     }
   ],
   "conventions": [
@@ -590,6 +598,65 @@
       "effective_to": null,
       "source_refs": [
         "bis_basel"
+      ],
+      "review_status": "draft",
+      "review": null,
+      "supersedes": []
+    },
+    {
+      "id": "convention.fairness.disparity_testing",
+      "record_type": "convention",
+      "name": "Outcome disparity testing at the applied cutoff",
+      "quantity": "outcome_disparity",
+      "unit": "ratio",
+      "horizon": null,
+      "conditioning": "point_in_time",
+      "default_definition_id": null,
+      "collateral_treatment": "not_applicable",
+      "discounting_basis": null,
+      "currency": null,
+      "seasoning_basis": null,
+      "calibration_population": "applications scored under one decision policy version, measured at the cutoff actually applied \u2014 not at a cutoff chosen for the study",
+      "day_count": null,
+      "viewpoint_ids": [
+        "role.lender"
+      ],
+      "loss_sign": "not_applicable",
+      "formula": {
+        "id": "formula.fairness.adverse_impact_ratio",
+        "expression": "selection_rate_protected / selection_rate_reference",
+        "inputs": [
+          "selection_rate_protected",
+          "selection_rate_reference"
+        ],
+        "outputs": [
+          "adverse_impact_ratio"
+        ]
+      },
+      "parameters": [
+        {
+          "id": "param.fairness.disparity_threshold",
+          "meaning": "ratio below which the institution treats the disparity as requiring a less-discriminatory-alternative search",
+          "default": null,
+          "required": true,
+          "rationale": "The four-fifths ratio is a widely used SCREENING convention, not a legal threshold and not a safe harbour. Supplying it as a default would let an adopter inherit a number their counsel never chose."
+        },
+        {
+          "id": "param.fairness.protected_class_estimation_method",
+          "meaning": "named method used to estimate protected class where it is not lawfully collected, for testing only",
+          "default": null,
+          "required": true,
+          "rationale": "Every estimation method carries material error that biases the disparity estimate itself. The method and its limitations must be a recorded choice, and the choice is jurisdiction-, product-, and counsel-dependent."
+        }
+      ],
+      "notes": "Measured at the cutoff actually applied. A disparity computed at a different cutoff answers a question nobody asked. The metric is a screen that says where to look, never a determination of lawfulness.",
+      "jurisdiction": "US",
+      "knowledge_class": "regulatory_supervisory_rule",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "cfpb"
       ],
       "review_status": "draft",
       "review": null,

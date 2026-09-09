@@ -31,6 +31,15 @@ wrong *act*. So the pack carries three layers `0063` did not need:
    obligations are structurally required; if it cannot meet them, the only valid
    state is `decision_support_only`, which the validator enforces and which
    prohibits sole-basis adverse action.
+   REQ-020 exists because the first draft of this design stopped at attribute
+   absence. That check is trivially satisfiable and certifies nothing: disparate
+   impact arises from facially neutral features correlated with protected class,
+   so a contract that only inspects a feature list supplies false comfort. The
+   substantive half — a testing basis, a disparity metric at the applied cutoff,
+   per-feature proxy visibility, and a less-discriminatory-alternative search on
+   breach — is now equally structural. An estimate of a protected attribute is
+   treated as a protected attribute for feature purposes.
+
 2. **A governance record.** Deployability in the coverage matrix is a computed
    property, not a label: a model is deployable only when a credit model card,
    independent validation evidence, challenger comparison, monitoring thresholds,
@@ -96,7 +105,7 @@ knowledge/credit_risk/
 | `taxonomy.json` | Stable IDs and deterministic alias resolution for obligors, facilities, exposures, counterparties, measures, roles, rating/score concepts, and default definitions, with the non-interchangeable sets from REQ-002 enforced. |
 | `conventions.json` | Units, horizon, conditioning basis, default-definition ID, collateral/guarantee treatment, discounting, currency, seasoning, calibration population, and formula references for every credit measure. |
 | `lifecycles.json` | Three transition graphs — credit state, approval/limit, and SR 11-7 model lifecycle — each transition naming its initiating role and produced artifact. |
-| `decision_paths.json` | Per-workflow consumer-decision classification and the REQ-014 obligations; the validator refuses a consumer-facing path that cannot derive reason codes. |
+| `decision_paths.json` | Per-workflow consumer-decision classification, the REQ-014 procedural obligations, and the REQ-020 substantive fairness obligations; the validator refuses a consumer-facing path that cannot derive reason codes or cannot test for disparity. |
 | `governance.json` | The credit model card extension and the deployability predicate; a model entry is deployable only when every required governance artifact resolves. |
 | `workflows.json` | The six end-to-end workflows: stages, participating agents, required inputs, produced artifacts, gates, human decision points, and each capability's runtime boundary. |
 | `coverage.json` | Capability surface mapped to current agents, instructions, runtimes, sources, tests, limitations, and future owning specs, at five coverage levels. |
@@ -223,6 +232,7 @@ against and why.
 | REQ-012 | `workflows.json` — six named end-to-end workflow contracts | T-012 |
 | REQ-013 | Runtime boundary classification (in-SDK / `0026` plugin / knowledge-only) | T-012, T-013 |
 | REQ-014 | `decision_paths.json` consumer-decision obligations | T-007 |
+| REQ-020 | `convention.fairness.disparity_testing` + per-path `fairness_testing` obligations | T-018 |
 | REQ-015 | `governance.json` model card extension + deployability predicate | T-013 |
 | REQ-016 | LLM evidence admission boundary over `0070`/`0071` | T-014 |
 | REQ-017 | `0073`–`0079` reservations in `docs/handoff.md` | T-002 |
@@ -244,6 +254,8 @@ against and why.
 | Program shape | One foundation spec plus seven reserved child specs | Six or more full spec chains written now | `0063` proved the foundation-first shape works here; designing seven runtimes against an unfrozen contract would rewrite all seven when the contract moves (RISK-005, P7). |
 | Pack format | JSON contracts plus Markdown narrative, stdlib validator | YAML, or a schema library dependency | Matches `0063` exactly, keeps NFR-001 achievable with no new dependency, and keeps the two domain packs one system rather than two dialects. |
 | Fairness handling | Structural: unsafe consumer-decision configuration is unrepresentable | Documented guidance plus reviewer judgement | P4. Guidance is skipped under delivery pressure; a validation failure is not (REQ-014, RISK-003). |
+| Fairness depth | Procedural **and** substantive: disparity measured at the applied cutoff, proxy association recorded, LDA search on breach | Attribute absence from the feature set alone | Absence is trivially satisfiable and certifies nothing; shipping it as *the* fairness control would have let `0074` call a feature-list check compliance (REQ-020, RISK-010). |
+| Disparity threshold | A required parameter with no default | The four-fifths ratio as a built-in | It is a screening convention, not a legal threshold or safe harbour. A default would let an adopter inherit a number their counsel never chose. |
 | Deployability | Computed from resolving governance artifacts | A `deployable: true` field an author sets | A self-asserted flag is exactly how an unvalidated model reaches production; the predicate cannot be satisfied by assertion (REQ-015). |
 | Agent creation | Gated on a coverage-matrix row showing a distinct workflow | Ship the full credit agent roster with the foundation | The catalog is at 168 agents; breadth without distinct workflows makes it unnavigable and violates the repository's standing rule (RISK-007). |
 | Retail scoring runtime | Deferred to `0074`, open question left open | Ship a reference scorecard in `0072` | A shipped scorecard would be mistaken for a validated model; the contracts and golden cases deliver the value without that risk. |

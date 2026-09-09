@@ -74,10 +74,15 @@ decision contract**, because a credit output is often an act with a subject.
 1. **`decision_paths.json` — the decision contract.** A workflow that supports a
    decision about an identifiable consumer must derive principal reason codes,
    record its policy version, cutoff, and overrides, carry an empty
-   protected-attribute feature set, and expose a disparate-impact hook. A path
-   that cannot do those is only representable as `decision_support_only` with
-   sole-basis adverse action prohibited. The unsafe configuration is
-   unrepresentable, not merely discouraged.
+   protected-attribute feature set, and expose a disparate-impact hook — *and*,
+   because attribute absence alone certifies nothing, declare substantive
+   fairness testing: a protected-class testing basis (an estimate of which is
+   itself never a feature), a disparity metric with a supplied threshold
+   measured at the applied cutoff, per-feature proxy association, and a
+   less-discriminatory-alternative search on breach. A path that cannot do those
+   is only representable as `decision_support_only` with sole-basis adverse
+   action prohibited. The unsafe configuration is unrepresentable, not merely
+   discouraged.
 2. **The evidence boundary.** A value derived by a language model enters as a
    `0071` artifact inside a `0070` envelope, with resolvable source spans, an
    assumption-ledger entry, and replay, labeled `derived_evidence`. Promotion to

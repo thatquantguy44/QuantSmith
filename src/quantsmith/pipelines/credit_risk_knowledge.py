@@ -59,6 +59,7 @@ ALLOWED_GOLDEN_OPERATIONS = {
     "adverse_action_ranking",
     "migration_matrix_rows",
     "point_in_time_admission",
+    "adverse_impact_ratio",
 }
 
 REQUIRED_CAPABILITY_DOMAINS = {
@@ -82,6 +83,18 @@ CONSUMER_DECISION_OBLIGATIONS = (
     "cutoff_field",
     "override_log_ref",
     "disparate_impact_hook",
+)
+
+# 0072 REQ-020. Attribute absence (REQ-014) is necessary but not sufficient:
+# disparate impact arises from facially neutral features that correlate with
+# protected class, so a contract that only checks a feature list certifies
+# nothing. These are the substantive obligations.
+FAIRNESS_TESTING_OBLIGATIONS = (
+    "protected_class_basis",
+    "disparity_metric",
+    "disparity_threshold_param",
+    "feature_proxy_association_recorded",
+    "less_discriminatory_alternative",
 )
 
 REQUIRED_GOVERNANCE_ARTIFACTS = {
@@ -453,6 +466,34 @@ def _validate_decision_paths(
             if not reasons.get("excludes_protected_attributes"):
                 unmet.append("reason_codes.excludes_protected_attributes")
 
+        fairness = path.get("fairness_testing")
+        if not isinstance(fairness, Mapping):
+            unmet.append("fairness_testing")
+        else:
+            for field in FAIRNESS_TESTING_OBLIGATIONS:
+                if not fairness.get(field):
+                    unmet.append(f"fairness_testing.{field}")
+            if not fairness.get("measured_at_applied_cutoff"):
+                unmet.append("fairness_testing.measured_at_applied_cutoff")
+            if fairness.get("protected_class_basis") == "estimated":
+                if not fairness.get("estimation_method_param"):
+                    unmet.append("fairness_testing.estimation_method_param")
+                if not fairness.get("estimation_limitations_recorded"):
+                    unmet.append("fairness_testing.estimation_limitations_recorded")
+                # An estimate of a protected attribute is a protected attribute
+                # for feature purposes: admissible for testing, never as input.
+                if fairness.get("estimation_use") != "testing_only":
+                    errors.append(
+                        f"{pid}: a protected-class estimate may be used for testing only, "
+                        f"never as a model feature"
+                    )
+            lda = fairness.get("less_discriminatory_alternative")
+            if isinstance(lda, Mapping):
+                if not lda.get("required_when"):
+                    unmet.append("fairness_testing.less_discriminatory_alternative.required_when")
+                if not lda.get("outcome_required"):
+                    unmet.append("fairness_testing.less_discriminatory_alternative.outcome_required")
+
         if unmet and path.get("sole_basis_adverse_action_permitted"):
             errors.append(
                 f"{pid}: consumer decision path is missing {sorted(set(unmet))} yet permits "
@@ -511,6 +552,11 @@ def is_deployable(
             if any(not path.get(field) for field in CONSUMER_DECISION_OBLIGATIONS):
                 return False
             if path.get("protected_attributes_in_features"):
+                return False
+            fairness = path.get("fairness_testing")
+            if not isinstance(fairness, Mapping):
+                return False
+            if any(not fairness.get(f) for f in FAIRNESS_TESTING_OBLIGATIONS):
                 return False
     return True
 
@@ -843,6 +889,39 @@ def migration_matrix_rows(
     return {"row_sums": row_sums, "rows_stochastic": stochastic, "absorbing": absorbs}
 
 
+def adverse_impact_ratio(
+    approved_protected: float,
+    total_protected: float,
+    approved_reference: float,
+    total_reference: float,
+    disparity_threshold: float,
+) -> Dict[str, Any]:
+    """Disparity screen at the applied cutoff, against a supplied threshold.
+
+    The threshold is an argument, never a constant here: the four-fifths ratio
+    is a widely used screening convention, not a legal threshold and not a safe
+    harbour. A breach says where to look; it is not a determination of
+    lawfulness.
+    """
+
+    if total_protected <= 0 or total_reference <= 0:
+        raise CreditRiskValidationError("group totals must be positive")
+    rate_protected = approved_protected / total_protected
+    rate_reference = approved_reference / total_reference
+    if rate_reference == 0:
+        raise CreditRiskValidationError("reference selection rate is zero; ratio undefined")
+    ratio = rate_protected / rate_reference
+    breached = ratio < disparity_threshold
+    return {
+        "adverse_impact_ratio": ratio,
+        "selection_rate_protected": rate_protected,
+        "selection_rate_reference": rate_reference,
+        "threshold_breached": breached,
+        # A breach obliges a recorded search outcome, not merely a warning.
+        "less_discriminatory_alternative_required": breached,
+    }
+
+
 def point_in_time_admission(
     decision_date: str,
     feature_as_of: str,
@@ -942,6 +1021,12 @@ def run_golden_case(case: Mapping[str, Any]) -> Dict[str, Any]:
             _value(case, "grades"), _value(case, "matrix"), _value(case, "absorbing_state")
         )
         actual = {"row_sums": result["row_sums"], "rows_stochastic": result["rows_stochastic"]}
+    elif op == "adverse_impact_ratio":
+        actual = adverse_impact_ratio(
+            _value(case, "approved_protected"), _value(case, "total_protected"),
+            _value(case, "approved_reference"), _value(case, "total_reference"),
+            _value(case, "disparity_threshold"),
+        )
     elif op == "point_in_time_admission":
         actual = point_in_time_admission(
             _value(case, "decision_date"), _value(case, "feature_as_of"),

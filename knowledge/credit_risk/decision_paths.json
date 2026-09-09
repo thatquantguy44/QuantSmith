@@ -13,13 +13,19 @@
       "cutoff_field is set",
       "override_log_ref is set",
       "protected_attributes_in_features is empty",
-      "disparate_impact_hook is set"
+      "disparate_impact_hook is set",
+      "fairness_testing.protected_class_basis is set",
+      "fairness_testing.disparity_metric is set",
+      "fairness_testing.disparity_threshold_param is set",
+      "fairness_testing.measured_at_applied_cutoff is true",
+      "fairness_testing.feature_proxy_association_recorded is true",
+      "fairness_testing.less_discriminatory_alternative.required_when is set"
     ],
     "otherwise": "the record is only valid as consumer_decision true with sole_basis_adverse_action_permitted false, or as a non-consumer path; a consumer path with an unmet obligation and sole basis permitted is rejected by the validator",
-    "rationale": "0072 REQ-014 and P4: the unsafe configuration is unrepresentable rather than discouraged. Guidance is skipped under delivery pressure; a validation failure is not."
+    "rationale": "0072 REQ-014 and P4: the unsafe configuration is unrepresentable rather than discouraged. Guidance is skipped under delivery pressure; a validation failure is not. REQ-020 adds the substantive half: attribute absence alone certifies nothing, because disparate impact arises from facially neutral features that correlate with protected class. A contract that only checks a feature list supplies false comfort."
   },
   "protected_attribute_registry": {
-    "note": "Named so a feature set can be checked against them mechanically. Listing an attribute here does NOT authorize collecting it; where an institution lawfully holds it, it is used for segregated fairness testing only, never as a model feature.",
+    "note": "Named so a feature set can be checked against them mechanically. Listing an attribute here does NOT authorize collecting it; where an institution lawfully holds it, it is used for segregated fairness testing only, never as a model feature. An ESTIMATE of a protected attribute is itself a protected attribute for feature purposes: it is admissible for testing and never as a model input.",
     "attribute_ids": [
       "attr.race",
       "attr.color",
@@ -66,7 +72,27 @@
       "protected_attributes_in_features": [],
       "disparate_impact_hook": "hook.disparate_impact.retail_underwriting",
       "sole_basis_adverse_action_permitted": true,
-      "rationale": "A decline here is an adverse action against an identifiable consumer. Every obligation in 0072 REQ-014 must hold before this path may be the sole basis for that action."
+      "rationale": "A decline here is an adverse action against an identifiable consumer. Every obligation in 0072 REQ-014 must hold before this path may be the sole basis for that action.",
+      "fairness_testing": {
+        "protected_class_basis": "estimated",
+        "estimation_method_param": "param.fairness.protected_class_estimation_method",
+        "estimation_limitations_recorded": true,
+        "estimation_use": "testing_only",
+        "disparity_metric": "formula.fairness.adverse_impact_ratio",
+        "disparity_threshold_param": "param.fairness.disparity_threshold",
+        "measured_at_applied_cutoff": true,
+        "feature_proxy_association_recorded": true,
+        "less_discriminatory_alternative": {
+          "required_when": "disparity_threshold_breached",
+          "record_ref": "artifact.lda_search.retail_underwriting_decision",
+          "outcome_required": [
+            "alternative_adopted",
+            "business_need_rationale"
+          ]
+        },
+        "results_artifact_ref": "artifact.fairness_testing.retail_underwriting_decision",
+        "versioned_with_model": true
+      }
     },
     {
       "id": "path.retail_account_management",
@@ -98,7 +124,27 @@
       "protected_attributes_in_features": [],
       "disparate_impact_hook": "hook.disparate_impact.account_management",
       "sole_basis_adverse_action_permitted": true,
-      "rationale": "A limit reduction or account closure on credit grounds is also an adverse action; the obligations do not attach only at origination."
+      "rationale": "A limit reduction or account closure on credit grounds is also an adverse action; the obligations do not attach only at origination.",
+      "fairness_testing": {
+        "protected_class_basis": "estimated",
+        "estimation_method_param": "param.fairness.protected_class_estimation_method",
+        "estimation_limitations_recorded": true,
+        "estimation_use": "testing_only",
+        "disparity_metric": "formula.fairness.adverse_impact_ratio",
+        "disparity_threshold_param": "param.fairness.disparity_threshold",
+        "measured_at_applied_cutoff": true,
+        "feature_proxy_association_recorded": true,
+        "less_discriminatory_alternative": {
+          "required_when": "disparity_threshold_breached",
+          "record_ref": "artifact.lda_search.retail_account_management",
+          "outcome_required": [
+            "alternative_adopted",
+            "business_need_rationale"
+          ]
+        },
+        "results_artifact_ref": "artifact.fairness_testing.retail_account_management",
+        "versioned_with_model": true
+      }
     },
     {
       "id": "path.credit_document_intelligence",
@@ -125,7 +171,8 @@
       "protected_attributes_in_features": [],
       "disparate_impact_hook": null,
       "sole_basis_adverse_action_permitted": false,
-      "rationale": "Extracted covenants, spread financials, and early-warning signals are derived evidence under 0072 REQ-016. This path cannot derive principal reasons from a scored model, so it is decision_support_only and is prohibited from being the sole basis of an adverse action. A human credit decision may cite it; the path may not make one."
+      "rationale": "Extracted covenants, spread financials, and early-warning signals are derived evidence under 0072 REQ-016. This path cannot derive principal reasons from a scored model, so it is decision_support_only and is prohibited from being the sole basis of an adverse action. A human credit decision may cite it; the path may not make one.",
+      "fairness_testing": null
     },
     {
       "id": "path.wholesale_obligor_review",
@@ -152,7 +199,8 @@
       "protected_attributes_in_features": [],
       "disparate_impact_hook": null,
       "sole_basis_adverse_action_permitted": false,
-      "rationale": "The subject is a legal entity, not a consumer, so ECOA adverse action obligations do not attach. Rating overrides are still logged: the requirement is credit-administration discipline, not only fair lending."
+      "rationale": "The subject is a legal entity, not a consumer, so ECOA adverse action obligations do not attach. Rating overrides are still logged: the requirement is credit-administration discipline, not only fair lending.",
+      "fairness_testing": null
     },
     {
       "id": "path.counterparty_limit_review",
@@ -179,7 +227,8 @@
       "protected_attributes_in_features": [],
       "disparate_impact_hook": null,
       "sole_basis_adverse_action_permitted": false,
-      "rationale": "Institutional counterparties; no consumer decision. Limit exceptions are logged with approver and expiry per the approval lifecycle."
+      "rationale": "Institutional counterparties; no consumer decision. Limit exceptions are logged with approver and expiry per the approval lifecycle.",
+      "fairness_testing": null
     },
     {
       "id": "path.ecl_measurement",
@@ -206,7 +255,8 @@
       "protected_attributes_in_features": [],
       "disparate_impact_hook": null,
       "sole_basis_adverse_action_permitted": false,
-      "rationale": "A measurement, not a decision about a person. Management adjustments and overlays are overrides and are logged as such."
+      "rationale": "A measurement, not a decision about a person. Management adjustments and overlays are overrides and are logged as such.",
+      "fairness_testing": null
     },
     {
       "id": "path.stress_capital_planning",
@@ -232,7 +282,8 @@
       "protected_attributes_in_features": [],
       "disparate_impact_hook": null,
       "sole_basis_adverse_action_permitted": false,
-      "rationale": "Scenario-conditioned projection. Scenario vintage is the control that matters here, not adverse action."
+      "rationale": "Scenario-conditioned projection. Scenario vintage is the control that matters here, not adverse action.",
+      "fairness_testing": null
     }
   ]
 }
