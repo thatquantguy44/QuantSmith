@@ -186,14 +186,17 @@
       "name": "Credit memos, covenant extraction, financial spreading, early warning",
       "domain": "credit_document_intelligence",
       "scope": "Credit memos, covenant extraction, financial spreading, early warning",
-      "coverage_level": "contract_only",
+      "coverage_level": "reference_runtime",
       "current_artifacts": [
         "knowledge/credit_risk/governance.json",
         "knowledge/credit_risk/workflows.json",
         "specs/0070-prompt-context-harness-foundation/",
-        "specs/0071-nlp-llm-quant-text-intelligence-foundation/"
+        "specs/0071-nlp-llm-quant-text-intelligence-foundation/",
+        "specs/0077-credit-document-intelligence/",
+        "src/quantsmith/pipelines/credit_document_intelligence.py",
+        "examples/credit_document_intelligence/"
       ],
-      "limitation": "The admission boundary is defined and its dependencies (0070 envelope, 0071 corpora) are already built \u2014 the reason this is the likely first child to activate. No extraction task, corpus, or agent exists yet.",
+      "limitation": "0077 proves the admission-boundary wiring against real, emitted 0071 artifacts (both derived_evidence and decision_input outcomes, plus rejection) and real replay determinism -- not a working covenant or financial-value extraction model. The underlying 0071 producer's entity_extraction/value_extraction/sentiment_stance/theme_detection outputs are fixed reference-fixture content, disclosed as such; only the classification result is genuinely computed from input text. A real, licensed corpus at retrieval scale and a genuine extractor remain future work.",
       "owning_spec": "0077",
       "models": [],
       "jurisdiction": "US",

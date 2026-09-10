@@ -341,10 +341,18 @@ def test_gap_register_rows_have_evidence_and_owners_AC_009():
 
 
 def test_no_capability_claims_more_than_contract_only_AC_009():
-    """Nothing is implemented yet; the coverage matrix must say so."""
+    """Nothing runs yet except what 0077 proved; the matrix must say so and
+    no more. A capability may claim reference_runtime only if a real,
+    tested runtime module backs it (the general coverage-level test above
+    already enforces that; this test enforces the reverse: no capability
+    claims MORE than the current, honest state)."""
 
-    for cap in _pack()["coverage"]["capabilities"]:
-        assert cap["coverage_level"] in {"absent", "prose_only", "contract_only"}
+    caps = {cap["id"]: cap for cap in _pack()["coverage"]["capabilities"]}
+    for cap_id, cap in caps.items():
+        if cap_id == "capability.document_intelligence":
+            assert cap["coverage_level"] == "reference_runtime", cap_id
+        else:
+            assert cap["coverage_level"] in {"absent", "prose_only", "contract_only"}, cap_id
 
 
 # --- AC-010: golden cases ---------------------------------------------------
@@ -412,10 +420,27 @@ def test_agent_charter_requires_coverage_row_AC_011():
         assert agent["owning_spec"] in owning_specs, agent
 
 
-def test_no_credit_agent_exists_yet_AC_011():
-    """The charter gates creation: no agent ships ahead of its coverage row."""
+def test_credit_agent_creation_stays_gated_on_coverage_AC_011():
+    """The charter gates creation: an agent exists only when its coverage row
+    justifies it, and no agent ships ahead of one. Exactly one exists today
+    (0077's credit_document_analyst); nothing else in agents/credit_risk/
+    ships without its own coverage row reaching reference_runtime first."""
 
-    assert not (ROOT / "agents" / "credit_risk").exists()
+    credit_risk_dir = ROOT / "agents" / "credit_risk"
+    assert credit_risk_dir.exists()
+    agent_dirs = {p.name for p in credit_risk_dir.iterdir() if p.is_dir()}
+    assert agent_dirs == {"credit_document_analyst"}
+
+    for agent_dir in agent_dirs:
+        for required_file in ("README.md", "instructions.md", "prompt.md", "tasks.md"):
+            assert (credit_risk_dir / agent_dir / required_file).exists(), (agent_dir, required_file)
+
+    coverage_level = next(
+        cap["coverage_level"]
+        for cap in _pack()["coverage"]["capabilities"]
+        if cap["id"] == "capability.document_intelligence"
+    )
+    assert coverage_level == "reference_runtime"
 
 
 # --- AC-012 / AC-013: workflows and runtime boundary ------------------------

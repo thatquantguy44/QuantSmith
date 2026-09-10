@@ -39,6 +39,7 @@ sources/
 | [`ifrs_foundation`](ifrs_foundation.yml) | IFRS Foundation — IFRS 9 Financial Instruments | document | public | evaluating | medium |
 | [`bis_basel`](bis_basel.yml) | BIS Consolidated Basel Framework | document | public | evaluating | high |
 | [`occ`](occ.yml) | OCC supervisory bulletins and handbooks | document | public | evaluating | medium |
+| [`credit_document_fixture`](credit_document_fixture.yml) | QuantSmith Synthetic Credit Document Fixtures | file_feed | public | active | high |
 | [`newsapi`](newsapi.yml) | NewsAPI.org (general news search/headlines) | api | internal | active | medium |
 | [`alpha_vantage_news`](alpha_vantage_news.yml) | Alpha Vantage NEWS_SENTIMENT (ticker-tagged news + sentiment) | api | internal | active | medium |
 | [`finnhub_news`](finnhub_news.yml) | Finnhub Company/Market News (ticker-scoped news) | api | internal | active | medium |
@@ -74,6 +75,8 @@ registrations, they do not implement live ingestion; that is spec `0078`.
 material so a derived rule can cite it with a jurisdiction and an effective
 interval. Whether a rule applies to a particular institution, product, or
 exposure is a decision for a qualified owner, not for this catalog.
+
+`credit_document_fixture` is the offline-only source for spec `0077`'s credit document intelligence examples — synthetic credit-memo/covenant text, kept separate from `text_intelligence_fixture` so a consumer never mistakes generic liquidity-commentary fixtures for credit-specific ones.
 
 `text_intelligence_fixture` is the offline-only source for spec `0071`'s
 committed examples. Its fictional bodies exercise governance and replay

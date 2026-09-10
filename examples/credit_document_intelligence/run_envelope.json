@@ -1,0 +1,106 @@
+{
+  "actor": {
+    "clearance": "internal",
+    "id": "credit_document_intelligence",
+    "type": "runtime"
+  },
+  "artifacts": [
+    {
+      "access_class": "public",
+      "hash": "sha256:b0ecf3eacde6fcdaa56d7d2795b6e868ddd2b75b3aab373820cc4ef85d4e8d76",
+      "path": "text_intelligence_manifest.json",
+      "producer_event_id": "evt-credit-document-intelligence-001-published",
+      "type": "text_intelligence_manifest"
+    },
+    {
+      "access_class": "public",
+      "hash": "sha256:c68aca9b6994c4c01bec9b44e6ad90300995d7628cb39d9ab13903b0c8b0e6a8",
+      "path": "task_results.json",
+      "producer_event_id": "evt-credit-document-intelligence-001-published",
+      "type": "task_results"
+    },
+    {
+      "access_class": "public",
+      "hash": "sha256:3a6f43790bab767590696958d371d75d05282600406ce3304c9d3a8a779c04cb",
+      "path": "text_signals.json",
+      "producer_event_id": "evt-credit-document-intelligence-001-published",
+      "type": "text_signals"
+    }
+  ],
+  "assumption_ledger": {
+    "hash": "sha256:dc4df68aff3a380955ccdae005718cbf350c2f8c2becc6753bf2a70901e4d976",
+    "path": "assumptions.jsonl",
+    "type": "assumption_ledger"
+  },
+  "audit_events": {
+    "hash": "sha256:592f1ad3eac97b55c13bcad81ac38283740e448cc97e92e77156f85eae9264a4",
+    "path": "audit_events.jsonl",
+    "type": "audit_events"
+  },
+  "context_manifest": {
+    "hash": "sha256:2a4a0f6851fd5707a3612c42705880f17fc998283200e4ac4122b96fddf5a380",
+    "path": "context_manifest.json",
+    "type": "context_manifest"
+  },
+  "created_at": "2026-09-10T09:00:20Z",
+  "environment": {
+    "dependencies": [
+      "stdlib"
+    ],
+    "network": "disabled",
+    "producer": "quantsmith.text_intelligence"
+  },
+  "evaluation_harness": {
+    "hash": "sha256:716294c762664fd48c3d1a637edcac4ff2ccc9e561835efc1ee7d48ab97fc9ca",
+    "path": "evaluation_harness.json",
+    "type": "evaluation_harness"
+  },
+  "gate_results": [
+    {
+      "checked_at": "2026-09-10T09:00:20Z",
+      "finding_count": 0,
+      "gate": "orchestration",
+      "status": "pass"
+    },
+    {
+      "checked_at": "2026-09-10T09:00:20Z",
+      "finding_count": 0,
+      "gate": "text-intelligence",
+      "status": "pass"
+    }
+  ],
+  "mode": "deterministic",
+  "objective": "Produce governed text intelligence with point-in-time lineage, evaluation, audit, and replay evidence.",
+  "prompt_manifest": {
+    "hash": "sha256:402e447369b8d7321c5dc48ec95ba830ddb66cb2e1bc5aa13b82321011ba205e",
+    "path": "prompt_manifest.json",
+    "type": "prompt_manifest"
+  },
+  "release_profile": "exploratory",
+  "replay": {
+    "command": "python -m quantsmith.text_intelligence replay --manifest text_intelligence_manifest.json",
+    "expected_outputs": [
+      {
+        "hash": "sha256:b0ecf3eacde6fcdaa56d7d2795b6e868ddd2b75b3aab373820cc4ef85d4e8d76",
+        "path": "text_intelligence_manifest.json",
+        "type": "text_intelligence_manifest"
+      },
+      {
+        "hash": "sha256:c68aca9b6994c4c01bec9b44e6ad90300995d7628cb39d9ab13903b0c8b0e6a8",
+        "path": "task_results.json",
+        "type": "task_results"
+      },
+      {
+        "hash": "sha256:3a6f43790bab767590696958d371d75d05282600406ce3304c9d3a8a779c04cb",
+        "path": "text_signals.json",
+        "type": "text_signals"
+      }
+    ],
+    "mode": "deterministic"
+  },
+  "repo_revision": "fixture",
+  "run_id": "credit-document-intelligence-001",
+  "schema_version": "quantsmith.orchestration.run.v1",
+  "spec_id": "0071-nlp-llm-quant-text-intelligence-foundation",
+  "stage": "implementation"
+}

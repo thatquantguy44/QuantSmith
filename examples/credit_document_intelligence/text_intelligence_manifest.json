@@ -1,0 +1,69 @@
+{
+  "audit_correlation_id": "evt-credit-document-intelligence-001-corpus",
+  "corpus_snapshot": {
+    "hash": "sha256:a77fc9a928868fd4d8be706b401da5e1cdca0cdd77683cd67d4b73528eac34e0",
+    "path": "corpus_snapshot.json",
+    "type": "corpus_snapshot"
+  },
+  "decision_time": "2026-09-10T09:00:12Z",
+  "downstream_consumers": [
+    "agents/knowledge/knowledge_retrieval",
+    "agents/research_analyst",
+    "agents/economists",
+    "agents/portfolio_management",
+    "agents/risk",
+    "agents/trading_strategies"
+  ],
+  "evaluation_suite": {
+    "hash": "sha256:36d0f35745891d8bbaaaa150213b8b869a3db8eca654d614056dea1832b4a22c",
+    "path": "text_evaluation.json",
+    "type": "evaluation_suite"
+  },
+  "manifest_id": "text-manifest-credit-document-intelligence-001",
+  "model_capabilities": {
+    "hash": "sha256:0b91f4fd5edf2111a2b934dc61f56dee917cf3bf2053695643f605a27ef44ef2",
+    "path": "model_capabilities.json",
+    "type": "model_capabilities"
+  },
+  "orchestration": {
+    "path": "run_envelope.json",
+    "run_id": "credit-document-intelligence-001",
+    "schema_version": "quantsmith.orchestration.run.v1"
+  },
+  "purpose": "Validate governed, point-in-time quant text intelligence with source-span lineage.",
+  "replay_class": "deterministic",
+  "review": {
+    "escalation_conditions": [
+      "any production, client, trading, or restricted-data use"
+    ],
+    "overrides": [],
+    "owner": "spec0071",
+    "rejected_alternatives": [
+      "represent fixture output as production evidence"
+    ],
+    "reviewed_at": "2026-09-10T09:00:11Z",
+    "reviewer": "credit_document_intelligence",
+    "status": "fixture_approved",
+    "uncertainty": "Synthetic fixture demonstrates contracts only; no investment conclusion is approved."
+  },
+  "run_id": "credit-document-intelligence-001",
+  "schema_version": "quantsmith.text_intelligence.manifest.v1",
+  "signal_artifacts": [
+    {
+      "hash": "sha256:3a6f43790bab767590696958d371d75d05282600406ce3304c9d3a8a779c04cb",
+      "path": "text_signals.json",
+      "type": "text_signals"
+    }
+  ],
+  "task_results": {
+    "hash": "sha256:c68aca9b6994c4c01bec9b44e6ad90300995d7628cb39d9ab13903b0c8b0e6a8",
+    "path": "task_results.json",
+    "type": "task_results"
+  },
+  "task_schema_version": "quantsmith.text_intelligence.task.v1",
+  "transform_chain": {
+    "hash": "sha256:0b5e77606f6b6f4adbbc75b64c00eb2aa72c12deb03ebd6de694200773b23f3a",
+    "path": "transform_chain.json",
+    "type": "transform_chain"
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "as_of": "2026-09-10T09:00:12Z",
+  "caller": {
+    "clearance": "internal",
+    "id": "credit_document_intelligence"
+  },
+  "context_id": "context-credit-document-intelligence-001",
+  "context_window": {
+    "character_budget": 16000,
+    "token_budget": 4096
+  },
+  "exclusions": [
+    {
+      "locator": "quarantined fixture inputs",
+      "reason": "unsafe text is excluded before prompt composition"
+    }
+  ],
+  "items": [
+    {
+      "access_level": "public",
+      "budget": {
+        "characters": 512,
+        "tokens": 128
+      },
+      "caller_clearance": "internal",
+      "citations": [
+        {
+          "label": "credit-memo-obligor-001",
+          "locator": "documents/credit-memo-obligor-001.txt"
+        }
+      ],
+      "content_hash": "sha256:86254837b3da886358eda733200c12111af79c8166d75c22026f94d6a11ed5af",
+      "context_id": "context-credit-memo-obligor-001",
+      "effective_at": "2026-09-08T09:00:00Z",
+      "expires_at": "2027-09-10T09:00:20Z",
+      "freshness": "current",
+      "known_at": "2026-09-08T09:01:00Z",
+      "locator": "documents/credit-memo-obligor-001.txt",
+      "rank": 1,
+      "retrieval_query": "funding liquidity collateral",
+      "selection_rule": "immutable corpus snapshot and caller-eligible source",
+      "source_authority": "source-catalog://credit_document_fixture"
+    },
+    {
+      "access_level": "public",
+      "budget": {
+        "characters": 512,
+        "tokens": 128
+      },
+      "caller_clearance": "internal",
+      "citations": [
+        {
+          "label": "credit-memo-covenant-001",
+          "locator": "documents/credit-memo-covenant-001.txt"
+        }
+      ],
+      "content_hash": "sha256:3b616eb963fe3669023b53bd146ead04b0c1237b594ab48cdb446edb17eb0706",
+      "context_id": "context-credit-memo-covenant-001",
+      "effective_at": "2026-09-08T09:02:00Z",
+      "expires_at": "2027-09-10T09:00:20Z",
+      "freshness": "current",
+      "known_at": "2026-09-08T09:03:00Z",
+      "locator": "documents/credit-memo-covenant-001.txt",
+      "rank": 2,
+      "retrieval_query": "funding liquidity collateral",
+      "selection_rule": "immutable corpus snapshot and caller-eligible source",
+      "source_authority": "source-catalog://credit_document_fixture"
+    }
+  ],
+  "run_id": "credit-document-intelligence-001",
+  "schema_version": "quantsmith.orchestration.context.v1"
+}

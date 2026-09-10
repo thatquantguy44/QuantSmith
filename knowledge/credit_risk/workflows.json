@@ -355,7 +355,7 @@
       "participating_agents": [
         {
           "agent_id": "agents/credit_risk/credit_document_analyst",
-          "status": "future",
+          "status": "existing",
           "owning_spec": "0077"
         },
         {
