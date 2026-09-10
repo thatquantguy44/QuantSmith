@@ -3,7 +3,7 @@
 ## Snapshot
 
 The SDK has a working v1: a **spec-driven engineering framework** over the six
-software-development stages, **168 agents** in `agents/`,
+software-development stages, **169 agents** in `agents/`,
 **35 quality gates**, **36 instruction standards**, and CI that
 enforces the deterministic gates. It remains primarily a scaffold to be copied
 into quant repos, with `src/quantsmith/pipelines/`, `src/quantsmith/orchestration/`,
@@ -28,7 +28,7 @@ it via stable IDs (`REQ`/`NFR`/`AC`/`RISK`/`T`).
 - `specs/NNNN-slug/{spec,plan,tasks}.md` from `templates/spec/`; worked example at
   `specs/0001-daily-momentum-signal/`.
 
-**Agents (168, verified by the `agent-catalog` gate — treat `agents/README.md`
+**Agents (169, verified by the `agent-catalog` gate — treat `agents/README.md`
 as the live count, not the number here)** — all on the four-file contract
 (`README`/`prompt`/`instructions`/`tasks`) with a `Spec-Driven Role`:
 
@@ -216,7 +216,6 @@ nobody noticed.
 | `0074` | **Retail underwriting and fair-lending runtime** — application and behavioral scorecards, cutoffs, adverse action reason codes, disparate-impact testing, reject inference | approved `0072`, and specifically its REQ-014 decision-path contract; the open question of whether any in-SDK reference scorecard ships at all must be resolved first | item 24 |
 | `0075` | **IFRS 9 / CECL expected credit loss engine** — staging, twelve-month versus lifetime measurement, effective-interest discounting, macro scenario overlays | approved `0072`; scenario vintage controls depend on `0078` for real sources | item 24 |
 | `0076` | **Regulatory capital and supervisory stress testing** — IRB risk weights, scenario expansion, capital planning inputs | approved `0072` plus `0075` for the ECL inputs it shares | item 24 |
-| `0077` | **Credit document intelligence** — credit memos, covenant extraction, financial spreading, early warning from filings and news | approved `0072` REQ-016 admission boundary, over built `0070` and `0071`; the likely first child to activate, since its dependencies already exist | item 24 |
 | `0078` | **Credit data sources and ingestion contracts** — register and ingest approved public regulatory, accounting, supervisory-scenario, and macro sources with vintage and effective-time controls | `0072` source-authority and temporal contracts; may proceed in parallel with `0073`–`0077` once those stabilize | item 24 |
 | `0079` | **Credit model risk management and monitoring runtime** — SR 11-7 model lifecycle, validation evidence, challenger comparison, drift and calibration monitoring, override logging | approved `0072` REQ-015 governance predicate; open question whether it should be credit-specific or generalized across the SDK's whole model inventory | item 24 |
 
@@ -224,9 +223,10 @@ Specs `0063-short-term-markets-domain-foundation/`,
 `0066-securities-lending-model-correction/`,
 `0067-collateral-margin-optimizer-contract/`,
 `0070-prompt-context-harness-foundation/`,
-`0071-nlp-llm-quant-text-intelligence-foundation/`, and
-`0072-credit-risk-domain-foundation/` are written, implemented, and **all
-Approved**, reviewed by Joshua Lutkemuller, CFA, 2026-09-09 (`0066`: five
+`0071-nlp-llm-quant-text-intelligence-foundation/`,
+`0072-credit-risk-domain-foundation/`, and
+`0077-credit-document-intelligence/` are written, implemented, and **all
+Approved**, reviewed by Joshua Lutkemuller, CFA (`0066`: five
 `0063` gap-register discrepancies corrected in place; `0067`: contract-only,
 the reference-optimizer-versus-plugin-boundary question resolved
 plugin-only; `0063`, `0070`, `0071` approved as foundations with their
@@ -234,10 +234,16 @@ implemented state noted in `specs/README.md`'s Status column; `0072`
 approved as a foundation whose knowledge pack and validator are built but
 whose 109 records remain individually `draft` pending a named
 credit-domain reviewer per its own `0072` REQ-019 — approving the spec
-chain is not the same act as promoting its records, see item 24) — so they
-are indexed here rather than listed as unwritten reservations above.
-Specs `0064`–`0065`, `0068`–`0069` (short-term markets) and `0073`–`0079`
-(credit risk) are **portfolio commitments, not active designs**: create and
+chain is not the same act as promoting its records, see item 24; `0077`:
+proves `0072`'s evidence-admission boundary against a real, emitted `0071`
+bundle rather than hand-typed fixtures, resolves `0072`'s `0054`
+open question, and creates `credit_document_analyst`, the first
+`agents/credit_risk/` agent, now that its coverage row justifies one — see
+item 25) — so they are indexed here rather than listed as unwritten
+reservations above.
+Specs `0064`–`0065`, `0068`–`0069` (short-term markets) and `0073`–`0076`,
+`0078`–`0079` (credit risk) are **portfolio commitments, not active
+designs**: create and
 approve one only when the foundation it consumes — `0063` or `0072` — has frozen
 that contract and the prior dependency named above is satisfied. Do not add
 agents merely to fill the map; prefer a canonical knowledge artifact or tested
@@ -663,7 +669,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
     to populate `sources/` as real sources come into use.
 
 14. **P1 Generalization & Team Onboarding — making QuantSmith self-serve across
-    domains.** QuantSmith is now a comprehensive framework (168 agents, 60 specs,
+    domains.** QuantSmith is now a comprehensive framework (169 agents, 60 specs,
     33 gates, 35 standards); the next phase is reducing discovery friction and
     enabling team-intuitive adoption without deep codebase reading.
     - **P0 Phase 1a: Role profiles** (`roles/{portfolio_manager,risk_manager,quant_researcher,data_engineer,compliance_officer}.md`):
@@ -1177,27 +1183,71 @@ manual-task persistence question stays deferred until a real consumer needs it.
     `T-011` is `todo` by design, and a test currently asserts that
     `agents/credit_risk/` does not exist, because the charter gates creation on
     a coverage-matrix row. No measurement, scoring, ECL, capital, or monitoring
-    runtime exists; all 8 capabilities sit honestly at `contract_only`, and the
+    runtime exists; 7 of 8 capabilities sit honestly at `contract_only`, and the
     validator rejects a `reference_runtime` claim with no runtime module behind
-    it. **All 109 records are `draft`** and a test asserts that count so it
-    cannot drift quietly: `T-016` is `blocked` on a named credit-domain
-    reviewer. No existing runtime's numerical output changed; the full suite
-    moved from 547 to 607 passing with nothing else altered.
+    it — the eighth, `capability.document_intelligence`, reached
+    `reference_runtime` via `0077` (item 25). **All 109 knowledge records are
+    still `draft`** and a test asserts that count so it cannot drift quietly:
+    `T-016` is `blocked` on a named credit-domain reviewer. No existing
+    runtime's numerical output changed; the full suite moved from 547 to 622
+    passing with nothing else altered.
 
     **Next pickup, in order:** (a) name a credit-domain reviewer — a credit
     risk officer, model validator, or CECL/IFRS 9 owner — because no individual
     record can reach `reviewed` without one and repository-owner approval of
     the spec chain is not a substitute; this is now the only thing blocking the
     pack's 109 records from moving past `draft`, since the spec chain itself is
-    Approved; (b) decide which pillar has the first real consumer, which
-    selects the first child to activate (`0077` remains the expectation, since
-    `0070` and `0071` are already built and the admission boundary is now
-    written and tested; `0073` if a portfolio consumer appears first); (c) only
-    then create `agents/credit_risk/` agents, each against the coverage row
-    that justifies it. Do not create agents ahead of that matrix, do not let a
-    capability's coverage level rise without a named runtime and test, and do
-    not commit real credit data — the pack is synthetic-fixtures-only by
-    NFR-006, permanently.
+    Approved; (b) decide which pillar has the next real consumer — `0073`
+    (wholesale) if a portfolio consumer appears, `0074` (retail) once its
+    reference-scorecard question is resolved, or extend `0077`'s document
+    intelligence toward a real, licensed corpus and a genuine extractor per its
+    own Follow-ups; (c) create further `agents/credit_risk/` agents only
+    against the coverage row that justifies each. Do not create agents ahead
+    of that matrix, do not let a capability's coverage level rise without a
+    named runtime and test, and do not commit real credit data — the pack is
+    synthetic-fixtures-only by NFR-006, permanently.
+
+25. **Credit document intelligence — Approved and implemented** (spec `0077`).
+    Reviewed and approved by Joshua Lutkemuller, CFA, 2026-09-10. Closes the
+    one gap `0072`'s own gap register named as unproven (`G-0072-006`):
+    whether `0072`'s LLM evidence-admission boundary (REQ-016) holds when a
+    real `0071` bundle, produced by `0071`'s real, unchanged producer, flows
+    through it, rather than only hand-typed fixtures written to satisfy it.
+
+    `0077` is deliberately narrow: no covenant-extraction model, no live model
+    call, no change to any approved `0070`/`0071`/`0072` module. It registers
+    a dedicated `credit_document_fixture` source, emits a real bundle over two
+    synthetic documents via `0071`'s unchanged `emit_lexical_signal_evidence`,
+    and bridges one real task result into `0072`'s `admit_derived_evidence` —
+    proving `derived_evidence`, `decision_input`, and rejection outcomes
+    against actual artifacts, plus deterministic replay through both `0070`'s
+    and `0071`'s existing replay engines. One committed, regenerable example
+    lives at `examples/credit_document_intelligence/`.
+
+    Building it surfaced a genuine integration gap no spec review would have
+    caught: `0071`'s task-result `review` object (`reviewer`, `reviewed_at`,
+    `owner`, `uncertainty`) and `0072`'s review object (`reviewer`,
+    `review_date`, `scope`) do not share field names. Neither schema is
+    wrong — they were designed for different documents — but wiring them
+    without an explicit adapter would have silently miscoerced one into the
+    other. `review_from_task_result` makes that mapping a single, named,
+    tested function rather than ad hoc coercion at each call site.
+
+    `0077` also creates `agents/credit_risk/credit_document_analyst/`, the
+    first agent under `0072`'s charter, justified by `capability.
+    document_intelligence` reaching `reference_runtime` — not created ahead
+    of that evidence. It states plainly what it does not do: the underlying
+    `0071` producer's `entity_extraction`/`value_extraction`/
+    `sentiment_stance`/`theme_detection` outputs are fixed reference-fixture
+    stubs, disclosed as such; only the `classification` result is genuinely
+    computed from the corpus's text. A real, licensed corpus at retrieval
+    scale and a genuine covenant/financial-value extractor remain open,
+    unowned follow-on work — see `0077`'s own Follow-ups.
+
+    Resolves `0072`'s open question on `0054` (MCP RAG server): not needed,
+    since a fixture-scale, two-document corpus proves the boundary via direct
+    span citation over `0071`'s existing index snapshots, and vector search
+    matters at retrieval scale, which this first consumer does not reach.
 
 
 ## Open Questions For The Owner
@@ -1215,7 +1265,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
 
 ## Risks
 
-- Breadth: 168 agents is useful only if each stays narrow and inspectable.
+- Breadth: 169 agents is useful only if each stays narrow and inspectable.
 - Heuristic gates (`leakage`, `backtest`, `secret-scan` fallback) can false-positive
   or miss; keep them advisory unless a repo's layout makes them reliable.
 - Docs can drift from the code; the `docs-link`, `agent-catalog`, and `spec-index` gates help, but

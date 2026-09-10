@@ -1,0 +1,213 @@
+{
+  "checks": [
+    {
+      "check_id": "check-credit-document-intelligence-001-corpus_integrity",
+      "deterministic": true,
+      "exception": null,
+      "findings": [],
+      "layer": "corpus_integrity",
+      "metrics": {
+        "status": "measured",
+        "value": 1.0
+      },
+      "status": "pass"
+    },
+    {
+      "check_id": "check-credit-document-intelligence-001-temporal_correctness",
+      "deterministic": true,
+      "exception": null,
+      "findings": [],
+      "layer": "temporal_correctness",
+      "metrics": {
+        "status": "measured",
+        "value": 1.0
+      },
+      "status": "pass"
+    },
+    {
+      "check_id": "check-credit-document-intelligence-001-duplicate_overlap",
+      "deterministic": true,
+      "exception": null,
+      "findings": [],
+      "layer": "duplicate_overlap",
+      "metrics": {
+        "status": "measured",
+        "value": 1.0
+      },
+      "status": "pass"
+    },
+    {
+      "check_id": "check-credit-document-intelligence-001-benchmark_contamination",
+      "deterministic": true,
+      "exception": null,
+      "findings": [],
+      "layer": "benchmark_contamination",
+      "metrics": {
+        "status": "measured",
+        "value": 1.0
+      },
+      "status": "pass"
+    },
+    {
+      "check_id": "check-credit-document-intelligence-001-task_quality",
+      "deterministic": true,
+      "exception": null,
+      "findings": [],
+      "layer": "task_quality",
+      "metrics": {
+        "status": "measured",
+        "value": 1.0
+      },
+      "status": "pass"
+    },
+    {
+      "check_id": "check-credit-document-intelligence-001-retrieval_quality",
+      "deterministic": true,
+      "exception": "Deterministic lexical example performs no semantic retrieval or reranking.",
+      "findings": [],
+      "layer": "retrieval_quality",
+      "metrics": {},
+      "status": "skipped"
+    },
+    {
+      "check_id": "check-credit-document-intelligence-001-reranking_quality",
+      "deterministic": true,
+      "exception": "Deterministic lexical example performs no semantic retrieval or reranking.",
+      "findings": [],
+      "layer": "reranking_quality",
+      "metrics": {},
+      "status": "skipped"
+    },
+    {
+      "check_id": "check-credit-document-intelligence-001-calibration",
+      "deterministic": true,
+      "exception": null,
+      "findings": [],
+      "layer": "calibration",
+      "metrics": {
+        "status": "measured",
+        "value": 1.0
+      },
+      "status": "pass"
+    },
+    {
+      "check_id": "check-credit-document-intelligence-001-citation_coverage",
+      "deterministic": true,
+      "exception": null,
+      "findings": [],
+      "layer": "citation_coverage",
+      "metrics": {
+        "status": "measured",
+        "value": 1.0
+      },
+      "status": "pass"
+    },
+    {
+      "check_id": "check-credit-document-intelligence-001-faithfulness",
+      "deterministic": true,
+      "exception": null,
+      "findings": [],
+      "layer": "faithfulness",
+      "metrics": {
+        "status": "measured",
+        "value": 1.0
+      },
+      "status": "pass"
+    },
+    {
+      "check_id": "check-credit-document-intelligence-001-robustness",
+      "deterministic": true,
+      "exception": null,
+      "findings": [],
+      "layer": "robustness",
+      "metrics": {
+        "status": "measured",
+        "value": 1.0
+      },
+      "status": "pass"
+    },
+    {
+      "check_id": "check-credit-document-intelligence-001-prompt_injection",
+      "deterministic": true,
+      "exception": null,
+      "findings": [],
+      "layer": "prompt_injection",
+      "metrics": {
+        "status": "measured",
+        "value": 1.0
+      },
+      "status": "pass"
+    },
+    {
+      "check_id": "check-credit-document-intelligence-001-unsafe_tool_use",
+      "deterministic": true,
+      "exception": null,
+      "findings": [],
+      "layer": "unsafe_tool_use",
+      "metrics": {
+        "status": "measured",
+        "value": 1.0
+      },
+      "status": "pass"
+    },
+    {
+      "check_id": "check-credit-document-intelligence-001-privacy_access",
+      "deterministic": true,
+      "exception": null,
+      "findings": [],
+      "layer": "privacy_access",
+      "metrics": {
+        "status": "measured",
+        "value": 1.0
+      },
+      "status": "pass"
+    },
+    {
+      "check_id": "check-credit-document-intelligence-001-latency_cost",
+      "deterministic": true,
+      "exception": null,
+      "findings": [],
+      "layer": "latency_cost",
+      "metrics": {
+        "currency": "USD",
+        "estimated_cost": 0.0,
+        "latency_ms": 0
+      },
+      "status": "pass"
+    },
+    {
+      "check_id": "check-credit-document-intelligence-001-signal_stability",
+      "deterministic": true,
+      "exception": null,
+      "findings": [],
+      "layer": "signal_stability",
+      "metrics": {
+        "fixture_runs": 2,
+        "identical": true
+      },
+      "status": "pass"
+    }
+  ],
+  "manifest_id": "text-manifest-credit-document-intelligence-001",
+  "promotion_status": "pass",
+  "required_layers": [
+    "corpus_integrity",
+    "temporal_correctness",
+    "duplicate_overlap",
+    "benchmark_contamination",
+    "task_quality",
+    "retrieval_quality",
+    "reranking_quality",
+    "calibration",
+    "citation_coverage",
+    "faithfulness",
+    "robustness",
+    "prompt_injection",
+    "unsafe_tool_use",
+    "privacy_access",
+    "latency_cost",
+    "signal_stability"
+  ],
+  "schema_version": "quantsmith.text_intelligence.evaluation.v1",
+  "suite_id": "text-evaluation-credit-document-intelligence-001"
+}

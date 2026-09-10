@@ -277,9 +277,13 @@ specific document or dataset version it uses.
   material error that biases the disparity estimate itself. `0072` requires a method to
   be named and its limitations recorded; it deliberately does not pick one, because the
   choice is jurisdiction-, product-, and counsel-dependent.
-- Open question: does credit document intelligence need `0054` (MCP RAG server)
-  activated for cited retrieval, or can `0071`'s index snapshots serve the first
-  consumer without it?
+- Resolved (2026-09-10, by `0077`): credit document intelligence does not
+  need `0054` (MCP RAG server) activated. `0077`'s fixture-scale, two-document
+  corpus proves the evidence-admission boundary via direct span citation over
+  `0071`'s existing index snapshots; vector search matters at retrieval scale,
+  which the first consumer does not reach. Revisit only if a real corpus at
+  retrieval scale becomes the actual consumer (see gap `G-0072-006` and
+  `0077`'s own Follow-ups).
 
 ## Exceptions
 

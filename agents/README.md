@@ -372,6 +372,29 @@ ACT/360 accrual, an honest — not fabricated — counterparty-concentration
 boundary, a tightened point-in-time check, and an explicit day-count basis)
 by spec `0066-securities-lending-model-correction`.
 
+## Credit Risk Agents (`credit_risk/`)
+
+Grouped in the `credit_risk/` category folder under spec
+`0072-credit-risk-domain-foundation`. Agent creation is gated: an agent
+exists here only when `knowledge/credit_risk/coverage.json` shows a
+coverage row with a distinct workflow no existing agent already holds — see
+`0072` REQ-011. This roster is intentionally short; most of `0072`'s
+coverage matrix is still `contract_only` and does not yet justify an agent.
+
+| Agent | Handles | Feeds mainly |
+| --- | --- | --- |
+| `credit_risk/credit_document_analyst/` | Cited extraction from credit documents into `0072`'s LLM evidence-admission boundary (`derived_evidence` → `decision_input` only on named human review); never decides a credit outcome itself | Wholesale review, ECL measurement, once a value is genuinely promoted |
+
+`credit_document_analyst/` has a tested runtime (spec
+`0077-credit-document-intelligence`):
+`src/quantsmith/pipelines/credit_document_intelligence.py` — emits a real
+`0071` bundle over a registered credit-document source via `0071`'s own
+unchanged producer, then bridges a real task result into `0072`'s
+`admit_derived_evidence` through a documented field-name adapter between
+`0071`'s and `0072`'s review objects. It proves the wiring, not a working
+covenant-extraction model — see the agent's own `README.md` for what it does
+not yet claim.
+
 ## Formulaic Alpha Agents (`formulaic_alphas/`)
 
 Grouped in the `formulaic_alphas/` category folder; they operationalize the
