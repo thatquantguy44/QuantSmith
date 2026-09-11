@@ -76,8 +76,12 @@
       "source_refs": [
         "bis_basel"
       ],
-      "review_status": "draft",
-      "review": null,
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Convention records -- units, horizon, conditioning basis, discounting, formula references, and required parameters -- reviewed for internal consistency and for correctly leaving institution-specific values (risk weight, disparity threshold, estimation method, score scaling) as required inputs rather than SDK constants. Not a review of any specific institution's calibration."
+      },
       "supersedes": []
     },
     {
@@ -110,8 +114,12 @@
       "source_refs": [
         "ifrs_foundation"
       ],
-      "review_status": "draft",
-      "review": null,
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Convention records -- units, horizon, conditioning basis, discounting, formula references, and required parameters -- reviewed for internal consistency and for correctly leaving institution-specific values (risk weight, disparity threshold, estimation method, score scaling) as required inputs rather than SDK constants. Not a review of any specific institution's calibration."
+      },
       "supersedes": []
     },
     {
@@ -153,8 +161,12 @@
         "ifrs_foundation",
         "fasb"
       ],
-      "review_status": "draft",
-      "review": null,
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Convention records -- units, horizon, conditioning basis, discounting, formula references, and required parameters -- reviewed for internal consistency and for correctly leaving institution-specific values (risk weight, disparity threshold, estimation method, score scaling) as required inputs rather than SDK constants. Not a review of any specific institution's calibration."
+      },
       "supersedes": []
     },
     {
@@ -187,8 +199,12 @@
       "source_refs": [
         "bis_basel"
       ],
-      "review_status": "draft",
-      "review": null,
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Convention records -- units, horizon, conditioning basis, discounting, formula references, and required parameters -- reviewed for internal consistency and for correctly leaving institution-specific values (risk weight, disparity threshold, estimation method, score scaling) as required inputs rather than SDK constants. Not a review of any specific institution's calibration."
+      },
       "supersedes": []
     },
     {
@@ -221,8 +237,12 @@
       "source_refs": [
         "bis_basel"
       ],
-      "review_status": "draft",
-      "review": null,
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Convention records -- units, horizon, conditioning basis, discounting, formula references, and required parameters -- reviewed for internal consistency and for correctly leaving institution-specific values (risk weight, disparity threshold, estimation method, score scaling) as required inputs rather than SDK constants. Not a review of any specific institution's calibration."
+      },
       "supersedes": []
     },
     {
@@ -266,8 +286,12 @@
       "source_refs": [
         "bis_basel"
       ],
-      "review_status": "draft",
-      "review": null,
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Convention records -- units, horizon, conditioning basis, discounting, formula references, and required parameters -- reviewed for internal consistency and for correctly leaving institution-specific values (risk weight, disparity threshold, estimation method, score scaling) as required inputs rather than SDK constants. Not a review of any specific institution's calibration."
+      },
       "supersedes": []
     },
     {
@@ -311,8 +335,12 @@
       "source_refs": [
         "bis_basel"
       ],
-      "review_status": "draft",
-      "review": null,
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Convention records -- units, horizon, conditioning basis, discounting, formula references, and required parameters -- reviewed for internal consistency and for correctly leaving institution-specific values (risk weight, disparity threshold, estimation method, score scaling) as required inputs rather than SDK constants. Not a review of any specific institution's calibration."
+      },
       "supersedes": []
     },
     {
@@ -345,8 +373,12 @@
       "source_refs": [
         "ifrs_foundation"
       ],
-      "review_status": "draft",
-      "review": null,
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Convention records -- units, horizon, conditioning basis, discounting, formula references, and required parameters -- reviewed for internal consistency and for correctly leaving institution-specific values (risk weight, disparity threshold, estimation method, score scaling) as required inputs rather than SDK constants. Not a review of any specific institution's calibration."
+      },
       "supersedes": []
     },
     {
@@ -392,8 +424,12 @@
         "ifrs_foundation",
         "fasb"
       ],
-      "review_status": "draft",
-      "review": null,
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Convention records -- units, horizon, conditioning basis, discounting, formula references, and required parameters -- reviewed for internal consistency and for correctly leaving institution-specific values (risk weight, disparity threshold, estimation method, score scaling) as required inputs rather than SDK constants. Not a review of any specific institution's calibration."
+      },
       "supersedes": []
     },
     {
@@ -444,8 +480,12 @@
       "source_refs": [
         "bis_basel"
       ],
-      "review_status": "draft",
-      "review": null,
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Convention records -- units, horizon, conditioning basis, discounting, formula references, and required parameters -- reviewed for internal consistency and for correctly leaving institution-specific values (risk weight, disparity threshold, estimation method, score scaling) as required inputs rather than SDK constants. Not a review of any specific institution's calibration."
+      },
       "supersedes": []
     },
     {
@@ -512,8 +552,12 @@
       "source_refs": [
         "cfpb"
       ],
-      "review_status": "draft",
-      "review": null,
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Convention records -- units, horizon, conditioning basis, discounting, formula references, and required parameters -- reviewed for internal consistency and for correctly leaving institution-specific values (risk weight, disparity threshold, estimation method, score scaling) as required inputs rather than SDK constants. Not a review of any specific institution's calibration."
+      },
       "supersedes": []
     },
     {
@@ -565,8 +609,12 @@
       "source_refs": [
         "cfpb"
       ],
-      "review_status": "draft",
-      "review": null,
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Convention records -- units, horizon, conditioning basis, discounting, formula references, and required parameters -- reviewed for internal consistency and for correctly leaving institution-specific values (risk weight, disparity threshold, estimation method, score scaling) as required inputs rather than SDK constants. Not a review of any specific institution's calibration."
+      },
       "supersedes": []
     },
     {
@@ -599,8 +647,12 @@
       "source_refs": [
         "bis_basel"
       ],
-      "review_status": "draft",
-      "review": null,
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Convention records -- units, horizon, conditioning basis, discounting, formula references, and required parameters -- reviewed for internal consistency and for correctly leaving institution-specific values (risk weight, disparity threshold, estimation method, score scaling) as required inputs rather than SDK constants. Not a review of any specific institution's calibration."
+      },
       "supersedes": []
     },
     {
@@ -658,8 +710,12 @@
       "source_refs": [
         "cfpb"
       ],
-      "review_status": "draft",
-      "review": null,
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Convention records -- units, horizon, conditioning basis, discounting, formula references, and required parameters -- reviewed for internal consistency and for correctly leaving institution-specific values (risk weight, disparity threshold, estimation method, score scaling) as required inputs rather than SDK constants. Not a review of any specific institution's calibration."
+      },
       "supersedes": []
     }
   ]

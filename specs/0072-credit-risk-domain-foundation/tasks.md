@@ -47,7 +47,7 @@
 | T-013 | Author `governance.json`: the credit model card extension, required validation evidence, challenger comparison, monitoring thresholds, override log, owner, and kill switch, with deployability as a computed predicate. | REQ-013, REQ-015 | done | 7 governance artifacts and a computed deployability predicate. There is no `deployable` field to set; `test_there_is_no_deployable_field_to_set_AC_016` asserts its absence from the committed JSON. |
 | T-014 | Implement the LLM evidence admission boundary over `0070` envelopes and `0071` artifacts: source spans, prompt/context manifest, assumption-ledger entry, replay reference, and `derived_evidence` labeling. | REQ-016, NFR-007 | done | Admission requires all six of artifact ref, source spans, envelope ref, manifest, assumption-ledger entry, and replay ref; each missing field is proven to block admission. Promotion to `decision_input` requires named human review and no automated path performs it. |
 | T-015 | Add `instructions/credit_risk.md` and update touching agents to cite the canonical pack instead of redefining shared terms. | REQ-018 | done | `instructions/credit_risk.md` added. Instruction-count truth moved 35 to 36; `README.md`, `docs/handoff.md`, and `docs/sdk_plan.md` updated in the same change and `doc-counts` is clean. |
-| T-016 | Complete two-part human review — credit practitioner review of measures, conventions, lifecycles, and decision paths, and a model-validation review of temporal and numerical cases — recording reviewer handles, scope, dates, and dispositions. | REQ-019, NFR-003, NFR-004 | blocked | Unchanged and genuinely blocked. All 107 records remain `draft`; `test_every_committed_record_is_still_draft_AC_020` asserts that rather than letting the count drift quietly. Resolution is a named credit-domain reviewer, which no automation here can substitute. |
+| T-016 | Complete two-part human review — credit practitioner review of measures, conventions, lifecycles, and decision paths, and a model-validation review of temporal and numerical cases — recording reviewer handles, scope, dates, and dispositions. | REQ-019, NFR-003, NFR-004 | in-progress | Reviewer named 2026-09-11: Joshua Lutkemuller, CFA (repository owner and approver; a self-attestation, not an independent third-party credit officer's sign-off — see `G-0072-001`). 94 of 109 records promoted to `reviewed` with reviewer/date/scope; the remaining 15 carry a `blocked_by_gap_ids` field naming `G-0072-002` (wholesale/counterparty runtime absent) or `G-0072-005` (fairness harness absent), and the validator's own gap-register parser refuses promotion while either stays open, regardless of how complete the review object is. `test_promotion_state_matches_gap_register_AC_020` and `test_a_record_naming_a_still_open_high_gap_cannot_be_reviewed_AC_020` assert the count and the mechanism, not just the current data. Task stays `in-progress`, not `done`, until `0073`/`0074` close their gaps and the remaining 15 can be reviewed. |
 | T-018 | Close the REQ-014 proxy gap: add REQ-020, the fairness-testing convention and per-path obligations, the disparity golden case, validator enforcement, and AC-023/AC-024 tests. | REQ-014, REQ-020, NFR-008 | done | Found by auditing the built pack, not before implementation. Recorded as G-0072-011 rather than quietly fixed: the register keeps what was wrong and when. Every obligation has a per-field negative test, so each is provably load-bearing. |
 | T-017 | Run the credit validation module, full `pytest`, and the required repository gates (`spec`, `docs-link`, `spec-index`, `doc-counts`, `handoff-sync`, `source-catalog`, `data-provenance`, `secret-scan`, `agent-catalog`, `readme-sync`), and record exact evidence. | NFR-001, NFR-006 | done | Evidence recorded below. |
 
@@ -114,6 +114,48 @@ Two honest caveats:
   this change adding only new files plus index and count edits, and on the full
   suite passing unchanged.
 
+## Review Promotion (2026-09-11)
+
+Captured on `claude/credit-risk-agents-spec-zttp6c`, after `0077` and after
+naming Joshua Lutkemuller, CFA as the credit-domain reviewer.
+
+- `PYTHONPATH=src python3 -m quantsmith.pipelines.credit_risk_knowledge` ->
+  `credit-risk validation OK (blocked_pending_gap=15, capabilities=8,
+  concepts=53, conventions=14, decision_paths=7, draft=15, golden_cases=11,
+  lifecycles=3, records=109, reviewed=94, workflows=6)`
+- `PYTHONPATH=src pytest -q tests/test_credit_risk_knowledge.py` -> `62 passed`
+- `PYTHONPATH=src pytest -q` -> full suite passes with no existing test's
+  behaviour changed
+- `hooks/stages/run-stage.sh spec spec-index handoff-sync doc-counts docs-link
+  source-catalog data-provenance secret-scan agent-catalog readme-sync` ->
+  clean except the pre-existing `readme-sync` finding for spec `0066`
+
+**What changed and why it is not a rubber stamp:**
+
+- The validator gained real enforcement it was missing: `REQ-019` always said
+  a record cannot be `reviewed` while an unresolved severity-high gap affects
+  it, but the code only checked reviewer/date/scope presence. `high_severity_
+  open_gap_ids` now parses `gap_register.md`'s actual open/closed status, and
+  `_validate_common_records` refuses `reviewed` status on any record whose
+  `blocked_by_gap_ids` intersects that set — proven by
+  `test_a_record_naming_a_still_open_high_gap_cannot_be_reviewed_AC_020`
+  against a record with an otherwise-complete review object.
+- 15 records — the 3 capabilities, 3 workflows, 2 decision paths, and 7 golden
+  cases tied directly to `G-0072-002` (no wholesale/counterparty runtime) or
+  `G-0072-005` (no fairness harness) — are tagged `blocked_by_gap_ids` and stay
+  `draft`. Promoting them would have been exactly the `RISK-001` failure mode
+  this pack's own design exists to prevent: a validated-looking record for
+  content whose own gap register says isn't operationally provable yet.
+- The remaining 94 — taxonomy definitions, conventions, lifecycles, non-retail
+  decision paths, governance artifacts, non-blocked workflows, coverage rows,
+  and non-blocked golden cases — were reviewed by domain area (see each JSON
+  file's per-record `review.scope`) and promoted.
+- The reviewer identity is stated without euphemism in `gap_register.md`'s
+  `G-0072-001` and `knowledge/credit_risk/README.md`: this is the account
+  owner's own attestation for a portfolio SDK, not an independent third-party
+  credit officer's or model validator's sign-off. `T-016` stays `in-progress`,
+  not `done`, for exactly that reason and because 15 records remain blocked.
+
 ## Follow-ups
 
 Reserved in `docs/handoff.md`, not active specs. Create one only after `0072` is
@@ -127,7 +169,7 @@ approved and the dependency named in its reservation is satisfied.
   measurement, EIR discounting, macro overlays).
 - `0076` — regulatory capital and supervisory stress testing (IRB risk weights,
   scenario expansion, capital planning inputs).
-- `0077` — credit document intelligence (memos, covenant extraction, financial
+- `0077` — **done, Approved.** Credit document intelligence (memos, covenant extraction, financial
   spreading, early warning) over `0070`/`0071`.
 - `0078` — credit data sources and ingestion contracts.
 - `0079` — credit model risk management and monitoring runtime.

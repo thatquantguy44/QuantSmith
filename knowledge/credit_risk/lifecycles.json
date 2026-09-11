@@ -328,8 +328,12 @@
         "fasb",
         "cfpb"
       ],
-      "review_status": "draft",
-      "review": null,
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Credit exposure, approval/limit, and model lifecycle graphs reviewed for state completeness, correct role attribution per transition, and that watch-list status is kept distinct from default."
+      },
       "supersedes": []
     },
     {
@@ -557,8 +561,12 @@
       "source_refs": [
         "occ"
       ],
-      "review_status": "draft",
-      "review": null,
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Credit exposure, approval/limit, and model lifecycle graphs reviewed for state completeness, correct role attribution per transition, and that watch-list status is kept distinct from default."
+      },
       "supersedes": []
     },
     {
@@ -758,8 +766,12 @@
         "federal_reserve",
         "occ"
       ],
-      "review_status": "draft",
-      "review": null,
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Credit exposure, approval/limit, and model lifecycle graphs reviewed for state completeness, correct role attribution per transition, and that watch-list status is kept distinct from default."
+      },
       "supersedes": []
     }
   ]

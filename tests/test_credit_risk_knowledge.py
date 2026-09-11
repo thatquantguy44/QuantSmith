@@ -17,6 +17,9 @@ from quantsmith.pipelines.credit_risk_knowledge import (
     CONSUMER_DECISION_OBLIGATIONS,
     FAIRNESS_TESTING_OBLIGATIONS,
     adverse_impact_ratio,
+    all_records,
+    high_severity_open_gap_ids,
+    parse_gap_register,
     REQUIRED_CAPABILITY_DOMAINS,
     REQUIRED_GOVERNANCE_ARTIFACTS,
     CreditRiskValidationError,
@@ -259,12 +262,60 @@ def test_review_promotion_rejects_missing_reviewer_or_high_gap_AC_020():
     assert any("handle, not an email" in e for e in errors)
 
 
-def test_every_committed_record_is_still_draft_AC_020():
-    """Honest state: no reviewer is named yet, so nothing may be reviewed."""
+def test_promotion_state_matches_gap_register_AC_020():
+    """A named reviewer (Joshua Lutkemuller, CFA) unblocked promotion, but
+    naming a reviewer is necessary, not sufficient: the 15 records this pack
+    tags blocked_by_gap_ids all cite a gap that is still open and
+    high-severity (G-0072-002 or G-0072-005), and the validator's own count
+    of reviewed + draft + blocked_pending_gap must reconcile with the total."""
 
     report = validate_domain_pack(ROOT)
-    assert report.counts["reviewed"] == 0
-    assert report.counts["draft"] == report.counts["records"]
+    assert report.counts["reviewed"] == 94
+    assert report.counts["draft"] == 15
+    assert report.counts["blocked_pending_gap"] == 15
+    assert report.counts["reviewed"] + report.counts["draft"] == report.counts["records"]
+
+    open_high = high_severity_open_gap_ids(ROOT)
+    assert open_high == {"G-0072-002", "G-0072-005"}
+
+    for record in all_records(_pack()):
+        blocked_by = record.get("blocked_by_gap_ids", [])
+        if blocked_by:
+            assert record["review_status"] == "draft", record["id"]
+            assert set(blocked_by) & open_high, record["id"]
+
+
+def test_a_record_naming_a_still_open_high_gap_cannot_be_reviewed_AC_020():
+    """The mechanism, not just the current data: if a caller tried to
+    promote a record while its named gap is still open and high-severity,
+    the validator refuses regardless of how complete the review object is."""
+
+    record = {
+        "id": "test.blocked", "record_type": "concept", "name": "t",
+        "jurisdiction": "US", "knowledge_class": "stable_mechanic",
+        "knowledge_as_of": "2026-09-11", "effective_from": None, "effective_to": None,
+        "source_refs": ["cfpb"], "review_status": "reviewed",
+        "review": {"reviewer": "Joshua Lutkemuller, CFA", "review_date": "2026-09-11",
+                   "scope": "s"},
+        "blocked_by_gap_ids": ["G-0072-002"], "supersedes": [],
+    }
+    errors: list[str] = []
+    _validate_common_records([record], {"cfpb"}, errors, blocking_gap_ids={"G-0072-002"})
+    assert any("cannot be reviewed" in e and "G-0072-002" in e for e in errors)
+
+    # Once the named gap is not in the open set (e.g. later closed), the
+    # same record with the same review object is admitted.
+    errors = []
+    _validate_common_records([record], {"cfpb"}, errors, blocking_gap_ids=set())
+    assert not errors
+
+
+def test_gap_register_parses_open_and_closed_status_AC_020():
+    rows = {row["id"]: row for row in parse_gap_register(ROOT)}
+    assert rows["G-0072-001"]["status"] == "closed"
+    assert rows["G-0072-011"]["status"] == "closed"
+    assert rows["G-0072-002"]["status"] == "open"
+    assert rows["G-0072-005"]["status"] == "open"
 
 
 # --- AC-007: knowledge time precedes effective time -------------------------
