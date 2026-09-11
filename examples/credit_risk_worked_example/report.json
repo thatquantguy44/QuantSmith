@@ -1,0 +1,207 @@
+{
+  "document_intelligence": {
+    "admission": {
+      "admitted": true,
+      "evidence_class": "decision_input",
+      "missing": []
+    },
+    "bundle_dir": "examples/credit_risk_worked_example/document_intelligence/text_intelligence_manifest.json"
+  },
+  "retail_fairness": {
+    "baseline": {
+      "adverse_impact_ratio": 0.5686274509803921,
+      "cutoff": 650,
+      "overall_approval_rate": 0.5333333333333333,
+      "protected_approval_rate": 0.38666666666666666,
+      "reference_approval_rate": 0.68,
+      "threshold_breached": true
+    },
+    "less_discriminatory_alternative": {
+      "alternative_found": true,
+      "baseline_cutoff": 650,
+      "candidates": [
+        {
+          "approval_rate_delta": 0.3466666666666667,
+          "cutoff": 600,
+          "disparity": {
+            "adverse_impact_ratio": 0.8992805755395684,
+            "cutoff": 600,
+            "overall_approval_rate": 0.88,
+            "protected_approval_rate": 0.8333333333333334,
+            "reference_approval_rate": 0.9266666666666666,
+            "threshold_breached": false
+          }
+        },
+        {
+          "approval_rate_delta": 0.31000000000000005,
+          "cutoff": 610,
+          "disparity": {
+            "adverse_impact_ratio": 0.8602941176470589,
+            "cutoff": 610,
+            "overall_approval_rate": 0.8433333333333334,
+            "protected_approval_rate": 0.78,
+            "reference_approval_rate": 0.9066666666666666,
+            "threshold_breached": false
+          }
+        },
+        {
+          "approval_rate_delta": 0.21999999999999997,
+          "cutoff": 620,
+          "disparity": {
+            "adverse_impact_ratio": 0.6992481203007518,
+            "cutoff": 620,
+            "overall_approval_rate": 0.7533333333333333,
+            "protected_approval_rate": 0.62,
+            "reference_approval_rate": 0.8866666666666667,
+            "threshold_breached": true
+          }
+        },
+        {
+          "approval_rate_delta": 0.16000000000000003,
+          "cutoff": 630,
+          "disparity": {
+            "adverse_impact_ratio": 0.625,
+            "cutoff": 630,
+            "overall_approval_rate": 0.6933333333333334,
+            "protected_approval_rate": 0.5333333333333333,
+            "reference_approval_rate": 0.8533333333333334,
+            "threshold_breached": true
+          }
+        },
+        {
+          "approval_rate_delta": 0.08666666666666667,
+          "cutoff": 640,
+          "disparity": {
+            "adverse_impact_ratio": 0.5897435897435898,
+            "cutoff": 640,
+            "overall_approval_rate": 0.62,
+            "protected_approval_rate": 0.46,
+            "reference_approval_rate": 0.78,
+            "threshold_breached": true
+          }
+        },
+        {
+          "approval_rate_delta": 0.0,
+          "cutoff": 650,
+          "disparity": {
+            "adverse_impact_ratio": 0.5686274509803921,
+            "cutoff": 650,
+            "overall_approval_rate": 0.5333333333333333,
+            "protected_approval_rate": 0.38666666666666666,
+            "reference_approval_rate": 0.68,
+            "threshold_breached": true
+          }
+        }
+      ],
+      "max_approval_rate_delta": 0.35,
+      "recommended_cutoff": 610
+    },
+    "protected_class_basis": "observed",
+    "proxy_associations": [
+      {
+        "correlation_with_protected_class": -0.6386851138716249,
+        "feature": "zip_income_proxy"
+      }
+    ]
+  },
+  "wholesale_measurement": {
+    "breached_counterparty_ids": [
+      "counterparty.northfield-mills"
+    ],
+    "concentration": {
+      "concentration_threshold": 0.4,
+      "herfindahl_index": 0.3828125,
+      "largest_counterparty_id": "counterparty.cascadia-fabricators",
+      "largest_counterparty_share": 0.5,
+      "threshold_breached": true,
+      "total_portfolio_ead": 8000000.0
+    },
+    "exposures": [
+      {
+        "counterparty_id": "counterparty.cascadia-fabricators",
+        "facilities_with_basis_violation": [],
+        "facility_ids": [
+          "facility.cascadia-revolver-001"
+        ],
+        "total_ead": 4000000.0,
+        "total_expected_loss": 24000.0
+      },
+      {
+        "counterparty_id": "counterparty.northfield-mills",
+        "facilities_with_basis_violation": [],
+        "facility_ids": [
+          "facility.northfield-term-001"
+        ],
+        "total_ead": 2500000.0,
+        "total_expected_loss": 22500.000000000004
+      },
+      {
+        "counterparty_id": "counterparty.blue-harbor-forge",
+        "facilities_with_basis_violation": [],
+        "facility_ids": [
+          "facility.blue-harbor-term-001"
+        ],
+        "total_ead": 1500000.0,
+        "total_expected_loss": 13500.000000000002
+      }
+    ],
+    "facility_measurements": [
+      {
+        "counterparty_id": "counterparty.cascadia-fabricators",
+        "currency": "USD",
+        "ead": 4000000.0,
+        "expected_loss": 24000.0,
+        "facility_id": "facility.cascadia-revolver-001",
+        "obligor_id": "obligor.cascadia-fabricators",
+        "rwa": 3000000.0,
+        "violated_rules": []
+      },
+      {
+        "counterparty_id": "counterparty.northfield-mills",
+        "currency": "USD",
+        "ead": 2500000.0,
+        "expected_loss": 22500.000000000004,
+        "facility_id": "facility.northfield-term-001",
+        "obligor_id": "obligor.northfield-mills",
+        "rwa": 2500000.0,
+        "violated_rules": []
+      },
+      {
+        "counterparty_id": "counterparty.blue-harbor-forge",
+        "currency": "USD",
+        "ead": 1500000.0,
+        "expected_loss": 13500.000000000002,
+        "facility_id": "facility.blue-harbor-term-001",
+        "obligor_id": "obligor.blue-harbor-forge",
+        "rwa": 1500000.0,
+        "violated_rules": []
+      }
+    ],
+    "limit_checks": [
+      {
+        "breach_amount": 0.0,
+        "counterparty_id": "counterparty.cascadia-fabricators",
+        "exposure": 4000000.0,
+        "limit": 5000000.0,
+        "status": "within_limit",
+        "utilization": 0.8
+      },
+      {
+        "breach_amount": 500000.0,
+        "counterparty_id": "counterparty.northfield-mills",
+        "exposure": 2500000.0,
+        "limit": 2000000.0,
+        "status": "breached",
+        "utilization": 1.25
+      },
+      {
+        "breach_amount": 0.0,
+        "counterparty_id": "counterparty.blue-harbor-forge",
+        "exposure": 1500000.0,
+        "limit": 2000000.0,
+        "status": "within_limit",
+        "utilization": 0.75
+      }
+    ]
+  }
+}

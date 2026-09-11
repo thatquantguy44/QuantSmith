@@ -286,6 +286,19 @@ for the ingestion, curation, retrieval, and persistence sequence.
 - Standard: `instructions/knowledge_base.md`; sources in `knowledge_sources.yml`.
 - Gate: `knowledge`.
 
+### Credit Risk (cross-cutting)
+
+Use the [Credit Risk group workflow](../agents/credit_risk/README.md#group-workflow)
+for document evidence admission, wholesale measurement, and retail fairness
+testing.
+
+- Standard: `specs/0072-credit-risk-domain-foundation/`; knowledge pack at
+  `knowledge/credit_risk/`.
+- Worked example: `examples/credit_risk_worked_example/` threads all three
+  runtimes (`0077` document intelligence, `0073` wholesale measurement,
+  `0074` retail fairness testing) against one reporting cycle, in
+  `src/quantsmith/pipelines/credit_risk_worked_example.py`.
+
 ## Group Workflows
 
 Role and scenario workflows above compose capabilities across groups. For groups
@@ -298,6 +311,7 @@ mini-map:
 | [Knowledge Management](../agents/knowledge/README.md#group-workflow) | Ingest → curate → retrieve or persist |
 | [Data Ingestion](../agents/data_ingestion/README.md#group-workflow) | Ingest → validate → emit data contract |
 | [Securities Financing](../agents/securities_financing/README.md#group-workflow) | Model financing inputs → all-in cost → backtest and risk |
+| [Credit Risk](../agents/credit_risk/README.md#group-workflow) | Document evidence admission → wholesale measurement/limits; separately, retail fairness testing |
 | [Secrets Management](../agents/secrets_management/README.md#group-workflow) | Store → access → rotate, with scanning throughout |
 | [Analytics](../agents/analytics/README.md#group-workflow) | Define metrics → design/read out experiments; feeds dashboards and reports |
 
