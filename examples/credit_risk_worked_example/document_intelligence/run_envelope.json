@@ -1,0 +1,106 @@
+{
+  "actor": {
+    "clearance": "internal",
+    "id": "credit_document_intelligence",
+    "type": "runtime"
+  },
+  "artifacts": [
+    {
+      "access_class": "public",
+      "hash": "sha256:39759c5fb4443ec64688119a5cf202cfe1a3bc00f2e3076997404c221b28d08d",
+      "path": "text_intelligence_manifest.json",
+      "producer_event_id": "evt-credit-risk-worked-example-cascadia-published",
+      "type": "text_intelligence_manifest"
+    },
+    {
+      "access_class": "public",
+      "hash": "sha256:e36339f1a04839ed2a759513eca096e70f7f3d666b1e184f16c064c788e44e72",
+      "path": "task_results.json",
+      "producer_event_id": "evt-credit-risk-worked-example-cascadia-published",
+      "type": "task_results"
+    },
+    {
+      "access_class": "public",
+      "hash": "sha256:f2e1f37f672969f68676d7ade37aa6ad4e7975944b4a933ed96a4d8d16296411",
+      "path": "text_signals.json",
+      "producer_event_id": "evt-credit-risk-worked-example-cascadia-published",
+      "type": "text_signals"
+    }
+  ],
+  "assumption_ledger": {
+    "hash": "sha256:ecf7f678a16cf03d8590b466ae3f29d2ac07328fcaeded1a09cd2fa03e8a5d8b",
+    "path": "assumptions.jsonl",
+    "type": "assumption_ledger"
+  },
+  "audit_events": {
+    "hash": "sha256:fa9009591c8d5d6880f0b8923a5b4ec2c88d138c887920191f40bcd569fda54b",
+    "path": "audit_events.jsonl",
+    "type": "audit_events"
+  },
+  "context_manifest": {
+    "hash": "sha256:7a476ad293e2145845f086d9ff464721627a9e8706234678093220798455a261",
+    "path": "context_manifest.json",
+    "type": "context_manifest"
+  },
+  "created_at": "2026-09-11T09:00:20Z",
+  "environment": {
+    "dependencies": [
+      "stdlib"
+    ],
+    "network": "disabled",
+    "producer": "quantsmith.text_intelligence"
+  },
+  "evaluation_harness": {
+    "hash": "sha256:d5c6892744ab21c3ad6d6213244fc35337657f36d0aa95f6bffa950bf897c59d",
+    "path": "evaluation_harness.json",
+    "type": "evaluation_harness"
+  },
+  "gate_results": [
+    {
+      "checked_at": "2026-09-11T09:00:20Z",
+      "finding_count": 0,
+      "gate": "orchestration",
+      "status": "pass"
+    },
+    {
+      "checked_at": "2026-09-11T09:00:20Z",
+      "finding_count": 0,
+      "gate": "text-intelligence",
+      "status": "pass"
+    }
+  ],
+  "mode": "deterministic",
+  "objective": "Produce governed text intelligence with point-in-time lineage, evaluation, audit, and replay evidence.",
+  "prompt_manifest": {
+    "hash": "sha256:6fa14d8fa8a28d1bd4874b57074b275c650b8196321c7f18993c3f7b14dafe66",
+    "path": "prompt_manifest.json",
+    "type": "prompt_manifest"
+  },
+  "release_profile": "exploratory",
+  "replay": {
+    "command": "python -m quantsmith.text_intelligence replay --manifest text_intelligence_manifest.json",
+    "expected_outputs": [
+      {
+        "hash": "sha256:39759c5fb4443ec64688119a5cf202cfe1a3bc00f2e3076997404c221b28d08d",
+        "path": "text_intelligence_manifest.json",
+        "type": "text_intelligence_manifest"
+      },
+      {
+        "hash": "sha256:e36339f1a04839ed2a759513eca096e70f7f3d666b1e184f16c064c788e44e72",
+        "path": "task_results.json",
+        "type": "task_results"
+      },
+      {
+        "hash": "sha256:f2e1f37f672969f68676d7ade37aa6ad4e7975944b4a933ed96a4d8d16296411",
+        "path": "text_signals.json",
+        "type": "text_signals"
+      }
+    ],
+    "mode": "deterministic"
+  },
+  "repo_revision": "fixture",
+  "run_id": "credit-risk-worked-example-cascadia",
+  "schema_version": "quantsmith.orchestration.run.v1",
+  "spec_id": "0071-nlp-llm-quant-text-intelligence-foundation",
+  "stage": "implementation"
+}

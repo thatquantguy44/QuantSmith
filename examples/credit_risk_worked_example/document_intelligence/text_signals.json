@@ -1,0 +1,67 @@
+{
+  "schema_version": "quantsmith.text_intelligence.signals.v1",
+  "signal_set_id": "signals-credit-risk-worked-example-cascadia",
+  "signals": [
+    {
+      "aggregation_rule": "mean supported task confidence; one fixture observation",
+      "availability_lag_seconds": 60,
+      "calibration": {
+        "method": "fixture_declared",
+        "production_calibrated": false
+      },
+      "confidence": 0.8,
+      "contributing_span_ids": [
+        "span-credit-memo-cascadia-001-001",
+        "span-credit-memo-cascadia-002-001"
+      ],
+      "decision_time": "2026-09-11T09:00:12Z",
+      "downstream_backtest_refs": [
+        "backtest://fixture/credit-risk-worked-example-cascadia"
+      ],
+      "downstream_dataset_refs": [
+        "dataset://fixture/credit-risk-worked-example-cascadia"
+      ],
+      "entity_instrument_mapping": [
+        {
+          "entity_id": "issuer-alpha",
+          "instrument_id": "fixture-instrument",
+          "mapping_as_of": "2026-09-11T09:00:12Z"
+        }
+      ],
+      "horizon": "5_business_days",
+      "missingness_policy": "abstain; never impute absent text as neutral",
+      "model_capability_ids": [
+        "cap-credit-risk-worked-example-cascadia-lexical"
+      ],
+      "observation_time": "2026-09-11T09:00:11Z",
+      "publication_state": "fixture_only",
+      "review": {
+        "escalation_conditions": [
+          "any production, client, trading, or restricted-data use"
+        ],
+        "overrides": [],
+        "owner": "spec0071",
+        "rejected_alternatives": [
+          "represent fixture output as production evidence"
+        ],
+        "reviewed_at": "2026-09-11T09:00:11Z",
+        "reviewer": "credit_document_intelligence",
+        "status": "fixture_approved",
+        "uncertainty": "Synthetic fixture demonstrates contracts only; no investment conclusion is approved."
+      },
+      "revision_policy": "append new signal version; never rewrite a historical decision",
+      "signal_id": "signal-credit-risk-worked-example-cascadia-funding-outlook",
+      "task_result_ids": [
+        "result-credit-risk-worked-example-cascadia-classification",
+        "result-credit-risk-worked-example-cascadia-entity",
+        "result-credit-risk-worked-example-cascadia-value",
+        "result-credit-risk-worked-example-cascadia-stance",
+        "result-credit-risk-worked-example-cascadia-theme"
+      ],
+      "universe": [
+        "issuer-alpha"
+      ],
+      "value": 1.0
+    }
+  ]
+}

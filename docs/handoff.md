@@ -119,7 +119,9 @@ advisory-by-default deployment decision. The chain builds on
 > (`credit_document_analyst` via `0077`, `counterparty_limits` via `0073`,
 > `fair_lending_review` via `0074`); wholesale/counterparty measurement and
 > retail fairness-testing runtimes exist, deliberately excluding rating,
-> PD/LGD estimation, and consumer scoring throughout.
+> PD/LGD estimation, and consumer scoring throughout. A cross-cutting worked
+> example (item 28, no new spec number) now threads all three runtimes
+> against one reporting cycle at `examples/credit_risk_worked_example/`.
 >
 > It follows `0063`'s foundation-first shape (knowledge pack + agent-group
 > charter + reserved bounded children `0073`–`0079`) and adds the two things
@@ -1370,6 +1372,33 @@ manual-task persistence question stays deferred until a real consumer needs it.
     under `0072`'s charter; deliberately does **not** create
     `agents/credit_risk/retail_underwriting/`, since no scoring or
     decisioning runtime exists or is planned in-SDK.
+
+28. **Credit risk worked example — done (no new spec number).** With
+    `0072`'s gap register empty, the highest-leverage remaining move was not
+    another speculative child spec (`0075`–`0076`, `0078`–`0079` stay
+    reserved-not-written) but a single narrative proving the three built
+    runtimes compose: `src/quantsmith/pipelines/credit_risk_worked_example.py`
+    threads `0077` (a synthetic wholesale obligor's credit memo, admitted
+    and promoted to `decision_input` through `0072`'s evidence gate), `0073`
+    (that obligor's facility measured for EL/EAD/RWA alongside two peer
+    counterparties, with a real limit breach and a real concentration
+    breach), and `0074` (a separate synthetic retail book fairness-tested
+    at its applied cutoff, breaching the disparity threshold and finding a
+    real less-discriminatory alternative). No new capability, decision path,
+    or knowledge-pack record is added; every arithmetic primitive is
+    imported, not reimplemented. The wholesale obligor and the retail
+    population are deliberately kept as two distinct entities rather than
+    fictionalized as the same borrower — `0072`'s own pack draws that line
+    (`path.wholesale_obligor_review`/`path.counterparty_limit_review` are
+    `consumer_decision: false`; `path.retail_underwriting_decision` is
+    `consumer_decision: true` and carries the fairness obligations), and
+    conflating them would misstate what the pack certifies. Committed
+    example at `examples/credit_risk_worked_example/`
+    (`report.json`, `narrative.md`, and a real `0071`/`0070` document
+    bundle), synthetic-data disclosure at
+    `docs/credit_risk_worked_example_synthetic_data_disclosure.md`, group
+    workflow at `agents/credit_risk/README.md`, 10 acceptance tests in
+    `tests/test_credit_risk_worked_example.py`.
 
 
 ## Open Questions For The Owner
