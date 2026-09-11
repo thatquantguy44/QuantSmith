@@ -72,12 +72,13 @@
         "bis_basel",
         "occ"
       ],
-      "review_status": "draft",
-      "review": null,
-      "supersedes": [],
-      "blocked_by_gap_ids": [
-        "G-0072-002"
-      ]
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Runtime existence and correctness reviewed against 0073's own golden-case reproduction: EL/EAD/RWA measurement and counterparty exposure/limit/concentration checking now have a tested, deterministic implementation composing credit_risk_knowledge.py's arithmetic. Not a review of any adopter's own rating or PD model -- none is shipped or claimed here."
+      },
+      "supersedes": []
     },
     {
       "id": "workflow.counterparty_limit_review",
@@ -114,7 +115,7 @@
       "participating_agents": [
         {
           "agent_id": "agents/credit_risk/counterparty_limits",
-          "status": "future",
+          "status": "existing",
           "owning_spec": "0073"
         },
         {
@@ -132,12 +133,13 @@
         "bis_basel",
         "occ"
       ],
-      "review_status": "draft",
-      "review": null,
-      "supersedes": [],
-      "blocked_by_gap_ids": [
-        "G-0072-002"
-      ]
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Runtime existence and correctness reviewed against 0073's own golden-case reproduction: EL/EAD/RWA measurement and counterparty exposure/limit/concentration checking now have a tested, deterministic implementation composing credit_risk_knowledge.py's arithmetic. Not a review of any adopter's own rating or PD model -- none is shipped or claimed here."
+      },
+      "supersedes": []
     },
     {
       "id": "workflow.retail_underwriting_decision",
