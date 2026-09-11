@@ -79,12 +79,13 @@
       "source_refs": [
         "bis_basel"
       ],
-      "review_status": "draft",
-      "review": null,
-      "supersedes": [],
-      "blocked_by_gap_ids": [
-        "G-0072-002"
-      ]
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Runtime existence and correctness reviewed against 0073's own golden-case reproduction: EL/EAD/RWA measurement and counterparty exposure/limit/concentration checking now have a tested, deterministic implementation composing credit_risk_knowledge.py's arithmetic. Not a review of any adopter's own rating or PD model -- none is shipped or claimed here."
+      },
+      "supersedes": []
     },
     {
       "id": "golden.el.basis_mismatch_rejected",
@@ -141,12 +142,13 @@
       "source_refs": [
         "bis_basel"
       ],
-      "review_status": "draft",
-      "review": null,
-      "supersedes": [],
-      "blocked_by_gap_ids": [
-        "G-0072-002"
-      ]
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Runtime existence and correctness reviewed against 0073's own golden-case reproduction: EL/EAD/RWA measurement and counterparty exposure/limit/concentration checking now have a tested, deterministic implementation composing credit_risk_knowledge.py's arithmetic. Not a review of any adopter's own rating or PD model -- none is shipped or claimed here."
+      },
+      "supersedes": []
     },
     {
       "id": "golden.ead.ccf_undrawn",
@@ -197,12 +199,13 @@
       "source_refs": [
         "bis_basel"
       ],
-      "review_status": "draft",
-      "review": null,
-      "supersedes": [],
-      "blocked_by_gap_ids": [
-        "G-0072-002"
-      ]
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Runtime existence and correctness reviewed against 0073's own golden-case reproduction: EL/EAD/RWA measurement and counterparty exposure/limit/concentration checking now have a tested, deterministic implementation composing credit_risk_knowledge.py's arithmetic. Not a review of any adopter's own rating or PD model -- none is shipped or claimed here."
+      },
+      "supersedes": []
     },
     {
       "id": "golden.ecl.twelve_month_vs_lifetime",
@@ -564,12 +567,13 @@
       "source_refs": [
         "bis_basel"
       ],
-      "review_status": "draft",
-      "review": null,
-      "supersedes": [],
-      "blocked_by_gap_ids": [
-        "G-0072-002"
-      ]
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Runtime existence and correctness reviewed against 0073's own golden-case reproduction: EL/EAD/RWA measurement and counterparty exposure/limit/concentration checking now have a tested, deterministic implementation composing credit_risk_knowledge.py's arithmetic. Not a review of any adopter's own rating or PD model -- none is shipped or claimed here."
+      },
+      "supersedes": []
     },
     {
       "id": "golden.temporal.outcome_window_rejected",

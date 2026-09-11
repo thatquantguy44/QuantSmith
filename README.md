@@ -13,9 +13,9 @@ signal and model **reproducible, leakage-safe, and traceable to a spec**.
 [![CI](https://github.com/joshualutkemuller/QuantSmith/actions/workflows/ci.yml/badge.svg)](https://github.com/joshualutkemuller/QuantSmith/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](pyproject.toml)
 [![Approach: Spec-Driven](https://img.shields.io/badge/Approach-Spec--Driven-ff6f00)](instructions/spec_driven_development.md)
-[![Agents: 169](https://img.shields.io/badge/Agents-169-6f42c1)](agents/README.md)
+[![Agents: 170](https://img.shields.io/badge/Agents-170-6f42c1)](agents/README.md)
 [![Quality Gates: 35](https://img.shields.io/badge/Quality%20Gates-35-2ea44f)](hooks/README.md)
-[![Specs: 64](https://img.shields.io/badge/Specs-64-0969da)](specs/README.md)
+[![Specs: 65](https://img.shields.io/badge/Specs-65-0969da)](specs/README.md)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](.github/GIT_GUIDELINES.md)
 
 <br/>
@@ -65,7 +65,7 @@ signal and model **reproducible, leakage-safe, and traceable to a spec**.
 | 🧠 Plan research from a hypothesis | Spec-driven planning agents + traceable requirements |
 | 🔎 Catch leakage & time-alignment bugs | Point-in-time standards + `leakage`/`backtest` gates |
 | 📝 Document features, models, backtests | Templates, cards, and reproducible run artifacts |
-| 🤖 Reuse research workflows | 169 narrow, inspectable agent roles across the stack |
+| 🤖 Reuse research workflows | 170 narrow, inspectable agent roles across the stack |
 | 🚦 Stop mistakes before commit/push | 35 quality gates, advisory by default, CI-enforceable |
 | 🗣️ Share a common vocabulary | An [agentic dictionary](agentic_dictionary.md) for the team |
 
@@ -501,6 +501,7 @@ the [spec index](specs/README.md).
 | [`0071`](specs/0071-nlp-llm-quant-text-intelligence-foundation/) | NLP, LLM, and Quant Text Intelligence Foundation — governed corpora, transformations, model capabilities, embeddings/index snapshots, structured text tasks, leakage-aware evaluation, review state, and auditable text-derived signals that replay through `0070` | `text_intelligence/` package, `quantsmith-text-intelligence` CLI, `text-intelligence` gate |
 | [`0072`](specs/0072-credit-risk-domain-foundation/) | Credit risk domain foundation — validates the U.S.-first credit taxonomy and non-interchangeable measure sets (PD/LGD/EAD, default definitions, TTC vs PIT), convention registry, three lifecycles, a consumer-decision contract making reason codes, disparity testing, and proxy visibility structural, an LLM evidence admission boundary over `0070`/`0071`, deployability as a computed predicate, coverage and gap registers, and golden cases | `credit_risk_knowledge.py` |
 | [`0077`](specs/0077-credit-document-intelligence/) | Credit document intelligence — bridges a real, emitted `0071` bundle into `0072`'s LLM evidence-admission boundary via a documented review-field adapter, proving `derived_evidence`, `decision_input`, and rejection outcomes against actual artifacts, with deterministic replay through `0070`/`0071`'s own engines | `credit_document_intelligence.py` (wiring only; no covenant-extraction model) |
+| [`0073`](specs/0073-wholesale-credit-measurement/) | Wholesale credit measurement — facility-level EL/EAD/RWA composing `0072`'s own arithmetic, plus counterparty exposure aggregation, limit-breach detection, and concentration as a full in-SDK reference runtime; rating and PD/LGD estimation stay adopter-plugin-only by design | `wholesale_credit_measurement.py` (measurement + limits only; no rating/PD model) |
 | [`0055`](specs/0055-workflow-scheduling-operations/) | Workflow scheduling operations — registry validation, cron dry-run evidence, idempotent dispatch, JSONL ledger, manual reminders, daily reports, alert handoff, memory candidates | `workflow_scheduling.py` |
 | [`0060`](specs/0060-scheduler-monitoring/) | Scheduler monitoring — executable report and alert-preview CLI plus caller-injected alert delivery over the workflow-scheduling runtime | `workflow_scheduling.py` *(extended)*, `workflow_scheduling_cli.py` |
 | [`0047`](specs/0047-downstream-contract/) | Downstream consumer contract — `DashboardSpec.schema_version` + compatibility check, release-notify workflow, and a copyable `quantsmith-version` gate for a separate consuming repository | `dashboard_spec.py` *(extended)* |

@@ -65,12 +65,15 @@ def test_required_capability_domains_AC_001():
 
 
 def test_coverage_level_claim_requires_a_runtime_AC_001():
-    """A runtime claim without a runtime module must fail."""
+    """A runtime claim without a runtime module must fail. Uses a
+    deliberately runtime-less capability rather than indexing into the real
+    pack, since which real capabilities have a runtime changes as child
+    specs land (0073, 0077)."""
 
     pack = _pack()
     cap = copy.deepcopy(pack["coverage"]["capabilities"][0])
+    cap["current_artifacts"] = ["knowledge/credit_risk/taxonomy.json"]
     cap["coverage_level"] = "reference_runtime"
-    assert not any(a.endswith(".py") for a in cap["current_artifacts"])
 
     errors: list[str] = []
     from quantsmith.pipelines.credit_risk_knowledge import _validate_coverage
@@ -264,19 +267,19 @@ def test_review_promotion_rejects_missing_reviewer_or_high_gap_AC_020():
 
 def test_promotion_state_matches_gap_register_AC_020():
     """A named reviewer (Joshua Lutkemuller, CFA) unblocked promotion, but
-    naming a reviewer is necessary, not sufficient: the 15 records this pack
-    tags blocked_by_gap_ids all cite a gap that is still open and
-    high-severity (G-0072-002 or G-0072-005), and the validator's own count
-    of reviewed + draft + blocked_pending_gap must reconcile with the total."""
+    naming a reviewer is necessary, not sufficient: every record this pack
+    still tags blocked_by_gap_ids cites a gap that is still open and
+    high-severity (G-0072-005, since 0073 closed G-0072-002), and the
+    validator's own count of reviewed + draft must reconcile with the total."""
 
     report = validate_domain_pack(ROOT)
-    assert report.counts["reviewed"] == 94
-    assert report.counts["draft"] == 15
-    assert report.counts["blocked_pending_gap"] == 15
+    assert report.counts["reviewed"] == 102
+    assert report.counts["draft"] == 7
+    assert report.counts["blocked_pending_gap"] == 7
     assert report.counts["reviewed"] + report.counts["draft"] == report.counts["records"]
 
     open_high = high_severity_open_gap_ids(ROOT)
-    assert open_high == {"G-0072-002", "G-0072-005"}
+    assert open_high == {"G-0072-005"}
 
     for record in all_records(_pack()):
         blocked_by = record.get("blocked_by_gap_ids", [])
@@ -313,8 +316,8 @@ def test_a_record_naming_a_still_open_high_gap_cannot_be_reviewed_AC_020():
 def test_gap_register_parses_open_and_closed_status_AC_020():
     rows = {row["id"]: row for row in parse_gap_register(ROOT)}
     assert rows["G-0072-001"]["status"] == "closed"
+    assert rows["G-0072-002"]["status"] == "closed"
     assert rows["G-0072-011"]["status"] == "closed"
-    assert rows["G-0072-002"]["status"] == "open"
     assert rows["G-0072-005"]["status"] == "open"
 
 
@@ -392,15 +395,20 @@ def test_gap_register_rows_have_evidence_and_owners_AC_009():
 
 
 def test_no_capability_claims_more_than_contract_only_AC_009():
-    """Nothing runs yet except what 0077 proved; the matrix must say so and
-    no more. A capability may claim reference_runtime only if a real,
+    """Nothing runs except what 0077 and 0073 proved; the matrix must say so
+    and no more. A capability may claim reference_runtime only if a real,
     tested runtime module backs it (the general coverage-level test above
     already enforces that; this test enforces the reverse: no capability
     claims MORE than the current, honest state)."""
 
     caps = {cap["id"]: cap for cap in _pack()["coverage"]["capabilities"]}
+    runtime_backed = {
+        "capability.document_intelligence",
+        "capability.wholesale_measurement",
+        "capability.counterparty_limits",
+    }
     for cap_id, cap in caps.items():
-        if cap_id == "capability.document_intelligence":
+        if cap_id in runtime_backed:
             assert cap["coverage_level"] == "reference_runtime", cap_id
         else:
             assert cap["coverage_level"] in {"absent", "prose_only", "contract_only"}, cap_id
@@ -473,25 +481,29 @@ def test_agent_charter_requires_coverage_row_AC_011():
 
 def test_credit_agent_creation_stays_gated_on_coverage_AC_011():
     """The charter gates creation: an agent exists only when its coverage row
-    justifies it, and no agent ships ahead of one. Exactly one exists today
-    (0077's credit_document_analyst); nothing else in agents/credit_risk/
+    justifies it, and no agent ships ahead of one. Two exist today
+    (0077's credit_document_analyst, 0073's counterparty_limits); notably
+    NOT obligor_rating, because rating/PD modeling stays plugin-only and no
+    runtime justifies that agent yet. Nothing else in agents/credit_risk/
     ships without its own coverage row reaching reference_runtime first."""
 
     credit_risk_dir = ROOT / "agents" / "credit_risk"
     assert credit_risk_dir.exists()
     agent_dirs = {p.name for p in credit_risk_dir.iterdir() if p.is_dir()}
-    assert agent_dirs == {"credit_document_analyst"}
+    assert agent_dirs == {"credit_document_analyst", "counterparty_limits"}
+    assert "obligor_rating" not in agent_dirs
 
     for agent_dir in agent_dirs:
         for required_file in ("README.md", "instructions.md", "prompt.md", "tasks.md"):
             assert (credit_risk_dir / agent_dir / required_file).exists(), (agent_dir, required_file)
 
-    coverage_level = next(
-        cap["coverage_level"]
-        for cap in _pack()["coverage"]["capabilities"]
-        if cap["id"] == "capability.document_intelligence"
-    )
-    assert coverage_level == "reference_runtime"
+    for cap_id in ("capability.document_intelligence", "capability.counterparty_limits"):
+        coverage_level = next(
+            cap["coverage_level"]
+            for cap in _pack()["coverage"]["capabilities"]
+            if cap["id"] == cap_id
+        )
+        assert coverage_level == "reference_runtime", cap_id
 
 
 # --- AC-012 / AC-013: workflows and runtime boundary ------------------------

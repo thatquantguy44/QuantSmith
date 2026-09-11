@@ -28,13 +28,15 @@
       "name": "Obligor and facility rating, PD/LGD/EAD measurement, drawn and undrawn exposure",
       "domain": "wholesale_rating_pd_lgd_ead",
       "scope": "Obligor and facility rating, PD/LGD/EAD measurement, drawn and undrawn exposure",
-      "coverage_level": "contract_only",
+      "coverage_level": "reference_runtime",
       "current_artifacts": [
         "knowledge/credit_risk/taxonomy.json",
         "knowledge/credit_risk/conventions.json",
-        "knowledge/credit_risk/lifecycles.json"
+        "knowledge/credit_risk/lifecycles.json",
+        "src/quantsmith/pipelines/wholesale_credit_measurement.py",
+        "specs/0073-wholesale-credit-measurement/"
       ],
-      "limitation": "Conventions, lifecycle, and golden cases exist; no measurement runtime and no rating agent. PD term-structure method is deliberately an unset required parameter.",
+      "limitation": "0073 implements facility-level EL/EAD/RWA measurement given a supplied PD, LGD, and risk weight -- it never assigns a rating or estimates PD/LGD. That remains the adopter's own model registered via 0026, per workflow.wholesale_obligor_review's adopter_plugin_via_0026 boundary.",
       "owning_spec": "0073",
       "models": [],
       "jurisdiction": "US",
@@ -45,12 +47,13 @@
       "source_refs": [
         "bis_basel"
       ],
-      "review_status": "draft",
-      "review": null,
-      "supersedes": [],
-      "blocked_by_gap_ids": [
-        "G-0072-002"
-      ]
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Runtime existence and correctness reviewed against 0073's own golden-case reproduction: EL/EAD/RWA measurement and counterparty exposure/limit/concentration checking now have a tested, deterministic implementation composing credit_risk_knowledge.py's arithmetic. Not a review of any adopter's own rating or PD model -- none is shipped or claimed here."
+      },
+      "supersedes": []
     },
     {
       "id": "capability.counterparty_limits",
@@ -58,13 +61,16 @@
       "name": "Counterparty exposure aggregation, limits, breaches, and concentration",
       "domain": "counterparty_exposure_limits_concentration",
       "scope": "Counterparty exposure aggregation, limits, breaches, and concentration",
-      "coverage_level": "contract_only",
+      "coverage_level": "reference_runtime",
       "current_artifacts": [
         "knowledge/credit_risk/lifecycles.json",
         "knowledge/credit_risk/workflows.json",
-        "agents/securities_financing/collateral_management/"
+        "agents/securities_financing/collateral_management/",
+        "src/quantsmith/pipelines/wholesale_credit_measurement.py",
+        "specs/0073-wholesale-credit-measurement/",
+        "agents/credit_risk/counterparty_limits/"
       ],
-      "limitation": "Approval and limit lifecycle is defined and collateral vocabulary is reused from 0063, but no aggregation runtime exists. 0038's factor risk model covers market concentration, not counterparty credit concentration.",
+      "limitation": "0073 implements exposure aggregation, limit breach detection, and concentration (largest-share plus Herfindahl index) as a full in-SDK reference runtime. A richer concentration framework (sector, geography, correlated-obligor clustering) remains future work with no consumer yet.",
       "owning_spec": "0073",
       "models": [],
       "jurisdiction": "US",
@@ -76,12 +82,13 @@
         "bis_basel",
         "occ"
       ],
-      "review_status": "draft",
-      "review": null,
-      "supersedes": [],
-      "blocked_by_gap_ids": [
-        "G-0072-002"
-      ]
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Runtime existence and correctness reviewed against 0073's own golden-case reproduction: EL/EAD/RWA measurement and counterparty exposure/limit/concentration checking now have a tested, deterministic implementation composing credit_risk_knowledge.py's arithmetic. Not a review of any adopter's own rating or PD model -- none is shipped or claimed here."
+      },
+      "supersedes": []
     },
     {
       "id": "capability.retail_underwriting",
