@@ -54,8 +54,12 @@
       "source_refs": [
         "cfpb"
       ],
-      "review_status": "draft",
-      "review": null,
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Runtime existence and correctness reviewed against 0074's own golden-case reproduction: disparity measurement, proxy association, and the less-discriminatory-alternative search now have a tested, deterministic implementation composing credit_risk_knowledge.py's adverse_impact_ratio. Not a review of any adopter's own scoring model or underwriting decision -- none is shipped or claimed here."
+      },
       "supersedes": [],
       "workflow_id": "workflow.retail_underwriting_decision",
       "consumer_decision": true,
@@ -70,7 +74,7 @@
       "cutoff_field": "decision_cutoff",
       "override_log_ref": "artifact.override_log.retail_underwriting",
       "protected_attributes_in_features": [],
-      "disparate_impact_hook": "hook.disparate_impact.retail_underwriting",
+      "disparate_impact_hook": "quantsmith.pipelines.retail_fairness_harness.run_fairness_harness",
       "sole_basis_adverse_action_permitted": true,
       "rationale": "A decline here is an adverse action against an identifiable consumer. Every obligation in 0072 REQ-014 must hold before this path may be the sole basis for that action.",
       "fairness_testing": {
@@ -92,10 +96,7 @@
         },
         "results_artifact_ref": "artifact.fairness_testing.retail_underwriting_decision",
         "versioned_with_model": true
-      },
-      "blocked_by_gap_ids": [
-        "G-0072-005"
-      ]
+      }
     },
     {
       "id": "path.retail_account_management",
@@ -109,8 +110,12 @@
       "source_refs": [
         "cfpb"
       ],
-      "review_status": "draft",
-      "review": null,
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Runtime existence and correctness reviewed against 0074's own golden-case reproduction: disparity measurement, proxy association, and the less-discriminatory-alternative search now have a tested, deterministic implementation composing credit_risk_knowledge.py's adverse_impact_ratio. Not a review of any adopter's own scoring model or underwriting decision -- none is shipped or claimed here."
+      },
       "supersedes": [],
       "workflow_id": "workflow.retail_account_management",
       "consumer_decision": true,
@@ -125,7 +130,7 @@
       "cutoff_field": "decision_cutoff",
       "override_log_ref": "artifact.override_log.account_management",
       "protected_attributes_in_features": [],
-      "disparate_impact_hook": "hook.disparate_impact.account_management",
+      "disparate_impact_hook": "quantsmith.pipelines.retail_fairness_harness.run_fairness_harness",
       "sole_basis_adverse_action_permitted": true,
       "rationale": "A limit reduction or account closure on credit grounds is also an adverse action; the obligations do not attach only at origination.",
       "fairness_testing": {
@@ -147,10 +152,7 @@
         },
         "results_artifact_ref": "artifact.fairness_testing.retail_account_management",
         "versioned_with_model": true
-      },
-      "blocked_by_gap_ids": [
-        "G-0072-005"
-      ]
+      }
     },
     {
       "id": "path.credit_document_intelligence",

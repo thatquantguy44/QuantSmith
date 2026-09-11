@@ -266,26 +266,22 @@ def test_review_promotion_rejects_missing_reviewer_or_high_gap_AC_020():
 
 
 def test_promotion_state_matches_gap_register_AC_020():
-    """A named reviewer (Joshua Lutkemuller, CFA) unblocked promotion, but
-    naming a reviewer is necessary, not sufficient: every record this pack
-    still tags blocked_by_gap_ids cites a gap that is still open and
-    high-severity (G-0072-005, since 0073 closed G-0072-002), and the
-    validator's own count of reviewed + draft must reconcile with the total."""
+    """A named reviewer (Joshua Lutkemuller, CFA) unblocked promotion, and
+    0073/0074 closed both remaining high-severity gaps: every one of the
+    109 records is now reviewed, zero remain blocked. The validator's own
+    counts must reconcile with the total -- this is checked, not assumed."""
 
     report = validate_domain_pack(ROOT)
-    assert report.counts["reviewed"] == 102
-    assert report.counts["draft"] == 7
-    assert report.counts["blocked_pending_gap"] == 7
+    assert report.counts["reviewed"] == 109
+    assert report.counts["draft"] == 0
+    assert report.counts["blocked_pending_gap"] == 0
     assert report.counts["reviewed"] + report.counts["draft"] == report.counts["records"]
 
     open_high = high_severity_open_gap_ids(ROOT)
-    assert open_high == {"G-0072-005"}
+    assert open_high == set()
 
     for record in all_records(_pack()):
-        blocked_by = record.get("blocked_by_gap_ids", [])
-        if blocked_by:
-            assert record["review_status"] == "draft", record["id"]
-            assert set(blocked_by) & open_high, record["id"]
+        assert not record.get("blocked_by_gap_ids"), record["id"]
 
 
 def test_a_record_naming_a_still_open_high_gap_cannot_be_reviewed_AC_020():
@@ -315,10 +311,14 @@ def test_a_record_naming_a_still_open_high_gap_cannot_be_reviewed_AC_020():
 
 def test_gap_register_parses_open_and_closed_status_AC_020():
     rows = {row["id"]: row for row in parse_gap_register(ROOT)}
-    assert rows["G-0072-001"]["status"] == "closed"
-    assert rows["G-0072-002"]["status"] == "closed"
-    assert rows["G-0072-011"]["status"] == "closed"
-    assert rows["G-0072-005"]["status"] == "open"
+    for gap_id in ("G-0072-001", "G-0072-002", "G-0072-005", "G-0072-011"):
+        assert rows[gap_id]["status"] == "closed", gap_id
+    # Medium/low-severity gaps stay open by design -- e.g. the unset PD
+    # term-structure method and unset IRB risk weight (G-0072-003/004) are
+    # deliberate, not oversights, and this parser must not silently "fix"
+    # them by miscounting severity.
+    assert rows["G-0072-003"]["status"] == "open"
+    assert rows["G-0072-003"]["severity"] == "medium"
 
 
 # --- AC-007: knowledge time precedes effective time -------------------------
@@ -406,6 +406,7 @@ def test_no_capability_claims_more_than_contract_only_AC_009():
         "capability.document_intelligence",
         "capability.wholesale_measurement",
         "capability.counterparty_limits",
+        "capability.retail_underwriting",
     }
     for cap_id, cap in caps.items():
         if cap_id in runtime_backed:
@@ -490,14 +491,19 @@ def test_credit_agent_creation_stays_gated_on_coverage_AC_011():
     credit_risk_dir = ROOT / "agents" / "credit_risk"
     assert credit_risk_dir.exists()
     agent_dirs = {p.name for p in credit_risk_dir.iterdir() if p.is_dir()}
-    assert agent_dirs == {"credit_document_analyst", "counterparty_limits"}
+    assert agent_dirs == {"credit_document_analyst", "counterparty_limits", "fair_lending_review"}
     assert "obligor_rating" not in agent_dirs
+    assert "retail_underwriting" not in agent_dirs
 
     for agent_dir in agent_dirs:
         for required_file in ("README.md", "instructions.md", "prompt.md", "tasks.md"):
             assert (credit_risk_dir / agent_dir / required_file).exists(), (agent_dir, required_file)
 
-    for cap_id in ("capability.document_intelligence", "capability.counterparty_limits"):
+    for cap_id in (
+        "capability.document_intelligence",
+        "capability.counterparty_limits",
+        "capability.retail_underwriting",
+    ):
         coverage_level = next(
             cap["coverage_level"]
             for cap in _pack()["coverage"]["capabilities"]

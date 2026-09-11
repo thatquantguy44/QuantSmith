@@ -3,7 +3,7 @@
 ## Snapshot
 
 The SDK has a working v1: a **spec-driven engineering framework** over the six
-software-development stages, **170 agents** in `agents/`,
+software-development stages, **171 agents** in `agents/`,
 **35 quality gates**, **36 instruction standards**, and CI that
 enforces the deterministic gates. It remains primarily a scaffold to be copied
 into quant repos, with `src/quantsmith/pipelines/`, `src/quantsmith/orchestration/`,
@@ -28,7 +28,7 @@ it via stable IDs (`REQ`/`NFR`/`AC`/`RISK`/`T`).
 - `specs/NNNN-slug/{spec,plan,tasks}.md` from `templates/spec/`; worked example at
   `specs/0001-daily-momentum-signal/`.
 
-**Agents (170, verified by the `agent-catalog` gate — treat `agents/README.md`
+**Agents (171, verified by the `agent-catalog` gate — treat `agents/README.md`
 as the live count, not the number here)** — all on the four-file contract
 (`README`/`prompt`/`instructions`/`tasks`) with a `Spec-Driven Role`:
 
@@ -111,13 +111,15 @@ advisory-by-default deployment decision. The chain builds on
 > scrutiny, and most current AI-deployment demand actually sit, and the SDK had
 > no canonical contract for any of it. Spec `0072` is **Approved, with its
 > knowledge pack and validator built**: 109 records behind a standard-library
-> validator and 62 acceptance tests. Joshua Lutkemuller, CFA is now the named
-> reviewer; 102 records are `reviewed` and 7 stay `draft`, each tagged with
-> the one remaining open, high-severity gap blocking it (`G-0072-005`, no
-> fairness harness) — a mechanism the validator itself enforces, not a
-> manual tally. Two agents exist (`credit_document_analyst` via `0077`,
-> `counterparty_limits` via `0073`); a wholesale/counterparty measurement
-> runtime exists, deliberately excluding rating/PD estimation.
+> validator and 62 acceptance tests. Joshua Lutkemuller, CFA is the named
+> reviewer, and **all 109 records are now `reviewed`** — `0073` and `0074`
+> closed the two remaining high-severity gaps the register named, the
+> validator itself enforcing that promotion required each gap's actual
+> closure, not just a reviewer's say-so. Three agents exist
+> (`credit_document_analyst` via `0077`, `counterparty_limits` via `0073`,
+> `fair_lending_review` via `0074`); wholesale/counterparty measurement and
+> retail fairness-testing runtimes exist, deliberately excluding rating,
+> PD/LGD estimation, and consumer scoring throughout.
 >
 > It follows `0063`'s foundation-first shape (knowledge pack + agent-group
 > charter + reserved bounded children `0073`–`0079`) and adds the two things
@@ -216,7 +218,6 @@ nobody noticed.
 | `0065` | **Cash products and pricing conventions** — Treasury bills and short-dated coupons plus the approved institutional cash universe; price/yield conversions, accrual, settlement, cashflows, and comparative carry | approved and implemented `0063`; exact product universe frozen by its coverage matrix; first non-Treasury consumer order resolved: commercial paper, then certificate of deposit, then money market fund shares | item 21 |
 | `0068` | **Short-term-markets source ingestion and data contracts** — register and ingest approved official benchmark, transaction, issuance, and market-structure sources with vintage/effective-time controls | `0063` source-authority and temporal contracts; may proceed in parallel with `0064`–`0067` after those contracts stabilize | item 21 |
 | `0069` | **Regulatory, legal, and market-structure knowledge pack** — jurisdiction- and effective-date-aware rules, clearing/reporting/settlement structure, master-agreement concepts, and freshness review; informational, not legal advice | `0063` evidence, jurisdiction, review-status, and freshness contracts | item 21 |
-| `0074` | **Retail underwriting and fair-lending runtime** — application and behavioral scorecards, cutoffs, adverse action reason codes, disparate-impact testing, reject inference | approved `0072`, and specifically its REQ-014 decision-path contract; the open question of whether any in-SDK reference scorecard ships at all must be resolved first | item 24 |
 | `0075` | **IFRS 9 / CECL expected credit loss engine** — staging, twelve-month versus lifetime measurement, effective-interest discounting, macro scenario overlays | approved `0072`; scenario vintage controls depend on `0078` for real sources | item 24 |
 | `0076` | **Regulatory capital and supervisory stress testing** — IRB risk weights, scenario expansion, capital planning inputs | approved `0072` plus `0075` for the ECL inputs it shares | item 24 |
 | `0078` | **Credit data sources and ingestion contracts** — register and ingest approved public regulatory, accounting, supervisory-scenario, and macro sources with vintage and effective-time controls | `0072` source-authority and temporal contracts; may proceed in parallel with `0073`–`0077` once those stabilize | item 24 |
@@ -228,17 +229,17 @@ Specs `0063-short-term-markets-domain-foundation/`,
 `0070-prompt-context-harness-foundation/`,
 `0071-nlp-llm-quant-text-intelligence-foundation/`,
 `0072-credit-risk-domain-foundation/`,
-`0073-wholesale-credit-measurement/`, and
+`0073-wholesale-credit-measurement/`,
+`0074-retail-underwriting-fairness-harness/`, and
 `0077-credit-document-intelligence/` are written, implemented, and **all
 Approved**, reviewed by Joshua Lutkemuller, CFA (`0066`: five
 `0063` gap-register discrepancies corrected in place; `0067`: contract-only,
 the reference-optimizer-versus-plugin-boundary question resolved
 plugin-only; `0063`, `0070`, `0071` approved as foundations with their
 implemented state noted in `specs/README.md`'s Status column; `0072`
-approved as a foundation whose knowledge pack and validator are built;
-102 of its 109 records are `reviewed` (Joshua Lutkemuller, CFA, named
-2026-09-11) and 7 stay `draft`, each blocked by the one still-open,
-high-severity gap (`G-0072-005`) the validator itself checks — approving
+approved as a foundation whose knowledge pack and validator are built —
+**all 109 of its records are now `reviewed`**, its three children below
+having closed every high-severity gap its own register named; approving
 the spec chain was not the same act as promoting its records, see item 24;
 `0077`: proves `0072`'s evidence-admission boundary against a real, emitted
 `0071` bundle rather than hand-typed fixtures, resolves `0072`'s `0054`
@@ -249,9 +250,15 @@ RWA measurement and a full counterparty exposure/limit/concentration
 runtime while deliberately keeping rating/PD estimation out of scope
 (`0026`-plugin-only), promoting the 8 records that gap blocked and creating
 `counterparty_limits` — not `obligor_rating` — for exactly that reason, see
-item 26) — so they are indexed here rather than listed as unwritten
-reservations above.
-Specs `0064`–`0065`, `0068`–`0069` (short-term markets) and `0074`–`0076`,
+item 26; `0074`: closes gap `G-0072-005`, the last one open, delivering
+disparity measurement, proxy-feature association, and a
+less-discriminatory-alternative search while resolving `0072`'s open
+scoring-runtime question the same way `0073` resolved the analogous
+wholesale one — no scorecard ships, promoting the 7 records that gap
+blocked and creating `fair_lending_review` — not `obligor_rating` or
+`retail_underwriting` — for exactly that reason, see item 27) — so they are
+indexed here rather than listed as unwritten reservations above.
+Specs `0064`–`0065`, `0068`–`0069` (short-term markets) and `0075`–`0076`,
 `0078`–`0079` (credit risk) are **portfolio commitments, not active
 designs**: create and
 approve one only when the foundation it consumes — `0063` or `0072` — has frozen
@@ -679,7 +686,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
     to populate `sources/` as real sources come into use.
 
 14. **P1 Generalization & Team Onboarding — making QuantSmith self-serve across
-    domains.** QuantSmith is now a comprehensive framework (170 agents, 60 specs,
+    domains.** QuantSmith is now a comprehensive framework (171 agents, 60 specs,
     33 gates, 35 standards); the next phase is reducing discovery friction and
     enabling team-intuitive adoption without deep codebase reading.
     - **P0 Phase 1a: Role profiles** (`roles/{portfolio_manager,risk_manager,quant_researcher,data_engineer,compliance_officer}.md`):
@@ -1189,46 +1196,51 @@ manual-task persistence question stays deferred until a real consumer needs it.
     `instructions/credit_risk.md` is the shared operating standard.
     16 of 18 tasks are `done`.
 
-    **What is NOT built, and should not be assumed:** no retail scoring, ECL,
-    capital, or monitoring runtime exists; 5 of 8 capabilities still sit
-    honestly at `contract_only`, and the validator rejects a
-    `reference_runtime` claim with no runtime module behind it. Three
-    capabilities now reach `reference_runtime`: `capability.document_
-    intelligence` via `0077` (item 25, created `credit_document_analyst`),
-    and `capability.wholesale_measurement`/`capability.counterparty_limits`
-    via `0073` (item 26, created `counterparty_limits`). Deliberately still
-    uncreated: `obligor_rating` — rating and PD/LGD estimation stay
-    `0026`-plugin-only, so no SDK runtime justifies that agent; the
-    remaining named agents (retail underwriting, ECL, stress testing) stay
-    uncreated pending their own child specs, per `T-011`.
+    **What is NOT built, and should not be assumed:** no ECL, capital, or
+    monitoring runtime exists; 4 of 8 capabilities still sit honestly at
+    `contract_only`. Four capabilities now reach `reference_runtime`:
+    `capability.document_intelligence` via `0077` (item 25, created
+    `credit_document_analyst`), `capability.wholesale_measurement`/
+    `capability.counterparty_limits` via `0073` (item 26, created
+    `counterparty_limits`), and `capability.retail_underwriting` via `0074`
+    (item 27, created `fair_lending_review`). The validator still rejects a
+    `reference_runtime` claim with no runtime module behind it — this is
+    checked, not assumed, on every one of the four. Deliberately still
+    uncreated: `obligor_rating` and `retail_underwriting` — rating, PD/LGD
+    estimation, and consumer credit scoring all stay `0026`-plugin-only, so
+    no SDK runtime justifies either agent; the remaining named agents (ECL,
+    stress testing) stay uncreated pending their own child specs, per
+    `T-011`.
 
     **A named reviewer, Joshua Lutkemuller, CFA (repository owner and
     approver), was recorded 2026-09-11 — stated without euphemism as a
     self-attestation for a portfolio SDK, not an independent third-party
-    credit officer's or model validator's sign-off (`G-0072-001`).** 102 of
-    109 records are now `reviewed`; 7 stay `draft`, each tagged
-    `blocked_by_gap_ids` naming the one gap remaining open and high-severity
-    (`G-0072-005`: no fairness harness — `G-0072-002` closed via `0073`).
-    The validator itself enforces this — a promotion attempt on a record
-    whose named gap is still open is refused regardless of how complete its
-    review object is, closing a real gap between what `REQ-019` always
+    credit officer's or model validator's sign-off (`G-0072-001`).**
+    **All 109 records are now `reviewed`; zero remain blocked, and zero
+    high-severity gaps remain open in the register** — `0073` closed
+    `G-0072-002`, `0074` closed `G-0072-005`, the last one. The validator
+    itself enforced every promotion — a record whose named gap was still
+    open could not be marked `reviewed` regardless of how complete its
+    review object looked, closing a real gap between what `REQ-019` always
     required and what the code actually checked. No existing runtime's
     numerical output changed; the full suite passes with nothing else
     altered.
 
-    **Next pickup, in order:** (a) close `G-0072-005` — the fairness harness
-    `0074` needs before its retail decision paths, workflow, and golden
-    cases can be reviewed; this is now the only remaining record-promotion
-    blocker; (b) resolve `0074`'s own open question (does it ship a
-    reference scorecard at all) before starting it, since that answer
-    shapes the harness; (c) extend `0077`'s document intelligence toward a
-    real, licensed corpus and a genuine extractor per its own Follow-ups, or
-    start `0075`/`0076` if a real ECL/capital consumer appears first; (d)
-    create further `agents/credit_risk/` agents only against the coverage
-    row that justifies each. Do not create agents ahead of that matrix, do
-    not let a capability's coverage level rise without a named runtime and
-    test, and do not commit real credit data — the pack is
-    synthetic-fixtures-only by NFR-006, permanently.
+    **Next pickup, in order:** (a) decide which pillar has the next real
+    consumer among the four remaining reserved children — `0075` (IFRS 9/
+    CECL) if an accounting consumer appears, `0076` (regulatory capital)
+    if a capital-planning one does, `0078`/`0079` (ingestion, model
+    monitoring) once a real corpus or model inventory needs them; (b)
+    extend `0077`'s document intelligence toward a real, licensed corpus
+    and a genuine extractor per its own Follow-ups; (c) extend `0074`'s
+    proxy-association measure beyond linear correlation, or schedule the
+    fairness harness to run repeatedly against a live scored population,
+    per its own Follow-ups; (d) create further `agents/credit_risk/`
+    agents only against the coverage row that justifies each. Do not
+    create agents ahead of that matrix, do not let a capability's coverage
+    level rise without a named runtime and test, and do not commit real
+    credit data — the pack is synthetic-fixtures-only by NFR-006,
+    permanently.
 
 25. **Credit document intelligence — Approved and implemented** (spec `0077`).
     Reviewed and approved by Joshua Lutkemuller, CFA, 2026-09-10. Closes the
@@ -1311,6 +1323,54 @@ manual-task persistence question stays deferred until a real consumer needs it.
     `G-0072-005` (`0074`'s fairness harness) now blocks any record from
     promotion.
 
+27. **Retail underwriting fairness harness — Approved and implemented**
+    (spec `0074`). Reviewed and approved by Joshua Lutkemuller, CFA,
+    2026-09-11. Closes `G-0072-005`, the last high-severity gap in `0072`'s
+    register: `decision_paths.json` declared `hook.disparate_impact.*` as a
+    callable fairness test on every consumer-facing decision path, but
+    nothing implemented it, and per-feature proxy association was
+    required-and-declared rather than measured.
+
+    Resolves `0072`'s other open scoping question the same way `0073`
+    resolved the wholesale one, at higher stakes: **no scorecard ships.**
+    Every applicant's score and every protected-class-membership indicator
+    is always a caller input — an adopter's own model, registered via
+    `0026`, or a declared BISG-style estimation method `0072`'s own
+    conventions already scope. A shipped scorecard, however clearly
+    labeled "reference," risks being mistaken for a validated,
+    ECOA-compliant model at the point where a wrong answer is an actual
+    adverse action against a consumer, not an internal risk number.
+    `retail_fairness_harness.py` composes `0072`'s own `adverse_impact_
+    ratio` rather than reimplementing it, and adds exactly what `G-0072-005`
+    named as missing: `measure_disparity` (group counting at a cutoff),
+    `measure_proxy_association` (a real, dependency-free Pearson
+    correlation between a feature and protected-class membership, refusing
+    to compute a meaningless result on a constant feature), and
+    `search_less_discriminatory_alternative` — the real implementation
+    `hook.disparate_impact.*` now resolves to.
+
+    Correct-by-construction: a single-group or empty population raises
+    rather than computing an undefined ratio; the less-discriminatory
+    search runs only when the baseline actually breaches the threshold,
+    and raises rather than silently skipping the search when it breaches
+    with no candidate cutoffs supplied; disparity threshold, candidate
+    cutoffs, and approval-rate tolerance all have no defaults anywhere in
+    the module. The search honestly reports `alternative_found: False`
+    when no candidate clears the threshold within tolerance — proven
+    against a real synthetic population showing a genuine ~0.39 adverse
+    impact ratio and a real proxy feature (a −0.73 correlation) before any
+    test was written to assert either.
+
+    Promotes the 7 records `G-0072-005` was blocking (1 capability, 1
+    workflow, 2 decision paths, 3 golden cases) to `reviewed`. **This
+    closes the register: all 109 of `0072`'s knowledge records are now
+    `reviewed`, zero remain blocked, and zero high-severity gaps remain
+    open** — the validator's `blocked_pending_gap` count reads `0`.
+    Creates `agents/credit_risk/fair_lending_review/`, the third agent
+    under `0072`'s charter; deliberately does **not** create
+    `agents/credit_risk/retail_underwriting/`, since no scoring or
+    decisioning runtime exists or is planned in-SDK.
+
 
 ## Open Questions For The Owner
 
@@ -1327,7 +1387,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
 
 ## Risks
 
-- Breadth: 170 agents is useful only if each stays narrow and inspectable.
+- Breadth: 171 agents is useful only if each stays narrow and inspectable.
 - Heuristic gates (`leakage`, `backtest`, `secret-scan` fallback) can false-positive
   or miss; keep them advisory unless a repo's layout makes them reliable.
 - Docs can drift from the code; the `docs-link`, `agent-catalog`, and `spec-index` gates help, but

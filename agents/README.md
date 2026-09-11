@@ -378,15 +378,16 @@ Grouped in the `credit_risk/` category folder under spec
 `0072-credit-risk-domain-foundation`. Agent creation is gated: an agent
 exists here only when `knowledge/credit_risk/coverage.json` shows a
 coverage row with a distinct workflow no existing agent already holds — see
-`0072` REQ-011. This roster stays short; most of `0072`'s coverage matrix is
-still `contract_only` and does not yet justify an agent. Notably absent:
-`obligor_rating` — rating and PD/LGD estimation stay an adopter's own model
-registered via `0026`, so no SDK runtime justifies that agent.
+`0072` REQ-011. Notably absent: `obligor_rating` and `retail_underwriting` —
+rating, PD/LGD estimation, and consumer credit scoring all stay an
+adopter's own model registered via `0026`, so no SDK runtime justifies
+either agent.
 
 | Agent | Handles | Feeds mainly |
 | --- | --- | --- |
 | `credit_risk/credit_document_analyst/` | Cited extraction from credit documents into `0072`'s LLM evidence-admission boundary (`derived_evidence` → `decision_input` only on named human review); never decides a credit outcome itself | Wholesale review, ECL measurement, once a value is genuinely promoted |
 | `credit_risk/counterparty_limits/` | Counterparty exposure aggregation, limit breach detection, and concentration (largest share, Herfindahl index) from supplied PD/LGD/EAD; never assigns a rating or estimates PD/LGD itself | Risk, backtest review |
+| `credit_risk/fair_lending_review/` | Disparate-impact testing, proxy-feature association, and less-discriminatory-alternative search on an already-scored population; never scores an applicant or estimates protected-class membership itself | A qualified fair-lending/compliance owner for the business-need-rationale decision |
 
 `credit_document_analyst/` has a tested runtime (spec
 `0077-credit-document-intelligence`):
@@ -407,6 +408,18 @@ full in-SDK reference runtime. Rating assignment and PD/LGD estimation
 remain out of scope by design — `workflow.wholesale_obligor_review` stays
 `adopter_plugin_via_0026`, the reason `obligor_rating` above is not an
 agent yet.
+
+`fair_lending_review/` has a tested runtime (spec
+`0074-retail-underwriting-fairness-harness`):
+`src/quantsmith/pipelines/retail_fairness_harness.py` — disparity
+measurement and proxy association composing `0072`'s own
+`adverse_impact_ratio`, plus a less-discriminatory-alternative search over
+caller-supplied cutoffs. No scorecard ships — resolved the same way `0073`
+resolved the analogous wholesale question, at higher stakes: every score
+and every protected-class indicator is a caller input, never produced here.
+This is why `retail_underwriting` above is not an agent yet: no SDK runtime
+scores or decides anything, only tests the fairness of a decision an
+adopter's own model already made.
 
 ## Formulaic Alpha Agents (`formulaic_alphas/`)
 

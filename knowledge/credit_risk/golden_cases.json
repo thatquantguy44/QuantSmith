@@ -389,12 +389,13 @@
       "source_refs": [
         "cfpb"
       ],
-      "review_status": "draft",
-      "review": null,
-      "supersedes": [],
-      "blocked_by_gap_ids": [
-        "G-0072-005"
-      ]
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Runtime existence and correctness reviewed against 0074's own golden-case reproduction: disparity measurement, proxy association, and the less-discriminatory-alternative search now have a tested, deterministic implementation composing credit_risk_knowledge.py's adverse_impact_ratio. Not a review of any adopter's own scoring model or underwriting decision -- none is shipped or claimed here."
+      },
+      "supersedes": []
     },
     {
       "id": "golden.adverse_action.reason_ranking",
@@ -475,12 +476,13 @@
       "source_refs": [
         "cfpb"
       ],
-      "review_status": "draft",
-      "review": null,
-      "supersedes": [],
-      "blocked_by_gap_ids": [
-        "G-0072-005"
-      ]
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Runtime existence and correctness reviewed against 0074's own golden-case reproduction: disparity measurement, proxy association, and the less-discriminatory-alternative search now have a tested, deterministic implementation composing credit_risk_knowledge.py's adverse_impact_ratio. Not a review of any adopter's own scoring model or underwriting decision -- none is shipped or claimed here."
+      },
+      "supersedes": []
     },
     {
       "id": "golden.migration.row_stochastic",
@@ -759,12 +761,13 @@
       "source_refs": [
         "cfpb"
       ],
-      "review_status": "draft",
-      "review": null,
-      "supersedes": [],
-      "blocked_by_gap_ids": [
-        "G-0072-005"
-      ]
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Runtime existence and correctness reviewed against 0074's own golden-case reproduction: disparity measurement, proxy association, and the less-discriminatory-alternative search now have a tested, deterministic implementation composing credit_risk_knowledge.py's adverse_impact_ratio. Not a review of any adopter's own scoring model or underwriting decision -- none is shipped or claimed here."
+      },
+      "supersedes": []
     }
   ]
 }
