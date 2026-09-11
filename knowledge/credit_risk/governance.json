@@ -45,8 +45,12 @@
         "federal_reserve",
         "occ"
       ],
-      "review_status": "draft",
-      "review": null,
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Required governance artifacts and the deployability predicate reviewed against SR 11-7 model-risk-management concepts (independent validation, challenger comparison, monitoring, override logging, kill switch)."
+      },
       "supersedes": [],
       "extends_template": "templates/docs/model_card.md",
       "credit_specific_fields": [
@@ -73,8 +77,12 @@
         "federal_reserve",
         "occ"
       ],
-      "review_status": "draft",
-      "review": null,
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Required governance artifacts and the deployability predicate reviewed against SR 11-7 model-risk-management concepts (independent validation, challenger comparison, monitoring, override logging, kill switch)."
+      },
       "supersedes": [],
       "requires": [
         "validator identity distinct from the developer",
@@ -99,8 +107,12 @@
         "federal_reserve",
         "occ"
       ],
-      "review_status": "draft",
-      "review": null,
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Required governance artifacts and the deployability predicate reviewed against SR 11-7 model-risk-management concepts (independent validation, challenger comparison, monitoring, override logging, kill switch)."
+      },
       "supersedes": [],
       "requires": [
         "named benchmark or challenger",
@@ -123,8 +135,12 @@
         "federal_reserve",
         "occ"
       ],
-      "review_status": "draft",
-      "review": null,
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Required governance artifacts and the deployability predicate reviewed against SR 11-7 model-risk-management concepts (independent validation, challenger comparison, monitoring, override logging, kill switch)."
+      },
       "supersedes": [],
       "extends_template": "templates/docs/model_monitoring_plan.md",
       "requires": [
@@ -156,8 +172,12 @@
         "federal_reserve",
         "occ"
       ],
-      "review_status": "draft",
-      "review": null,
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Required governance artifacts and the deployability predicate reviewed against SR 11-7 model-risk-management concepts (independent validation, challenger comparison, monitoring, override logging, kill switch)."
+      },
       "supersedes": [],
       "requires": [
         "override reason",
@@ -180,8 +200,12 @@
         "federal_reserve",
         "occ"
       ],
-      "review_status": "draft",
-      "review": null,
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Required governance artifacts and the deployability predicate reviewed against SR 11-7 model-risk-management concepts (independent validation, challenger comparison, monitoring, override logging, kill switch)."
+      },
       "supersedes": [],
       "requires": [
         "a person or role accountable for the model in production"
@@ -201,8 +225,12 @@
         "federal_reserve",
         "occ"
       ],
-      "review_status": "draft",
-      "review": null,
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Required governance artifacts and the deployability predicate reviewed against SR 11-7 model-risk-management concepts (independent validation, challenger comparison, monitoring, override logging, kill switch)."
+      },
       "supersedes": [],
       "requires": [
         "documented fallback (prior version, alternative model, or human decision)",

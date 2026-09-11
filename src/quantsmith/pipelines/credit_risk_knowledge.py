@@ -209,6 +209,8 @@ def _validate_common_records(
     records: Sequence[Mapping[str, Any]],
     sources: set[str],
     errors: List[str],
+    *,
+    blocking_gap_ids: set[str] = frozenset(),
 ) -> None:
     seen: set[str] = set()
     for record in records:
@@ -249,6 +251,7 @@ def _validate_common_records(
 
         # Promotion gate (0072 REQ-019): reviewed requires a named reviewer,
         # date, and scope. Automation cannot self-certify credit correctness.
+        blocked_by = set(record.get("blocked_by_gap_ids", []))
         if status == "reviewed":
             review = record.get("review")
             if not isinstance(review, Mapping):
@@ -262,6 +265,16 @@ def _validate_common_records(
                     errors.append(f"{rid}: reviewer must be a handle, not an email address")
             if not record.get("source_refs"):
                 errors.append(f"{rid}: reviewed record must cite at least one source")
+            # A record naming a gap that is still open, high-severity, and
+            # declared to affect it cannot be reviewed regardless of how
+            # complete its review object looks -- a named reviewer is
+            # necessary, not sufficient (0072 REQ-019).
+            still_blocking = blocked_by & blocking_gap_ids
+            if still_blocking:
+                errors.append(
+                    f"{rid}: cannot be reviewed while {sorted(still_blocking)} remain open "
+                    "and high-severity"
+                )
 
 
 def _validate_taxonomy(taxonomy: Mapping[str, Any], errors: List[str]) -> set[str]:
@@ -639,6 +652,49 @@ def _validate_coverage(coverage: Mapping[str, Any], root: Path, errors: List[str
         errors.append(f"coverage: required domain(s) not covered: {sorted(missing)}")
 
 
+def parse_gap_register(root: Path | None = None) -> List[Dict[str, str]]:
+    """Parse gap_register.md into structured rows.
+
+    A gap is considered OPEN unless its disposition explicitly states
+    resolution — starting with "Resolved" or "**Corrected" (bold, matching
+    this pack's own convention for a closed gap). Anything else, including
+    "Assigned" or "Open", is open. This is deliberately conservative: an
+    ambiguous disposition is treated as still blocking, never as silently
+    resolved.
+    """
+
+    root = root or repository_root()
+    path = root / PACK_DIR / "gap_register.md"
+    text = path.read_text(encoding="utf-8")
+    rows = re.findall(r"^\| (G-0072-\d{3}) \|(.+)$", text, re.M)
+    parsed: List[Dict[str, str]] = []
+    for gap_id, rest in rows:
+        cells = [c.strip() for c in rest.split("|")]
+        if len(cells) < 6:
+            continue
+        gap, evidence, severity, affected, disposition, owner = cells[:6]
+        disposition_stripped = disposition.lstrip("*").strip()
+        closed = disposition_stripped.lower().startswith(("resolved", "corrected"))
+        parsed.append(
+            {
+                "id": gap_id, "gap": gap, "evidence": evidence,
+                "severity": severity.lower(), "affected": affected,
+                "disposition": disposition, "owner": owner,
+                "status": "closed" if closed else "open",
+            }
+        )
+    return parsed
+
+
+def high_severity_open_gap_ids(root: Path | None = None) -> set[str]:
+    """Return the IDs of gaps that are both high-severity and still open."""
+
+    return {
+        row["id"] for row in parse_gap_register(root)
+        if row["severity"] == "high" and row["status"] == "open"
+    }
+
+
 def _validate_gap_register(root: Path, errors: List[str]) -> None:
     path = root / PACK_DIR / "gap_register.md"
     if not path.exists():
@@ -699,8 +755,9 @@ def validate_domain_pack(root: Path | None = None) -> ValidationReport:
     sources = registered_source_ids(root)
     records = all_records(pack)
     errors: List[str] = []
+    blocking_gap_ids = high_severity_open_gap_ids(root)
 
-    _validate_common_records(records, sources, errors)
+    _validate_common_records(records, sources, errors, blocking_gap_ids=blocking_gap_ids)
     concept_ids = _validate_taxonomy(pack["taxonomy"], errors)
     convention_ids = _validate_conventions(pack["conventions"], concept_ids, errors)
     _validate_lifecycles(pack["lifecycles"], errors)
@@ -729,6 +786,7 @@ def validate_domain_pack(root: Path | None = None) -> ValidationReport:
         "golden_cases": len(pack["golden_cases"].get("golden_cases", [])),
         "reviewed": sum(1 for r in records if r.get("review_status") == "reviewed"),
         "draft": sum(1 for r in records if r.get("review_status") == "draft"),
+        "blocked_pending_gap": sum(1 for r in records if r.get("blocked_by_gap_ids")),
     }
     return ValidationReport(errors=tuple(errors), counts=counts)
 

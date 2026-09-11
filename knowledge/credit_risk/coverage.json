@@ -47,7 +47,10 @@
       ],
       "review_status": "draft",
       "review": null,
-      "supersedes": []
+      "supersedes": [],
+      "blocked_by_gap_ids": [
+        "G-0072-002"
+      ]
     },
     {
       "id": "capability.counterparty_limits",
@@ -75,7 +78,10 @@
       ],
       "review_status": "draft",
       "review": null,
-      "supersedes": []
+      "supersedes": [],
+      "blocked_by_gap_ids": [
+        "G-0072-002"
+      ]
     },
     {
       "id": "capability.retail_underwriting",
@@ -101,7 +107,10 @@
       ],
       "review_status": "draft",
       "review": null,
-      "supersedes": []
+      "supersedes": [],
+      "blocked_by_gap_ids": [
+        "G-0072-005"
+      ]
     },
     {
       "id": "capability.expected_credit_loss",
@@ -126,8 +135,12 @@
         "ifrs_foundation",
         "fasb"
       ],
-      "review_status": "draft",
-      "review": null,
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Coverage levels reviewed against actual repository artifacts; no row claims more than a named, existing artifact and test support."
+      },
       "supersedes": []
     },
     {
@@ -151,8 +164,12 @@
       "source_refs": [
         "bis_basel"
       ],
-      "review_status": "draft",
-      "review": null,
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Coverage levels reviewed against actual repository artifacts; no row claims more than a named, existing artifact and test support."
+      },
       "supersedes": []
     },
     {
@@ -176,8 +193,12 @@
       "source_refs": [
         "federal_reserve"
       ],
-      "review_status": "draft",
-      "review": null,
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Coverage levels reviewed against actual repository artifacts; no row claims more than a named, existing artifact and test support."
+      },
       "supersedes": []
     },
     {
@@ -208,8 +229,12 @@
         "cfpb",
         "occ"
       ],
-      "review_status": "draft",
-      "review": null,
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Coverage levels reviewed against actual repository artifacts; no row claims more than a named, existing artifact and test support."
+      },
       "supersedes": []
     },
     {
@@ -237,8 +262,12 @@
         "federal_reserve",
         "occ"
       ],
-      "review_status": "draft",
-      "review": null,
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Coverage levels reviewed against actual repository artifacts; no row claims more than a named, existing artifact and test support."
+      },
       "supersedes": []
     }
   ]

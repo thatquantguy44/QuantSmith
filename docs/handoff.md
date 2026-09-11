@@ -110,10 +110,13 @@ advisory-by-default deployment decision. The chain builds on
 > roadmap.** Credit is where most bank model inventory, most regulatory
 > scrutiny, and most current AI-deployment demand actually sit, and the SDK had
 > no canonical contract for any of it. Spec `0072` is **Approved, with its
-> knowledge pack and validator built**: 109 records, a standard-library
-> validator, and 60 acceptance tests — but every individual record is still
-> `draft` pending a named credit-domain reviewer, no credit agent exists, and
-> no measurement runtime exists.
+> knowledge pack and validator built**: 109 records behind a standard-library
+> validator and 62 acceptance tests. Joshua Lutkemuller, CFA is now the named
+> reviewer; 94 records are `reviewed` and 15 stay `draft`, each tagged with
+> the specific open, high-severity gap blocking it (`G-0072-002` or
+> `G-0072-005`) — a mechanism the validator itself enforces, not a manual
+> tally. One agent exists (`credit_document_analyst`, via `0077`); no
+> measurement runtime exists yet.
 >
 > It follows `0063`'s foundation-first shape (knowledge pack + agent-group
 > charter + reserved bounded children `0073`–`0079`) and adds the two things
@@ -231,10 +234,11 @@ Approved**, reviewed by Joshua Lutkemuller, CFA (`0066`: five
 the reference-optimizer-versus-plugin-boundary question resolved
 plugin-only; `0063`, `0070`, `0071` approved as foundations with their
 implemented state noted in `specs/README.md`'s Status column; `0072`
-approved as a foundation whose knowledge pack and validator are built but
-whose 109 records remain individually `draft` pending a named
-credit-domain reviewer per its own `0072` REQ-019 — approving the spec
-chain is not the same act as promoting its records, see item 24; `0077`:
+approved as a foundation whose knowledge pack and validator are built;
+94 of its 109 records are now `reviewed` (Joshua Lutkemuller, CFA, named
+2026-09-11) and 15 stay `draft`, each blocked by a still-open, high-severity
+gap the validator itself checks — approving the spec chain was not the same
+act as promoting its records, see item 24; `0077`:
 proves `0072`'s evidence-admission boundary against a real, emitted `0071`
 bundle rather than hand-typed fixtures, resolves `0072`'s `0054`
 open question, and creates `credit_document_analyst`, the first
@@ -1174,31 +1178,40 @@ manual-task persistence question stays deferred until a real consumer needs it.
     3 lifecycle graphs (32 states, 45 transitions), 7 decision paths, 7
     governance artifacts, 6 workflows, 8 capabilities, and 11 golden cases —
     behind a standard-library validator
-    (`src/quantsmith/pipelines/credit_risk_knowledge.py`) and a 60-test
+    (`src/quantsmith/pipelines/credit_risk_knowledge.py`) and a 62-test
     acceptance module. Five public sources are registered locator-only, and
     `instructions/credit_risk.md` is the shared operating standard.
     16 of 18 tasks are `done`.
 
-    **What is NOT built, and should not be assumed:** no credit agent exists —
-    `T-011` is `todo` by design, and a test currently asserts that
-    `agents/credit_risk/` does not exist, because the charter gates creation on
-    a coverage-matrix row. No measurement, scoring, ECL, capital, or monitoring
-    runtime exists; 7 of 8 capabilities sit honestly at `contract_only`, and the
-    validator rejects a `reference_runtime` claim with no runtime module behind
-    it — the eighth, `capability.document_intelligence`, reached
-    `reference_runtime` via `0077` (item 25). **All 109 knowledge records are
-    still `draft`** and a test asserts that count so it cannot drift quietly:
-    `T-016` is `blocked` on a named credit-domain reviewer. No existing
-    runtime's numerical output changed; the full suite moved from 547 to 622
-    passing with nothing else altered.
+    **What is NOT built, and should not be assumed:** no wholesale, scoring,
+    ECL, capital, or monitoring runtime exists; 7 of 8 capabilities still sit
+    honestly at `contract_only`, and the validator rejects a
+    `reference_runtime` claim with no runtime module behind it — the eighth,
+    `capability.document_intelligence`, reached `reference_runtime` via
+    `0077` (item 25), which also created the charter's first agent,
+    `credit_document_analyst`; the remaining named agents (wholesale rating,
+    counterparty limits, retail underwriting, ECL, stress testing) stay
+    uncreated pending their own child specs, per `T-011`.
 
-    **Next pickup, in order:** (a) name a credit-domain reviewer — a credit
-    risk officer, model validator, or CECL/IFRS 9 owner — because no individual
-    record can reach `reviewed` without one and repository-owner approval of
-    the spec chain is not a substitute; this is now the only thing blocking the
-    pack's 109 records from moving past `draft`, since the spec chain itself is
-    Approved; (b) decide which pillar has the next real consumer — `0073`
-    (wholesale) if a portfolio consumer appears, `0074` (retail) once its
+    **A named reviewer, Joshua Lutkemuller, CFA (repository owner and
+    approver), was recorded 2026-09-11 — stated without euphemism as a
+    self-attestation for a portfolio SDK, not an independent third-party
+    credit officer's or model validator's sign-off (`G-0072-001`).** 94 of
+    109 records are now `reviewed`; 15 stay `draft`, each tagged
+    `blocked_by_gap_ids` naming the specific open, high-severity gap that
+    blocks it (`G-0072-002`: no wholesale/counterparty runtime;
+    `G-0072-005`: no fairness harness). The validator itself now enforces
+    this — a promotion attempt on a record whose named gap is still open is
+    refused regardless of how complete its review object is, closing a real
+    gap between what `REQ-019` always required and what the code actually
+    checked. No existing runtime's numerical output changed; the full suite
+    passes with nothing else altered.
+
+    **Next pickup, in order:** (a) close `G-0072-002` or `G-0072-005` — the
+    15 blocked records are unblocked the moment their gap's disposition
+    states resolution, not by re-reviewing them; (b) decide which pillar has
+    the next real consumer — `0073` (wholesale) if a portfolio consumer
+    appears, `0074` (retail) once its
     reference-scorecard question is resolved, or extend `0077`'s document
     intelligence toward a real, licensed corpus and a genuine extractor per its
     own Follow-ups; (c) create further `agents/credit_risk/` agents only

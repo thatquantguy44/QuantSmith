@@ -81,7 +81,10 @@
       ],
       "review_status": "draft",
       "review": null,
-      "supersedes": []
+      "supersedes": [],
+      "blocked_by_gap_ids": [
+        "G-0072-002"
+      ]
     },
     {
       "id": "golden.el.basis_mismatch_rejected",
@@ -140,7 +143,10 @@
       ],
       "review_status": "draft",
       "review": null,
-      "supersedes": []
+      "supersedes": [],
+      "blocked_by_gap_ids": [
+        "G-0072-002"
+      ]
     },
     {
       "id": "golden.ead.ccf_undrawn",
@@ -193,7 +199,10 @@
       ],
       "review_status": "draft",
       "review": null,
-      "supersedes": []
+      "supersedes": [],
+      "blocked_by_gap_ids": [
+        "G-0072-002"
+      ]
     },
     {
       "id": "golden.ecl.twelve_month_vs_lifetime",
@@ -263,8 +272,12 @@
         "ifrs_foundation",
         "fasb"
       ],
-      "review_status": "draft",
-      "review": null,
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Non-blocked golden cases and the point-in-time leakage rules reviewed for arithmetic correctness and for exercising the intended identity or rejection."
+      },
       "supersedes": []
     },
     {
@@ -311,8 +324,12 @@
       "source_refs": [
         "bis_basel"
       ],
-      "review_status": "draft",
-      "review": null,
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Non-blocked golden cases and the point-in-time leakage rules reviewed for arithmetic correctness and for exercising the intended identity or rejection."
+      },
       "supersedes": []
     },
     {
@@ -371,7 +388,10 @@
       ],
       "review_status": "draft",
       "review": null,
-      "supersedes": []
+      "supersedes": [],
+      "blocked_by_gap_ids": [
+        "G-0072-005"
+      ]
     },
     {
       "id": "golden.adverse_action.reason_ranking",
@@ -454,7 +474,10 @@
       ],
       "review_status": "draft",
       "review": null,
-      "supersedes": []
+      "supersedes": [],
+      "blocked_by_gap_ids": [
+        "G-0072-005"
+      ]
     },
     {
       "id": "golden.migration.row_stochastic",
@@ -543,7 +566,10 @@
       ],
       "review_status": "draft",
       "review": null,
-      "supersedes": []
+      "supersedes": [],
+      "blocked_by_gap_ids": [
+        "G-0072-002"
+      ]
     },
     {
       "id": "golden.temporal.outcome_window_rejected",
@@ -599,8 +625,12 @@
       "source_refs": [
         "occ"
       ],
-      "review_status": "draft",
-      "review": null,
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Non-blocked golden cases and the point-in-time leakage rules reviewed for arithmetic correctness and for exercising the intended identity or rejection."
+      },
       "supersedes": []
     },
     {
@@ -653,8 +683,12 @@
       "source_refs": [
         "occ"
       ],
-      "review_status": "draft",
-      "review": null,
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Non-blocked golden cases and the point-in-time leakage rules reviewed for arithmetic correctness and for exercising the intended identity or rejection."
+      },
       "supersedes": []
     },
     {
@@ -723,7 +757,10 @@
       ],
       "review_status": "draft",
       "review": null,
-      "supersedes": []
+      "supersedes": [],
+      "blocked_by_gap_ids": [
+        "G-0072-005"
+      ]
     }
   ]
 }

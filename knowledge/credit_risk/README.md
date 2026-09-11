@@ -99,10 +99,17 @@ Records are `draft`, `reviewed`, `superseded`, or `retired`. Promotion to
 `reviewed` requires a named credit-domain reviewer, review date, review scope,
 supporting evidence, and no unresolved severity-high gap affecting the record.
 
-**Every record in this pack is currently `draft`.** The named credit-domain
-reviewer — a credit risk officer, model validator, or CECL/IFRS 9 owner — is an
-open question in `0072`'s spec. Structural review by the repository owner is not
-a substitute, and no automation in this repository can promote a record.
+**94 of 109 records are `reviewed`; 15 remain `draft`.** Joshua Lutkemuller,
+CFA — the repository owner and this spec's approver — is the named reviewer,
+recorded 2026-09-11. Stated plainly: this is the account owner's own
+attestation for a portfolio SDK, not an independent third-party credit
+officer's or model validator's sign-off (see `gap_register.md`'s
+`G-0072-001`). The 15 records still `draft` carry a `blocked_by_gap_ids`
+field naming an open, high-severity gap (`G-0072-002`: no wholesale/
+counterparty measurement runtime; `G-0072-005`: no fairness harness) — the
+validator refuses `reviewed` status on any record whose named gap is still
+open, however complete its review object looks. Naming a reviewer was
+necessary, not sufficient.
 
 ## Using this pack
 

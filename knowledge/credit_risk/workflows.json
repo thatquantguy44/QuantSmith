@@ -74,7 +74,10 @@
       ],
       "review_status": "draft",
       "review": null,
-      "supersedes": []
+      "supersedes": [],
+      "blocked_by_gap_ids": [
+        "G-0072-002"
+      ]
     },
     {
       "id": "workflow.counterparty_limit_review",
@@ -131,7 +134,10 @@
       ],
       "review_status": "draft",
       "review": null,
-      "supersedes": []
+      "supersedes": [],
+      "blocked_by_gap_ids": [
+        "G-0072-002"
+      ]
     },
     {
       "id": "workflow.retail_underwriting_decision",
@@ -195,7 +201,10 @@
       ],
       "review_status": "draft",
       "review": null,
-      "supersedes": []
+      "supersedes": [],
+      "blocked_by_gap_ids": [
+        "G-0072-005"
+      ]
     },
     {
       "id": "workflow.ecl_measurement",
@@ -251,8 +260,12 @@
         "ifrs_foundation",
         "fasb"
       ],
-      "review_status": "draft",
-      "review": null,
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Non-blocked workflow contracts reviewed for stage/gate/human-decision-point completeness and correct runtime-boundary classification."
+      },
       "supersedes": []
     },
     {
@@ -312,8 +325,12 @@
         "federal_reserve",
         "bis_basel"
       ],
-      "review_status": "draft",
-      "review": null,
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Non-blocked workflow contracts reviewed for stage/gate/human-decision-point completeness and correct runtime-boundary classification."
+      },
       "supersedes": []
     },
     {
@@ -378,8 +395,12 @@
         "cfpb",
         "occ"
       ],
-      "review_status": "draft",
-      "review": null,
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Non-blocked workflow contracts reviewed for stage/gate/human-decision-point completeness and correct runtime-boundary classification."
+      },
       "supersedes": []
     }
   ]
