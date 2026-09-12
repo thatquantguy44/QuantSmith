@@ -1,10 +1,10 @@
 # Spec: Prompt / Context / Harness Engineering Foundation
 
 - **ID:** 0070-prompt-context-harness-foundation
-- **Status:** Draft (foundation implemented)
+- **Status:** Approved (foundation implemented)
 - **Author:** Codex
-- **Approver:**
-- **Last updated:** 2026-09-06
+- **Approver:** Joshua Lutkemuller, CFA
+- **Last updated:** 2026-09-09
 
 ## Problem & Context
 

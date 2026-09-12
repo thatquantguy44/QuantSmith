@@ -14,7 +14,7 @@ The SDK now has a working v1 built on a spec-driven engineering framework:
   (`instructions/engineering_principles.md`), the SDD method
   (`instructions/spec_driven_development.md`), per-feature specs under `specs/`, and
   a worked example (`specs/0001-daily-momentum-signal/`).
-- **168 agents** in `agents/`, indexed by the catalog `agents/README.md` (the
+- **171 agents** in `agents/`, indexed by the catalog `agents/README.md` (the
   live count — this file is a roadmap, not the source of truth): an
   orchestrator, six lifecycle agents (one per SDLC stage), core domain agents, and
   19 grouped categories — `optimization/`, `machine_learning/`,
@@ -26,7 +26,7 @@ The SDK now has a working v1 built on a spec-driven engineering framework:
 - **35 quality gates** in `hooks/stages/` (SDLC stages, quant gates, and repo
   gates) driven by `run-stage.sh`; advisory by default, blocking under
   `QF_STAGE_ENFORCE=1`.
-- **35 instruction standards** and a prompt/template library covering specs, run
+- **36 instruction standards** and a prompt/template library covering specs, run
   cards, data contracts, monitoring plans, alert policies, synthetic-data
   disclosure, and postmortems.
 - **`adapters/`** is a first-class SDK surface (6 groups: `alert_delivery/`,

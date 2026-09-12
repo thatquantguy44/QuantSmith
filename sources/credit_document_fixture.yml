@@ -1,0 +1,43 @@
+source_id: "credit_document_fixture"
+name: "QuantSmith Synthetic Credit Document Fixtures"
+type: file_feed
+owner: "credit-risk"
+description: >
+  Synthetic, fictional credit memo and covenant-letter excerpts used by spec
+  0077's credit document intelligence examples and tests. Distinct from the
+  general-purpose `text_intelligence_fixture` source: this corpus is
+  credit-domain content (leverage ratios, covenant headroom, obligor
+  commentary) registered separately so a consumer never mistakes generic
+  liquidity-commentary fixtures for credit-specific ones. No real obligor,
+  counterparty, or credit-agreement text is used; every document is authored
+  fiction, disclosed under 0025.
+
+domain: ["credit_risk", "text_intelligence"]
+access_level: public
+
+quality:
+  completeness: high
+  timeliness: "static; regenerated deterministically by
+    quantsmith.pipelines.credit_document_intelligence.generate_credit_document_examples"
+  known_issues:
+    - "fictional content only; not evidence of any real obligor's credit condition"
+    - "the pipeline's entity/value/stance/theme outputs are the underlying 0071
+      deterministic-lexical producer's fixed reference-fixture stubs, not a
+      working covenant-extraction model; only the classification label is
+      computed from this corpus's actual text (see 0077 spec non-goals)"
+  last_assessed: "2026-09-10"
+
+point_in_time:
+  supports_asof: false
+  revision_policy: "fixtures are static and versioned by git history; no
+    revision or restatement semantics apply"
+
+connection:
+  method: local_file
+  endpoint_or_host: "examples/credit_document_intelligence/"
+  credential_ref: "not_required_public_access"
+
+documentation_uri: "specs/0077-credit-document-intelligence/spec.md"
+status: active
+
+data_contract_refs: ["specs/0077-credit-document-intelligence/"]

@@ -1,0 +1,37 @@
+{
+  "capability_set_id": "capabilities-credit-document-intelligence-001",
+  "profiles": [
+    {
+      "artifact_checksum": "sha256:3e9fb4ac0f5b8e2dfdbe0c066407c3bec23d7e0cb9f65bd494effc157f1fca27",
+      "capability_id": "cap-credit-document-intelligence-001-lexical",
+      "deterministic_settings": {
+        "seed": 0,
+        "temperature": 0
+      },
+      "execution_location": "local_cpu",
+      "fallback": {
+        "behavior": "abstain",
+        "reason": "no lexical evidence"
+      },
+      "license": "Apache-2.0-compatible reference logic",
+      "limits": {
+        "max_characters": 100000,
+        "max_output_items": 1000
+      },
+      "model": "deterministic-keyword-baseline",
+      "operations": [
+        "lexical",
+        "tokenize"
+      ],
+      "privacy_classes": [
+        "public",
+        "internal"
+      ],
+      "provider": "local",
+      "replay_class": "deterministic",
+      "revision": "1.0.0",
+      "runtime": "quantsmith.text_intelligence.lexical.v1"
+    }
+  ],
+  "schema_version": "quantsmith.text_intelligence.capabilities.v1"
+}

@@ -1,0 +1,1852 @@
+{
+  "schema_version": "0072.1",
+  "scope": {
+    "jurisdiction": "US",
+    "effective_interval_policy": "effective_from inclusive, effective_to exclusive",
+    "status": "draft_structural_contract",
+    "pillars": [
+      "wholesale_counterparty_credit",
+      "retail_underwriting",
+      "accounting_regulatory_capital",
+      "credit_document_intelligence"
+    ],
+    "reuses": {
+      "0063": "collateral, haircut, margin, and eligibility vocabulary is referenced from knowledge/short_term_markets, not redefined here"
+    }
+  },
+  "concepts": [
+    {
+      "id": "entity.obligor",
+      "record_type": "concept",
+      "name": "Obligor",
+      "kind": "entity",
+      "aliases": [
+        "borrower entity",
+        "counterparty obligor"
+      ],
+      "definition": "The legal person contractually obliged to repay a credit exposure. Ratings, probability of default, and default status attach to the obligor, not to any single facility it holds.",
+      "parent_ids": [],
+      "related_ids": [
+        "entity.counterparty",
+        "product.facility",
+        "concept.exposure",
+        "measure.pd"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "entity.counterparty",
+      "record_type": "concept",
+      "name": "Counterparty",
+      "kind": "entity",
+      "aliases": [
+        "trading counterparty"
+      ],
+      "definition": "The party to a transaction that gives rise to credit exposure. A counterparty is a transaction-side role; an obligor is a repayment obligation holder. The same legal entity can be both, and the two are not the same object.",
+      "parent_ids": [],
+      "related_ids": [
+        "entity.obligor",
+        "concept.exposure"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "entity.guarantor",
+      "record_type": "concept",
+      "name": "Guarantor",
+      "kind": "entity",
+      "aliases": [],
+      "definition": "A party that assumes an obligation to pay if the obligor does not. A guarantee changes loss given default and may change the effective obligor for risk-weight purposes; it does not change who the obligor is.",
+      "parent_ids": [],
+      "related_ids": [
+        "entity.obligor",
+        "measure.lgd.expected"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "product.facility",
+      "record_type": "concept",
+      "name": "Credit facility",
+      "kind": "product",
+      "aliases": [
+        "credit line",
+        "facility"
+      ],
+      "definition": "A specific credit arrangement extended to an obligor, carrying its own limit, structure, seniority, collateral, and terms. Loss given default and exposure at default attach to the facility, not to the obligor.",
+      "parent_ids": [],
+      "related_ids": [
+        "entity.obligor",
+        "concept.exposure",
+        "measure.lgd.expected",
+        "measure.ead"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "product.revolving_facility",
+      "record_type": "concept",
+      "name": "Revolving credit facility",
+      "kind": "product",
+      "aliases": [
+        "revolver",
+        "line of credit"
+      ],
+      "definition": "A facility the obligor may draw, repay, and redraw up to a limit. Undrawn commitment is the reason exposure at default and drawn balance diverge, and the reason a credit conversion factor is required.",
+      "parent_ids": [
+        "product.facility"
+      ],
+      "related_ids": [
+        "measure.ccf",
+        "measure.ead",
+        "measure.drawn_balance"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "product.term_loan",
+      "record_type": "concept",
+      "name": "Term loan",
+      "kind": "product",
+      "aliases": [],
+      "definition": "A facility drawn at or near origination and repaid on a schedule. Undrawn commitment is typically absent after drawdown, so exposure at default is closer to outstanding balance than for a revolving facility.",
+      "parent_ids": [
+        "product.facility"
+      ],
+      "related_ids": [
+        "measure.ead"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "concept.exposure",
+      "record_type": "concept",
+      "name": "Credit exposure",
+      "kind": "concept",
+      "aliases": [
+        "amount at risk"
+      ],
+      "definition": "The amount at risk to an obligor or counterparty. Ambiguous on its own: it may mean notional, drawn balance, exposure at default, or an amount net of collateral and guarantees. A caller must resolve which before computing.",
+      "parent_ids": [],
+      "related_ids": [
+        "measure.notional",
+        "measure.drawn_balance",
+        "measure.ead"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "concept.undrawn_commitment",
+      "record_type": "concept",
+      "name": "Undrawn commitment",
+      "kind": "concept",
+      "aliases": [
+        "unused commitment",
+        "available limit"
+      ],
+      "definition": "The portion of a committed facility limit not currently drawn. It is off-balance-sheet exposure: it carries credit risk because it can be drawn, typically as credit quality deteriorates.",
+      "parent_ids": [],
+      "related_ids": [
+        "measure.ccf",
+        "measure.ead",
+        "product.revolving_facility"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "role.lender",
+      "record_type": "concept",
+      "name": "Lender / creditor",
+      "kind": "role",
+      "aliases": [],
+      "definition": "The party extending credit and bearing loss if the obligor defaults. Credit loss is a positive cost from this viewpoint.",
+      "parent_ids": [],
+      "related_ids": [
+        "concept.exposure"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "role.borrower",
+      "record_type": "concept",
+      "name": "Borrower / obligor role",
+      "kind": "role",
+      "aliases": [],
+      "definition": "The party receiving credit and owing repayment. A credit loss to the lender is not a symmetric gain here; default carries its own costs.",
+      "parent_ids": [],
+      "related_ids": [
+        "concept.exposure"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "role.guarantor_role",
+      "record_type": "concept",
+      "name": "Guarantor role",
+      "kind": "role",
+      "aliases": [],
+      "definition": "The party contingently obliged on the obligor's default; bears loss only after the guarantee is called.",
+      "parent_ids": [],
+      "related_ids": [
+        "concept.exposure"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "role.protection_buyer",
+      "record_type": "concept",
+      "name": "Credit protection buyer",
+      "kind": "role",
+      "aliases": [],
+      "definition": "The party transferring credit risk to another and paying for it. Reduces credit exposure to the reference obligor, creating exposure to the protection seller.",
+      "parent_ids": [],
+      "related_ids": [
+        "concept.exposure"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "role.protection_seller",
+      "record_type": "concept",
+      "name": "Credit protection seller",
+      "kind": "role",
+      "aliases": [],
+      "definition": "The party assuming credit risk on a reference obligor in exchange for payment.",
+      "parent_ids": [],
+      "related_ids": [
+        "concept.exposure"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "role.servicer",
+      "record_type": "concept",
+      "name": "Servicer",
+      "kind": "role",
+      "aliases": [],
+      "definition": "The party administering collection, modification, and workout. Not a risk holder by virtue of servicing, but the source of much of the observed performance data.",
+      "parent_ids": [],
+      "related_ids": [
+        "concept.exposure"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "role.investor",
+      "record_type": "concept",
+      "name": "Credit investor",
+      "kind": "role",
+      "aliases": [],
+      "definition": "The holder of credit risk through a purchased instrument rather than an originated facility.",
+      "parent_ids": [],
+      "related_ids": [
+        "concept.exposure"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "defn.default.dpd_90",
+      "record_type": "concept",
+      "name": "90 days past due",
+      "kind": "default_definition",
+      "aliases": [
+        "90 dpd",
+        "days past due 90"
+      ],
+      "definition": "A quantitative default trigger: a material obligation unpaid for 90 days. Precise day count, materiality threshold, and product scope vary by portfolio and rule, so the threshold alone does not make two definitions equivalent.",
+      "parent_ids": [],
+      "related_ids": [
+        "measure.pd",
+        "concept.default_event"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "defn.default.unlikeliness_to_pay",
+      "record_type": "concept",
+      "name": "Unlikeliness to pay",
+      "kind": "default_definition",
+      "aliases": [
+        "utp",
+        "unlikely to pay"
+      ],
+      "definition": "A qualitative default trigger: the obligor is judged unlikely to pay in full without recourse to actions such as realizing collateral. Judgement-based, so two institutions can classify the same obligor differently.",
+      "parent_ids": [],
+      "related_ids": [
+        "measure.pd",
+        "concept.default_event"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "defn.default.irb_reference",
+      "record_type": "concept",
+      "name": "IRB reference definition of default",
+      "kind": "default_definition",
+      "aliases": [
+        "regulatory default",
+        "basel default"
+      ],
+      "definition": "The default definition used for internal-ratings-based regulatory purposes, combining past-due and unlikeliness-to-pay triggers as implemented nationally. National implementation differs from the international framework text.",
+      "parent_ids": [],
+      "related_ids": [
+        "measure.pd",
+        "concept.default_event"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "regulatory_supervisory_rule",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "defn.default.ifrs9_stage3",
+      "record_type": "concept",
+      "name": "IFRS 9 stage 3 credit-impaired trigger",
+      "kind": "default_definition",
+      "aliases": [
+        "credit impaired",
+        "stage 3"
+      ],
+      "definition": "The accounting trigger for credit-impaired status under IFRS 9. Related to but not identical with a regulatory default definition; alignment is a policy choice an institution must document, not an identity.",
+      "parent_ids": [],
+      "related_ids": [
+        "measure.pd",
+        "concept.default_event"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "accounting_standard",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "ifrs_foundation"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "defn.default.cecl_nonaccrual",
+      "record_type": "concept",
+      "name": "CECL nonaccrual / charge-off trigger",
+      "kind": "default_definition",
+      "aliases": [
+        "nonaccrual"
+      ],
+      "definition": "The status at which interest accrual stops and, separately, at which a balance is charged off under U.S. GAAP practice. Nonaccrual and charge-off are distinct events and neither is automatically a regulatory default.",
+      "parent_ids": [],
+      "related_ids": [
+        "measure.pd",
+        "concept.default_event"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "accounting_standard",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "fasb"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "defn.default.internal_watchlist",
+      "record_type": "concept",
+      "name": "Internal watch-list action",
+      "kind": "default_definition",
+      "aliases": [
+        "watch list"
+      ],
+      "definition": "An internal credit-administration action signalling deterioration. It is a management state, not a default: treating it as one overstates default rates and corrupts a PD calibration.",
+      "parent_ids": [],
+      "related_ids": [
+        "measure.pd",
+        "concept.default_event"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "regulatory_supervisory_rule",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "occ"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "concept.default_event",
+      "record_type": "concept",
+      "name": "Default event",
+      "kind": "concept",
+      "aliases": [],
+      "definition": "The event a probability of default predicts. Meaningless without naming which default definition applies: a PD calibrated to one definition cannot be read against outcomes observed under another.",
+      "parent_ids": [],
+      "related_ids": [
+        "defn.default.dpd_90",
+        "defn.default.unlikeliness_to_pay",
+        "defn.default.irb_reference",
+        "defn.default.ifrs9_stage3",
+        "defn.default.cecl_nonaccrual",
+        "defn.default.internal_watchlist"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "measure.pd",
+      "record_type": "concept",
+      "name": "Probability of default",
+      "kind": "measure",
+      "aliases": [
+        "pd",
+        "probability of default"
+      ],
+      "definition": "The probability that an obligor defaults over a stated horizon under a stated default definition and conditioning basis. A bare 'PD' is not a usable quantity: horizon, conditioning, and default definition must all be resolved first.",
+      "parent_ids": [],
+      "related_ids": [
+        "measure.pd.one_year.ttc",
+        "measure.pd.one_year.pit",
+        "measure.pd.lifetime",
+        "measure.observed_default_rate",
+        "concept.default_event"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "measure.pd.one_year.ttc",
+      "record_type": "concept",
+      "name": "One-year through-the-cycle PD",
+      "kind": "measure",
+      "aliases": [
+        "ttc pd"
+      ],
+      "definition": "A one-year default probability calibrated to average conditions across a cycle, deliberately insensitive to the current point in the cycle. Used for regulatory IRB purposes. Substituting it into a point-in-time or accounting measurement understates cyclical variation.",
+      "parent_ids": [
+        "measure.pd"
+      ],
+      "related_ids": [
+        "measure.pd.one_year.pit"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "measure.pd.one_year.pit",
+      "record_type": "concept",
+      "name": "One-year point-in-time PD",
+      "kind": "measure",
+      "aliases": [
+        "pit pd"
+      ],
+      "definition": "A one-year default probability conditioned on current observable conditions. Moves with the cycle by design. Required for accounting measurement; wrong for a through-the-cycle regulatory parameter.",
+      "parent_ids": [
+        "measure.pd"
+      ],
+      "related_ids": [
+        "measure.pd.one_year.ttc",
+        "measure.ecl.twelve_month"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "ifrs_foundation"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "measure.pd.lifetime",
+      "record_type": "concept",
+      "name": "Lifetime PD",
+      "kind": "measure",
+      "aliases": [
+        "lifetime probability of default"
+      ],
+      "definition": "The probability of default over the remaining life of the exposure, typically as a term structure of marginal probabilities. Not derivable from a one-year PD without an explicit, recorded term-structure assumption.",
+      "parent_ids": [
+        "measure.pd"
+      ],
+      "related_ids": [
+        "measure.ecl.lifetime"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "ifrs_foundation"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "measure.observed_default_rate",
+      "record_type": "concept",
+      "name": "Observed default rate",
+      "kind": "measure",
+      "aliases": [
+        "realized default rate",
+        "default frequency"
+      ],
+      "definition": "The realized fraction of a cohort that defaulted over a window. A historical outcome, not a forward-looking probability: using it as a PD imports the conditions of the observation window as though they were expectations.",
+      "parent_ids": [],
+      "related_ids": [
+        "measure.pd"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "empirical_finding",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "measure.lgd.expected",
+      "record_type": "concept",
+      "name": "Expected loss given default",
+      "kind": "measure",
+      "aliases": [
+        "lgd",
+        "expected lgd"
+      ],
+      "definition": "The share of exposure expected to be lost if default occurs, net of expected recoveries and workout costs, discounted to the default date. A facility-level quantity.",
+      "parent_ids": [],
+      "related_ids": [
+        "measure.lgd.downturn",
+        "measure.recovery_rate",
+        "measure.loss_rate"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "measure.lgd.downturn",
+      "record_type": "concept",
+      "name": "Downturn loss given default",
+      "kind": "measure",
+      "aliases": [
+        "downturn lgd"
+      ],
+      "definition": "Loss given default estimated under adverse economic conditions, required where recovery is cyclical. Higher than expected LGD by construction; substituting expected for downturn understates regulatory capital.",
+      "parent_ids": [
+        "measure.lgd.expected"
+      ],
+      "related_ids": [],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "measure.recovery_rate",
+      "record_type": "concept",
+      "name": "Recovery rate",
+      "kind": "measure",
+      "aliases": [
+        "recovery"
+      ],
+      "definition": "The share of exposure recovered after default. Arithmetically one minus loss given default only when both are stated on the same basis \u2014 same discounting, same cost treatment, same workout window. Often they are not.",
+      "parent_ids": [],
+      "related_ids": [
+        "measure.lgd.expected"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "measure.loss_rate",
+      "record_type": "concept",
+      "name": "Loss rate",
+      "kind": "measure",
+      "aliases": [
+        "net loss rate",
+        "charge-off rate"
+      ],
+      "definition": "Realized loss as a share of a portfolio or cohort balance, including exposures that did not default. Not loss given default, which conditions on default having occurred; the two differ by the default rate.",
+      "parent_ids": [],
+      "related_ids": [
+        "measure.lgd.expected",
+        "measure.observed_default_rate"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "empirical_finding",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "fasb"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "measure.ead",
+      "record_type": "concept",
+      "name": "Exposure at default",
+      "kind": "measure",
+      "aliases": [
+        "ead",
+        "exposure at default"
+      ],
+      "definition": "The exposure amount expected at the time of default, including expected further drawdown on undrawn commitment. Not the current drawn balance and not the facility notional.",
+      "parent_ids": [],
+      "related_ids": [
+        "measure.drawn_balance",
+        "measure.notional",
+        "measure.ccf"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "measure.drawn_balance",
+      "record_type": "concept",
+      "name": "Drawn balance",
+      "kind": "measure",
+      "aliases": [
+        "outstanding balance",
+        "utilization"
+      ],
+      "definition": "The amount currently outstanding on a facility. An observation at a point in time, not a forecast of exposure at default.",
+      "parent_ids": [],
+      "related_ids": [
+        "measure.ead"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "measure.notional",
+      "record_type": "concept",
+      "name": "Facility notional / limit",
+      "kind": "measure",
+      "aliases": [
+        "commitment",
+        "facility limit"
+      ],
+      "definition": "The committed facility amount. An upper bound on drawing, not an expectation of it; using notional as exposure at default overstates exposure for most revolving facilities.",
+      "parent_ids": [],
+      "related_ids": [
+        "measure.ead"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "measure.ccf",
+      "record_type": "concept",
+      "name": "Credit conversion factor",
+      "kind": "measure",
+      "aliases": [
+        "ccf",
+        "credit conversion factor"
+      ],
+      "definition": "The fraction of undrawn commitment expected to be drawn by the time of default. The parameter that converts a limit and a drawn balance into exposure at default; it is not itself an exposure.",
+      "parent_ids": [],
+      "related_ids": [
+        "measure.ead",
+        "concept.undrawn_commitment"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "measure.el",
+      "record_type": "concept",
+      "name": "Expected loss",
+      "kind": "measure",
+      "aliases": [
+        "expected loss"
+      ],
+      "definition": "The expected credit loss over a horizon for an exposure, classically the product of probability of default, loss given default, and exposure at default, with all three on a consistent horizon and default definition.",
+      "parent_ids": [],
+      "related_ids": [
+        "measure.pd",
+        "measure.lgd.expected",
+        "measure.ead"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "measure.ecl.twelve_month",
+      "record_type": "concept",
+      "name": "Twelve-month expected credit loss",
+      "kind": "measure",
+      "aliases": [
+        "12-month ecl",
+        "stage 1 ecl"
+      ],
+      "definition": "The portion of lifetime expected credit loss arising from default events possible within twelve months of the reporting date. It is not a twelve-month-horizon expected loss in the regulatory sense, and it is not the same as an IRB one-year expected loss.",
+      "parent_ids": [],
+      "related_ids": [
+        "measure.ecl.lifetime",
+        "measure.pd.one_year.pit"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "accounting_standard",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "ifrs_foundation"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "measure.ecl.lifetime",
+      "record_type": "concept",
+      "name": "Lifetime expected credit loss",
+      "kind": "measure",
+      "aliases": [
+        "lifetime ecl"
+      ],
+      "definition": "Expected credit loss from all possible default events over the expected life of the instrument, discounted at the effective interest rate. Required for stage 2 and stage 3 exposures under IFRS 9 and for all in-scope assets under CECL.",
+      "parent_ids": [],
+      "related_ids": [
+        "measure.pd.lifetime",
+        "measure.ecl.twelve_month"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "accounting_standard",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "ifrs_foundation",
+        "fasb"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "measure.impairment",
+      "record_type": "concept",
+      "name": "Impairment",
+      "kind": "measure",
+      "aliases": [],
+      "definition": "The accounting recognition of credit deterioration in the carrying amount of an asset. The recognition concept; the allowance is the balance and the provision is the period expense.",
+      "parent_ids": [],
+      "related_ids": [
+        "measure.provision",
+        "measure.ecl.lifetime"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "accounting_standard",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "fasb",
+        "ifrs_foundation"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "measure.provision",
+      "record_type": "concept",
+      "name": "Provision (period expense)",
+      "kind": "measure",
+      "aliases": [
+        "provision expense",
+        "credit loss expense"
+      ],
+      "definition": "The expense recognized in a period to bring the allowance to its measured level. A flow, not a stock: it is not the allowance balance and not the expected credit loss measurement itself.",
+      "parent_ids": [],
+      "related_ids": [
+        "measure.impairment",
+        "measure.ecl.lifetime"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "accounting_standard",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "fasb"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "measure.charge_off",
+      "record_type": "concept",
+      "name": "Charge-off",
+      "kind": "measure",
+      "aliases": [
+        "chargeoff"
+      ],
+      "definition": "The removal of a balance from carrying value when it is deemed uncollectible. An event with its own policy trigger; it is not the same as default and not the same as economic loss, since recoveries may follow.",
+      "parent_ids": [],
+      "related_ids": [
+        "measure.write_off",
+        "measure.recovery_rate"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "accounting_standard",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "fasb"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "measure.write_off",
+      "record_type": "concept",
+      "name": "Write-off",
+      "kind": "measure",
+      "aliases": [],
+      "definition": "The derecognition of a financial asset when there is no reasonable expectation of recovery. Distinct from charge-off practice: the trigger, timing, and accounting consequence differ and the two must not share a record.",
+      "parent_ids": [],
+      "related_ids": [
+        "measure.charge_off"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "accounting_standard",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "ifrs_foundation"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "measure.rating_grade",
+      "record_type": "concept",
+      "name": "Rating grade",
+      "kind": "measure",
+      "aliases": [
+        "risk rating",
+        "obligor grade"
+      ],
+      "definition": "An ordinal credit-quality classification on a defined scale, mapped to a PD range by an explicit calibration. Ordinal, not cardinal: grades cannot be averaged or differenced arithmetically.",
+      "parent_ids": [],
+      "related_ids": [
+        "measure.score",
+        "measure.pd"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "measure.score",
+      "record_type": "concept",
+      "name": "Credit score",
+      "kind": "measure",
+      "aliases": [
+        "scorecard score"
+      ],
+      "definition": "A model output on an arbitrary scale ordering obligors or applications by credit quality. Monotonic in odds only after a calibration is applied; a score is not a probability and not a rating grade.",
+      "parent_ids": [],
+      "related_ids": [
+        "measure.rating_grade",
+        "measure.score_band"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "cfpb"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "measure.score_band",
+      "record_type": "concept",
+      "name": "Score band",
+      "kind": "measure",
+      "aliases": [
+        "score bucket"
+      ],
+      "definition": "A contiguous interval of scores treated as one group for policy. A discretization of a score, not a score: band membership loses within-band ordering that a cutoff may depend on.",
+      "parent_ids": [],
+      "related_ids": [
+        "measure.score"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "cfpb"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "measure.rwa",
+      "record_type": "concept",
+      "name": "Risk-weighted assets",
+      "kind": "measure",
+      "aliases": [
+        "rwa"
+      ],
+      "definition": "Exposure scaled by a regulatory risk weight, the denominator of regulatory capital ratios. A regulatory construct, not an economic loss estimate.",
+      "parent_ids": [],
+      "related_ids": [
+        "measure.pd.one_year.ttc",
+        "measure.lgd.downturn",
+        "measure.ead"
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "regulatory_supervisory_rule",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "process.underwriting",
+      "record_type": "concept",
+      "name": "Credit underwriting",
+      "kind": "process",
+      "aliases": [],
+      "definition": "Assessing an application and deciding whether, and on what terms, to extend credit. Where a consumer is the subject, the decision carries adverse action obligations.",
+      "parent_ids": [],
+      "related_ids": [],
+      "jurisdiction": "US",
+      "knowledge_class": "regulatory_supervisory_rule",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "cfpb"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "process.rating_assignment",
+      "record_type": "concept",
+      "name": "Rating assignment",
+      "kind": "process",
+      "aliases": [],
+      "definition": "Assigning an obligor or facility grade under a defined scale and methodology, with documented overrides.",
+      "parent_ids": [],
+      "related_ids": [],
+      "jurisdiction": "US",
+      "knowledge_class": "regulatory_supervisory_rule",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "process.ecl_measurement",
+      "record_type": "concept",
+      "name": "Expected credit loss measurement",
+      "kind": "process",
+      "aliases": [],
+      "definition": "Measuring the allowance for credit losses at a reporting date, including staging or pooling, lifetime measurement, and discounting.",
+      "parent_ids": [],
+      "related_ids": [],
+      "jurisdiction": "US",
+      "knowledge_class": "regulatory_supervisory_rule",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "ifrs_foundation",
+        "fasb"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "process.capital_calculation",
+      "record_type": "concept",
+      "name": "Regulatory capital calculation",
+      "kind": "process",
+      "aliases": [],
+      "definition": "Computing risk-weighted assets and capital requirements from regulatory parameters.",
+      "parent_ids": [],
+      "related_ids": [],
+      "jurisdiction": "US",
+      "knowledge_class": "regulatory_supervisory_rule",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "process.stress_testing",
+      "record_type": "concept",
+      "name": "Supervisory stress testing",
+      "kind": "process",
+      "aliases": [],
+      "definition": "Projecting losses, revenues, and capital under prescribed macroeconomic scenarios.",
+      "parent_ids": [],
+      "related_ids": [],
+      "jurisdiction": "US",
+      "knowledge_class": "regulatory_supervisory_rule",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "federal_reserve"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "process.credit_review",
+      "record_type": "concept",
+      "name": "Credit review",
+      "kind": "process",
+      "aliases": [],
+      "definition": "Periodic reassessment of an existing exposure's risk, terms, and rating.",
+      "parent_ids": [],
+      "related_ids": [],
+      "jurisdiction": "US",
+      "knowledge_class": "regulatory_supervisory_rule",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "occ"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "process.model_validation",
+      "record_type": "concept",
+      "name": "Model validation",
+      "kind": "process",
+      "aliases": [],
+      "definition": "Independent assessment of a model's conceptual soundness, outcomes, and ongoing performance, distinct from its development.",
+      "parent_ids": [],
+      "related_ids": [],
+      "jurisdiction": "US",
+      "knowledge_class": "regulatory_supervisory_rule",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "federal_reserve",
+        "occ"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Taxonomy definitions, aliases, and non-interchangeable term distinctions reviewed for accuracy against standard U.S. credit-risk usage (obligor/facility/exposure roles, PD/LGD/EAD family, default definitions, rating/score concepts, accounting terms). Not a review of any runtime built on these definitions -- none exists yet outside 0077."
+      },
+      "supersedes": []
+    }
+  ],
+  "ambiguity_rules": [
+    {
+      "alias": "default",
+      "requires": [
+        "default_definition_id"
+      ],
+      "allowed_concept_ids": [
+        "defn.default.dpd_90",
+        "defn.default.unlikeliness_to_pay",
+        "defn.default.irb_reference",
+        "defn.default.ifrs9_stage3",
+        "defn.default.cecl_nonaccrual",
+        "defn.default.internal_watchlist"
+      ],
+      "resolution": "Callers must name which default definition applies. A PD calibrated to one definition cannot be read against outcomes observed under another."
+    },
+    {
+      "alias": "pd",
+      "requires": [
+        "horizon",
+        "conditioning",
+        "default_definition_id"
+      ],
+      "allowed_concept_ids": [
+        "measure.pd.one_year.ttc",
+        "measure.pd.one_year.pit",
+        "measure.pd.lifetime",
+        "measure.observed_default_rate"
+      ],
+      "resolution": "Resolve horizon, conditioning basis, and default definition before using a probability of default in any formula."
+    },
+    {
+      "alias": "lgd",
+      "requires": [
+        "conditioning"
+      ],
+      "allowed_concept_ids": [
+        "measure.lgd.expected",
+        "measure.lgd.downturn"
+      ],
+      "resolution": "Expected and downturn loss given default are different parameters; regulatory capital generally requires downturn."
+    },
+    {
+      "alias": "exposure",
+      "requires": [
+        "exposure_basis"
+      ],
+      "allowed_concept_ids": [
+        "measure.notional",
+        "measure.drawn_balance",
+        "measure.ead"
+      ],
+      "resolution": "Resolve whether the amount is notional, drawn balance, or exposure at default, and whether it is gross or net of collateral and guarantees."
+    },
+    {
+      "alias": "loss",
+      "requires": [
+        "viewpoint_id",
+        "loss_basis"
+      ],
+      "allowed_concept_ids": [
+        "measure.el",
+        "measure.loss_rate",
+        "measure.lgd.expected",
+        "measure.charge_off",
+        "measure.ecl.lifetime"
+      ],
+      "resolution": "Loss is a family, not a quantity. Resolve whether it is conditional on default, a portfolio rate, an accounting measurement, or an event."
+    },
+    {
+      "alias": "ecl",
+      "requires": [
+        "horizon",
+        "framework"
+      ],
+      "allowed_concept_ids": [
+        "measure.ecl.twelve_month",
+        "measure.ecl.lifetime"
+      ],
+      "resolution": "Twelve-month and lifetime measurement differ, and IFRS 9 staging is not CECL pooling; name the framework."
+    }
+  ],
+  "non_interchangeable_pairs": [
+    [
+      "entity.obligor",
+      "product.facility"
+    ],
+    [
+      "entity.obligor",
+      "concept.exposure"
+    ],
+    [
+      "entity.obligor",
+      "entity.counterparty"
+    ],
+    [
+      "product.facility",
+      "concept.exposure"
+    ],
+    [
+      "product.facility",
+      "entity.counterparty"
+    ],
+    [
+      "concept.exposure",
+      "entity.counterparty"
+    ],
+    [
+      "measure.pd",
+      "measure.observed_default_rate"
+    ],
+    [
+      "measure.pd.one_year.ttc",
+      "measure.pd.one_year.pit"
+    ],
+    [
+      "measure.pd.one_year.pit",
+      "measure.pd.lifetime"
+    ],
+    [
+      "measure.pd.one_year.ttc",
+      "measure.pd.lifetime"
+    ],
+    [
+      "measure.lgd.expected",
+      "measure.loss_rate"
+    ],
+    [
+      "measure.lgd.expected",
+      "measure.recovery_rate"
+    ],
+    [
+      "measure.loss_rate",
+      "measure.recovery_rate"
+    ],
+    [
+      "measure.lgd.expected",
+      "measure.lgd.downturn"
+    ],
+    [
+      "measure.ead",
+      "measure.notional"
+    ],
+    [
+      "measure.ead",
+      "measure.drawn_balance"
+    ],
+    [
+      "measure.ead",
+      "measure.ccf"
+    ],
+    [
+      "measure.notional",
+      "measure.drawn_balance"
+    ],
+    [
+      "measure.notional",
+      "measure.ccf"
+    ],
+    [
+      "measure.drawn_balance",
+      "measure.ccf"
+    ],
+    [
+      "measure.ecl.lifetime",
+      "measure.impairment"
+    ],
+    [
+      "measure.ecl.lifetime",
+      "measure.provision"
+    ],
+    [
+      "measure.ecl.lifetime",
+      "measure.charge_off"
+    ],
+    [
+      "measure.impairment",
+      "measure.provision"
+    ],
+    [
+      "measure.impairment",
+      "measure.charge_off"
+    ],
+    [
+      "measure.provision",
+      "measure.charge_off"
+    ],
+    [
+      "measure.charge_off",
+      "measure.write_off"
+    ],
+    [
+      "measure.ecl.twelve_month",
+      "measure.ecl.lifetime"
+    ],
+    [
+      "measure.rating_grade",
+      "measure.score"
+    ],
+    [
+      "measure.rating_grade",
+      "measure.score_band"
+    ],
+    [
+      "measure.score",
+      "measure.score_band"
+    ],
+    [
+      "defn.default.dpd_90",
+      "defn.default.unlikeliness_to_pay"
+    ],
+    [
+      "defn.default.dpd_90",
+      "defn.default.irb_reference"
+    ],
+    [
+      "defn.default.dpd_90",
+      "defn.default.ifrs9_stage3"
+    ],
+    [
+      "defn.default.dpd_90",
+      "defn.default.cecl_nonaccrual"
+    ],
+    [
+      "defn.default.dpd_90",
+      "defn.default.internal_watchlist"
+    ],
+    [
+      "defn.default.unlikeliness_to_pay",
+      "defn.default.irb_reference"
+    ],
+    [
+      "defn.default.unlikeliness_to_pay",
+      "defn.default.ifrs9_stage3"
+    ],
+    [
+      "defn.default.unlikeliness_to_pay",
+      "defn.default.cecl_nonaccrual"
+    ],
+    [
+      "defn.default.unlikeliness_to_pay",
+      "defn.default.internal_watchlist"
+    ],
+    [
+      "defn.default.irb_reference",
+      "defn.default.ifrs9_stage3"
+    ],
+    [
+      "defn.default.irb_reference",
+      "defn.default.cecl_nonaccrual"
+    ],
+    [
+      "defn.default.irb_reference",
+      "defn.default.internal_watchlist"
+    ],
+    [
+      "defn.default.ifrs9_stage3",
+      "defn.default.cecl_nonaccrual"
+    ],
+    [
+      "defn.default.ifrs9_stage3",
+      "defn.default.internal_watchlist"
+    ],
+    [
+      "defn.default.cecl_nonaccrual",
+      "defn.default.internal_watchlist"
+    ]
+  ]
+}

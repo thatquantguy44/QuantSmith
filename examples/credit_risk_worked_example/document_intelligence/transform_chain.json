@@ -1,0 +1,69 @@
+{
+  "chain_id": "transforms-credit-risk-worked-example-cascadia-v1",
+  "corpus_snapshot_id": "corpus-credit-risk-worked-example-cascadia-v1",
+  "schema_version": "quantsmith.text_intelligence.transforms.v1",
+  "transforms": [
+    {
+      "config_version": "1.0.0",
+      "deterministic": true,
+      "implementation": "quantsmith.text_intelligence.producers._normalize_text",
+      "input_refs": [
+        {
+          "hash": "sha256:04148af06e442bb44dae36883fe0f0106ab901ffcf75adc4678b5ccf23b817a5",
+          "path": "documents/credit-memo-cascadia-001.txt"
+        }
+      ],
+      "lineage_order": 1,
+      "operation": "normalization",
+      "output_refs": [
+        {
+          "hash": "sha256:04148af06e442bb44dae36883fe0f0106ab901ffcf75adc4678b5ccf23b817a5",
+          "path": "transformed/credit-memo-cascadia-001.txt"
+        }
+      ],
+      "parameters": {
+        "source_boundaries": "preserved",
+        "unicode": "NFKC",
+        "whitespace": "collapse"
+      },
+      "security_scan": {
+        "flags": [],
+        "quarantine_action": "none",
+        "status": "pass"
+      },
+      "timestamp": "2026-09-11T09:00:01Z",
+      "transform_id": "transform-credit-memo-cascadia-001"
+    },
+    {
+      "config_version": "1.0.0",
+      "deterministic": true,
+      "implementation": "quantsmith.text_intelligence.producers._normalize_text",
+      "input_refs": [
+        {
+          "hash": "sha256:7af6a066791c8f2b08eafe83352c2ee8a08b5faf1d259af859487f029ca45a70",
+          "path": "documents/credit-memo-cascadia-002.txt"
+        }
+      ],
+      "lineage_order": 2,
+      "operation": "normalization",
+      "output_refs": [
+        {
+          "hash": "sha256:7af6a066791c8f2b08eafe83352c2ee8a08b5faf1d259af859487f029ca45a70",
+          "path": "transformed/credit-memo-cascadia-002.txt"
+        }
+      ],
+      "parameters": {
+        "source_boundaries": "preserved",
+        "unicode": "NFKC",
+        "whitespace": "collapse"
+      },
+      "security_scan": {
+        "flags": [],
+        "quarantine_action": "none",
+        "status": "pass"
+      },
+      "timestamp": "2026-09-11T09:00:02Z",
+      "transform_id": "transform-credit-memo-cascadia-002"
+    }
+  ]
+}

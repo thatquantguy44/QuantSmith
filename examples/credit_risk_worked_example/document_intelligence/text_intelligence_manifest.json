@@ -1,0 +1,69 @@
+{
+  "audit_correlation_id": "evt-credit-risk-worked-example-cascadia-corpus",
+  "corpus_snapshot": {
+    "hash": "sha256:4509ff30fd667b800dd59d0a3f358e50cd73b0f8522f9ea52b9f82130b15a4d1",
+    "path": "corpus_snapshot.json",
+    "type": "corpus_snapshot"
+  },
+  "decision_time": "2026-09-11T09:00:12Z",
+  "downstream_consumers": [
+    "agents/knowledge/knowledge_retrieval",
+    "agents/research_analyst",
+    "agents/economists",
+    "agents/portfolio_management",
+    "agents/risk",
+    "agents/trading_strategies"
+  ],
+  "evaluation_suite": {
+    "hash": "sha256:0a3a18e965ad943123bfb3c1e06f09c5ae4b1e5dc30356630eba42dda33ca633",
+    "path": "text_evaluation.json",
+    "type": "evaluation_suite"
+  },
+  "manifest_id": "text-manifest-credit-risk-worked-example-cascadia",
+  "model_capabilities": {
+    "hash": "sha256:586c007020758e4372b26e96c4a3cbfc4fab2814e4eecd1c377e0a88ee5e00e4",
+    "path": "model_capabilities.json",
+    "type": "model_capabilities"
+  },
+  "orchestration": {
+    "path": "run_envelope.json",
+    "run_id": "credit-risk-worked-example-cascadia",
+    "schema_version": "quantsmith.orchestration.run.v1"
+  },
+  "purpose": "Validate governed, point-in-time quant text intelligence with source-span lineage.",
+  "replay_class": "deterministic",
+  "review": {
+    "escalation_conditions": [
+      "any production, client, trading, or restricted-data use"
+    ],
+    "overrides": [],
+    "owner": "spec0071",
+    "rejected_alternatives": [
+      "represent fixture output as production evidence"
+    ],
+    "reviewed_at": "2026-09-11T09:00:11Z",
+    "reviewer": "credit_document_intelligence",
+    "status": "fixture_approved",
+    "uncertainty": "Synthetic fixture demonstrates contracts only; no investment conclusion is approved."
+  },
+  "run_id": "credit-risk-worked-example-cascadia",
+  "schema_version": "quantsmith.text_intelligence.manifest.v1",
+  "signal_artifacts": [
+    {
+      "hash": "sha256:f2e1f37f672969f68676d7ade37aa6ad4e7975944b4a933ed96a4d8d16296411",
+      "path": "text_signals.json",
+      "type": "text_signals"
+    }
+  ],
+  "task_results": {
+    "hash": "sha256:e36339f1a04839ed2a759513eca096e70f7f3d666b1e184f16c064c788e44e72",
+    "path": "task_results.json",
+    "type": "task_results"
+  },
+  "task_schema_version": "quantsmith.text_intelligence.task.v1",
+  "transform_chain": {
+    "hash": "sha256:7f2aa36f32f66f6fee868ba0292349318d0824ba4304d212aa61cb772f273954",
+    "path": "transform_chain.json",
+    "type": "transform_chain"
+  }
+}

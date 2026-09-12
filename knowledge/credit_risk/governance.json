@@ -1,0 +1,243 @@
+{
+  "schema_version": "0072.1",
+  "scope": {
+    "jurisdiction": "US",
+    "status": "draft_structural_contract"
+  },
+  "deployability_predicate": {
+    "id": "predicate.deployable",
+    "statement": "A coverage entry is deployable if and only if every artifact in required_artifacts resolves for it, AND no severity-high gap in gap_register.md is open against it, AND \u2014 where its decision path has consumer_decision true \u2014 that path satisfies every obligation in decision_paths.json.",
+    "computed_not_asserted": true,
+    "why": "There is deliberately no `deployable: true` field. A self-asserted flag is exactly how an unvalidated model reaches production; this predicate cannot be satisfied by assertion."
+  },
+  "evidence_admission": {
+    "id": "rule.llm_evidence_admission",
+    "applies_to": "any value derived by a language or text model",
+    "requires": {
+      "artifact_ref": "a 0071 text artifact identifier",
+      "source_spans": "resolvable spans in a governed corpus",
+      "envelope_ref": "a 0070 run envelope identifier",
+      "prompt_context_manifest": "recorded in the envelope",
+      "assumption_ledger_entry": "one entry per inferred value",
+      "replay_ref": "replayable through 0070's replay engine"
+    },
+    "initial_evidence_class": "derived_evidence",
+    "promotion_to": "decision_input",
+    "promotion_requires": [
+      "named human reviewer",
+      "review date",
+      "review scope"
+    ],
+    "automated_promotion_permitted": false,
+    "why": "0072 REQ-016. Extraction is useful and unverified. Labelling it evidence keeps it usable without letting it silently become the basis of a credit decision."
+  },
+  "required_artifacts": [
+    {
+      "id": "gov.model_card",
+      "record_type": "governance_artifact",
+      "name": "Credit model card",
+      "jurisdiction": "US",
+      "knowledge_class": "regulatory_supervisory_rule",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "federal_reserve",
+        "occ"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Required governance artifacts and the deployability predicate reviewed against SR 11-7 model-risk-management concepts (independent validation, challenger comparison, monitoring, override logging, kill switch)."
+      },
+      "supersedes": [],
+      "extends_template": "templates/docs/model_card.md",
+      "credit_specific_fields": [
+        "default_definition_id the model is calibrated to",
+        "calibration population and observation window",
+        "performance window and its alignment to the decision date",
+        "conditioning basis (through-the-cycle, point-in-time, or scenario-conditioned)",
+        "segment performance, including segments relevant to fairness testing",
+        "downturn treatment where the parameter feeds regulatory capital",
+        "known limitations and conditions of use"
+      ],
+      "why": "A model card without the default definition and performance window cannot be checked for the two errors that matter most: basis mismatch and outcome-window leakage."
+    },
+    {
+      "id": "gov.independent_validation",
+      "record_type": "governance_artifact",
+      "name": "Independent validation evidence",
+      "jurisdiction": "US",
+      "knowledge_class": "regulatory_supervisory_rule",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "federal_reserve",
+        "occ"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Required governance artifacts and the deployability predicate reviewed against SR 11-7 model-risk-management concepts (independent validation, challenger comparison, monitoring, override logging, kill switch)."
+      },
+      "supersedes": [],
+      "requires": [
+        "validator identity distinct from the developer",
+        "validation date",
+        "scope of validation",
+        "findings with severity and owner",
+        "conceptual soundness assessment",
+        "outcomes analysis"
+      ],
+      "why": "Independence is the point. A developer's own testing, however thorough, is not validation."
+    },
+    {
+      "id": "gov.challenger_comparison",
+      "record_type": "governance_artifact",
+      "name": "Challenger or benchmark comparison",
+      "jurisdiction": "US",
+      "knowledge_class": "regulatory_supervisory_rule",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "federal_reserve",
+        "occ"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Required governance artifacts and the deployability predicate reviewed against SR 11-7 model-risk-management concepts (independent validation, challenger comparison, monitoring, override logging, kill switch)."
+      },
+      "supersedes": [],
+      "requires": [
+        "named benchmark or challenger",
+        "comparison metric and window",
+        "result",
+        "decision rationale where the champion is retained"
+      ],
+      "why": "A model with no benchmark cannot be shown to be better than the simpler thing it replaced."
+    },
+    {
+      "id": "gov.monitoring_plan",
+      "record_type": "governance_artifact",
+      "name": "Monitoring plan with thresholds",
+      "jurisdiction": "US",
+      "knowledge_class": "regulatory_supervisory_rule",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "federal_reserve",
+        "occ"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Required governance artifacts and the deployability predicate reviewed against SR 11-7 model-risk-management concepts (independent validation, challenger comparison, monitoring, override logging, kill switch)."
+      },
+      "supersedes": [],
+      "extends_template": "templates/docs/model_monitoring_plan.md",
+      "requires": [
+        "metrics",
+        "thresholds",
+        "measurement frequency",
+        "escalation path",
+        "action on breach"
+      ],
+      "minimum_metrics": [
+        "score or PD distribution drift",
+        "calibration against realized default outcomes",
+        "override rate",
+        "decline-reason mix",
+        "segment performance including fairness-relevant segments"
+      ],
+      "why": "0072 NFR and P6: a model is not done until you can tell whether it is working."
+    },
+    {
+      "id": "gov.override_log",
+      "record_type": "governance_artifact",
+      "name": "Override and exception log",
+      "jurisdiction": "US",
+      "knowledge_class": "regulatory_supervisory_rule",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "federal_reserve",
+        "occ"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Required governance artifacts and the deployability predicate reviewed against SR 11-7 model-risk-management concepts (independent validation, challenger comparison, monitoring, override logging, kill switch)."
+      },
+      "supersedes": [],
+      "requires": [
+        "override reason",
+        "approver",
+        "date",
+        "affected decision or measurement"
+      ],
+      "why": "Overrides are where a model's real behaviour diverges from its documented behaviour. An unlogged override is an undetectable one."
+    },
+    {
+      "id": "gov.owner",
+      "record_type": "governance_artifact",
+      "name": "Named owner",
+      "jurisdiction": "US",
+      "knowledge_class": "regulatory_supervisory_rule",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "federal_reserve",
+        "occ"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Required governance artifacts and the deployability predicate reviewed against SR 11-7 model-risk-management concepts (independent validation, challenger comparison, monitoring, override logging, kill switch)."
+      },
+      "supersedes": [],
+      "requires": [
+        "a person or role accountable for the model in production"
+      ],
+      "why": "P6. An unowned model in production has no one to notice it failing."
+    },
+    {
+      "id": "gov.kill_switch",
+      "record_type": "governance_artifact",
+      "name": "Kill switch or fallback policy",
+      "jurisdiction": "US",
+      "knowledge_class": "regulatory_supervisory_rule",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "federal_reserve",
+        "occ"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Required governance artifacts and the deployability predicate reviewed against SR 11-7 model-risk-management concepts (independent validation, challenger comparison, monitoring, override logging, kill switch)."
+      },
+      "supersedes": [],
+      "requires": [
+        "documented fallback (prior version, alternative model, or human decision)",
+        "who may invoke it",
+        "how it is tested"
+      ],
+      "why": "P5. Reversibility is a precondition of deployment, not a launch-day task."
+    }
+  ]
+}

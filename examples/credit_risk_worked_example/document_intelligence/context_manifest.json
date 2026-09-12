@@ -1,0 +1,72 @@
+{
+  "as_of": "2026-09-11T09:00:12Z",
+  "caller": {
+    "clearance": "internal",
+    "id": "credit_document_intelligence"
+  },
+  "context_id": "context-credit-risk-worked-example-cascadia",
+  "context_window": {
+    "character_budget": 16000,
+    "token_budget": 4096
+  },
+  "exclusions": [
+    {
+      "locator": "quarantined fixture inputs",
+      "reason": "unsafe text is excluded before prompt composition"
+    }
+  ],
+  "items": [
+    {
+      "access_level": "public",
+      "budget": {
+        "characters": 512,
+        "tokens": 128
+      },
+      "caller_clearance": "internal",
+      "citations": [
+        {
+          "label": "credit-memo-cascadia-001",
+          "locator": "documents/credit-memo-cascadia-001.txt"
+        }
+      ],
+      "content_hash": "sha256:04148af06e442bb44dae36883fe0f0106ab901ffcf75adc4678b5ccf23b817a5",
+      "context_id": "context-credit-memo-cascadia-001",
+      "effective_at": "2026-09-09T09:00:00Z",
+      "expires_at": "2027-09-11T09:00:20Z",
+      "freshness": "current",
+      "known_at": "2026-09-09T09:01:00Z",
+      "locator": "documents/credit-memo-cascadia-001.txt",
+      "rank": 1,
+      "retrieval_query": "funding liquidity collateral",
+      "selection_rule": "immutable corpus snapshot and caller-eligible source",
+      "source_authority": "source-catalog://credit_document_fixture"
+    },
+    {
+      "access_level": "public",
+      "budget": {
+        "characters": 512,
+        "tokens": 128
+      },
+      "caller_clearance": "internal",
+      "citations": [
+        {
+          "label": "credit-memo-cascadia-002",
+          "locator": "documents/credit-memo-cascadia-002.txt"
+        }
+      ],
+      "content_hash": "sha256:7af6a066791c8f2b08eafe83352c2ee8a08b5faf1d259af859487f029ca45a70",
+      "context_id": "context-credit-memo-cascadia-002",
+      "effective_at": "2026-09-09T09:02:00Z",
+      "expires_at": "2027-09-11T09:00:20Z",
+      "freshness": "current",
+      "known_at": "2026-09-09T09:03:00Z",
+      "locator": "documents/credit-memo-cascadia-002.txt",
+      "rank": 2,
+      "retrieval_query": "funding liquidity collateral",
+      "selection_rule": "immutable corpus snapshot and caller-eligible source",
+      "source_authority": "source-catalog://credit_document_fixture"
+    }
+  ],
+  "run_id": "credit-risk-worked-example-cascadia",
+  "schema_version": "quantsmith.orchestration.context.v1"
+}
