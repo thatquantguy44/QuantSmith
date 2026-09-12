@@ -1,0 +1,125 @@
+{
+  "created_at": "2026-09-11T09:00:06Z",
+  "decision_cutoff": "2026-09-11T09:00:12Z",
+  "deduplication_policy": {
+    "exact": "content_hash",
+    "near_duplicate": "declared_group_before_split",
+    "version": "1.0.0"
+  },
+  "documents": [
+    {
+      "access_level": "public",
+      "available_at": "2026-09-09T09:01:00Z",
+      "canonical_group_id": "canonical-credit-memo-cascadia-001",
+      "content_ref": {
+        "hash": "sha256:04148af06e442bb44dae36883fe0f0106ab901ffcf75adc4678b5ccf23b817a5",
+        "path": "documents/credit-memo-cascadia-001.txt"
+      },
+      "content_type": "text/plain",
+      "document_id": "credit-memo-cascadia-001",
+      "effective_time": "2026-09-09T09:00:00Z",
+      "entitlement": "public",
+      "event_time": "2026-09-09T09:00:00Z",
+      "ingestion_time": "2026-09-09T09:01:00Z",
+      "language": "en",
+      "license_class": "synthetic_fixture",
+      "near_duplicate_group_id": "near-credit-memo-cascadia-001",
+      "observation_time": "2026-09-09T09:00:05Z",
+      "publication_time": "2026-09-09T09:00:00Z",
+      "revision_group_id": "revision-credit-memo-cascadia-001",
+      "revision_number": 1,
+      "security_status": "accepted",
+      "source_id": "credit_document_fixture",
+      "source_locator": "documents/credit-memo-cascadia-001.txt",
+      "split": "backtest",
+      "supersession_state": "current"
+    },
+    {
+      "access_level": "public",
+      "available_at": "2026-09-09T09:03:00Z",
+      "canonical_group_id": "canonical-credit-memo-cascadia-002",
+      "content_ref": {
+        "hash": "sha256:7af6a066791c8f2b08eafe83352c2ee8a08b5faf1d259af859487f029ca45a70",
+        "path": "documents/credit-memo-cascadia-002.txt"
+      },
+      "content_type": "text/plain",
+      "document_id": "credit-memo-cascadia-002",
+      "effective_time": "2026-09-09T09:02:00Z",
+      "entitlement": "public",
+      "event_time": "2026-09-09T09:02:00Z",
+      "ingestion_time": "2026-09-09T09:03:00Z",
+      "language": "en",
+      "license_class": "synthetic_fixture",
+      "near_duplicate_group_id": "near-credit-memo-cascadia-002",
+      "observation_time": "2026-09-09T09:02:05Z",
+      "publication_time": "2026-09-09T09:02:00Z",
+      "revision_group_id": "revision-credit-memo-cascadia-002",
+      "revision_number": 1,
+      "security_status": "accepted",
+      "source_id": "credit_document_fixture",
+      "source_locator": "documents/credit-memo-cascadia-002.txt",
+      "split": "backtest",
+      "supersession_state": "current"
+    }
+  ],
+  "exclusions": [],
+  "immutable": true,
+  "schema_version": "quantsmith.text_intelligence.corpus.v1",
+  "snapshot_hash": "sha256:6ef7a55e622cf2529b3d8463cb07fcb17035c465e9dd89dcc31ca226aecf6ecb",
+  "snapshot_id": "corpus-credit-risk-worked-example-cascadia-v1",
+  "source_policy": {
+    "allowed_access_levels": [
+      "public",
+      "internal",
+      "restricted"
+    ],
+    "allowed_license_classes": [
+      "synthetic_fixture"
+    ],
+    "credentials_by_reference": true,
+    "raw_credentials_prohibited": true,
+    "registered_source_ids": [
+      "credit_document_fixture"
+    ]
+  },
+  "spans": [
+    {
+      "access_level": "public",
+      "content_ref": {
+        "hash": "sha256:04148af06e442bb44dae36883fe0f0106ab901ffcf75adc4678b5ccf23b817a5",
+        "path": "transformed/credit-memo-cascadia-001.txt"
+      },
+      "document_id": "credit-memo-cascadia-001",
+      "end": 202,
+      "span_id": "span-credit-memo-cascadia-001-001",
+      "split": "backtest",
+      "start": 0,
+      "transform_version": "1.0.0"
+    },
+    {
+      "access_level": "public",
+      "content_ref": {
+        "hash": "sha256:7af6a066791c8f2b08eafe83352c2ee8a08b5faf1d259af859487f029ca45a70",
+        "path": "transformed/credit-memo-cascadia-002.txt"
+      },
+      "document_id": "credit-memo-cascadia-002",
+      "end": 162,
+      "span_id": "span-credit-memo-cascadia-002-001",
+      "split": "backtest",
+      "start": 0,
+      "transform_version": "1.0.0"
+    }
+  ],
+  "split_policy": {
+    "allowed": [
+      "train",
+      "validation",
+      "test",
+      "retrieval",
+      "backtest",
+      "none"
+    ],
+    "group_before_split": true,
+    "temporal_cutoff": "2026-09-11T09:00:12Z"
+  }
+}

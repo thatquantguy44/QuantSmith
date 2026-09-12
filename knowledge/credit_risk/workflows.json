@@ -1,0 +1,410 @@
+{
+  "schema_version": "0072.1",
+  "scope": {
+    "jurisdiction": "US",
+    "status": "draft_structural_contract"
+  },
+  "runtime_boundary_levels": {
+    "in_sdk_reference_runtime": "dependency-light deterministic reference shipping under src/quantsmith/pipelines/",
+    "in_sdk_reference_runtime_over_0070_0071": "as above, composed on the built prompt/harness and text-intelligence foundations",
+    "adopter_plugin_via_0026": "the institution's own validated model, registered through the 0026 model-plugin contract",
+    "contract_only_pending_0074_decision": "contract and fairness harness only; whether any reference scorecard ships is an open question in 0072",
+    "knowledge_only": "no runtime; the pack defines the concept and its conventions"
+  },
+  "workflows": [
+    {
+      "id": "workflow.wholesale_obligor_review",
+      "record_type": "workflow",
+      "name": "Wholesale obligor review and rating",
+      "pillar": "wholesale_counterparty_credit",
+      "decision_path_id": "path.wholesale_obligor_review",
+      "stages": [
+        "assemble obligor financials and exposure inventory",
+        "compute or retrieve PD on a declared basis",
+        "assign or reaffirm rating grade with documented overrides",
+        "review facility-level LGD and EAD inputs",
+        "produce a credit review memo with limitations"
+      ],
+      "required_inputs": [
+        "obligor identifier",
+        "point-in-time financials",
+        "facility inventory",
+        "rating policy version",
+        "default_definition_id"
+      ],
+      "produced_artifacts": [
+        "credit_review_memo",
+        "rating_record_with_overrides"
+      ],
+      "gates": [
+        "basis compatibility (rule.basis.el_operands)",
+        "point-in-time admission",
+        "override logging"
+      ],
+      "human_decision_points": [
+        "rating override approval",
+        "final rating sign-off"
+      ],
+      "runtime_boundary": "adopter_plugin_via_0026",
+      "participating_agents": [
+        {
+          "agent_id": "agents/credit_risk/obligor_rating",
+          "status": "future",
+          "owning_spec": "0073"
+        },
+        {
+          "agent_id": "agents/risk",
+          "status": "existing",
+          "owning_spec": null
+        },
+        {
+          "agent_id": "agents/backtest_review",
+          "status": "existing",
+          "owning_spec": null
+        }
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel",
+        "occ"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Runtime existence and correctness reviewed against 0073's own golden-case reproduction: EL/EAD/RWA measurement and counterparty exposure/limit/concentration checking now have a tested, deterministic implementation composing credit_risk_knowledge.py's arithmetic. Not a review of any adopter's own rating or PD model -- none is shipped or claimed here."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "workflow.counterparty_limit_review",
+      "record_type": "workflow",
+      "name": "Counterparty limit and concentration review",
+      "pillar": "wholesale_counterparty_credit",
+      "decision_path_id": "path.counterparty_limit_review",
+      "stages": [
+        "aggregate exposure by counterparty and group",
+        "apply collateral and netting per 0063 vocabulary",
+        "measure utilization against approved limits",
+        "identify concentrations and breaches",
+        "route exceptions for approval with expiry"
+      ],
+      "required_inputs": [
+        "exposure inventory",
+        "limit registry",
+        "collateral and netting terms",
+        "concentration policy version"
+      ],
+      "produced_artifacts": [
+        "limit_utilization_report",
+        "breach_and_exception_log"
+      ],
+      "gates": [
+        "limit breach detection",
+        "exception expiry check"
+      ],
+      "human_decision_points": [
+        "exception approval",
+        "concentration tolerance decision"
+      ],
+      "runtime_boundary": "in_sdk_reference_runtime",
+      "participating_agents": [
+        {
+          "agent_id": "agents/credit_risk/counterparty_limits",
+          "status": "existing",
+          "owning_spec": "0073"
+        },
+        {
+          "agent_id": "agents/securities_financing/collateral_management",
+          "status": "existing",
+          "owning_spec": null
+        }
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel",
+        "occ"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Runtime existence and correctness reviewed against 0073's own golden-case reproduction: EL/EAD/RWA measurement and counterparty exposure/limit/concentration checking now have a tested, deterministic implementation composing credit_risk_knowledge.py's arithmetic. Not a review of any adopter's own rating or PD model -- none is shipped or claimed here."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "workflow.retail_underwriting_decision",
+      "record_type": "workflow",
+      "name": "Retail underwriting decision with adverse action",
+      "pillar": "retail_underwriting",
+      "decision_path_id": "path.retail_underwriting_decision",
+      "stages": [
+        "assemble application and attributes as of the decision date",
+        "score using the approved model version",
+        "apply policy cutoff and any policy rules",
+        "derive ordered principal reasons where the outcome is adverse",
+        "record decision, policy version, cutoff, and any override",
+        "emit the adverse action artifact where applicable"
+      ],
+      "required_inputs": [
+        "application record",
+        "attributes with as-of dates",
+        "approved model version",
+        "decision_policy_version",
+        "decision_cutoff",
+        "param.adverse_action.max_reasons"
+      ],
+      "produced_artifacts": [
+        "decision_record",
+        "adverse_action_notice_with_principal_reasons",
+        "override_log_entry"
+      ],
+      "gates": [
+        "decision-path obligations (REQ-014)",
+        "protected-attribute absence",
+        "reason-code determinism",
+        "outcome-window admission",
+        "deployability predicate on the scoring model"
+      ],
+      "human_decision_points": [
+        "policy cutoff setting",
+        "manual override of a model decision",
+        "fairness testing review"
+      ],
+      "runtime_boundary": "contract_only_pending_0074_decision",
+      "participating_agents": [
+        {
+          "agent_id": "agents/credit_risk/retail_underwriting",
+          "status": "future",
+          "owning_spec": "0074"
+        },
+        {
+          "agent_id": "agents/credit_risk/fair_lending_review",
+          "status": "existing",
+          "owning_spec": "0074"
+        }
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "cfpb"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Runtime existence and correctness reviewed against 0074's own golden-case reproduction: disparity measurement, proxy association, and the less-discriminatory-alternative search now have a tested, deterministic implementation composing credit_risk_knowledge.py's adverse_impact_ratio. Not a review of any adopter's own scoring model or underwriting decision -- none is shipped or claimed here."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "workflow.ecl_measurement",
+      "record_type": "workflow",
+      "name": "Expected credit loss measurement and staging",
+      "pillar": "accounting_regulatory_capital",
+      "decision_path_id": "path.ecl_measurement",
+      "stages": [
+        "segment or stage the portfolio on a declared trigger",
+        "select twelve-month or lifetime measurement per stage",
+        "apply the lifetime term structure and LGD on a consistent basis",
+        "discount at the effective interest rate",
+        "apply and log any management adjustment",
+        "reconcile allowance movement to provision expense"
+      ],
+      "required_inputs": [
+        "exposure inventory with EIR",
+        "staging or pooling policy",
+        "PD term structure",
+        "LGD basis",
+        "macro scenario vintage",
+        "ecl_policy_version"
+      ],
+      "produced_artifacts": [
+        "allowance_measurement",
+        "stage_transition_record",
+        "management_adjustment_log"
+      ],
+      "gates": [
+        "basis compatibility",
+        "discounting basis (rule.basis.ecl_discounting)",
+        "scenario vintage admission",
+        "override logging"
+      ],
+      "human_decision_points": [
+        "staging trigger policy",
+        "management adjustment approval"
+      ],
+      "runtime_boundary": "adopter_plugin_via_0026",
+      "participating_agents": [
+        {
+          "agent_id": "agents/credit_risk/ecl_measurement",
+          "status": "future",
+          "owning_spec": "0075"
+        }
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "ifrs_foundation",
+        "fasb"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Non-blocked workflow contracts reviewed for stage/gate/human-decision-point completeness and correct runtime-boundary classification."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "workflow.stress_capital_planning",
+      "record_type": "workflow",
+      "name": "Supervisory stress testing and capital planning",
+      "pillar": "accounting_regulatory_capital",
+      "decision_path_id": "path.stress_capital_planning",
+      "stages": [
+        "fix the scenario vintage and its publication date",
+        "project parameters under each scenario path",
+        "translate projections into losses and risk-weighted assets",
+        "aggregate to capital ratios",
+        "record overlays with rationale"
+      ],
+      "required_inputs": [
+        "scenario set with vintage",
+        "exposure inventory",
+        "regulatory parameters",
+        "param.rwa.risk_weight",
+        "scenario_policy_version"
+      ],
+      "produced_artifacts": [
+        "scenario_loss_projection",
+        "capital_ratio_projection",
+        "overlay_log"
+      ],
+      "gates": [
+        "scenario vintage admission",
+        "no-look-ahead on scenario publication",
+        "parameter basis compatibility"
+      ],
+      "human_decision_points": [
+        "scenario selection",
+        "overlay approval",
+        "capital action decision"
+      ],
+      "runtime_boundary": "adopter_plugin_via_0026",
+      "participating_agents": [
+        {
+          "agent_id": "agents/credit_risk/stress_testing",
+          "status": "future",
+          "owning_spec": "0076"
+        },
+        {
+          "agent_id": "agents/economists",
+          "status": "existing",
+          "owning_spec": null
+        }
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "federal_reserve",
+        "bis_basel"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Non-blocked workflow contracts reviewed for stage/gate/human-decision-point completeness and correct runtime-boundary classification."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "workflow.credit_document_intelligence",
+      "record_type": "workflow",
+      "name": "Credit document intelligence feeding credit review",
+      "pillar": "credit_document_intelligence",
+      "decision_path_id": "path.credit_document_intelligence",
+      "stages": [
+        "select a governed corpus and access tier (0071)",
+        "run the extraction task inside a 0070 envelope",
+        "attach source spans and assumption-ledger entries to each extracted value",
+        "label every value derived_evidence",
+        "route to human review before any promotion to decision input",
+        "hand cited output to the wholesale review or ECL workflow"
+      ],
+      "required_inputs": [
+        "governed corpus reference",
+        "access tier",
+        "0070 envelope",
+        "extraction task definition"
+      ],
+      "produced_artifacts": [
+        "extracted_covenant_set",
+        "spread_financials",
+        "early_warning_note",
+        "citation_manifest"
+      ],
+      "gates": [
+        "LLM evidence admission (rule.llm_evidence_admission)",
+        "access-tier isolation",
+        "replay availability",
+        "decision_support_only enforcement"
+      ],
+      "human_decision_points": [
+        "review and promotion of any extracted value to a decision input"
+      ],
+      "runtime_boundary": "in_sdk_reference_runtime_over_0070_0071",
+      "participating_agents": [
+        {
+          "agent_id": "agents/credit_risk/credit_document_analyst",
+          "status": "existing",
+          "owning_spec": "0077"
+        },
+        {
+          "agent_id": "agents/knowledge/knowledge_retrieval",
+          "status": "existing",
+          "owning_spec": null
+        },
+        {
+          "agent_id": "agents/deep_learning/nlp_llm",
+          "status": "existing",
+          "owning_spec": null
+        }
+      ],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "cfpb",
+        "occ"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Non-blocked workflow contracts reviewed for stage/gate/human-decision-point completeness and correct runtime-boundary classification."
+      },
+      "supersedes": []
+    }
+  ]
+}

@@ -1,0 +1,722 @@
+{
+  "schema_version": "0072.1",
+  "scope": {
+    "jurisdiction": "US",
+    "effective_interval_policy": "effective_from inclusive, effective_to exclusive",
+    "status": "draft_structural_contract"
+  },
+  "basis_compatibility_rules": [
+    {
+      "id": "rule.basis.el_operands",
+      "applies_to": "convention.el.pd_lgd_ead",
+      "requires_same": [
+        "horizon",
+        "default_definition_id"
+      ],
+      "rationale": "An expected loss whose PD and LGD are stated on different horizons or default definitions is not an expected loss."
+    },
+    {
+      "id": "rule.basis.ecl_discounting",
+      "applies_to": "convention.ecl.lifetime_eir",
+      "requires": {
+        "discounting_basis": "effective_interest_rate"
+      },
+      "rationale": "Discounting at a funding or market rate changes the measurement itself."
+    },
+    {
+      "id": "rule.basis.collateral_once",
+      "applies_to": [
+        "convention.ead.ccf_undrawn",
+        "convention.el.pd_lgd_ead",
+        "convention.ecl.lifetime_eir",
+        "convention.rwa.irb_corporate"
+      ],
+      "requires": {
+        "collateral_counted_once": true
+      },
+      "rationale": "Collateral reflected in both EAD and LGD double-counts recovery."
+    },
+    {
+      "id": "rule.basis.disparity_cutoff",
+      "applies_to": "convention.fairness.disparity_testing",
+      "requires": {
+        "measured_at_applied_cutoff": true
+      },
+      "rationale": "A disparity measured at a cutoff other than the one applied is not the disparity the decision produced."
+    }
+  ],
+  "conventions": [
+    {
+      "id": "convention.pd.one_year_ttc_irb",
+      "record_type": "convention",
+      "name": "One-year through-the-cycle PD (IRB basis)",
+      "quantity": "probability_of_default",
+      "unit": "probability",
+      "horizon": "P1Y",
+      "conditioning": "through_the_cycle",
+      "default_definition_id": "defn.default.irb_reference",
+      "collateral_treatment": "not_applicable",
+      "discounting_basis": null,
+      "currency": null,
+      "seasoning_basis": null,
+      "calibration_population": "obligor grade pool, long-run average default frequency over a period covering a full economic cycle as defined by the institution's documented policy",
+      "day_count": null,
+      "viewpoint_ids": [
+        "role.lender"
+      ],
+      "loss_sign": "not_applicable",
+      "formula": null,
+      "parameters": [],
+      "notes": "Not interchangeable with a point-in-time PD. Substituting this into an accounting measurement removes the cyclical sensitivity that measurement requires.",
+      "jurisdiction": "US",
+      "knowledge_class": "regulatory_supervisory_rule",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Convention records -- units, horizon, conditioning basis, discounting, formula references, and required parameters -- reviewed for internal consistency and for correctly leaving institution-specific values (risk weight, disparity threshold, estimation method, score scaling) as required inputs rather than SDK constants. Not a review of any specific institution's calibration."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "convention.pd.one_year_pit_ifrs9",
+      "record_type": "convention",
+      "name": "One-year point-in-time PD (accounting basis)",
+      "quantity": "probability_of_default",
+      "unit": "probability",
+      "horizon": "P1Y",
+      "conditioning": "point_in_time",
+      "default_definition_id": "defn.default.ifrs9_stage3",
+      "collateral_treatment": "not_applicable",
+      "discounting_basis": null,
+      "currency": null,
+      "seasoning_basis": null,
+      "calibration_population": "current portfolio conditioned on observable risk drivers and forward-looking macroeconomic information as of the reporting date",
+      "day_count": null,
+      "viewpoint_ids": [
+        "role.lender"
+      ],
+      "loss_sign": "not_applicable",
+      "formula": null,
+      "parameters": [],
+      "notes": "Conditioned on the reporting date. Moves with the cycle by design.",
+      "jurisdiction": "US",
+      "knowledge_class": "accounting_standard",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "ifrs_foundation"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Convention records -- units, horizon, conditioning basis, discounting, formula references, and required parameters -- reviewed for internal consistency and for correctly leaving institution-specific values (risk weight, disparity threshold, estimation method, score scaling) as required inputs rather than SDK constants. Not a review of any specific institution's calibration."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "convention.pd.lifetime_term_structure",
+      "record_type": "convention",
+      "name": "Lifetime PD term structure",
+      "quantity": "probability_of_default",
+      "unit": "probability_vector",
+      "horizon": "instrument_life",
+      "conditioning": "point_in_time",
+      "default_definition_id": "defn.default.ifrs9_stage3",
+      "collateral_treatment": "not_applicable",
+      "discounting_basis": null,
+      "currency": null,
+      "seasoning_basis": null,
+      "calibration_population": "marginal default probability per period over remaining expected life",
+      "day_count": null,
+      "viewpoint_ids": [
+        "role.lender"
+      ],
+      "loss_sign": "not_applicable",
+      "formula": null,
+      "parameters": [
+        {
+          "id": "param.pd.term_structure_method",
+          "meaning": "method converting a one-year PD to a lifetime term structure",
+          "default": null,
+          "required": true,
+          "rationale": "There is no universal correct method; leaving this unset forces the caller to declare theirs rather than inherit ours."
+        }
+      ],
+      "notes": "Not derivable from a one-year PD without an explicit, recorded term-structure assumption. A constant-hazard extrapolation is a model assumption and must be declared as one.",
+      "jurisdiction": "US",
+      "knowledge_class": "accounting_standard",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "ifrs_foundation",
+        "fasb"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Convention records -- units, horizon, conditioning basis, discounting, formula references, and required parameters -- reviewed for internal consistency and for correctly leaving institution-specific values (risk weight, disparity threshold, estimation method, score scaling) as required inputs rather than SDK constants. Not a review of any specific institution's calibration."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "convention.lgd.expected_workout",
+      "record_type": "convention",
+      "name": "Expected LGD, workout basis, discounted",
+      "quantity": "loss_given_default",
+      "unit": "fraction_of_ead",
+      "horizon": "workout_period",
+      "conditioning": "expected",
+      "default_definition_id": "defn.default.irb_reference",
+      "collateral_treatment": "net_of_expected_collateral_recovery_and_workout_costs",
+      "discounting_basis": "discounted_to_default_date",
+      "currency": null,
+      "seasoning_basis": null,
+      "calibration_population": "facility-level realized workout outcomes on defaulted exposures",
+      "day_count": null,
+      "viewpoint_ids": [
+        "role.lender"
+      ],
+      "loss_sign": "positive_is_loss_to_lender",
+      "formula": null,
+      "parameters": [],
+      "notes": "Recovery rate equals one minus LGD only when both are on this same basis. An undiscounted, cost-excluded recovery rate is a different quantity.",
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Convention records -- units, horizon, conditioning basis, discounting, formula references, and required parameters -- reviewed for internal consistency and for correctly leaving institution-specific values (risk weight, disparity threshold, estimation method, score scaling) as required inputs rather than SDK constants. Not a review of any specific institution's calibration."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "convention.lgd.downturn_regulatory",
+      "record_type": "convention",
+      "name": "Downturn LGD (regulatory basis)",
+      "quantity": "loss_given_default",
+      "unit": "fraction_of_ead",
+      "horizon": "workout_period",
+      "conditioning": "downturn",
+      "default_definition_id": "defn.default.irb_reference",
+      "collateral_treatment": "net_of_expected_collateral_recovery_and_workout_costs",
+      "discounting_basis": "discounted_to_default_date",
+      "currency": null,
+      "seasoning_basis": null,
+      "calibration_population": "realized workout outcomes conditioned on adverse economic periods",
+      "day_count": null,
+      "viewpoint_ids": [
+        "role.lender"
+      ],
+      "loss_sign": "positive_is_loss_to_lender",
+      "formula": null,
+      "parameters": [],
+      "notes": "Greater than or equal to expected LGD by construction. Substituting expected LGD understates regulatory capital.",
+      "jurisdiction": "US",
+      "knowledge_class": "regulatory_supervisory_rule",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Convention records -- units, horizon, conditioning basis, discounting, formula references, and required parameters -- reviewed for internal consistency and for correctly leaving institution-specific values (risk weight, disparity threshold, estimation method, score scaling) as required inputs rather than SDK constants. Not a review of any specific institution's calibration."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "convention.ead.ccf_undrawn",
+      "record_type": "convention",
+      "name": "EAD from drawn balance and credit conversion factor",
+      "quantity": "exposure_at_default",
+      "unit": "currency_amount",
+      "horizon": "P1Y",
+      "conditioning": "expected",
+      "default_definition_id": "defn.default.irb_reference",
+      "collateral_treatment": "gross_of_collateral",
+      "discounting_basis": null,
+      "currency": "USD",
+      "seasoning_basis": null,
+      "calibration_population": "facility-level observed drawdown behaviour approaching default",
+      "day_count": null,
+      "viewpoint_ids": [
+        "role.lender"
+      ],
+      "loss_sign": "not_applicable",
+      "formula": {
+        "id": "formula.ead.ccf",
+        "expression": "drawn_balance + ccf * (limit - drawn_balance)",
+        "inputs": [
+          "drawn_balance",
+          "limit",
+          "ccf"
+        ],
+        "outputs": [
+          "ead"
+        ]
+      },
+      "parameters": [],
+      "notes": "Gross of collateral: collateral enters through LGD, not through EAD. Applying it in both places double-counts recovery.",
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Convention records -- units, horizon, conditioning basis, discounting, formula references, and required parameters -- reviewed for internal consistency and for correctly leaving institution-specific values (risk weight, disparity threshold, estimation method, score scaling) as required inputs rather than SDK constants. Not a review of any specific institution's calibration."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "convention.el.pd_lgd_ead",
+      "record_type": "convention",
+      "name": "Expected loss from PD, LGD, and EAD",
+      "quantity": "expected_loss",
+      "unit": "currency_amount",
+      "horizon": "P1Y",
+      "conditioning": "basis_must_match_operands",
+      "default_definition_id": "defn.default.irb_reference",
+      "collateral_treatment": "collateral_reflected_in_lgd_only",
+      "discounting_basis": null,
+      "currency": "USD",
+      "seasoning_basis": null,
+      "calibration_population": null,
+      "day_count": null,
+      "viewpoint_ids": [
+        "role.lender"
+      ],
+      "loss_sign": "positive_is_loss_to_lender",
+      "formula": {
+        "id": "formula.el.pd_lgd_ead",
+        "expression": "pd * lgd * ead",
+        "inputs": [
+          "pd",
+          "lgd",
+          "ead"
+        ],
+        "outputs": [
+          "expected_loss"
+        ]
+      },
+      "parameters": [],
+      "notes": "The operands must share a horizon and a default definition. A one-year PD with a lifetime LGD is not an expected loss; the validator rejects the mismatch.",
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Convention records -- units, horizon, conditioning basis, discounting, formula references, and required parameters -- reviewed for internal consistency and for correctly leaving institution-specific values (risk weight, disparity threshold, estimation method, score scaling) as required inputs rather than SDK constants. Not a review of any specific institution's calibration."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "convention.ecl.twelve_month_ifrs9",
+      "record_type": "convention",
+      "name": "Twelve-month ECL (IFRS 9 stage 1)",
+      "quantity": "expected_credit_loss",
+      "unit": "currency_amount",
+      "horizon": "P12M_default_events",
+      "conditioning": "point_in_time",
+      "default_definition_id": "defn.default.ifrs9_stage3",
+      "collateral_treatment": "collateral_reflected_in_lgd_only",
+      "discounting_basis": "effective_interest_rate",
+      "currency": "USD",
+      "seasoning_basis": null,
+      "calibration_population": null,
+      "day_count": null,
+      "viewpoint_ids": [
+        "role.lender"
+      ],
+      "loss_sign": "positive_is_loss_to_lender",
+      "formula": null,
+      "parameters": [],
+      "notes": "The portion of LIFETIME loss from default events possible in twelve months \u2014 not a twelve-month-horizon expected loss. This distinction is the one most often collapsed.",
+      "jurisdiction": "US",
+      "knowledge_class": "accounting_standard",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "ifrs_foundation"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Convention records -- units, horizon, conditioning basis, discounting, formula references, and required parameters -- reviewed for internal consistency and for correctly leaving institution-specific values (risk weight, disparity threshold, estimation method, score scaling) as required inputs rather than SDK constants. Not a review of any specific institution's calibration."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "convention.ecl.lifetime_eir",
+      "record_type": "convention",
+      "name": "Lifetime ECL discounted at the effective interest rate",
+      "quantity": "expected_credit_loss",
+      "unit": "currency_amount",
+      "horizon": "instrument_life",
+      "conditioning": "point_in_time",
+      "default_definition_id": "defn.default.ifrs9_stage3",
+      "collateral_treatment": "collateral_reflected_in_lgd_only",
+      "discounting_basis": "effective_interest_rate",
+      "currency": "USD",
+      "seasoning_basis": null,
+      "calibration_population": null,
+      "day_count": null,
+      "viewpoint_ids": [
+        "role.lender"
+      ],
+      "loss_sign": "positive_is_loss_to_lender",
+      "formula": {
+        "id": "formula.ecl.lifetime",
+        "expression": "sum_t( marginal_pd[t] * lgd * ead[t] / (1 + eir) ** t )",
+        "inputs": [
+          "marginal_pd",
+          "lgd",
+          "ead",
+          "eir"
+        ],
+        "outputs": [
+          "lifetime_ecl"
+        ]
+      },
+      "parameters": [],
+      "notes": "Discounting is at the effective interest rate, not a funding or market rate. Using a different discount rate changes the measurement, not just its precision.",
+      "jurisdiction": "US",
+      "knowledge_class": "accounting_standard",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "ifrs_foundation",
+        "fasb"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Convention records -- units, horizon, conditioning basis, discounting, formula references, and required parameters -- reviewed for internal consistency and for correctly leaving institution-specific values (risk weight, disparity threshold, estimation method, score scaling) as required inputs rather than SDK constants. Not a review of any specific institution's calibration."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "convention.rwa.irb_corporate",
+      "record_type": "convention",
+      "name": "IRB corporate risk weight and RWA",
+      "quantity": "risk_weighted_assets",
+      "unit": "currency_amount",
+      "horizon": "P1Y",
+      "conditioning": "through_the_cycle",
+      "default_definition_id": "defn.default.irb_reference",
+      "collateral_treatment": "collateral_reflected_in_lgd_only",
+      "discounting_basis": null,
+      "currency": "USD",
+      "seasoning_basis": null,
+      "calibration_population": null,
+      "day_count": null,
+      "viewpoint_ids": [
+        "role.lender"
+      ],
+      "loss_sign": "not_applicable",
+      "formula": {
+        "id": "formula.rwa.irb",
+        "expression": "risk_weight * ead",
+        "inputs": [
+          "risk_weight",
+          "ead"
+        ],
+        "outputs": [
+          "rwa"
+        ]
+      },
+      "parameters": [
+        {
+          "id": "param.rwa.risk_weight",
+          "meaning": "supervisory risk weight applicable to the exposure under the governing national rule",
+          "default": null,
+          "required": true,
+          "rationale": "Institution- and jurisdiction-specific; hard-coding it would make a wrong capital number look authoritative."
+        }
+      ],
+      "notes": "The risk weight itself comes from the applicable national rule and is an INPUT here, not a constant this pack supplies. National implementation differs from the international framework text.",
+      "jurisdiction": "US",
+      "knowledge_class": "regulatory_supervisory_rule",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Convention records -- units, horizon, conditioning basis, discounting, formula references, and required parameters -- reviewed for internal consistency and for correctly leaving institution-specific values (risk weight, disparity threshold, estimation method, score scaling) as required inputs rather than SDK constants. Not a review of any specific institution's calibration."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "convention.score.points_to_odds",
+      "record_type": "convention",
+      "name": "Scorecard points-to-odds calibration",
+      "quantity": "credit_score",
+      "unit": "score_points",
+      "horizon": null,
+      "conditioning": "point_in_time",
+      "default_definition_id": null,
+      "collateral_treatment": "not_applicable",
+      "discounting_basis": null,
+      "currency": null,
+      "seasoning_basis": null,
+      "calibration_population": "development sample of scored applications with observed outcomes over a declared performance window",
+      "day_count": null,
+      "viewpoint_ids": [
+        "role.lender"
+      ],
+      "loss_sign": "not_applicable",
+      "formula": {
+        "id": "formula.score.points_to_odds",
+        "expression": "odds = base_odds * 2 ** ((score - base_score) / pdo)",
+        "inputs": [
+          "score",
+          "base_score",
+          "base_odds",
+          "pdo"
+        ],
+        "outputs": [
+          "odds"
+        ]
+      },
+      "parameters": [
+        {
+          "id": "param.score.base_score",
+          "meaning": "score at which base_odds holds",
+          "default": null,
+          "required": true,
+          "rationale": "Scaling is institution-specific; a default would silently mis-calibrate every adopter's scorecard."
+        },
+        {
+          "id": "param.score.base_odds",
+          "meaning": "good:bad odds at base_score",
+          "default": null,
+          "required": true,
+          "rationale": "As above."
+        },
+        {
+          "id": "param.score.pdo",
+          "meaning": "points to double the odds",
+          "default": null,
+          "required": true,
+          "rationale": "As above."
+        }
+      ],
+      "notes": "A score is not a probability. base_score, base_odds, and pdo (points to double the odds) are institution-specific scaling parameters and are inputs.",
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "cfpb"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Convention records -- units, horizon, conditioning basis, discounting, formula references, and required parameters -- reviewed for internal consistency and for correctly leaving institution-specific values (risk weight, disparity threshold, estimation method, score scaling) as required inputs rather than SDK constants. Not a review of any specific institution's calibration."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "convention.adverse_action.reason_ranking",
+      "record_type": "convention",
+      "name": "Adverse action principal-reason ranking",
+      "quantity": "adverse_action_reasons",
+      "unit": "ordered_reason_codes",
+      "horizon": null,
+      "conditioning": "point_in_time",
+      "default_definition_id": null,
+      "collateral_treatment": "not_applicable",
+      "discounting_basis": null,
+      "currency": null,
+      "seasoning_basis": null,
+      "calibration_population": null,
+      "day_count": null,
+      "viewpoint_ids": [
+        "role.lender"
+      ],
+      "loss_sign": "not_applicable",
+      "formula": {
+        "id": "formula.adverse_action.rank",
+        "expression": "rank features by points_lost = max_attainable_points - actual_points, descending, ties broken by declared stable feature order",
+        "inputs": [
+          "feature_points",
+          "max_attainable_points",
+          "stable_feature_order"
+        ],
+        "outputs": [
+          "ordered_reason_codes"
+        ]
+      },
+      "parameters": [
+        {
+          "id": "param.adverse_action.max_reasons",
+          "meaning": "number of principal reasons disclosed",
+          "default": null,
+          "required": true,
+          "rationale": "Set by the institution's compliance policy for the product and jurisdiction; this pack does not determine it."
+        }
+      ],
+      "notes": "Deterministic ordering matters: two runs on the same application must produce the same principal reasons. Ties are broken by a declared stable order, never by dictionary or float ordering. The number of reasons disclosed is a policy parameter, and no protected attribute may appear as a reason.",
+      "jurisdiction": "US",
+      "knowledge_class": "regulatory_supervisory_rule",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "cfpb"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Convention records -- units, horizon, conditioning basis, discounting, formula references, and required parameters -- reviewed for internal consistency and for correctly leaving institution-specific values (risk weight, disparity threshold, estimation method, score scaling) as required inputs rather than SDK constants. Not a review of any specific institution's calibration."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "convention.migration.annual_matrix",
+      "record_type": "convention",
+      "name": "Annual rating migration matrix",
+      "quantity": "rating_migration",
+      "unit": "probability_matrix",
+      "horizon": "P1Y",
+      "conditioning": "through_the_cycle",
+      "default_definition_id": "defn.default.irb_reference",
+      "collateral_treatment": "not_applicable",
+      "discounting_basis": null,
+      "currency": null,
+      "seasoning_basis": null,
+      "calibration_population": "cohort of rated obligors observed from one year-end to the next",
+      "day_count": null,
+      "viewpoint_ids": [
+        "role.lender"
+      ],
+      "loss_sign": "not_applicable",
+      "formula": null,
+      "parameters": [],
+      "notes": "Each row is a probability distribution over end-states including default and must sum to one. A matrix whose rows do not sum to one is not a migration matrix, whatever it is called. Withdrawn ratings must be handled explicitly, not dropped silently.",
+      "jurisdiction": "US",
+      "knowledge_class": "empirical_finding",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Convention records -- units, horizon, conditioning basis, discounting, formula references, and required parameters -- reviewed for internal consistency and for correctly leaving institution-specific values (risk weight, disparity threshold, estimation method, score scaling) as required inputs rather than SDK constants. Not a review of any specific institution's calibration."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "convention.fairness.disparity_testing",
+      "record_type": "convention",
+      "name": "Outcome disparity testing at the applied cutoff",
+      "quantity": "outcome_disparity",
+      "unit": "ratio",
+      "horizon": null,
+      "conditioning": "point_in_time",
+      "default_definition_id": null,
+      "collateral_treatment": "not_applicable",
+      "discounting_basis": null,
+      "currency": null,
+      "seasoning_basis": null,
+      "calibration_population": "applications scored under one decision policy version, measured at the cutoff actually applied \u2014 not at a cutoff chosen for the study",
+      "day_count": null,
+      "viewpoint_ids": [
+        "role.lender"
+      ],
+      "loss_sign": "not_applicable",
+      "formula": {
+        "id": "formula.fairness.adverse_impact_ratio",
+        "expression": "selection_rate_protected / selection_rate_reference",
+        "inputs": [
+          "selection_rate_protected",
+          "selection_rate_reference"
+        ],
+        "outputs": [
+          "adverse_impact_ratio"
+        ]
+      },
+      "parameters": [
+        {
+          "id": "param.fairness.disparity_threshold",
+          "meaning": "ratio below which the institution treats the disparity as requiring a less-discriminatory-alternative search",
+          "default": null,
+          "required": true,
+          "rationale": "The four-fifths ratio is a widely used SCREENING convention, not a legal threshold and not a safe harbour. Supplying it as a default would let an adopter inherit a number their counsel never chose."
+        },
+        {
+          "id": "param.fairness.protected_class_estimation_method",
+          "meaning": "named method used to estimate protected class where it is not lawfully collected, for testing only",
+          "default": null,
+          "required": true,
+          "rationale": "Every estimation method carries material error that biases the disparity estimate itself. The method and its limitations must be a recorded choice, and the choice is jurisdiction-, product-, and counsel-dependent."
+        }
+      ],
+      "notes": "Measured at the cutoff actually applied. A disparity computed at a different cutoff answers a question nobody asked. The metric is a screen that says where to look, never a determination of lawfulness.",
+      "jurisdiction": "US",
+      "knowledge_class": "regulatory_supervisory_rule",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "cfpb"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Convention records -- units, horizon, conditioning basis, discounting, formula references, and required parameters -- reviewed for internal consistency and for correctly leaving institution-specific values (risk weight, disparity threshold, estimation method, score scaling) as required inputs rather than SDK constants. Not a review of any specific institution's calibration."
+      },
+      "supersedes": []
+    }
+  ]
+}

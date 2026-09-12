@@ -1,0 +1,285 @@
+{
+  "schema_version": "0072.1",
+  "scope": {
+    "jurisdiction": "US",
+    "status": "draft_structural_contract"
+  },
+  "coverage_levels": [
+    "absent",
+    "prose_only",
+    "contract_only",
+    "reference_runtime",
+    "validated_runtime"
+  ],
+  "required_domains": [
+    "wholesale_rating_pd_lgd_ead",
+    "counterparty_exposure_limits_concentration",
+    "retail_scoring_underwriting",
+    "ifrs9_cecl_expected_credit_loss",
+    "basel_irb_regulatory_capital",
+    "supervisory_stress_capital_planning",
+    "credit_document_intelligence",
+    "credit_model_governance_monitoring"
+  ],
+  "capabilities": [
+    {
+      "id": "capability.wholesale_measurement",
+      "record_type": "capability",
+      "name": "Obligor and facility rating, PD/LGD/EAD measurement, drawn and undrawn exposure",
+      "domain": "wholesale_rating_pd_lgd_ead",
+      "scope": "Obligor and facility rating, PD/LGD/EAD measurement, drawn and undrawn exposure",
+      "coverage_level": "reference_runtime",
+      "current_artifacts": [
+        "knowledge/credit_risk/taxonomy.json",
+        "knowledge/credit_risk/conventions.json",
+        "knowledge/credit_risk/lifecycles.json",
+        "src/quantsmith/pipelines/wholesale_credit_measurement.py",
+        "specs/0073-wholesale-credit-measurement/"
+      ],
+      "limitation": "0073 implements facility-level EL/EAD/RWA measurement given a supplied PD, LGD, and risk weight -- it never assigns a rating or estimates PD/LGD. That remains the adopter's own model registered via 0026, per workflow.wholesale_obligor_review's adopter_plugin_via_0026 boundary.",
+      "owning_spec": "0073",
+      "models": [],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Runtime existence and correctness reviewed against 0073's own golden-case reproduction: EL/EAD/RWA measurement and counterparty exposure/limit/concentration checking now have a tested, deterministic implementation composing credit_risk_knowledge.py's arithmetic. Not a review of any adopter's own rating or PD model -- none is shipped or claimed here."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "capability.counterparty_limits",
+      "record_type": "capability",
+      "name": "Counterparty exposure aggregation, limits, breaches, and concentration",
+      "domain": "counterparty_exposure_limits_concentration",
+      "scope": "Counterparty exposure aggregation, limits, breaches, and concentration",
+      "coverage_level": "reference_runtime",
+      "current_artifacts": [
+        "knowledge/credit_risk/lifecycles.json",
+        "knowledge/credit_risk/workflows.json",
+        "agents/securities_financing/collateral_management/",
+        "src/quantsmith/pipelines/wholesale_credit_measurement.py",
+        "specs/0073-wholesale-credit-measurement/",
+        "agents/credit_risk/counterparty_limits/"
+      ],
+      "limitation": "0073 implements exposure aggregation, limit breach detection, and concentration (largest-share plus Herfindahl index) as a full in-SDK reference runtime. A richer concentration framework (sector, geography, correlated-obligor clustering) remains future work with no consumer yet.",
+      "owning_spec": "0073",
+      "models": [],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel",
+        "occ"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Runtime existence and correctness reviewed against 0073's own golden-case reproduction: EL/EAD/RWA measurement and counterparty exposure/limit/concentration checking now have a tested, deterministic implementation composing credit_risk_knowledge.py's arithmetic. Not a review of any adopter's own rating or PD model -- none is shipped or claimed here."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "capability.retail_underwriting",
+      "record_type": "capability",
+      "name": "Application and behavioural scoring, cutoffs, adverse action, fairness testing",
+      "domain": "retail_scoring_underwriting",
+      "scope": "Application and behavioural scoring, cutoffs, adverse action, fairness testing",
+      "coverage_level": "reference_runtime",
+      "current_artifacts": [
+        "knowledge/credit_risk/decision_paths.json",
+        "knowledge/credit_risk/conventions.json",
+        "src/quantsmith/pipelines/retail_fairness_harness.py",
+        "specs/0074-retail-underwriting-fairness-harness/",
+        "agents/credit_risk/fair_lending_review/"
+      ],
+      "limitation": "0074 implements the fairness-testing surface: disparity measurement, proxy association, and a less-discriminatory-alternative search over caller-supplied cutoffs. No scoring or underwriting-decision runtime exists or is planned in-SDK -- scoring remains the adopter's own model registered via 0026, per REQ-014's decision-path contract.",
+      "owning_spec": "0074",
+      "models": [],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "cfpb"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Runtime existence and correctness reviewed against 0074's own golden-case reproduction: disparity measurement, proxy association, and the less-discriminatory-alternative search now have a tested, deterministic implementation composing credit_risk_knowledge.py's adverse_impact_ratio. Not a review of any adopter's own scoring model or underwriting decision -- none is shipped or claimed here."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "capability.expected_credit_loss",
+      "record_type": "capability",
+      "name": "IFRS 9 and CECL staging, twelve-month and lifetime measurement, EIR discounting",
+      "domain": "ifrs9_cecl_expected_credit_loss",
+      "scope": "IFRS 9 and CECL staging, twelve-month and lifetime measurement, EIR discounting",
+      "coverage_level": "contract_only",
+      "current_artifacts": [
+        "knowledge/credit_risk/conventions.json",
+        "knowledge/credit_risk/golden_cases.json"
+      ],
+      "limitation": "Measurement conventions and discounting rules are pinned by golden cases; no ECL engine exists and no macro overlay mechanism is defined. IFRS 9 and CECL are kept as distinct records rather than a merged abstraction.",
+      "owning_spec": "0075",
+      "models": [],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "ifrs_foundation",
+        "fasb"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Coverage levels reviewed against actual repository artifacts; no row claims more than a named, existing artifact and test support."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "capability.regulatory_capital",
+      "record_type": "capability",
+      "name": "IRB risk weights, regulatory parameter definitions, RWA",
+      "domain": "basel_irb_regulatory_capital",
+      "scope": "IRB risk weights, regulatory parameter definitions, RWA",
+      "coverage_level": "contract_only",
+      "current_artifacts": [
+        "knowledge/credit_risk/conventions.json"
+      ],
+      "limitation": "The RWA convention exists but the risk weight itself is a required unset input, not a constant this pack supplies: national implementation differs from the international framework and a hard-coded weight would make a wrong capital number look authoritative.",
+      "owning_spec": "0076",
+      "models": [],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "bis_basel"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Coverage levels reviewed against actual repository artifacts; no row claims more than a named, existing artifact and test support."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "capability.stress_testing",
+      "record_type": "capability",
+      "name": "Scenario-conditioned loss projection and capital planning",
+      "domain": "supervisory_stress_capital_planning",
+      "scope": "Scenario-conditioned loss projection and capital planning",
+      "coverage_level": "contract_only",
+      "current_artifacts": [
+        "knowledge/credit_risk/workflows.json"
+      ],
+      "limitation": "Workflow and scenario-vintage controls are defined; no projection runtime. Scenario drivers would reuse the registered fred and federal_reserve sources via 0078.",
+      "owning_spec": "0076",
+      "models": [],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "federal_reserve"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Coverage levels reviewed against actual repository artifacts; no row claims more than a named, existing artifact and test support."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "capability.document_intelligence",
+      "record_type": "capability",
+      "name": "Credit memos, covenant extraction, financial spreading, early warning",
+      "domain": "credit_document_intelligence",
+      "scope": "Credit memos, covenant extraction, financial spreading, early warning",
+      "coverage_level": "reference_runtime",
+      "current_artifacts": [
+        "knowledge/credit_risk/governance.json",
+        "knowledge/credit_risk/workflows.json",
+        "specs/0070-prompt-context-harness-foundation/",
+        "specs/0071-nlp-llm-quant-text-intelligence-foundation/",
+        "specs/0077-credit-document-intelligence/",
+        "src/quantsmith/pipelines/credit_document_intelligence.py",
+        "examples/credit_document_intelligence/"
+      ],
+      "limitation": "0077 proves the admission-boundary wiring against real, emitted 0071 artifacts (both derived_evidence and decision_input outcomes, plus rejection) and real replay determinism -- not a working covenant or financial-value extraction model. The underlying 0071 producer's entity_extraction/value_extraction/sentiment_stance/theme_detection outputs are fixed reference-fixture content, disclosed as such; only the classification result is genuinely computed from input text. A real, licensed corpus at retrieval scale and a genuine extractor remain future work.",
+      "owning_spec": "0077",
+      "models": [],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "cfpb",
+        "occ"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Coverage levels reviewed against actual repository artifacts; no row claims more than a named, existing artifact and test support."
+      },
+      "supersedes": []
+    },
+    {
+      "id": "capability.model_governance",
+      "record_type": "capability",
+      "name": "Model lifecycle, validation evidence, challenger comparison, monitoring, overrides",
+      "domain": "credit_model_governance_monitoring",
+      "scope": "Model lifecycle, validation evidence, challenger comparison, monitoring, overrides",
+      "coverage_level": "contract_only",
+      "current_artifacts": [
+        "knowledge/credit_risk/governance.json",
+        "knowledge/credit_risk/lifecycles.json",
+        "templates/docs/model_card.md",
+        "templates/docs/model_monitoring_plan.md"
+      ],
+      "limitation": "The deployability predicate and model lifecycle are defined and enforced structurally; no monitoring runtime exists. Whether this should be credit-specific or generalized across the SDK's whole model inventory is an open question in 0072.",
+      "owning_spec": "0079",
+      "models": [],
+      "jurisdiction": "US",
+      "knowledge_class": "stable_mechanic",
+      "knowledge_as_of": "2026-09-09",
+      "effective_from": null,
+      "effective_to": null,
+      "source_refs": [
+        "federal_reserve",
+        "occ"
+      ],
+      "review_status": "reviewed",
+      "review": {
+        "reviewer": "Joshua Lutkemuller, CFA",
+        "review_date": "2026-09-11",
+        "scope": "Coverage levels reviewed against actual repository artifacts; no row claims more than a named, existing artifact and test support."
+      },
+      "supersedes": []
+    }
+  ]
+}

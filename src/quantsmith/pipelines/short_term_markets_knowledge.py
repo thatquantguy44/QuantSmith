@@ -638,7 +638,11 @@ def _validate_handoff(root: Path, errors: List[str]) -> None:
             errors.append(f"handoff: missing reserved child spec {spec_id}")
     for required in (
         "0063-short-term-markets-domain-foundation/",
-        "active Draft",
+        # 0063 was Draft at authoring time; it is now Approved (0072's owner
+        # approved 0063/0070/0071/0072 together). This checks the CURRENT
+        # activation state named in the handoff, not a frozen string — update
+        # it again if 0063's status prose changes.
+        "Approved and implemented (`0063`)",
         "Do not draft all six child specs at once",
     ):
         if required not in text:

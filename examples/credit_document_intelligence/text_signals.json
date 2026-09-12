@@ -1,0 +1,67 @@
+{
+  "schema_version": "quantsmith.text_intelligence.signals.v1",
+  "signal_set_id": "signals-credit-document-intelligence-001",
+  "signals": [
+    {
+      "aggregation_rule": "mean supported task confidence; one fixture observation",
+      "availability_lag_seconds": 60,
+      "calibration": {
+        "method": "fixture_declared",
+        "production_calibrated": false
+      },
+      "confidence": 0.8,
+      "contributing_span_ids": [
+        "span-credit-memo-obligor-001-001",
+        "span-credit-memo-covenant-001-001"
+      ],
+      "decision_time": "2026-09-10T09:00:12Z",
+      "downstream_backtest_refs": [
+        "backtest://fixture/credit-document-intelligence-001"
+      ],
+      "downstream_dataset_refs": [
+        "dataset://fixture/credit-document-intelligence-001"
+      ],
+      "entity_instrument_mapping": [
+        {
+          "entity_id": "issuer-alpha",
+          "instrument_id": "fixture-instrument",
+          "mapping_as_of": "2026-09-10T09:00:12Z"
+        }
+      ],
+      "horizon": "5_business_days",
+      "missingness_policy": "abstain; never impute absent text as neutral",
+      "model_capability_ids": [
+        "cap-credit-document-intelligence-001-lexical"
+      ],
+      "observation_time": "2026-09-10T09:00:11Z",
+      "publication_state": "fixture_only",
+      "review": {
+        "escalation_conditions": [
+          "any production, client, trading, or restricted-data use"
+        ],
+        "overrides": [],
+        "owner": "spec0071",
+        "rejected_alternatives": [
+          "represent fixture output as production evidence"
+        ],
+        "reviewed_at": "2026-09-10T09:00:11Z",
+        "reviewer": "credit_document_intelligence",
+        "status": "fixture_approved",
+        "uncertainty": "Synthetic fixture demonstrates contracts only; no investment conclusion is approved."
+      },
+      "revision_policy": "append new signal version; never rewrite a historical decision",
+      "signal_id": "signal-credit-document-intelligence-001-funding-outlook",
+      "task_result_ids": [
+        "result-credit-document-intelligence-001-classification",
+        "result-credit-document-intelligence-001-entity",
+        "result-credit-document-intelligence-001-value",
+        "result-credit-document-intelligence-001-stance",
+        "result-credit-document-intelligence-001-theme"
+      ],
+      "universe": [
+        "issuer-alpha"
+      ],
+      "value": 1.0
+    }
+  ]
+}

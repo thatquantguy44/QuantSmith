@@ -372,6 +372,55 @@ ACT/360 accrual, an honest — not fabricated — counterparty-concentration
 boundary, a tightened point-in-time check, and an explicit day-count basis)
 by spec `0066-securities-lending-model-correction`.
 
+## Credit Risk Agents (`credit_risk/`)
+
+Grouped in the `credit_risk/` category folder under spec
+`0072-credit-risk-domain-foundation`. Agent creation is gated: an agent
+exists here only when `knowledge/credit_risk/coverage.json` shows a
+coverage row with a distinct workflow no existing agent already holds — see
+`0072` REQ-011. Notably absent: `obligor_rating` and `retail_underwriting` —
+rating, PD/LGD estimation, and consumer credit scoring all stay an
+adopter's own model registered via `0026`, so no SDK runtime justifies
+either agent.
+
+| Agent | Handles | Feeds mainly |
+| --- | --- | --- |
+| `credit_risk/credit_document_analyst/` | Cited extraction from credit documents into `0072`'s LLM evidence-admission boundary (`derived_evidence` → `decision_input` only on named human review); never decides a credit outcome itself | Wholesale review, ECL measurement, once a value is genuinely promoted |
+| `credit_risk/counterparty_limits/` | Counterparty exposure aggregation, limit breach detection, and concentration (largest share, Herfindahl index) from supplied PD/LGD/EAD; never assigns a rating or estimates PD/LGD itself | Risk, backtest review |
+| `credit_risk/fair_lending_review/` | Disparate-impact testing, proxy-feature association, and less-discriminatory-alternative search on an already-scored population; never scores an applicant or estimates protected-class membership itself | A qualified fair-lending/compliance owner for the business-need-rationale decision |
+
+`credit_document_analyst/` has a tested runtime (spec
+`0077-credit-document-intelligence`):
+`src/quantsmith/pipelines/credit_document_intelligence.py` — emits a real
+`0071` bundle over a registered credit-document source via `0071`'s own
+unchanged producer, then bridges a real task result into `0072`'s
+`admit_derived_evidence` through a documented field-name adapter between
+`0071`'s and `0072`'s review objects. It proves the wiring, not a working
+covenant-extraction model — see the agent's own `README.md` for what it does
+not yet claim.
+
+`counterparty_limits/` has a tested runtime (spec
+`0073-wholesale-credit-measurement`):
+`src/quantsmith/pipelines/wholesale_credit_measurement.py` — facility-level
+EL/EAD/RWA measurement composing `0072`'s own arithmetic primitives, plus
+counterparty exposure aggregation, limit checking, and concentration as a
+full in-SDK reference runtime. Rating assignment and PD/LGD estimation
+remain out of scope by design — `workflow.wholesale_obligor_review` stays
+`adopter_plugin_via_0026`, the reason `obligor_rating` above is not an
+agent yet.
+
+`fair_lending_review/` has a tested runtime (spec
+`0074-retail-underwriting-fairness-harness`):
+`src/quantsmith/pipelines/retail_fairness_harness.py` — disparity
+measurement and proxy association composing `0072`'s own
+`adverse_impact_ratio`, plus a less-discriminatory-alternative search over
+caller-supplied cutoffs. No scorecard ships — resolved the same way `0073`
+resolved the analogous wholesale question, at higher stakes: every score
+and every protected-class indicator is a caller input, never produced here.
+This is why `retail_underwriting` above is not an agent yet: no SDK runtime
+scores or decides anything, only tests the fairness of a decision an
+adopter's own model already made.
+
 ## Formulaic Alpha Agents (`formulaic_alphas/`)
 
 Grouped in the `formulaic_alphas/` category folder; they operationalize the
