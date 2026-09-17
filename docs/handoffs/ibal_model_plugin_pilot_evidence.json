@@ -1,0 +1,123 @@
+{
+  "created_at": "2026-09-17T12:27:42Z",
+  "health": {
+    "api_schema_version": "1.0.0",
+    "backend": {
+      "name": "highs",
+      "ready": true,
+      "version": "1.15.1"
+    },
+    "engine_package_version": "0.1.0",
+    "error_category": null,
+    "ready": true,
+    "status": "ready"
+  },
+  "independent_reverification": {
+    "binding_constraint_count_abs_slack_le_1e_minus_6": 55,
+    "current_quantity_from_allocations": 515918.23693899997,
+    "decrease_quantity_from_allocations": 7842.653093,
+    "demand_effective_cap_from_rows": 1314178.888776,
+    "demand_filled_from_demand_rows": 1241168.9505120001,
+    "demand_raw_from_demand_rows": 1460198.765309,
+    "economics_total_delta_from_components": 1799.1191602981346,
+    "economics_total_delta_usd": 1799.1191602981346,
+    "economics_total_value_from_components": 2963.136786211736,
+    "economics_total_value_usd": 2963.136786211736,
+    "fill_rate_recomputed": 0.849999999999555,
+    "increase_quantity_from_allocations": 733093.3666660001,
+    "max_integrality_violation": 0.0,
+    "max_inventory_allocation_balance_delta": 0.0,
+    "max_row_violation": 1.1641532182693481e-10,
+    "max_variable_bound_violation": 0.0,
+    "net_change_from_allocations": 725250.7135730002,
+    "objective_reconstruction_delta": 0.0,
+    "post_on_loan_from_balances": 1241168.9505120001,
+    "post_quantity_from_allocations": 1241168.9505120001,
+    "pre_on_loan_from_balances": 515918.23693899997,
+    "verification_passed_from_engine": true,
+    "weighted_fill_rate_recomputed": 0.9444444444455194
+  },
+  "input": {
+    "request_hash": "d8b1117979f6dfb13c4f5bba86fbc179d31184c4764010ed6429095a94683977",
+    "request_id": "SYN-REQ-260917",
+    "source": {
+      "filename": null,
+      "generator_version": "synthetic-v1",
+      "label": "Synthetic",
+      "mode": "synthetic",
+      "seed": 260917,
+      "upload_hash": null
+    },
+    "summary": {
+      "as_of": "2026-09-14T12:00:00Z",
+      "borrower_count": 6,
+      "effective_date": "2026-09-14",
+      "row_counts": {
+        "counterparty_limits": 3,
+        "demand": 24,
+        "entity_relationships": 6,
+        "inventory": 8,
+        "routes": 24,
+        "utilization_policies": 8
+      },
+      "security_count": 8,
+      "total_available_shares": 846381.763061,
+      "total_current_on_loan_shares": 515918.23693899997,
+      "total_demand_shares": 1460198.765309,
+      "total_lendable_shares": 1434000.0
+    },
+    "synthetic_config": {
+      "profile": "balanced",
+      "scale": "small",
+      "seed": 260917
+    }
+  },
+  "raw_payload_storage": "Raw dataset/run JSON were written only to /tmp/ibal_quant_smith_pilot during the pilot and are not committed.",
+  "registration_model_id": "ibal-inventoryballast-rest-v1",
+  "run": {
+    "backend_version": "1.15.1",
+    "created_at": "2026-09-17T12:27:42.844905Z",
+    "economics": {
+      "component_count": 2,
+      "total_delta_usd": 1799.1191602981346,
+      "total_value_usd": 2963.136786211736
+    },
+    "formulation": null,
+    "native_status": "kOptimal",
+    "objective_value": null,
+    "package_version": "0.1.0",
+    "run_id": "inv-opt-f14b57a3f642",
+    "section_counts": {
+      "allocations": 24,
+      "balances": 8,
+      "binding_constraints": 0,
+      "binding_constraints_abs_slack_le_1e_minus_6": 55,
+      "constraints": 67,
+      "demand": 24,
+      "economics": 3
+    },
+    "solver": {
+      "backend_name": "highs",
+      "backend_version": "1.15.1",
+      "best_bound": null,
+      "iterations": 9,
+      "nodes": null,
+      "relative_gap": null,
+      "runtime_seconds": 0.00034166700061177835,
+      "termination_reason": "Optimal"
+    },
+    "status": "optimal",
+    "strict": true,
+    "termination_reason": "Optimal",
+    "verification": {
+      "has_primal": true,
+      "max_integrality_violation": 0.0,
+      "max_row_violation": 1.1641532182693481e-10,
+      "max_variable_bound_violation": 0.0,
+      "objective_reconstruction_delta": 0.0,
+      "passed": true
+    }
+  },
+  "schema_version": "ibal-quantsmith-pilot-evidence-v1",
+  "source": "IBAL REST API on local Market Terminal service; synthetic data only"
+}
