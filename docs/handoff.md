@@ -156,8 +156,9 @@ time:
    yesterday" can compare against them. It reuses what is already built
    (`0008` metrics, `0058` access, `0014`–`0018` dashboards, `0070` replay)
    rather than adding a new foundation. **Next:** approve the spec, answer its
-   four open questions (first write-back database, first chat surface,
-   knowledge-candidate promotion, approval model), then build from T-001.
+   three remaining open questions (first chat surface, knowledge-candidate
+   promotion, approval model), then build from T-001. First write-back
+   target resolved 2026-09-24: SQLite (local, gitignored file).
 2. **Short-term-markets domain foundation (item 21, spec `0063`, Approved).**
    Build the shared expert contract before adding more agents or isolated
    models: U.S.-first product taxonomy, explicit economic viewpoints and sign
@@ -1435,11 +1436,13 @@ manual-task persistence question stays deferred until a real consumer needs it.
     point-in-time, closing the multi-day gap `0055`/`0059` leave open. Adds
     `agents/analytics/data_visualization/` (promoting the P3 backlog row) and
     `agents/analytics/nl_analytics/`. **Status:** spec, plan, and tasks
-    written (14 REQ, 6 NFR, 22 AC, 19 tasks, all `todo`); nothing built.
-    **Next:** owner approval and answers to the spec's four open questions
-    (first write-back database, first chat surface, whether insights also
-    become `0048`/`0056` knowledge candidates, approval model), then T-001
-    onward.
+    written (14 REQ, 6 NFR, 22 AC, 20 tasks, all `todo`); nothing built.
+    First write-back target resolved (owner, 2026-09-24): **SQLite** through
+    stdlib `sqlite3` against a local gitignored file (T-020); a shared
+    database adapter is deferred until a team needs one. **Next:** owner
+    approval and answers to the spec's three remaining open questions (first
+    chat surface, whether insights also become `0048`/`0056` knowledge
+    candidates, approval model), then T-001 onward.
 
 ## Open Questions For The Owner
 

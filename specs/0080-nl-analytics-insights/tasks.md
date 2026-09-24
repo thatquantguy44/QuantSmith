@@ -39,7 +39,8 @@
 | T-015 | Agents `agents/analytics/data_visualization/` and `agents/analytics/nl_analytics/` (four files each, `Spec-Driven Role`), catalog rows, group README handoffs. | REQ-014, AC-018 | todo | |
 | T-016 | Import/source scan test (stdlib only, no credentials or network) and privacy test. | NFR-003, NFR-004, AC-019, AC-020 | todo | |
 | T-017 | 100k-row benchmark test. | NFR-005, AC-021 | todo | |
-| T-018 | `cli.py` and `examples/nl_analytics/` (synthetic three-day transcript, sqlite3 reference writer, committed sample response) plus `docs/0080_synthetic_data_disclosure.md`. | REQ-009, REQ-012 | todo | |
+| T-018 | `cli.py` and `examples/nl_analytics/` (synthetic three-day transcript, committed sample response) plus `docs/0080_synthetic_data_disclosure.md`. | REQ-009, REQ-012 | todo | |
+| T-020 | `writeback_sqlite.py`: `SQLiteWriter` + reader over stdlib `sqlite3` (schema from contract, `ON CONFLICT DO NOTHING` idempotency, tombstone reversal, as-of prior-insight read); runs AC-014/015/016 against both the recording writer and SQLite (`:memory:` and a temp file). First supported target, resolved by the owner 2026-09-24. | REQ-010, REQ-011, REQ-012, AC-014, AC-015, AC-016 | todo | |
 | T-019 | Update `specs/README.md`, `src/quantsmith/pipelines/README.md` or package README, `docs/handoff.md`, `docs/handoffs/future_features.md`, and `CHANGELOG.md` on ship. | REQ-014 | todo | |
 
 Status values: `todo` | `in-progress` | `blocked` | `done`.
@@ -77,8 +78,9 @@ Every acceptance criterion must be named by at least one test.
 
 Tracked work intentionally deferred (no silent "temporary" shortcuts — P8).
 
-- Provider adapter for the first real write-back database (after the owner
-  names it).
+- Shared-database write-back adapter (Postgres / SQL Server via the existing
+  `SQLDataSource` classes, or a warehouse) — deferred; SQLite (T-020) is the
+  first target.
 - Chat-surface adapter (Claude chat / Slack / `0057` console `QueryEngine`).
 - Multi-metric plans beyond a two-measure scatter.
 - Non-additive metric contribution (distinct counts, medians) — depends on

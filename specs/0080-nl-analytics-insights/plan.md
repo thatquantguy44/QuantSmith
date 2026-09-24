@@ -57,6 +57,7 @@ question ──▶ interpret ──▶ validate ──▶ authorize ──▶ ex
 | `narrate.py` | `template_narrative(insights)`; `ground(narrative, insights, result) -> GroundingReport` (numeric-token extraction with tolerance, causal-phrase list); caveat triggers. |
 | `respond.py` | `answer(question, context) -> ChatResponse` — the single entry point composing the stages and emitting the `0070` envelope. |
 | `writeback.py` | `WriteBackContract` loader/validator; `build_records(response)`; `publish(records, contract, writer, *, dry_run=True, approved=False)`; `reverse(run_id, contract, writer)`; `prior_insights(reader, key, as_of)`. |
+| `writeback_sqlite.py` | The first supported write-back target: `SQLiteWriter` implementing the injected-writer protocol over stdlib `sqlite3` — creates the insight table from the contract schema, `INSERT ... ON CONFLICT(record_key) DO NOTHING` for idempotency, tombstone reversal by `run_id` (`UPDATE ... SET reversed_at`), and a matching reader for `prior_insights`. Parameterized statements only; the path comes from the contract, never from the question. |
 | `cli.py` | `quantsmith-nl-analytics ask "<question>" --registry … --data … [--publish --approve]` for local use and the worked example. |
 
 Supporting artifacts:
@@ -194,7 +195,9 @@ derived from the plan window and re-filtered by the same bound;
 
 ## Open Questions
 
-- First real write-back target and its provider adapter (see spec).
+- ~~First write-back target~~ — resolved 2026-09-24: SQLite
+  (`writeback_sqlite.py`, stdlib `sqlite3`, local gitignored file). A shared
+  database adapter is deferred until a team needs one.
 - First chat surface; whether the `0057` console hosts it through its existing
   `QueryEngine` seam.
 - Whether insight records also become `0048`/`0056` knowledge candidates.

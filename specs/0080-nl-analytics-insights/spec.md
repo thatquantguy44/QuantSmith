@@ -156,9 +156,10 @@ It supports two decisions: *what does the data say about my question right now*
 - **Provenance:** `0025` data-provenance guardrail and synthetic-data
   disclosure for any example data.
 - **Write-back target:** declared in a committed write-back contract
-  (`templates/data/writeback_contract.md`); the database itself, its
-  credentials, and its driver are adopter-owned. The reference example uses
-  standard-library `sqlite3` against a local, gitignored file.
+  (`templates/data/writeback_contract.md`). The first supported target is
+  SQLite through standard-library `sqlite3` against a local, gitignored file
+  (resolved 2026-09-24). Shared databases, their credentials, and their
+  drivers stay adopter-owned.
 - No private data, credentials, or real company data enter this repository;
   example data is synthetic and disclosed.
 
@@ -182,9 +183,15 @@ It supports two decisions: *what does the data say about my question right now*
   limit stated in the response.
 - Assumption: a question maps to one metric per plan in the first slice;
   multi-metric questions beyond a two-measure scatter return a clarification.
-- Open question: which database is the first real write-back target (Postgres,
-  Snowflake, SQL Server, the `0056` research store)? The contract is
-  target-neutral; the first adopter's choice drives a provider adapter.
+- Resolved (owner, 2026-09-24): the first write-back target is **SQLite** via
+  the standard-library `sqlite3` module — a local file matched by the
+  existing `*.db`/`*.sqlite`/`*.sqlite3` `.gitignore` patterns, never
+  committed. It needs no driver, credential, or network, so it serves the
+  reference example, the tests, and single-user local use. It is not a shared
+  team store. A shared target (Postgres or SQL Server, which already have
+  `SQLDataSource` classes in `quant/agentic_quant/sql_data.py`, or a
+  warehouse) is deferred until a team needs one; the contract stays
+  target-neutral so that adapter plugs in without changing callers.
 - Open question: which chat surface ships first — Claude chat (returned
   Markdown + Vega-Lite), Slack, or the `0057` Knowledge Console's query seam?
 - Open question: should persisted insights become `0048`/`0056` knowledge
