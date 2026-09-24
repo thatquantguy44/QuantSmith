@@ -135,29 +135,30 @@ advisory-by-default deployment decision. The chain builds on
 > `0071` corpora inside a `0070` envelope as labeled derived evidence, never as
 > unattributed decision inputs.
 >
-> **The owner's decision, not the agent's:** where `0072` ranks against the five
+> **The owner's decision, not the agent's:** where `0072` ranks against the six
 > priorities below. It is deliberately listed apart from them rather than
 > inserted into their order. It is also the one item here now blocked on a
 > person rather than on work — the pack is built, and no record can reach
 > `reviewed` without a named credit-domain reviewer (see item 24 and the spec's
 > open questions).
 
-> ### Requested — Natural-language analytics (spec `0080`, Draft)
->
-> Ask a data question in plain language; get back a governed chart, a grounded
-> interpretation, and — opt-in and approved — the insights published to a
-> database so tomorrow's "what changed since yesterday" can compare against
-> them. Requested by the owner as a priority item on 2026-09-24 and tracked as
-> item 29 and a P1 row in `docs/handoffs/future_features.md`. **The owner's
-> decision:** approve the spec, and rank it against the five priorities below.
+**Highest priority, in order: (1) natural-language analytics, (2) the
+short-term-markets domain foundation, (3) the knowledge base, (4) scheduler
+monitoring, (5) prompt/context/harness engineering, (6) NLP/LLM quant text
+intelligence.** Everything else in this section is real, tracked work, but
+these six are what should get attention first if only one thing can move at a
+time:
 
-**Highest priority, in order: (1) the short-term-markets domain foundation,
-(2) the knowledge base, (3) scheduler monitoring, (4) prompt/context/harness
-engineering, (5) NLP/LLM quant text intelligence.** Everything else in this
-section is real, tracked work, but these five are what should get attention first
-if only one thing can move at a time:
-
-1. **Short-term-markets domain foundation (item 21, spec `0063`, Approved).**
+1. **Natural-language analytics (item 29, spec `0080`, Draft) — ranked #1 by
+   the owner on 2026-09-24.** Ask a data question in plain language; get back
+   a governed chart, a grounded interpretation, and — opt-in and approved —
+   the insights published to a database so tomorrow's "what changed since
+   yesterday" can compare against them. It reuses what is already built
+   (`0008` metrics, `0058` access, `0014`–`0018` dashboards, `0070` replay)
+   rather than adding a new foundation. **Next:** approve the spec, answer its
+   four open questions (first write-back database, first chat surface,
+   knowledge-candidate promotion, approval model), then build from T-001.
+2. **Short-term-markets domain foundation (item 21, spec `0063`, Approved).**
    Build the shared expert contract before adding more agents or isolated
    models: U.S.-first product taxonomy, explicit economic viewpoints and sign
    conventions, rate/price/collateral conventions, lifecycle state models,
@@ -165,7 +166,7 @@ if only one thing can move at a time:
    register, and deterministic golden cases. Follow-on work is deliberately
    split into bounded specs `0064`–`0069`; their reserved scopes, dependencies,
    and activation rule are in the Planned specs table below.
-2. **Knowledge base (item 15, "Company knowledge over time").** The
+3. **Knowledge base (item 15, "Company knowledge over time").** The
    read/write runtime and both front ends are built (`0048`/`0049`/`0057`),
    and per-person access control now closes the enforcement gap
    (`0058`) — but the store itself is still five reference records
@@ -177,7 +178,7 @@ if only one thing can move at a time:
    MCP exposure (item 17) is the next step *after* there is real content
    worth a team reaching for over the network — building the server first
    would expose an empty store.
-3. **Scheduler deployment/adoption (specs `0055` and `0060`).** The SDK-level
+4. **Scheduler deployment/adoption (specs `0055` and `0060`).** The SDK-level
    monitoring slice is built: `0060` connects routed alerts to caller-injected
    delivery senders, provides `workflow_scheduling_cli` report and alert-preview
    commands, updates the worked example, and resolves deployment as advisory by
@@ -186,7 +187,7 @@ if only one thing can move at a time:
    thresholds—plus a future persisted manual-task format only if a concrete
    consumer needs it. Do not add network or credential ownership to the SDK to
    make a demonstration look deployed.
-4. **Prompt / Context / Harness Engineering Foundation (spec `0070`, Approved, foundation implemented).**
+5. **Prompt / Context / Harness Engineering Foundation (spec `0070`, Approved, foundation implemented).**
    The typed run envelope, prompt/context manifests, assumption ledger,
    evaluation harness, audit schema, replay engine/CLI, composite gate, two
    examples, and Quant Model Factory producer are built. Spec `0071` now proves
@@ -195,7 +196,7 @@ if only one thing can move at a time:
    approve the Draft contract, then require new agentic producers to emit a
    `0070` envelope rather than adding another orchestration ledger. Do not
    activate `0064`–`0069` through this cross-cutting work.
-5. **NLP, LLM, and Quant Text Intelligence Foundation (spec `0071`, Approved, foundation implemented).**
+6. **NLP, LLM, and Quant Text Intelligence Foundation (spec `0071`, Approved, foundation implemented).**
    The standard-library `text_intelligence` package, CLI, templates, source
    fixture, synthetic disclosure, composite gate, 16-AC test module, and two
    committed examples are built. They cover immutable corpora/source spans,
@@ -1412,7 +1413,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
 
 
 29. **Natural-language analytics — visualization, interpretation, and
-    write-back (spec `0080`, Draft; requested priority item).** The Data
+    write-back (spec `0080`, Draft; ranked #1 priority by the owner).** The Data
     Analyst track has governed metrics (`0008`), seven dashboard renderers
     (`0014`–`0018`), storytelling, access control (`0058`), and replayable
     agent runs (`0070`), but no path from a user's *question* to an answer.
