@@ -408,14 +408,128 @@ def coverage_report(packs: Sequence[Mapping], root: str | Path = ".") -> Dict[st
     }
 
 
+# ---------------------------------------------------------------------------
+# Review workflow (REQ-012)
+# ---------------------------------------------------------------------------
+
+# Named reviewer for each family, recorded when the owner took review on
+# (2026-09-24). A pack may still be reviewed by someone else; this is the
+# assignment, not a permission.
+FAMILY_REVIEWERS: Dict[str, str] = {fam: "Joshua Lutkemuller, CFA" for fam in FAMILIES}
+
+
+def review_sheet(packs: Sequence[Mapping], family: str) -> str:
+    """A Markdown sheet for reviewing one family, pack by pack.
+
+    Everything a reviewer must judge is on the sheet: each metric's unit and
+    additivity (with what that permits), every convention, insight rule,
+    caveat, and chart convention, and the golden cases. Deterministic: packs
+    in file-name order, sections in contract order.
+    """
+    if family not in FAMILIES:
+        raise ValueError(f"unknown family {family!r}; use one of {list(FAMILIES)}")
+    chosen = [p for p in packs if p["family"] == family]
+    yes_no = lambda b: "yes" if b else "no"  # noqa: E731
+    lines = [f"# Review sheet — `{family}` ({len(chosen)} packs)", "",
+             f"Assigned reviewer: {FAMILY_REVIEWERS.get(family, '—')}", "",
+             "For each pack, check every line below. When a pack is right, mark it:", "",
+             "```sh",
+             "PYTHONPATH=src python3 -m quantsmith.pipelines.analytics_packs \\",
+             "  --mark-reviewed <pack_id> --reviewer \"<your name>\" --date YYYY-MM-DD",
+             "```", "",
+             "To change content, edit `knowledge/analytics_packs/<pack_id>.json` first, then mark it.", ""]
+    for p in chosen:
+        rv = p["review"]
+        lines += [f"## `{p['pack_id']}` — {p['name']}", "",
+                  f"{p['description']}", "",
+                  f"- Status: **{rv['status']}**" + (f" ({rv['reviewer']}, {rv['reviewed_on']})" if rv.get("reviewer") else ""),
+                  f"- Selected by source domains: {', '.join(p['source_domains'])}",
+                  f"- Reviewer agents: {', '.join(p['reviewer_agents'])}",
+                  f"- Builds on: {', '.join(p['builds_on']) or '—'}", "",
+                  "| Metric | Unit | Additivity | Sum across dims? | Sum across time? | Synonyms |",
+                  "| --- | --- | --- | --- | --- | --- |"]
+        for m in p["metrics"]:
+            add = m["additivity"] + (f" — {m['additivity_rationale']}" if m.get("additivity_rationale") else "")
+            lines.append(f"| `{m['name']}` — {m['description']} | {m['unit']} | {add} | "
+                         f"{yes_no(can_sum(m, 'dimension'))} | {yes_no(can_sum(m, 'time'))} | "
+                         f"{', '.join(m['synonyms']) or '—'} |")
+        lines += ["", "Dimensions: " + "; ".join(f"`{d['name']}` ({d['description']})" for d in p["dimensions"]), ""]
+        for title, key, fmt in (
+            ("Conventions", "conventions", lambda x: f"`{x['id']}` {x['rule']}"),
+            ("Insight rules (suppress only)", "insight_rules",
+             lambda x: f"`{x['id']}` on `{x['applies_to']}` suppress {', '.join(x['suppress_kinds'])} — {x['reason']}"),
+            ("Caveats", "caveats", lambda x: f"`{x['id']}` [{x['trigger']}] {x['text']}"),
+            ("Chart conventions", "chart_conventions", lambda x: f"`{x['id']}` {x['rule']}"),
+            ("Golden cases (machine-checked)", "golden_cases", _describe_golden),
+        ):
+            lines.append(f"**{title}**")
+            lines += [f"- [ ] {fmt(x)}" for x in p[key]] or ["- (none)"]
+            lines.append("")
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def _describe_golden(g: Mapping) -> str:
+    if g["kind"] == "bps_change":
+        return f"`{g['id']}` {g['from_pct']}% → {g['to_pct']}% = {g['expected_bps']} bp"
+    if g["kind"] == "ratio":
+        return f"`{g['id']}` {g['numerator']} / {g['denominator']} × {g['scale']} = {g['expected']}"
+    return f"`{g['id']}` `{g['metric']}` summed across {g['across']}: {'allowed' if g['allowed'] else 'not allowed'}"
+
+
+def mark_reviewed(root: str | Path, pack_id: str, reviewer: str, reviewed_on: str,
+                  notes: Optional[str] = None) -> dict:
+    """Record a named review on one pack file (REQ-005, REQ-012).
+
+    Refuses an empty reviewer, a non-ISO date, an unknown pack, or a pack that
+    has any validation error — a review cannot certify a pack that does not
+    validate. One pack per call, on purpose: a family is reviewed pack by pack.
+    """
+    reviewer = (reviewer or "").strip()
+    if not reviewer:
+        raise PackValidationError("a named reviewer is required")
+    if not _DATE_RE.match(reviewed_on or ""):
+        raise PackValidationError(f"reviewed_on {reviewed_on!r} is not an ISO date (YYYY-MM-DD)")
+    path = Path(root) / PACKS_DIR / f"{pack_id}.json"
+    if not path.is_file():
+        raise PackValidationError(f"no pack named {pack_id!r}")
+    pack = json.loads(path.read_text(encoding="utf-8"))
+    pack["review"] = {
+        "status": "reviewed",
+        "reviewer": reviewer,
+        "reviewed_on": reviewed_on,
+        "notes": notes if notes is not None else "Conventions, rules, and golden cases confirmed by the named reviewer.",
+    }
+    errors = [f for f in validate_pack(pack, root, file_stem=pack_id) if f.severity == "error"]
+    if errors:
+        raise PackValidationError("; ".join(str(e) for e in errors))
+    path.write_text(json.dumps(pack, indent=2) + "\n", encoding="utf-8")
+    return pack
+
+
 def main(argv: Optional[Sequence[str]] = None) -> int:  # pragma: no cover - thin CLI
     import argparse
 
-    ap = argparse.ArgumentParser(description="Validate analytics domain packs (spec 0081).")
+    ap = argparse.ArgumentParser(description="Validate and review analytics domain packs (spec 0081).")
     ap.add_argument("--root", default=".")
     ap.add_argument("--report", action="store_true", help="print the coverage report as JSON")
+    ap.add_argument("--review-sheet", metavar="FAMILY", help="print a Markdown review sheet for one family")
+    ap.add_argument("--mark-reviewed", metavar="PACK_ID", help="record a named review on one pack")
+    ap.add_argument("--reviewer", help="reviewer name for --mark-reviewed")
+    ap.add_argument("--date", help="review date (YYYY-MM-DD) for --mark-reviewed")
+    ap.add_argument("--notes", help="optional review notes for --mark-reviewed")
     args = ap.parse_args(argv)
+    if args.mark_reviewed:
+        try:
+            mark_reviewed(args.root, args.mark_reviewed, args.reviewer or "", args.date or "", args.notes)
+        except PackValidationError as exc:
+            print(f"refused: {exc}")
+            return 1
+        print(f"{args.mark_reviewed}: reviewed by {args.reviewer} on {args.date}")
+        return 0
     packs = load_packs(args.root)
+    if args.review_sheet:
+        print(review_sheet(packs, args.review_sheet), end="")
+        return 0
     findings = validate_catalog(packs, args.root)
     for f in findings:
         print(f)

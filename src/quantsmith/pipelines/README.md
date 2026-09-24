@@ -741,8 +741,9 @@ only code. Standard library only.
 | `can_sum`, `suppressed_insights` | REQ-003, REQ-011 | Additivity decides summing across dimensions/time; non-additive metrics never get contributor insights; rules only add suppressions. |
 | `select_packs` → `Selection` | REQ-004, REQ-005 | `sources/*.yml` domain tags select packs deterministically; cross-pack term conflicts surfaced; `all_reviewed` is the write-back gate. |
 | `coverage_report`, CLI | REQ-010 | Counts by family and review status; source tags that select no pack (info). |
+| `review_sheet`, `mark_reviewed`, `--review-sheet` / `--mark-reviewed` | REQ-012 | Per-family Markdown review sheet; one-pack named review that refuses empty names, bad dates, and packs that fail validation. |
 
-Tests: `tests/test_analytics_packs.py` (14 acceptance tests).
+Tests: `tests/test_analytics_packs.py` (16 acceptance tests).
 
 ```sh
 PYTHONPATH=src python3 -m quantsmith.pipelines.analytics_packs --report
