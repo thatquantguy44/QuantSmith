@@ -142,6 +142,15 @@ advisory-by-default deployment decision. The chain builds on
 > `reviewed` without a named credit-domain reviewer (see item 24 and the spec's
 > open questions).
 
+> ### Requested — Natural-language analytics (spec `0080`, Draft)
+>
+> Ask a data question in plain language; get back a governed chart, a grounded
+> interpretation, and — opt-in and approved — the insights published to a
+> database so tomorrow's "what changed since yesterday" can compare against
+> them. Requested by the owner as a priority item on 2026-09-24 and tracked as
+> item 29 and a P1 row in `docs/handoffs/future_features.md`. **The owner's
+> decision:** approve the spec, and rank it against the five priorities below.
+
 **Highest priority, in order: (1) the short-term-markets domain foundation,
 (2) the knowledge base, (3) scheduler monitoring, (4) prompt/context/harness
 engineering, (5) NLP/LLM quant text intelligence.** Everything else in this
@@ -266,7 +275,7 @@ designs**: create and
 approve one only when the foundation it consumes — `0063` or `0072` — has frozen
 that contract and the prior dependency named above is satisfied. Do not add
 agents merely to fill the map; prefer a canonical knowledge artifact or tested
-runtime that an existing agent can use. **Next unreserved spec number: `0080`.**
+runtime that an existing agent can use. **Next unreserved spec number: `0081`.**
 Reserving a number here does not create the directory; copy `templates/spec/`
 only when that slice becomes active.
 
@@ -345,8 +354,9 @@ manual-task persistence question stays deferred until a real consumer needs it.
      `DashboardSpec` now renders to **seven targets** — Power BI, Excel, React
      (`0015`/`0016`) and Streamlit, Looker, Superset, Qlik (`0018`) — each with a
      `tooling/` agent. **Open Data Analyst track:** executable emitters for
-     Looker/Superset/Qlik and a `powerbi_publish` provider (payload/agents exist), an
-     optional `analytics/data_visualization` agent, and optional continuous-metric /
+     Looker/Superset/Qlik and a `powerbi_publish` provider (payload/agents exist),
+     natural-language analytics (spec `0080`, Draft — item 29, which also promotes
+     the `analytics/data_visualization` agent), and optional continuous-metric /
      sequential experiment designs.
    - **Data Engineer — group fully staffed; two runtime nodes.** The
      `agents/data_engineering/` group now has all six agents: `pipeline_orchestration`
@@ -1400,6 +1410,35 @@ manual-task persistence question stays deferred until a real consumer needs it.
     workflow at `agents/credit_risk/README.md`, 10 acceptance tests in
     `tests/test_credit_risk_worked_example.py`.
 
+
+29. **Natural-language analytics — visualization, interpretation, and
+    write-back (spec `0080`, Draft; requested priority item).** The Data
+    Analyst track has governed metrics (`0008`), seven dashboard renderers
+    (`0014`–`0018`), storytelling, access control (`0058`), and replayable
+    agent runs (`0070`), but no path from a user's *question* to an answer.
+    `0080` defines one: an interpreter seam (deterministic keyword baseline;
+    LLM via `adapters/llm_runtime/` as a drop-in) turns the question into a
+    typed `QueryPlan` over governed metrics only — no SQL field exists — or
+    asks a clarification rather than guessing; `0058` clearance is checked
+    before execution with existence masking; the `0008` layer executes over a
+    caller-injected read-only reader bounded by as-of; a declared form rule
+    picks the chart (line/bar/KPI/scatter/table, Vega-Lite plus a Markdown
+    fallback, promotable to a `DashboardSpec` panel); a deterministic insight
+    set (level, change, contributors, trend, outliers, concentration) backs a
+    narrative whose every number must ground to a computed value. The answer
+    returns as a `ChatResponse`; **write-back** is opt-in, declared per target
+    in a write-back contract, dry-run by default, approval-gated,
+    append-only, idempotent, and reversible by run id through a
+    caller-injected writer — never touching source tables. Persisted
+    insights make "what changed since yesterday / this week" answerable
+    point-in-time, closing the multi-day gap `0055`/`0059` leave open. Adds
+    `agents/analytics/data_visualization/` (promoting the P3 backlog row) and
+    `agents/analytics/nl_analytics/`. **Status:** spec, plan, and tasks
+    written (14 REQ, 6 NFR, 22 AC, 19 tasks, all `todo`); nothing built.
+    **Next:** owner approval and answers to the spec's four open questions
+    (first write-back database, first chat surface, whether insights also
+    become `0048`/`0056` knowledge candidates, approval model), then T-001
+    onward.
 
 ## Open Questions For The Owner
 

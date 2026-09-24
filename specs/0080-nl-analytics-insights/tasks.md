@@ -1,0 +1,86 @@
+# Tasks: Natural-Language Analytics — Visualization, Interpretation, and Write-Back
+
+- **Spec:** 0080-nl-analytics-insights (`spec.md`, `plan.md`)
+- **Last updated:** 2026-09-24
+
+> Ordered, testable units of work. Every task cites the requirement(s) it advances
+> and carries a Definition of Done. No task without a requirement.
+
+## Definition of Done (applies to every task)
+
+- Code matches the plan; deviations noted in `plan.md`.
+- Standard library only; no new runtime dependency.
+- No network call, connection string, or credential anywhere in
+  `src/quantsmith/nl_analytics/` or its tests — reads, writes, and LLM calls
+  are caller-injected.
+- Tests exist in `tests/test_nl_analytics.py`, name their `AC-*`, and pass
+  deterministically.
+- Example data is synthetic and disclosed per `0025`.
+- Docs/configs updated alongside the change.
+
+## Task List
+
+| ID | Task | Covers | Status | Notes |
+| --- | --- | --- | --- | --- |
+| T-001 | `plan.py`: `QueryPlan`, `TimeWindow`, `Comparison`, `Filter` frozen dataclasses with canonical JSON; no SQL/code field. | REQ-001, AC-001 | todo | |
+| T-002 | `validate_plan` against the `0008` registry (metric, declared dimensions, filter values, window, grain) and `describe_plan` echo. | REQ-001, REQ-002, AC-001, AC-003 | todo | |
+| T-003 | `interpret.py`: `Interpreter` protocol, `Clarification`, `KeywordInterpreter` (synonyms, relative dates, declared defaults). | REQ-002, REQ-003, AC-002, AC-003 | todo | |
+| T-004 | Interpreter registration hook; stub-LLM test proving one validator for all interpreters. | REQ-003, AC-004 | todo | |
+| T-005 | `authorize.py`: clearance check via `0058`; existence masking in answers and clarifications. | REQ-004, AC-005 | todo | |
+| T-006 | `execute.py`: injected reader, as-of filter, row count, latest period, content hash. | REQ-005, NFR-001, NFR-002, AC-006 | todo | |
+| T-007 | `chart.py`: form rule, finding-first titles, units/labels/footnote/alt text, Vega-Lite and Markdown table, `to_panel` rendered via `0015`. | REQ-006, AC-007, AC-008 | todo | |
+| T-008 | `insights.py`: level, change, contributors, trend, outliers, concentration with the values each rests on. | REQ-007, AC-009 | todo | |
+| T-009 | `narrate.py`: template narrative, grounding validator (numbers, causal phrases), caveat triggers. | REQ-008, AC-010, AC-011 | todo | |
+| T-010 | `respond.py`: `answer()` entry point and `ChatResponse` with typed status for every path. | REQ-009, NFR-006, AC-012, AC-022 | todo | |
+| T-011 | `templates/data/writeback_contract.md` and contract loader/validator (targets, schema, key, allowed columns, source-table deny-list). | REQ-010, AC-013 | todo | |
+| T-012 | `writeback.py`: `build_records`, `publish` (dry-run default, approval, idempotency), `reverse` by run id (tombstone). | REQ-010, REQ-011, AC-014, AC-015 | todo | |
+| T-013 | `prior_insights` as-of lookup and `prior_insight` comparison kind. | REQ-012, NFR-002, AC-016 | todo | |
+| T-014 | Emit `0070` envelope and audit events per stage, with redaction and privacy-flag propagation; replay test. | REQ-013, NFR-001, NFR-004, AC-017, AC-020 | todo | |
+| T-015 | Agents `agents/analytics/data_visualization/` and `agents/analytics/nl_analytics/` (four files each, `Spec-Driven Role`), catalog rows, group README handoffs. | REQ-014, AC-018 | todo | |
+| T-016 | Import/source scan test (stdlib only, no credentials or network) and privacy test. | NFR-003, NFR-004, AC-019, AC-020 | todo | |
+| T-017 | 100k-row benchmark test. | NFR-005, AC-021 | todo | |
+| T-018 | `cli.py` and `examples/nl_analytics/` (synthetic three-day transcript, sqlite3 reference writer, committed sample response) plus `docs/0080_synthetic_data_disclosure.md`. | REQ-009, REQ-012 | todo | |
+| T-019 | Update `specs/README.md`, `src/quantsmith/pipelines/README.md` or package README, `docs/handoff.md`, `docs/handoffs/future_features.md`, and `CHANGELOG.md` on ship. | REQ-014 | todo | |
+
+Status values: `todo` | `in-progress` | `blocked` | `done`.
+
+## Test Coverage Map
+
+Every acceptance criterion must be named by at least one test.
+
+| Acceptance criterion | Test(s) | Status |
+| --- | --- | --- |
+| AC-001 | `test_ac001_plan_is_governed_and_has_no_sql_field` | todo |
+| AC-002 | `test_ac002_unknown_metric_returns_clarification` | todo |
+| AC-003 | `test_ac003_default_window_applied_and_echoed` | todo |
+| AC-004 | `test_ac004_llm_interpreter_shares_validator` | todo |
+| AC-005 | `test_ac005_restricted_metric_is_masked` | todo |
+| AC-006 | `test_ac006_execute_respects_as_of_and_hashes` | todo |
+| AC-007 | `test_ac007_form_rule_by_result_shape` | todo |
+| AC-008 | `test_ac008_chart_promotes_to_panel_and_renders` | todo |
+| AC-009 | `test_ac009_insights_match_hand_computed` | todo |
+| AC-010 | `test_ac010_grounding_rejects_unbacked_numbers_and_flags_causal` | todo |
+| AC-011 | `test_ac011_caveats_triggered` | todo |
+| AC-012 | `test_ac012_chat_response_complete` | todo |
+| AC-013 | `test_ac013_writeback_contract_rejections` | todo |
+| AC-014 | `test_ac014_dry_run_default_and_idempotent_commit` | todo |
+| AC-015 | `test_ac015_approval_required_and_reversal_by_run_id` | todo |
+| AC-016 | `test_ac016_since_yesterday_uses_prior_insight_as_of` | todo |
+| AC-017 | `test_ac017_replay_is_byte_identical` | todo |
+| AC-018 | agent-contract + `agent-catalog` gates | todo |
+| AC-019 | `test_ac019_stdlib_only_no_credentials_or_network` | todo |
+| AC-020 | `test_ac020_audit_redaction_and_privacy_flags` | todo |
+| AC-021 | `test_ac021_benchmark_100k_rows` | todo |
+| AC-022 | `test_ac022_typed_status_on_every_failure_path` | todo |
+
+## Follow-ups
+
+Tracked work intentionally deferred (no silent "temporary" shortcuts — P8).
+
+- Provider adapter for the first real write-back database (after the owner
+  names it).
+- Chat-surface adapter (Claude chat / Slack / `0057` console `QueryEngine`).
+- Multi-metric plans beyond a two-measure scatter.
+- Non-additive metric contribution (distinct counts, medians) — depends on
+  `0008`'s own follow-up.
+- Promoting persisted insights into `0048`/`0056` knowledge candidates.
