@@ -8,7 +8,8 @@ full `specs/NNNN-slug/` when work starts (see `docs/handoffs/README.md`).
 
 > **Top priority (owner, 2026-09-24):** natural-language analytics, spec
 > `specs/0080-nl-analytics-insights/` — the `analytics/nl_analytics` and
-> `analytics/data_visualization` rows below. It comes before every other P0.
+> `analytics/data_visualization` rows below, and its domain packs (spec
+> `specs/0081-analytics-domain-packs/`). It comes before every other P0.
 
 ## Agents
 
@@ -29,6 +30,7 @@ full `specs/NNNN-slug/` when work starts (see `docs/handoffs/README.md`).
 | `adapters/dashboard_render/` provider implementations | Executable providers behind the contract. Shipped: `scaffold_react`, `write_xlsx` (specs `0017`), and `scaffold_streamlit` (`0018`). Remaining: `powerbi_publish`, Looker/Superset/Qlik emitters, and a hosted-deploy step | P2 | in-progress |
 | `agents/analytics/data_visualization/` | Single-chart encoding/color/accessibility, split from `dashboard_design`. **Promoted into spec `specs/0080-nl-analytics-insights/`** (Draft), which owns chart choice via a declared form rule | P0 | in-progress |
 | `agents/analytics/nl_analytics/` + `src/quantsmith/nl_analytics/` | Natural-language data questions → governed `QueryPlan` (no free-form SQL) → chart + grounded insights → chat response and/or approved, append-only, reversible database write-back; persisted insights answer multi-day "what changed since yesterday" questions. Spec `specs/0080-nl-analytics-insights/` (Draft, ranked #1 priority by the owner 2026-09-24) | P0 | in-progress |
+| `knowledge/analytics_packs/` (40 analytics domain packs) | Pluggable financial-services domain knowledge for `0080`, selected by `sources/*.yml` domain tags: vocabulary, units, additivity, suppress-only insight rules, caveats, chart conventions, reviewer agents, golden cases. **Shipped** as drafts with validator and tests (spec `specs/0081-analytics-domain-packs/`). Remaining: named review per family | P0 | in-progress |
 | `agents/alerts/alert_policy/` | Threshold, anomaly, composite, and missing-event policies with severity, suppression, cooldown, and market-calendar rules. **Shipped**: agent + `instructions/alerting.md` + spec `specs/0020-alerting/` + tested runtime `src/quantsmith/pipelines/alerting.py` (`evaluate_policies`) | P1 | done |
 | `agents/alerts/alert_router/` | Ownership, deduplication, grouping, rate limits, escalation, and channel selection. **Shipped**: agent + `route` (spec `0020`); delivery via `adapters/alert_delivery/` | P1 | done |
 | `agents/alerts/incident_notification/` | Actionable notifications, acknowledgement/recovery lifecycle, evidence and runbook links. **Shipped**: agent (spec `0020`) | P1 | done |

@@ -1,0 +1,181 @@
+{
+  "schema_version": "0081.1",
+  "pack_id": "mortgages_home_lending",
+  "name": "Mortgages & Home Lending",
+  "family": "business_line",
+  "description": "Residential mortgage and home-equity origination, servicing, prepayment, and credit performance.",
+  "source_domains": [
+    "mortgages",
+    "home_lending",
+    "residential_real_estate"
+  ],
+  "builds_on": [
+    "knowledge/credit_risk"
+  ],
+  "reviewer_agents": [
+    "agents/risk",
+    "agents/asset_classes/fixed_income_rates"
+  ],
+  "dimensions": [
+    {
+      "name": "loan_type",
+      "description": "Conforming, jumbo, FHA/VA, HELOC",
+      "synonyms": [
+        "program"
+      ]
+    },
+    {
+      "name": "purpose",
+      "description": "Purchase, rate/term refi, cash-out refi",
+      "synonyms": []
+    },
+    {
+      "name": "ltv_band",
+      "description": "Loan-to-value band",
+      "synonyms": [
+        "LTV bucket"
+      ]
+    },
+    {
+      "name": "vintage",
+      "description": "Origination cohort",
+      "synonyms": []
+    }
+  ],
+  "metrics": [
+    {
+      "name": "origination_volume",
+      "description": "Funded loan amount in the period",
+      "unit": "currency",
+      "additivity": "additive",
+      "synonyms": [
+        "originations",
+        "fundings"
+      ]
+    },
+    {
+      "name": "servicing_upb",
+      "description": "Unpaid principal balance serviced at a point in time",
+      "unit": "currency",
+      "additivity": "semi_additive",
+      "synonyms": [
+        "UPB",
+        "servicing portfolio"
+      ]
+    },
+    {
+      "name": "cpr",
+      "description": "Conditional prepayment rate, annualized",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "prepayment speed"
+      ]
+    },
+    {
+      "name": "ltv",
+      "description": "Loan amount divided by property value",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "loan to value"
+      ]
+    },
+    {
+      "name": "dti",
+      "description": "Monthly debt payments divided by gross monthly income",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "debt to income"
+      ]
+    },
+    {
+      "name": "serious_delinquency_rate",
+      "description": "Share of loans 90+ days past due or in foreclosure",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "SDQ",
+        "90+ DPD"
+      ]
+    },
+    {
+      "name": "pull_through_rate",
+      "description": "Funded loans divided by locked applications",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "pull-through"
+      ]
+    }
+  ],
+  "conventions": [
+    {
+      "id": "conv.cpr_smm",
+      "rule": "CPR = 1 - (1 - SMM)^12; state whether a speed is CPR or monthly SMM."
+    },
+    {
+      "id": "conv.ltv_basis",
+      "rule": "State whether LTV uses origination or current (marked) property value, and whether it is combined (CLTV)."
+    },
+    {
+      "id": "conv.count_vs_upb",
+      "rule": "Delinquency can be measured by loan count or by balance; state which."
+    }
+  ],
+  "insight_rules": [
+    {
+      "id": "ir.cpr_no_contrib",
+      "applies_to": "cpr",
+      "suppress_kinds": [
+        "contributor",
+        "concentration"
+      ],
+      "reason": "Prepayment speeds are rates; attribute via prepaid principal instead."
+    }
+  ],
+  "caveats": [
+    {
+      "id": "cv.rate_driven",
+      "trigger": "metric:origination_volume",
+      "text": "Origination and refinance volumes are driven by the rate environment; pair with the mortgage rate series before attributing change to the business."
+    }
+  ],
+  "chart_conventions": [
+    {
+      "id": "ch.speeds",
+      "rule": "Plot prepayment speeds as lines by coupon or vintage; do not stack them."
+    }
+  ],
+  "golden_cases": [
+    {
+      "id": "g.orig_time",
+      "kind": "additivity",
+      "metric": "origination_volume",
+      "across": "time",
+      "allowed": true
+    },
+    {
+      "id": "g.upb_time",
+      "kind": "additivity",
+      "metric": "servicing_upb",
+      "across": "time",
+      "allowed": false
+    },
+    {
+      "id": "g.ltv",
+      "kind": "ratio",
+      "numerator": 400000,
+      "denominator": 500000,
+      "scale": 100,
+      "expected": 80.0
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewer": null,
+    "reviewed_on": null,
+    "notes": "Drafted from public, general industry conventions; not yet reviewed by a named domain owner."
+  }
+}

@@ -1,0 +1,126 @@
+{
+  "schema_version": "0081.1",
+  "pack_id": "climate_esg_risk",
+  "name": "Climate & ESG Risk",
+  "family": "risk",
+  "description": "Financed emissions, physical and transition risk exposure, and sustainability metrics.",
+  "source_domains": [
+    "climate",
+    "esg"
+  ],
+  "builds_on": [],
+  "reviewer_agents": [
+    "agents/risk",
+    "agents/research_analyst"
+  ],
+  "dimensions": [
+    {
+      "name": "sector",
+      "description": "Borrower or issuer sector",
+      "synonyms": []
+    },
+    {
+      "name": "scope",
+      "description": "Emissions scope (1, 2, 3)",
+      "synonyms": []
+    },
+    {
+      "name": "hazard",
+      "description": "Physical hazard type",
+      "synonyms": []
+    }
+  ],
+  "metrics": [
+    {
+      "name": "financed_emissions",
+      "description": "Attributed tCO2e using the stated attribution method",
+      "unit": "quantity",
+      "additivity": "additive",
+      "synonyms": [
+        "financed emissions"
+      ]
+    },
+    {
+      "name": "emissions_intensity",
+      "description": "Financed emissions per unit of exposure or revenue",
+      "unit": "ratio",
+      "additivity": "non_additive",
+      "synonyms": [
+        "carbon intensity"
+      ]
+    },
+    {
+      "name": "exposure_to_high_risk_sectors",
+      "description": "Exposure to sectors flagged as high transition risk",
+      "unit": "currency",
+      "additivity": "semi_additive",
+      "synonyms": [
+        "carbon-related exposure"
+      ]
+    },
+    {
+      "name": "data_quality_score",
+      "description": "Weighted emissions data-quality score",
+      "unit": "score",
+      "additivity": "non_additive",
+      "synonyms": [
+        "PCAF score"
+      ]
+    }
+  ],
+  "conventions": [
+    {
+      "id": "conv.attribution",
+      "rule": "State the attribution method (e.g., PCAF) and the data vintage."
+    },
+    {
+      "id": "conv.scopes",
+      "rule": "Never add scope 3 to scope 1 and 2 without labeling it; scope 3 double-counts across entities."
+    }
+  ],
+  "insight_rules": [
+    {
+      "id": "ir.intensity",
+      "applies_to": "emissions_intensity",
+      "suppress_kinds": [
+        "contributor"
+      ],
+      "reason": "Attribute via emissions and denominator separately."
+    }
+  ],
+  "caveats": [
+    {
+      "id": "cv.estimates",
+      "trigger": "always",
+      "text": "Much emissions data is estimated rather than reported; show the data-quality score beside results."
+    }
+  ],
+  "chart_conventions": [
+    {
+      "id": "ch.sector",
+      "rule": "Show emissions and exposure side by side by sector; they rank differently."
+    }
+  ],
+  "golden_cases": [
+    {
+      "id": "g.fe_dim",
+      "kind": "additivity",
+      "metric": "financed_emissions",
+      "across": "dimension",
+      "allowed": true
+    },
+    {
+      "id": "g.int_dim",
+      "kind": "additivity",
+      "metric": "emissions_intensity",
+      "across": "dimension",
+      "allowed": false
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewer": null,
+    "reviewed_on": null,
+    "notes": "Drafted from public, general industry conventions; not yet reviewed by a named domain owner."
+  }
+}

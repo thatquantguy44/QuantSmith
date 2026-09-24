@@ -1,0 +1,138 @@
+{
+  "schema_version": "0081.1",
+  "pack_id": "digital_assets",
+  "name": "Digital Assets",
+  "family": "markets",
+  "description": "Cryptoassets and tokenized instruments: prices, volumes, venues, and custody.",
+  "source_domains": [
+    "digital_assets",
+    "crypto"
+  ],
+  "builds_on": [
+    "specs/0022-asset-class-mechanics-agents"
+  ],
+  "reviewer_agents": [
+    "agents/asset_classes/digital_assets",
+    "agents/risk"
+  ],
+  "dimensions": [
+    {
+      "name": "asset",
+      "description": "Token or coin",
+      "synonyms": [
+        "coin",
+        "token"
+      ]
+    },
+    {
+      "name": "venue",
+      "description": "Exchange or venue",
+      "synonyms": [
+        "exchange"
+      ]
+    },
+    {
+      "name": "chain",
+      "description": "Blockchain network",
+      "synonyms": []
+    }
+  ],
+  "metrics": [
+    {
+      "name": "price",
+      "description": "Reference price at a point in time",
+      "unit": "currency",
+      "additivity": "non_additive",
+      "synonyms": [
+        "spot"
+      ]
+    },
+    {
+      "name": "volume",
+      "description": "Traded value in the period",
+      "unit": "currency",
+      "additivity": "additive",
+      "synonyms": [
+        "trading volume"
+      ]
+    },
+    {
+      "name": "realized_volatility",
+      "description": "Annualized standard deviation of returns",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "vol"
+      ]
+    },
+    {
+      "name": "holdings",
+      "description": "Units held at a point in time",
+      "unit": "quantity",
+      "additivity": "semi_additive",
+      "synonyms": [
+        "position"
+      ]
+    }
+  ],
+  "conventions": [
+    {
+      "id": "conv.24x7",
+      "rule": "Markets trade 24/7; annualize with 365 days and state the daily cut-off time (e.g., 00:00 UTC)."
+    },
+    {
+      "id": "conv.reference_price",
+      "rule": "Venue prices differ; name the reference price or index."
+    },
+    {
+      "id": "conv.volume_quality",
+      "rule": "Reported volumes on some venues are unreliable; prefer vetted venue sets."
+    }
+  ],
+  "insight_rules": [
+    {
+      "id": "ir.price",
+      "applies_to": "price",
+      "suppress_kinds": [
+        "contributor",
+        "concentration"
+      ],
+      "reason": "Prices are not additive across assets."
+    }
+  ],
+  "caveats": [
+    {
+      "id": "cv.venue",
+      "trigger": "dimension:venue",
+      "text": "Cross-venue comparisons are affected by fragmented liquidity and inconsistent reporting."
+    }
+  ],
+  "chart_conventions": [
+    {
+      "id": "ch.log",
+      "rule": "Use log scale for long price histories."
+    }
+  ],
+  "golden_cases": [
+    {
+      "id": "g.vol_dim",
+      "kind": "additivity",
+      "metric": "volume",
+      "across": "dimension",
+      "allowed": true
+    },
+    {
+      "id": "g.price_dim",
+      "kind": "additivity",
+      "metric": "price",
+      "across": "dimension",
+      "allowed": false
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewer": null,
+    "reviewed_on": null,
+    "notes": "Drafted from public, general industry conventions; not yet reviewed by a named domain owner."
+  }
+}

@@ -1,0 +1,166 @@
+{
+  "schema_version": "0081.1",
+  "pack_id": "aml_financial_crime",
+  "name": "AML & Financial Crime Compliance",
+  "family": "control_compliance",
+  "description": "Transaction monitoring, sanctions screening, KYC, and suspicious activity reporting.",
+  "source_domains": [
+    "aml",
+    "sanctions",
+    "kyc",
+    "financial_crime"
+  ],
+  "builds_on": [],
+  "reviewer_agents": [
+    "agents/risk",
+    "agents/alerts/alert_policy"
+  ],
+  "dimensions": [
+    {
+      "name": "scenario",
+      "description": "Monitoring rule or scenario",
+      "synonyms": [
+        "rule"
+      ]
+    },
+    {
+      "name": "customer_risk_rating",
+      "description": "Customer risk rating",
+      "synonyms": []
+    },
+    {
+      "name": "jurisdiction",
+      "description": "Jurisdiction",
+      "synonyms": []
+    },
+    {
+      "name": "queue",
+      "description": "Investigation queue",
+      "synonyms": []
+    }
+  ],
+  "metrics": [
+    {
+      "name": "alerts_generated",
+      "description": "Monitoring alerts generated in the period",
+      "unit": "count",
+      "additivity": "additive",
+      "synonyms": [
+        "alerts"
+      ]
+    },
+    {
+      "name": "alert_to_case_rate",
+      "description": "Alerts escalated to cases divided by alerts",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "escalation rate"
+      ]
+    },
+    {
+      "name": "false_positive_rate",
+      "description": "Alerts closed without escalation divided by alerts",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "FP rate"
+      ]
+    },
+    {
+      "name": "sars_filed",
+      "description": "Suspicious activity reports filed in the period",
+      "unit": "count",
+      "additivity": "additive",
+      "synonyms": [
+        "SARs"
+      ]
+    },
+    {
+      "name": "kyc_overdue",
+      "description": "Customers past their KYC refresh date",
+      "unit": "count",
+      "additivity": "semi_additive",
+      "synonyms": [
+        "overdue refreshes"
+      ]
+    },
+    {
+      "name": "alert_backlog",
+      "description": "Open alerts at a point in time",
+      "unit": "count",
+      "additivity": "semi_additive",
+      "synonyms": [
+        "backlog"
+      ]
+    }
+  ],
+  "conventions": [
+    {
+      "id": "conv.confidential",
+      "rule": "SAR existence and content are legally confidential; never surface individual SARs or customer identities in analytics."
+    },
+    {
+      "id": "conv.tuning",
+      "rule": "Alert volumes change when scenarios are tuned; mark tuning dates on trends."
+    }
+  ],
+  "insight_rules": [
+    {
+      "id": "ir.no_outlier_people",
+      "applies_to": "*",
+      "suppress_kinds": [
+        "outlier"
+      ],
+      "reason": "Outlier detection on individual customers is investigation work, not reporting; report at scenario or segment level."
+    }
+  ],
+  "caveats": [
+    {
+      "id": "cv.restricted",
+      "trigger": "always",
+      "text": "Financial-crime data is typically restricted; responses are aggregated and access-checked."
+    },
+    {
+      "id": "cv.tuning",
+      "trigger": "metric:alerts_generated",
+      "text": "Scenario tuning, not risk, may explain a volume change."
+    }
+  ],
+  "chart_conventions": [
+    {
+      "id": "ch.funnel",
+      "rule": "Show the alert-to-case-to-SAR funnel as a bar funnel with conversion rates."
+    }
+  ],
+  "golden_cases": [
+    {
+      "id": "g.alerts_time",
+      "kind": "additivity",
+      "metric": "alerts_generated",
+      "across": "time",
+      "allowed": true
+    },
+    {
+      "id": "g.backlog_time",
+      "kind": "additivity",
+      "metric": "alert_backlog",
+      "across": "time",
+      "allowed": false
+    },
+    {
+      "id": "g.fp",
+      "kind": "ratio",
+      "numerator": 950,
+      "denominator": 1000,
+      "scale": 100,
+      "expected": 95.0
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewer": null,
+    "reviewed_on": null,
+    "notes": "Drafted from public, general industry conventions; not yet reviewed by a named domain owner."
+  }
+}

@@ -1,0 +1,173 @@
+{
+  "schema_version": "0081.1",
+  "pack_id": "asset_management",
+  "name": "Asset Management",
+  "family": "business_line",
+  "description": "Funds and mandates: AUM, flows, fees, and investment performance versus benchmark.",
+  "source_domains": [
+    "asset_management",
+    "funds"
+  ],
+  "builds_on": [],
+  "reviewer_agents": [
+    "agents/portfolio_management/performance_attribution",
+    "agents/portfolio_management/monitoring_governance"
+  ],
+  "dimensions": [
+    {
+      "name": "strategy",
+      "description": "Investment strategy or fund",
+      "synonyms": [
+        "fund",
+        "product"
+      ]
+    },
+    {
+      "name": "vehicle",
+      "description": "Mutual fund, ETF, separate account, private fund",
+      "synonyms": []
+    },
+    {
+      "name": "asset_class",
+      "description": "Equity, fixed income, multi-asset, alternatives",
+      "synonyms": []
+    },
+    {
+      "name": "share_class",
+      "description": "Fund share class",
+      "synonyms": []
+    }
+  ],
+  "metrics": [
+    {
+      "name": "aum",
+      "description": "Assets under management at a point in time",
+      "unit": "currency",
+      "additivity": "semi_additive",
+      "synonyms": [
+        "assets under management"
+      ]
+    },
+    {
+      "name": "net_flows",
+      "description": "Subscriptions minus redemptions in the period",
+      "unit": "currency",
+      "additivity": "additive",
+      "synonyms": [
+        "flows",
+        "net sales"
+      ]
+    },
+    {
+      "name": "management_fee_rate",
+      "description": "Annualized management fees divided by average AUM",
+      "unit": "bps",
+      "additivity": "non_additive",
+      "synonyms": [
+        "fee rate",
+        "expense ratio"
+      ]
+    },
+    {
+      "name": "excess_return",
+      "description": "Portfolio return minus benchmark return over the period",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "alpha",
+        "active return"
+      ]
+    },
+    {
+      "name": "tracking_error",
+      "description": "Annualized standard deviation of excess returns",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "TE",
+        "active risk"
+      ]
+    },
+    {
+      "name": "information_ratio",
+      "description": "Annualized excess return divided by tracking error",
+      "unit": "ratio",
+      "additivity": "non_additive",
+      "synonyms": [
+        "IR"
+      ]
+    }
+  ],
+  "conventions": [
+    {
+      "id": "conv.return_basis",
+      "rule": "State gross or net of fees, the currency, and time-weighted or money-weighted returns."
+    },
+    {
+      "id": "conv.compounding",
+      "rule": "Multi-period returns compound geometrically; never add period returns."
+    },
+    {
+      "id": "conv.benchmark",
+      "rule": "Excess return is always against the mandate's stated benchmark for the same period."
+    }
+  ],
+  "insight_rules": [
+    {
+      "id": "ir.returns",
+      "applies_to": "excess_return",
+      "suppress_kinds": [
+        "contributor"
+      ],
+      "reason": "Use a performance attribution (allocation, selection) instead of additive contribution of returns."
+    }
+  ],
+  "caveats": [
+    {
+      "id": "cv.survivorship",
+      "trigger": "dimension:strategy",
+      "text": "Closed or merged funds drop out of databases; averages across funds can be survivorship-biased."
+    },
+    {
+      "id": "cv.short_window",
+      "trigger": "metric:information_ratio",
+      "text": "Risk-adjusted ratios over short windows are statistically weak; state the window length."
+    }
+  ],
+  "chart_conventions": [
+    {
+      "id": "ch.growth_of_1",
+      "rule": "Show cumulative performance as growth of 1 (or 100) against the benchmark on the same axis."
+    }
+  ],
+  "golden_cases": [
+    {
+      "id": "g.aum_time",
+      "kind": "additivity",
+      "metric": "aum",
+      "across": "time",
+      "allowed": false
+    },
+    {
+      "id": "g.flows_time",
+      "kind": "additivity",
+      "metric": "net_flows",
+      "across": "time",
+      "allowed": true
+    },
+    {
+      "id": "g.ir",
+      "kind": "ratio",
+      "numerator": 2.0,
+      "denominator": 4.0,
+      "scale": 1,
+      "expected": 0.5
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewer": null,
+    "reviewed_on": null,
+    "notes": "Drafted from public, general industry conventions; not yet reviewed by a named domain owner."
+  }
+}

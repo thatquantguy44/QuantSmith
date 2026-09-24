@@ -97,6 +97,9 @@ It supports two decisions: *what does the data say about my question right now*
 | REQ-011 | A non-dry-run write shall require an explicit approval on the request unless the target's contract declares `auto_approve: true`; every committed write batch shall be reversible by run id through the same injected writer. | must |
 | REQ-012 | A question may compare against persisted prior insights ("since yesterday", "vs last week's answer"); the comparison shall read the write-back store as-of the request and shall never modify persisted history. | should |
 | REQ-013 | Every request shall emit a `0070` run envelope (context manifest; prompt manifest when an LLM is used; audit events for interpret, validate, execute, chart, interpret-insights, narrate, deliver, write) sufficient for the `0070` replay engine to reproduce the plan, result, chart spec, and insight set. | must |
+| REQ-015 | The system shall apply the analytics domain packs (`0081`) selected by the dataset's `sources/*.yml` domain tags: pack vocabulary extends interpretation, pack units and conventions govern display (e.g. basis points for yield moves), pack additivity governs aggregation and contributor insights, and pack caveats and chart conventions are added to the response. A term that is a conflict between selected packs yields a clarification. | must |
+| REQ-016 | When any applied pack is not `reviewed`, the response shall carry an "unreviewed domain pack" caveat naming it, and database write-back shall be refused; write-back is eligible only when every applied pack is `reviewed` (`0081` REQ-005). | must |
+| REQ-017 | When no pack matches, the system shall use generic behavior (unit and additivity taken from the `0008` definition only) and say so in the response; packs may only restrict interpretation, never widen access or enable an insight the generic rules forbid. | must |
 | REQ-014 | The SDK shall add two narrow agents: `agents/analytics/data_visualization/` (chart choice, encoding, color, accessibility — promoting the `proposed` backlog row) and `agents/analytics/nl_analytics/` (question → plan → response orchestration, clarification, write-back request), each handing off to `metrics_semantic_layer`, `data_storytelling`, and `sql-integration-agent` rather than duplicating them. | must |
 
 ## Non-Functional Requirements
@@ -135,6 +138,10 @@ It supports two decisions: *what does the data say about my question right now*
 | AC-019 | Given the runtime package, when its imports and source are scanned, then it imports only the standard library and in-repo modules, and contains no connection string, credential, or network call. | NFR-003 |
 | AC-020 | Given a request against a dataset classified `contains_pii`, when audit events are emitted, then they contain hashes and redacted text only, and an LLM adapter request built for it carries `contains_pii: true`. | NFR-004 |
 | AC-021 | Given 100,000 synthetic fact rows, when the deterministic path runs end-to-end, then it completes in under 2 s (benchmark test, skipped in CI with a recorded reason if the runner is under-provisioned). | NFR-005 |
+| AC-023 | Given a rates dataset tagged `fixed_income_rates` and a yield moving from 4.00% to 4.20%, when answered, then the change is reported as +20 bp (not +5%), and a question about `var` under `market_risk` produces no contributor insight and no cross-desk sum. | REQ-015 |
+| AC-024 | Given a dataset tagged `equities` and `fx` and the question "vol by pair", when interpreted, then the response is `clarification_needed` naming both candidate metrics. | REQ-015, REQ-002 |
+| AC-025 | Given only `draft` packs applied, when answered, then the unreviewed caveat names each pack and a write-back request is rejected with that reason; with all applied packs `reviewed`, the same write-back proceeds to its normal checks. | REQ-016 |
+| AC-026 | Given a dataset whose tags select no pack, when answered, then the response states generic behavior was used; given any pack, the set of permitted insights is a subset of the generic set. | REQ-017 |
 | AC-022 | Given each failure path (clarification, masked, empty result, stale data, write rejected), when a response is returned, then it carries a typed status and a non-empty reason, and no chart spec is attached to a non-answer. | NFR-006 |
 
 ## Data & Dependencies
@@ -147,6 +154,9 @@ It supports two decisions: *what does the data say about my question right now*
   The SDK never opens a connection.
 - **Access:** `0058` `access_control` clearance resolution and
   `access_level_allows`.
+- **Domain knowledge:** `0081` analytics domain packs
+  (`knowledge/analytics_packs/`, `analytics_packs.select_packs`,
+  `can_sum`, `suppressed_insights`), selected by `sources/*.yml` domain tags.
 - **Charts:** `dashboard_spec.CHART_TYPES` and `Panel` (`0014`/`0047`);
   renderers `0015`–`0018` downstream.
 - **Narrative:** `instructions/data_storytelling.md` (situation → insight →

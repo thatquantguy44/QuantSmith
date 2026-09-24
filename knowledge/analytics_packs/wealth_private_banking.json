@@ -1,0 +1,150 @@
+{
+  "schema_version": "0081.1",
+  "pack_id": "wealth_private_banking",
+  "name": "Wealth Management & Private Banking",
+  "family": "business_line",
+  "description": "Advisory and brokerage assets, flows, fee rates, and lending to high-net-worth clients.",
+  "source_domains": [
+    "wealth_management",
+    "private_banking"
+  ],
+  "builds_on": [],
+  "reviewer_agents": [
+    "agents/portfolio_management/performance_attribution",
+    "agents/risk"
+  ],
+  "dimensions": [
+    {
+      "name": "client_tier",
+      "description": "Client asset tier",
+      "synonyms": [
+        "segment"
+      ]
+    },
+    {
+      "name": "account_type",
+      "description": "Advisory, brokerage, trust, lending",
+      "synonyms": []
+    },
+    {
+      "name": "advisor_team",
+      "description": "Advisor or team",
+      "synonyms": []
+    }
+  ],
+  "metrics": [
+    {
+      "name": "client_assets",
+      "description": "Client assets (AUM plus AUA) at a point in time",
+      "unit": "currency",
+      "additivity": "semi_additive",
+      "synonyms": [
+        "total client assets",
+        "AUM",
+        "AUA"
+      ]
+    },
+    {
+      "name": "net_new_assets",
+      "description": "Client inflows minus outflows in the period, excluding market moves",
+      "unit": "currency",
+      "additivity": "additive",
+      "synonyms": [
+        "NNA",
+        "net flows"
+      ]
+    },
+    {
+      "name": "fee_rate",
+      "description": "Annualized advisory fees divided by average fee-based assets",
+      "unit": "bps",
+      "additivity": "non_additive",
+      "synonyms": [
+        "ROA",
+        "fee yield"
+      ]
+    },
+    {
+      "name": "advisor_count",
+      "description": "Advisors at a point in time",
+      "unit": "count",
+      "additivity": "semi_additive",
+      "synonyms": [
+        "headcount"
+      ]
+    },
+    {
+      "name": "client_lending_balances",
+      "description": "Securities-based and mortgage lending to clients",
+      "unit": "currency",
+      "additivity": "semi_additive",
+      "synonyms": [
+        "SBL",
+        "loans"
+      ]
+    }
+  ],
+  "conventions": [
+    {
+      "id": "conv.flows_vs_market",
+      "rule": "Separate asset change into net new assets and market movement; never report a market-driven rise as growth."
+    },
+    {
+      "id": "conv.aum_aua",
+      "rule": "AUM (discretionary) and AUA (custody/brokerage) earn different fees; label which."
+    }
+  ],
+  "insight_rules": [
+    {
+      "id": "ir.fee_rate",
+      "applies_to": "fee_rate",
+      "suppress_kinds": [
+        "contributor"
+      ],
+      "reason": "Fee rate is balance-weighted; decompose into pricing and mix effects."
+    }
+  ],
+  "caveats": [
+    {
+      "id": "cv.market_beta",
+      "trigger": "metric:client_assets",
+      "text": "Client assets move with markets; pair with a market index before attributing change to the business."
+    }
+  ],
+  "chart_conventions": [
+    {
+      "id": "ch.bridge",
+      "rule": "Show asset change as a bridge (waterfall-style table): opening, net new assets, market, other, closing."
+    }
+  ],
+  "golden_cases": [
+    {
+      "id": "g.nna_time",
+      "kind": "additivity",
+      "metric": "net_new_assets",
+      "across": "time",
+      "allowed": true
+    },
+    {
+      "id": "g.assets_time",
+      "kind": "additivity",
+      "metric": "client_assets",
+      "across": "time",
+      "allowed": false
+    },
+    {
+      "id": "g.fee_rate",
+      "kind": "ratio",
+      "numerator": 0.7,
+      "denominator": 100,
+      "scale": 10000,
+      "expected": 70.0
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewer": null,
+    "reviewed_on": null,
+    "notes": "Drafted from public, general industry conventions; not yet reviewed by a named domain owner."
+  }
+}

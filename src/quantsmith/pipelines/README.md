@@ -727,3 +727,24 @@ Tests: `tests/test_mcp_servers.py` (one test per acceptance criterion, 20 total)
 ```sh
 PYTHONPATH=src python3 -m pytest tests/test_mcp_servers.py -q
 ```
+
+## `analytics_packs.py` — spec `0081`
+
+Validates, selects, and interprets the analytics domain packs in
+`knowledge/analytics_packs/` (40 packs, seven families) that natural-language
+analytics (`0080`) applies by data type. Packs are data; this module is the
+only code. Standard library only.
+
+| Component | Spec | What it guarantees |
+| --- | --- | --- |
+| `validate_pack` / `validate_catalog` | REQ-001–REQ-003, REQ-005–REQ-009 | Required fields and schema version; unit/additivity vocabularies; rate-like units non-additive unless justified; insight-rule and caveat targets exist; golden cases recomputed; `reviewed` needs a named reviewer and date; reviewer agents and `builds_on` paths exist; every family covered; README lists every pack. |
+| `can_sum`, `suppressed_insights` | REQ-003, REQ-011 | Additivity decides summing across dimensions/time; non-additive metrics never get contributor insights; rules only add suppressions. |
+| `select_packs` → `Selection` | REQ-004, REQ-005 | `sources/*.yml` domain tags select packs deterministically; cross-pack term conflicts surfaced; `all_reviewed` is the write-back gate. |
+| `coverage_report`, CLI | REQ-010 | Counts by family and review status; source tags that select no pack (info). |
+
+Tests: `tests/test_analytics_packs.py` (14 acceptance tests).
+
+```sh
+PYTHONPATH=src python3 -m quantsmith.pipelines.analytics_packs --report
+PYTHONPATH=src python3 -m pytest tests/test_analytics_packs.py -q
+```

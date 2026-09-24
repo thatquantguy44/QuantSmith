@@ -1,0 +1,161 @@
+{
+  "schema_version": "0081.1",
+  "pack_id": "insurance",
+  "name": "Insurance",
+  "family": "business_line",
+  "description": "Property & casualty and life insurance underwriting, claims, and reserves.",
+  "source_domains": [
+    "insurance",
+    "underwriting"
+  ],
+  "builds_on": [],
+  "reviewer_agents": [
+    "agents/risk",
+    "agents/modeling"
+  ],
+  "dimensions": [
+    {
+      "name": "line_of_business",
+      "description": "Line of business (auto, home, commercial, life, annuity)",
+      "synonyms": [
+        "LOB"
+      ]
+    },
+    {
+      "name": "accident_year",
+      "description": "Accident or underwriting year",
+      "synonyms": [
+        "AY"
+      ]
+    },
+    {
+      "name": "region",
+      "description": "Geography",
+      "synonyms": []
+    }
+  ],
+  "metrics": [
+    {
+      "name": "gross_written_premium",
+      "description": "Premiums written in the period",
+      "unit": "currency",
+      "additivity": "additive",
+      "synonyms": [
+        "GWP",
+        "premiums"
+      ]
+    },
+    {
+      "name": "earned_premium",
+      "description": "Premiums earned in the period",
+      "unit": "currency",
+      "additivity": "additive",
+      "synonyms": [
+        "NEP"
+      ]
+    },
+    {
+      "name": "incurred_losses",
+      "description": "Paid losses plus change in reserves in the period",
+      "unit": "currency",
+      "additivity": "additive",
+      "synonyms": [
+        "losses incurred"
+      ]
+    },
+    {
+      "name": "loss_ratio",
+      "description": "Incurred losses and loss adjustment expense divided by earned premium",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "LR"
+      ]
+    },
+    {
+      "name": "combined_ratio",
+      "description": "Loss ratio plus expense ratio",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "COR"
+      ]
+    },
+    {
+      "name": "reserves",
+      "description": "Loss reserves at a point in time",
+      "unit": "currency",
+      "additivity": "semi_additive",
+      "synonyms": [
+        "IBNR plus case reserves"
+      ]
+    }
+  ],
+  "conventions": [
+    {
+      "id": "conv.written_earned",
+      "rule": "Written and earned premium differ by timing; ratios use earned premium."
+    },
+    {
+      "id": "conv.development",
+      "rule": "Loss ratios for recent accident years are immature and develop over time; compare at equal development age."
+    },
+    {
+      "id": "conv.combined",
+      "rule": "A combined ratio below 100% means an underwriting profit, before investment income."
+    }
+  ],
+  "insight_rules": [
+    {
+      "id": "ir.ratios",
+      "applies_to": "*_ratio",
+      "suppress_kinds": [
+        "contributor"
+      ],
+      "reason": "Attribute via losses and premium separately."
+    }
+  ],
+  "caveats": [
+    {
+      "id": "cv.cat",
+      "trigger": "always",
+      "text": "Catastrophe events dominate some periods; show results with and without catastrophe losses."
+    }
+  ],
+  "chart_conventions": [
+    {
+      "id": "ch.triangle",
+      "rule": "Show loss development as a triangle table (accident year by development age)."
+    }
+  ],
+  "golden_cases": [
+    {
+      "id": "g.gwp_time",
+      "kind": "additivity",
+      "metric": "gross_written_premium",
+      "across": "time",
+      "allowed": true
+    },
+    {
+      "id": "g.lr_dim",
+      "kind": "additivity",
+      "metric": "loss_ratio",
+      "across": "dimension",
+      "allowed": false
+    },
+    {
+      "id": "g.lr",
+      "kind": "ratio",
+      "numerator": 65,
+      "denominator": 100,
+      "scale": 100,
+      "expected": 65.0
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewer": null,
+    "reviewed_on": null,
+    "notes": "Drafted from public, general industry conventions; not yet reviewed by a named domain owner."
+  }
+}

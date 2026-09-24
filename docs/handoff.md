@@ -4,9 +4,10 @@
 
 > **Current top priority (owner, 2026-09-24): natural-language analytics —
 > spec `0080`.** Ask a data question in plain language; get a governed chart,
-> a grounded interpretation, and opt-in write-back to SQLite. It outranks
-> every other item on this roadmap, the credit-risk direction included. See
-> item 1 of *What's Next* and item 29.
+> a grounded interpretation, and opt-in write-back to SQLite. It reads each
+> dataset through the `0081` analytics domain packs (40 packs spanning the
+> firm). It outranks every other item on this roadmap, the credit-risk
+> direction included. See item 1 of *What's Next* and items 29–30.
 
 The SDK has a working v1: a **spec-driven engineering framework** over the six
 software-development stages, **171 agents** in `agents/`,
@@ -116,6 +117,8 @@ advisory-by-default deployment decision. The chain builds on
 > one thing moves, it is this: get `0080` approved, answer its three remaining
 > open questions (first chat surface, knowledge-candidate promotion, approval
 > model), and build from T-001. First write-back target is resolved: SQLite.
+> Domain knowledge is in place: spec `0081` ships 40 draft analytics domain
+> packs plus their validator (item 30); `0080` T-021/T-022 wire them in.
 
 > ### New direction — Credit Risk Domain Foundation (spec `0072`, Approved)
 >
@@ -292,7 +295,7 @@ designs**: create and
 approve one only when the foundation it consumes — `0063` or `0072` — has frozen
 that contract and the prior dependency named above is satisfied. Do not add
 agents merely to fill the map; prefer a canonical knowledge artifact or tested
-runtime that an existing agent can use. **Next unreserved spec number: `0081`.**
+runtime that an existing agent can use. **Next unreserved spec number: `0082`.**
 Reserving a number here does not create the directory; copy `templates/spec/`
 only when that slice becomes active.
 
@@ -1458,6 +1461,31 @@ manual-task persistence question stays deferred until a real consumer needs it.
     approval and answers to the spec's three remaining open questions (first
     chat surface, whether insights also become `0048`/`0056` knowledge
     candidates, approval model), then T-001 onward.
+
+30. **Analytics domain packs (spec `0081`, Draft; packs drafted, validator
+    built) — the domain knowledge behind item 29.** Forty JSON packs in
+    `knowledge/analytics_packs/`, spanning a bank front to back across seven
+    families: business lines (deposits, cards, mortgages, commercial, treasury
+    services, trade finance, investment banking, wealth, asset management,
+    payments, custody, insurance), markets (equities, rates, credit, FX,
+    commodities, derivatives, digital assets, short-term funding, securities
+    financing, sales & trading), risk (credit, counterparty/XVA, market,
+    liquidity, ALM/IRRBB, operational, model, climate), finance (performance,
+    regulatory capital), control (AML, fraud, consumer compliance), operations
+    (settlement, collections), and cross-cutting (customer, macro, portfolio
+    attribution). Each pack declares metric vocabulary, unit, and additivity
+    class — so VaR, PFE, PDs, and rates are never summed and balances never
+    summed across time, by construction — plus suppress-only insight rules,
+    caveats, chart conventions, existing reviewer agents, `builds_on`
+    references to `knowledge/credit_risk` / `knowledge/short_term_markets`,
+    and golden cases the validator recomputes. Selection reuses the
+    `domain:` tags already on every `sources/*.yml` entry. `analytics_packs.py`
+    (stdlib) validates and selects; 14 acceptance tests in
+    `tests/test_analytics_packs.py`. **Honest status:** all 40 packs are
+    `draft`, written from general public conventions; `0080` may use them in
+    chat with an "unreviewed domain pack" caveat, but write-back needs every
+    applied pack reviewed by a named person with a date. **Next:** name a
+    reviewer per family (T-007), then review pack by pack.
 
 ## Open Questions For The Owner
 

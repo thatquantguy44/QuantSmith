@@ -1,0 +1,134 @@
+{
+  "schema_version": "0081.1",
+  "pack_id": "treasury_alm_irrbb",
+  "name": "Treasury, ALM & Interest-Rate Risk in the Banking Book",
+  "family": "risk",
+  "description": "Balance-sheet interest-rate risk, funds transfer pricing, and net interest income sensitivity.",
+  "source_domains": [
+    "alm",
+    "irrbb",
+    "treasury"
+  ],
+  "builds_on": [],
+  "reviewer_agents": [
+    "agents/risk",
+    "agents/portfolio_management/liquidity_cash_management"
+  ],
+  "dimensions": [
+    {
+      "name": "scenario",
+      "description": "Rate scenario (parallel +/-, steepener, flattener)",
+      "synonyms": [
+        "shock"
+      ]
+    },
+    {
+      "name": "repricing_bucket",
+      "description": "Repricing or maturity bucket",
+      "synonyms": []
+    },
+    {
+      "name": "balance_sheet_line",
+      "description": "Asset or liability line",
+      "synonyms": []
+    }
+  ],
+  "metrics": [
+    {
+      "name": "nii_sensitivity",
+      "description": "Change in 12-month net interest income under a rate scenario",
+      "unit": "currency",
+      "additivity": "additive",
+      "synonyms": [
+        "NII at risk",
+        "EaR"
+      ]
+    },
+    {
+      "name": "eve_sensitivity",
+      "description": "Change in economic value of equity under a rate scenario",
+      "unit": "currency",
+      "additivity": "additive",
+      "synonyms": [
+        "EVE"
+      ]
+    },
+    {
+      "name": "repricing_gap",
+      "description": "Assets minus liabilities repricing in a bucket",
+      "unit": "currency",
+      "additivity": "additive",
+      "synonyms": [
+        "gap"
+      ]
+    },
+    {
+      "name": "ftp_rate",
+      "description": "Funds transfer pricing rate",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "FTP"
+      ]
+    },
+    {
+      "name": "deposit_beta",
+      "description": "Assumed deposit rate pass-through",
+      "unit": "ratio",
+      "additivity": "non_additive",
+      "synonyms": [
+        "beta"
+      ]
+    }
+  ],
+  "conventions": [
+    {
+      "id": "conv.scenario",
+      "rule": "Every sensitivity names its scenario, horizon, and balance-sheet assumption (static or dynamic)."
+    },
+    {
+      "id": "conv.behavioral",
+      "rule": "Non-maturity deposit and prepayment assumptions drive results; state them."
+    },
+    {
+      "id": "conv.scenario_additive",
+      "rule": "Sensitivities add across balance-sheet lines within one scenario, never across scenarios."
+    }
+  ],
+  "insight_rules": [],
+  "caveats": [
+    {
+      "id": "cv.assumption",
+      "trigger": "always",
+      "text": "IRRBB outputs are assumption-driven model results, not observed values."
+    }
+  ],
+  "chart_conventions": [
+    {
+      "id": "ch.gap",
+      "rule": "Show repricing gaps as bars by bucket in maturity order, positive and negative around zero."
+    }
+  ],
+  "golden_cases": [
+    {
+      "id": "g.nii_dim",
+      "kind": "additivity",
+      "metric": "nii_sensitivity",
+      "across": "dimension",
+      "allowed": true
+    },
+    {
+      "id": "g.ftp_dim",
+      "kind": "additivity",
+      "metric": "ftp_rate",
+      "across": "dimension",
+      "allowed": false
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewer": null,
+    "reviewed_on": null,
+    "notes": "Drafted from public, general industry conventions; not yet reviewed by a named domain owner."
+  }
+}

@@ -37,6 +37,11 @@ patterns locally rather than expecting them to update in place.
 - A CI job that installs the package (`.[dev,data,quant]`) and runs `tests/`.
 - Trackers: `specs/README.md` (spec index) and
   `src/quantsmith/pipelines/README.md` (runtime catalog).
+- Spec `0080` (Draft): natural-language analytics — governed question-to-chart
+  workflow with grounded interpretation and approved SQLite write-back.
+- Spec `0081`: 40 analytics domain packs across seven financial-services
+  families (`knowledge/analytics_packs/`), the `analytics_packs.py` validator
+  and selector, and `tests/test_analytics_packs.py`. All packs ship `draft`.
 
 ### Changed
 - `docs/packaging.md` updated — the Python-package phase is now active (real code

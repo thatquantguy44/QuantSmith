@@ -1,0 +1,194 @@
+{
+  "schema_version": "0081.1",
+  "pack_id": "cards_consumer_lending",
+  "name": "Cards & Consumer Lending",
+  "family": "business_line",
+  "description": "Credit cards, personal loans, and auto loans: balances, spend, yield, delinquency, and losses.",
+  "source_domains": [
+    "consumer_lending",
+    "cards",
+    "retail_lending"
+  ],
+  "builds_on": [
+    "knowledge/credit_risk",
+    "specs/0074-retail-underwriting-fairness-harness"
+  ],
+  "reviewer_agents": [
+    "agents/risk",
+    "agents/credit_risk/fair_lending_review"
+  ],
+  "dimensions": [
+    {
+      "name": "product",
+      "description": "Card, personal loan, or auto",
+      "synonyms": [
+        "portfolio"
+      ]
+    },
+    {
+      "name": "vintage",
+      "description": "Origination cohort",
+      "synonyms": [
+        "cohort"
+      ]
+    },
+    {
+      "name": "score_band",
+      "description": "Credit score band at origination or refresh",
+      "synonyms": [
+        "FICO band",
+        "risk tier"
+      ]
+    },
+    {
+      "name": "delinquency_bucket",
+      "description": "Days-past-due bucket (current, 30, 60, 90+)",
+      "synonyms": [
+        "DPD bucket"
+      ]
+    }
+  ],
+  "metrics": [
+    {
+      "name": "outstanding_balance",
+      "description": "Receivables outstanding at a point in time",
+      "unit": "currency",
+      "additivity": "semi_additive",
+      "synonyms": [
+        "receivables",
+        "loans outstanding"
+      ]
+    },
+    {
+      "name": "purchase_volume",
+      "description": "Card purchase volume in the period",
+      "unit": "currency",
+      "additivity": "additive",
+      "synonyms": [
+        "spend",
+        "sales volume"
+      ]
+    },
+    {
+      "name": "net_charge_offs",
+      "description": "Gross charge-offs minus recoveries in the period",
+      "unit": "currency",
+      "additivity": "additive",
+      "synonyms": [
+        "NCOs",
+        "losses"
+      ]
+    },
+    {
+      "name": "nco_rate",
+      "description": "Annualized net charge-offs divided by average receivables",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "loss rate",
+        "charge-off rate"
+      ]
+    },
+    {
+      "name": "delinquency_rate_30_plus",
+      "description": "Balances 30+ days past due divided by total balances",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "30+ DPD",
+        "delinquency"
+      ]
+    },
+    {
+      "name": "utilization",
+      "description": "Balances divided by credit lines",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "line utilization"
+      ]
+    },
+    {
+      "name": "portfolio_yield",
+      "description": "Annualized finance charges and fees divided by average receivables",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "yield",
+        "revenue yield"
+      ]
+    }
+  ],
+  "conventions": [
+    {
+      "id": "conv.annualize",
+      "rule": "Loss and yield rates are annualized from the period; state the annualization factor."
+    },
+    {
+      "id": "conv.nco_net",
+      "rule": "Net charge-offs are net of recoveries; report gross and recoveries separately when asked."
+    },
+    {
+      "id": "conv.vintage",
+      "rule": "Compare vintages at equal months-on-book, not on calendar date."
+    }
+  ],
+  "insight_rules": [
+    {
+      "id": "ir.rate_no_contrib",
+      "applies_to": "*_rate",
+      "suppress_kinds": [
+        "contributor"
+      ],
+      "reason": "Rates are not additive across segments; decompose the numerator and denominator instead."
+    }
+  ],
+  "caveats": [
+    {
+      "id": "cv.seasonality",
+      "trigger": "always",
+      "text": "Card spend and delinquency are seasonal (holiday spend, tax refunds); compare to the same period a year earlier."
+    },
+    {
+      "id": "cv.fair_lending",
+      "trigger": "dimension:score_band",
+      "text": "Segmenting by credit characteristics can proxy protected attributes; route consumer-decision uses through fair-lending review."
+    }
+  ],
+  "chart_conventions": [
+    {
+      "id": "ch.vintage_curves",
+      "rule": "Show vintage loss curves with months-on-book on the x-axis and one line per vintage."
+    }
+  ],
+  "golden_cases": [
+    {
+      "id": "g.nco_time",
+      "kind": "additivity",
+      "metric": "net_charge_offs",
+      "across": "time",
+      "allowed": true
+    },
+    {
+      "id": "g.ncorate_dim",
+      "kind": "additivity",
+      "metric": "nco_rate",
+      "across": "dimension",
+      "allowed": false
+    },
+    {
+      "id": "g.nco_rate",
+      "kind": "ratio",
+      "numerator": 1.2,
+      "denominator": 40.0,
+      "scale": 100,
+      "expected": 3.0
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewer": null,
+    "reviewed_on": null,
+    "notes": "Drafted from public, general industry conventions; not yet reviewed by a named domain owner."
+  }
+}

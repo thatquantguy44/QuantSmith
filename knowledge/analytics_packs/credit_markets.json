@@ -1,0 +1,158 @@
+{
+  "schema_version": "0081.1",
+  "pack_id": "credit_markets",
+  "name": "Credit Markets",
+  "family": "markets",
+  "description": "Corporate bonds, leveraged loans, CDS, and securitized credit: spreads, defaults, and ratings.",
+  "source_domains": [
+    "credit_markets",
+    "corporate_bonds",
+    "securitized"
+  ],
+  "builds_on": [
+    "specs/0022-asset-class-mechanics-agents",
+    "knowledge/credit_risk"
+  ],
+  "reviewer_agents": [
+    "agents/asset_classes/fixed_income_rates",
+    "agents/risk"
+  ],
+  "dimensions": [
+    {
+      "name": "rating",
+      "description": "Agency or internal rating",
+      "synonyms": [
+        "grade"
+      ]
+    },
+    {
+      "name": "sector",
+      "description": "Issuer sector",
+      "synonyms": []
+    },
+    {
+      "name": "seniority",
+      "description": "Senior secured, senior unsecured, subordinated",
+      "synonyms": []
+    },
+    {
+      "name": "maturity_bucket",
+      "description": "Maturity bucket",
+      "synonyms": []
+    }
+  ],
+  "metrics": [
+    {
+      "name": "oas",
+      "description": "Option-adjusted spread over the risk-free curve",
+      "unit": "bps",
+      "additivity": "non_additive",
+      "synonyms": [
+        "spread",
+        "credit spread"
+      ]
+    },
+    {
+      "name": "cds_spread",
+      "description": "Credit default swap par spread",
+      "unit": "bps",
+      "additivity": "non_additive",
+      "synonyms": [
+        "CDS"
+      ]
+    },
+    {
+      "name": "cs01",
+      "description": "Value change for a one-basis-point spread widening",
+      "unit": "currency",
+      "additivity": "additive",
+      "synonyms": [
+        "spread DV01"
+      ]
+    },
+    {
+      "name": "default_rate",
+      "description": "Issuers defaulting in the period divided by issuers at the start",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "default rate"
+      ]
+    },
+    {
+      "name": "market_value",
+      "description": "Market value outstanding at a point in time",
+      "unit": "currency",
+      "additivity": "semi_additive",
+      "synonyms": [
+        "MV"
+      ]
+    }
+  ],
+  "conventions": [
+    {
+      "id": "conv.spread_bps",
+      "rule": "Report spread moves in basis points; widening is a positive change."
+    },
+    {
+      "id": "conv.default_basis",
+      "rule": "State whether default rates are issuer-weighted or dollar-weighted and over what horizon."
+    },
+    {
+      "id": "conv.rating_scale",
+      "rule": "Map ratings to one scale before comparing across agencies."
+    }
+  ],
+  "insight_rules": [
+    {
+      "id": "ir.spread",
+      "applies_to": "oas",
+      "suppress_kinds": [
+        "contributor"
+      ],
+      "reason": "Spread is market-value-weighted; attribute via CS01 times spread change."
+    }
+  ],
+  "caveats": [
+    {
+      "id": "cv.index_rebal",
+      "trigger": "always",
+      "text": "Index-level spreads move when index composition changes at rebalances, not only when credit changes."
+    }
+  ],
+  "chart_conventions": [
+    {
+      "id": "ch.rating_order",
+      "rule": "Order ratings from highest to lowest quality, not alphabetically."
+    }
+  ],
+  "golden_cases": [
+    {
+      "id": "g.widen",
+      "kind": "bps_change",
+      "from_pct": 1.2,
+      "to_pct": 1.45,
+      "expected_bps": 25.0
+    },
+    {
+      "id": "g.cs01_dim",
+      "kind": "additivity",
+      "metric": "cs01",
+      "across": "dimension",
+      "allowed": true
+    },
+    {
+      "id": "g.oas_dim",
+      "kind": "additivity",
+      "metric": "oas",
+      "across": "dimension",
+      "allowed": false
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewer": null,
+    "reviewed_on": null,
+    "notes": "Drafted from public, general industry conventions; not yet reviewed by a named domain owner."
+  }
+}
