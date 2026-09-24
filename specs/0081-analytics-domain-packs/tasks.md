@@ -23,7 +23,8 @@
 | T-004 | `select_packs` with deterministic order, unmatched tags, term conflicts, and write-back eligibility. | REQ-004, REQ-005 | done | |
 | T-005 | Catalog checks (family coverage, README sync), coverage report, and CLI. | REQ-009, REQ-010 | done | |
 | T-006 | Acceptance tests AC-001–AC-014, including mutation tests that prove each rejection fires. | REQ-001, NFR-001, NFR-002 | done | |
-| T-007 | Named review of each pack by a domain owner (status → `reviewed`). | REQ-005 | todo | Owner decision: reviewer per family. |
+| T-007 | Named review of each pack by a domain owner (status → `reviewed`). | REQ-005 | in-progress | Reviewer: Joshua Lutkemuller, CFA, all seven families (resolved 2026-09-24). 0 of 40 reviewed. |
+| T-008 | Review tooling: per-family review sheet, `mark_reviewed` with refusal rules, CLI flags, reviewer assignment. | REQ-012 | done | |
 
 Status values: `todo` | `in-progress` | `blocked` | `done`.
 
@@ -44,13 +45,15 @@ Status values: `todo` | `in-progress` | `blocked` | `done`.
 | AC-011 | `test_ac011_cli_and_readme_sync` | done |
 | AC-012 | `test_ac012_uncovered_tags_are_info_only` | done |
 | AC-013 | `test_ac013_packs_only_restrict` | done |
+| AC-015 | `test_ac015_review_sheet_covers_every_reviewable_line` | done |
+| AC-016 | `test_ac016_mark_reviewed_records_named_review_and_refuses_bad_input` | done |
 | AC-014 | `test_ac014_stdlib_only_and_no_sensitive_content` | done |
 
 ## Follow-ups
 
 Tracked work intentionally deferred (no silent "temporary" shortcuts — P8).
 
-- T-007 named review, one pack at a time.
+- T-007 named review, one pack at a time (owner reviewing all families).
 - Adopter override mechanism (spec open question).
 - Jurisdiction variants (e.g., EU/UK capital and conduct terminology) once a
   non-U.S. adopter needs them.

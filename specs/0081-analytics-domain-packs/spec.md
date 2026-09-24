@@ -69,6 +69,7 @@ data, so `0080` reads each dataset with the right domain knowledge.
 | REQ-008 | Each pack shall carry machine-checkable golden cases (`bps_change`, `additivity`, `ratio`) that the validator verifies against the pack's own declarations and arithmetic. | must |
 | REQ-009 | A standard-library validator shall check every pack and the catalog (unique ids, file-name match, family coverage, catalog README listing) and return findings, with a CLI that exits non-zero on any error. | must |
 | REQ-010 | The validator shall report which `sources/*.yml` domain tags select no pack, as information. | should |
+| REQ-012 | The SDK shall support review by family: a deterministic Markdown review sheet per family listing every pack, metric (with unit, additivity, and what it permits), convention, insight rule, caveat, chart convention, and golden case; and a command that records a named review on one pack at a time, refusing an empty reviewer, a non-ISO date, an unknown pack, or a pack that fails validation. | must |
 | REQ-011 | Packs shall only restrict interpretation: insight rules suppress, caveats add, conventions constrain. No pack field can enable an insight, widen access, or override `0008` governance. | must |
 
 ## Non-Functional Requirements
@@ -108,6 +109,8 @@ data, so `0080` reads each dataset with the right domain knowledge.
 | AC-011 | Given the committed catalog, when the CLI runs, then it exits zero; given a catalog README missing a pack id, then an error names that pack. | REQ-009 |
 | AC-012 | Given `sources/*.yml`, when coverage is reported, then only text/document tags remain uncovered and they are reported as `info`, never `error`. | REQ-010 |
 | AC-013 | Given an insight rule, when applied, then it can only add suppressed kinds; the pack contract has no field that enables an insight kind or changes access level. | REQ-011 |
+| AC-015 | Given any family, when its review sheet is generated twice, then the output is identical, names the assigned reviewer, and lists every pack id, metric, and item id of that family; an unknown family is rejected. | REQ-012 |
+| AC-016 | Given a pack, when marked reviewed with a name and ISO date, then the file records status, reviewer, and date and the selection becomes write-back eligible; an empty name, a bad date, an unknown pack, or a pack with a validation error is refused and the file is unchanged. | REQ-012, REQ-005 |
 | AC-014 | Given the validator module, when its imports are scanned, then it imports only the standard library; given every pack, when scanned, then it contains no email address, credential-like token, or URL with credentials. | NFR-001, NFR-002 |
 
 ## Data & Dependencies
@@ -133,8 +136,9 @@ data, so `0080` reads each dataset with the right domain knowledge.
 
 - Assumption: U.S.-first conventions where they differ by jurisdiction, as in
   `0063`/`0072`.
-- Open question: who reviews each family (a named owner per family is the
-  suggested unit)?
+- Resolved (owner, 2026-09-24): Joshua Lutkemuller, CFA reviews all seven
+  families, pack by pack, using the review sheet and `--mark-reviewed`
+  (REQ-012). Recorded in `analytics_packs.FAMILY_REVIEWERS`.
 - Open question: should adopters override packs by file shadowing in their
   own repository, or by a declared overlay field?
 

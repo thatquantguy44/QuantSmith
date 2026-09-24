@@ -69,6 +69,22 @@ PYTHONPATH=src python3 -m quantsmith.pipelines.analytics_packs --report
 python3 -m pytest tests/test_analytics_packs.py -q
 ```
 
+## Review assignments
+
+Joshua Lutkemuller, CFA reviews all seven families (owner decision,
+2026-09-24). Review pack by pack:
+
+```sh
+# read everything to check for one family
+PYTHONPATH=src python3 -m quantsmith.pipelines.analytics_packs --review-sheet risk
+# after editing any wrong content, record the review on one pack
+PYTHONPATH=src python3 -m quantsmith.pipelines.analytics_packs \
+  --mark-reviewed market_risk --reviewer "Joshua Lutkemuller, CFA" --date 2026-09-24
+```
+
+`--mark-reviewed` refuses an empty name, a non-ISO date, or a pack that fails
+validation, and changes only that pack's `review` block.
+
 ## Adding or reviewing a pack
 
 1. Copy the closest pack, keep `review.status: draft`, and add a row below.

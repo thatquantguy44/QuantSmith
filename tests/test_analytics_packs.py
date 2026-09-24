@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import ast
 import copy
+import json
 import re
 import subprocess
 import sys
@@ -225,3 +226,53 @@ def test_ac014_stdlib_only_and_no_sensitive_content():
     pattern = re.compile(r"[\w.+-]+@[\w-]+\.[\w.]+|(api[_-]?key|secret|password|token)\s*[:=]|://[^/\s]+:[^/\s]+@", re.I)
     for f in sorted((ROOT / ap.PACKS_DIR).glob("*.json")):
         assert not pattern.search(f.read_text(encoding="utf-8")), f.name
+
+
+def test_ac015_review_sheet_covers_every_reviewable_line(packs):
+    """AC-015: a family's review sheet lists every pack, metric, convention, rule, caveat, and golden case."""
+    for fam in ap.FAMILIES:
+        sheet = ap.review_sheet(packs, fam)
+        assert sheet == ap.review_sheet(packs, fam)
+        assert ap.FAMILY_REVIEWERS[fam] in sheet
+        for p in (p for p in packs if p["family"] == fam):
+            assert f"`{p['pack_id']}`" in sheet
+            for m in p["metrics"]:
+                assert f"`{m['name']}`" in sheet
+            for key in ("conventions", "insight_rules", "caveats", "chart_conventions", "golden_cases"):
+                for item in p[key]:
+                    assert f"`{item['id']}`" in sheet, (p["pack_id"], item["id"])
+    with pytest.raises(ValueError):
+        ap.review_sheet(packs, "no_such_family")
+
+
+def test_ac016_mark_reviewed_records_named_review_and_refuses_bad_input(tmp_path):
+    """AC-016: marking writes reviewer, date, and status; missing name, bad date, unknown or invalid packs are refused."""
+    import shutil
+
+    shutil.copytree(ROOT / "agents", tmp_path / "agents")
+    shutil.copytree(ROOT / "knowledge", tmp_path / "knowledge")
+    shutil.copytree(ROOT / "specs", tmp_path / "specs")
+    (tmp_path / "instructions").mkdir()
+    shutil.copy(ROOT / "instructions" / "portfolio_management.md", tmp_path / "instructions")
+
+    for bad in (dict(reviewer="", reviewed_on="2026-09-24"), dict(reviewer="A Reviewer", reviewed_on="24/09/2026")):
+        with pytest.raises(ap.PackValidationError):
+            ap.mark_reviewed(tmp_path, "fraud", **bad)
+    with pytest.raises(ap.PackValidationError):
+        ap.mark_reviewed(tmp_path, "no_such_pack", "A Reviewer", "2026-09-24")
+
+    pack = ap.mark_reviewed(tmp_path, "fraud", "A Reviewer", "2026-09-24")
+    on_disk = json.loads((tmp_path / ap.PACKS_DIR / "fraud.json").read_text(encoding="utf-8"))
+    assert on_disk == pack
+    assert on_disk["review"]["status"] == "reviewed"
+    assert on_disk["review"]["reviewer"] == "A Reviewer" and on_disk["review"]["reviewed_on"] == "2026-09-24"
+    assert "not yet reviewed" not in on_disk["review"]["notes"]
+    assert ap.select_packs(["fraud"], ap.load_packs(tmp_path)).all_reviewed
+
+    broken = tmp_path / ap.PACKS_DIR / "payments.json"
+    data = json.loads(broken.read_text(encoding="utf-8"))
+    data["reviewer_agents"] = ["agents/no_such_agent"]
+    broken.write_text(json.dumps(data), encoding="utf-8")
+    with pytest.raises(ap.PackValidationError):
+        ap.mark_reviewed(tmp_path, "payments", "A Reviewer", "2026-09-24")
+    assert json.loads(broken.read_text(encoding="utf-8"))["review"]["status"] == "draft"

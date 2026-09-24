@@ -86,6 +86,7 @@ single home). Key rules:
 | REQ-009 | `validate_catalog`, CLI | T-003, T-005 |
 | REQ-010 | `uncovered_source_domains`, `coverage_report` | T-005 |
 | REQ-011 | contract has suppress-only fields; `suppressed_insights` only adds | T-001, T-003 |
+| REQ-012 | `review_sheet`, `mark_reviewed`, `FAMILY_REVIEWERS`, CLI flags | T-008 |
 | NFR-001 | stdlib only; sorted loading | T-003, T-006 |
 | NFR-002 | content scan test | T-006 |
 | NFR-003 | `schema_version` check | T-003 |
@@ -117,5 +118,5 @@ reviewed diff to one JSON file. Rollback: revert the file or set status back to
 
 ## Open Questions
 
-- Named reviewer per family.
+- ~~Named reviewer per family~~ — resolved 2026-09-24: the owner reviews all seven families.
 - Adopter override mechanism (file shadowing vs. overlay field).

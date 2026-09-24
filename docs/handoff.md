@@ -1484,8 +1484,12 @@ manual-task persistence question stays deferred until a real consumer needs it.
     `tests/test_analytics_packs.py`. **Honest status:** all 40 packs are
     `draft`, written from general public conventions; `0080` may use them in
     chat with an "unreviewed domain pack" caveat, but write-back needs every
-    applied pack reviewed by a named person with a date. **Next:** name a
-    reviewer per family (T-007), then review pack by pack.
+    applied pack reviewed by a named person with a date. **Reviewer
+    (resolved 2026-09-24):** Joshua Lutkemuller, CFA reviews all seven
+    families. Per-family review sheets (`--review-sheet <family>`) and a
+    `--mark-reviewed <pack_id> --reviewer … --date …` command make each review
+    one checked diff to one JSON file. **Next:** review pack by pack (0 of 40
+    reviewed); start with the families behind the first `0080` questions.
 
 ## Open Questions For The Owner
 
