@@ -2,6 +2,12 @@
 
 ## Snapshot
 
+> **Current top priority (owner, 2026-09-24): natural-language analytics —
+> spec `0080`.** Ask a data question in plain language; get a governed chart,
+> a grounded interpretation, and opt-in write-back to SQLite. It outranks
+> every other item on this roadmap, the credit-risk direction included. See
+> item 1 of *What's Next* and item 29.
+
 The SDK has a working v1: a **spec-driven engineering framework** over the six
 software-development stages, **171 agents** in `agents/`,
 **35 quality gates**, **36 instruction standards**, and CI that
@@ -103,6 +109,14 @@ advisory-by-default deployment decision. The chain builds on
 
 ## What's Next (prioritized)
 
+> ### #1 priority — Natural-language analytics (spec `0080`, Draft)
+>
+> **The owner has made this the single highest priority, ahead of everything
+> below — including the credit-risk direction and the ranked list.** If only
+> one thing moves, it is this: get `0080` approved, answer its three remaining
+> open questions (first chat surface, knowledge-candidate promotion, approval
+> model), and build from T-001. First write-back target is resolved: SQLite.
+
 > ### New direction — Credit Risk Domain Foundation (spec `0072`, Approved)
 >
 > **This is the SDK's first deliberate expansion beyond the investment side of
@@ -135,8 +149,9 @@ advisory-by-default deployment decision. The chain builds on
 > `0071` corpora inside a `0070` envelope as labeled derived evidence, never as
 > unattributed decision inputs.
 >
-> **The owner's decision, not the agent's:** where `0072` ranks against the six
-> priorities below. It is deliberately listed apart from them rather than
+> **The owner's decision, not the agent's:** where `0072` ranks against
+> priorities (2)–(6) below — it sits below `0080`, which the owner ranked
+> first. It is deliberately listed apart from them rather than
 > inserted into their order. It is also the one item here now blocked on a
 > person rather than on work — the pack is built, and no record can reach
 > `reviewed` without a named credit-domain reviewer (see item 24 and the spec's
