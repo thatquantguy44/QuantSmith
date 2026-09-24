@@ -22,12 +22,12 @@
 
 | ID | Task | Covers | Status | Notes |
 | --- | --- | --- | --- | --- |
-| T-001 | `plan.py`: `QueryPlan`, `TimeWindow`, `Comparison`, `Filter` frozen dataclasses with canonical JSON; no SQL/code field. | REQ-001, AC-001 | todo | |
-| T-002 | `validate_plan` against the `0008` registry (metric, declared dimensions, filter values, window, grain) and `describe_plan` echo. | REQ-001, REQ-002, AC-001, AC-003 | todo | |
-| T-003 | `interpret.py`: `Interpreter` protocol, `Clarification`, `KeywordInterpreter` (synonyms, relative dates, declared defaults). | REQ-002, REQ-003, AC-002, AC-003 | todo | |
-| T-004 | Interpreter registration hook; stub-LLM test proving one validator for all interpreters. | REQ-003, AC-004 | todo | |
-| T-005 | `authorize.py`: clearance check via `0058`; existence masking in answers and clarifications. | REQ-004, AC-005 | todo | |
-| T-006 | `execute.py`: injected reader, as-of filter, row count, latest period, content hash. | REQ-005, NFR-001, NFR-002, AC-006 | todo | |
+| T-001 | `plan.py`: `QueryPlan`, `TimeWindow`, `Comparison`, `Filter` frozen dataclasses with canonical JSON; no SQL/code field. | REQ-001, AC-001 | done | |
+| T-002 | `validate_plan` against the `0008` registry (metric, declared dimensions, filter values, window, grain) and `describe_plan` echo. | REQ-001, REQ-002, AC-001, AC-003 | done | |
+| T-003 | `interpret.py`: `Interpreter` protocol, `Clarification`, `KeywordInterpreter` (synonyms, relative dates, declared defaults). | REQ-002, REQ-003, AC-002, AC-003 | done | |
+| T-004 | Interpreter registration hook; stub-LLM test proving one validator for all interpreters. | REQ-003, AC-004 | done | |
+| T-005 | `authorize.py`: clearance check via `0058`; existence masking in answers and clarifications. | REQ-004, AC-005 | done | |
+| T-006 | `execute.py`: injected reader, as-of filter, row count, latest period, content hash. | REQ-005, NFR-001, NFR-002, AC-006 | done | Two-dimension grouping composes `0008`'s public `compute()` per partition rather than its private `group_by` path, so it works for 0/1/2 declared dimensions. |
 | T-007 | `chart.py`: form rule, finding-first titles, units/labels/footnote/alt text, Vega-Lite and Markdown table, `to_panel` rendered via `0015`. | REQ-006, AC-007, AC-008 | todo | |
 | T-008 | `insights.py`: level, change, contributors, trend, outliers, concentration with the values each rests on. | REQ-007, AC-009 | todo | |
 | T-009 | `narrate.py`: template narrative, grounding validator (numbers, causal phrases), caveat triggers. | REQ-008, AC-010, AC-011 | todo | |
@@ -54,12 +54,12 @@ Every acceptance criterion must be named by at least one test.
 
 | Acceptance criterion | Test(s) | Status |
 | --- | --- | --- |
-| AC-001 | `test_ac001_plan_is_governed_and_has_no_sql_field` | todo |
-| AC-002 | `test_ac002_unknown_metric_returns_clarification` | todo |
-| AC-003 | `test_ac003_default_window_applied_and_echoed` | todo |
-| AC-004 | `test_ac004_llm_interpreter_shares_validator` | todo |
-| AC-005 | `test_ac005_restricted_metric_is_masked` | todo |
-| AC-006 | `test_ac006_execute_respects_as_of_and_hashes` | todo |
+| AC-001 | `test_ac001_plan_is_governed_and_has_no_sql_field`, `test_ac001_filter_and_window_reject_bad_values` | done |
+| AC-002 | `test_ac002_unknown_metric_or_dimension_rejected`, `test_ac002_keyword_interpreter_returns_clarification_for_unknown_question`, `test_ac002_ambiguous_question_lists_candidates` | done |
+| AC-003 | `test_ac003_default_window_applied_and_echoed`, `test_ac003_no_default_window_configured_is_a_clarification`, `test_ac003_relative_phrase_needs_no_default` | done |
+| AC-004 | `test_ac004_llm_style_interpreter_shares_the_same_validator` | done |
+| AC-005 | `test_ac005_restricted_metric_is_masked`, `test_ac005_public_metric_passes_through`, `test_ac005_restricted_dimension_is_dropped_not_named` | done |
+| AC-006 | `test_ac006_execute_respects_as_of_and_hashes`, `test_ac006_execute_groups_by_declared_dimensions`, `test_ac006_execute_applies_filters` | done |
 | AC-007 | `test_ac007_form_rule_by_result_shape` | todo |
 | AC-008 | `test_ac008_chart_promotes_to_panel_and_renders` | todo |
 | AC-009 | `test_ac009_insights_match_hand_computed` | todo |
