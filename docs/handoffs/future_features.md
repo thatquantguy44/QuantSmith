@@ -6,6 +6,10 @@ full `specs/NNNN-slug/` when work starts (see `docs/handoffs/README.md`).
 **Status:** `proposed` → `in-progress` → `done`.
 **Priority:** P0 (highest) · P1 (high) · P2 (medium) · P3 (nice-to-have).
 
+> **Top priority (owner, 2026-09-24):** natural-language analytics, spec
+> `specs/0080-nl-analytics-insights/` — the `analytics/nl_analytics` and
+> `analytics/data_visualization` rows below. It comes before every other P0.
+
 ## Agents
 
 | Feature | What it adds | Priority | Status |
