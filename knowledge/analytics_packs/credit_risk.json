@@ -1,0 +1,174 @@
+{
+  "schema_version": "0081.1",
+  "pack_id": "credit_risk",
+  "name": "Credit Risk",
+  "family": "risk",
+  "description": "Wholesale and retail credit exposure, expected loss, allowance, and credit quality.",
+  "source_domains": [
+    "credit_risk",
+    "expected_credit_loss",
+    "regulatory_capital"
+  ],
+  "builds_on": [
+    "knowledge/credit_risk",
+    "specs/0072-credit-risk-domain-foundation",
+    "specs/0073-wholesale-credit-measurement"
+  ],
+  "reviewer_agents": [
+    "agents/credit_risk/counterparty_limits",
+    "agents/risk"
+  ],
+  "dimensions": [
+    {
+      "name": "obligor",
+      "description": "Obligor or borrower group",
+      "synonyms": [
+        "borrower",
+        "counterparty"
+      ]
+    },
+    {
+      "name": "rating_grade",
+      "description": "Internal rating grade",
+      "synonyms": [
+        "grade"
+      ]
+    },
+    {
+      "name": "portfolio",
+      "description": "Portfolio or product",
+      "synonyms": []
+    },
+    {
+      "name": "stage",
+      "description": "Accounting stage or impairment category",
+      "synonyms": []
+    }
+  ],
+  "metrics": [
+    {
+      "name": "ead",
+      "description": "Exposure at default",
+      "unit": "currency",
+      "additivity": "semi_additive",
+      "synonyms": [
+        "exposure"
+      ]
+    },
+    {
+      "name": "pd",
+      "description": "Probability of default over a stated horizon",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "default probability"
+      ]
+    },
+    {
+      "name": "lgd",
+      "description": "Loss given default",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "loss severity"
+      ]
+    },
+    {
+      "name": "expected_loss",
+      "description": "PD x LGD x EAD on a consistent basis",
+      "unit": "currency",
+      "additivity": "semi_additive",
+      "synonyms": [
+        "EL"
+      ]
+    },
+    {
+      "name": "allowance",
+      "description": "Allowance for credit losses at a point in time",
+      "unit": "currency",
+      "additivity": "semi_additive",
+      "synonyms": [
+        "ACL",
+        "reserve"
+      ]
+    },
+    {
+      "name": "allowance_coverage",
+      "description": "Allowance divided by loans",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "reserve ratio",
+        "coverage"
+      ]
+    }
+  ],
+  "conventions": [
+    {
+      "id": "conv.credit_pack",
+      "rule": "Measure definitions, bases, and admissible combinations follow knowledge/credit_risk; this pack adds analytics defaults only."
+    },
+    {
+      "id": "conv.pd_not_additive",
+      "rule": "PDs are never summed or simply averaged across obligors; aggregate expected loss, or EAD-weight with the basis stated."
+    },
+    {
+      "id": "conv.same_basis",
+      "rule": "PD, LGD, and EAD combine only on the same horizon and default definition."
+    }
+  ],
+  "insight_rules": [
+    {
+      "id": "ir.pd",
+      "applies_to": "pd",
+      "suppress_kinds": [
+        "contributor",
+        "concentration"
+      ],
+      "reason": "PD is a probability, not an amount; concentration is measured on EAD or EL."
+    }
+  ],
+  "caveats": [
+    {
+      "id": "cv.model",
+      "trigger": "metric:pd",
+      "text": "PD and LGD are model outputs; state the model and version before comparing periods."
+    }
+  ],
+  "chart_conventions": [
+    {
+      "id": "ch.migration",
+      "rule": "Show rating migration as a from-to matrix table, not a chart."
+    }
+  ],
+  "golden_cases": [
+    {
+      "id": "g.pd_dim",
+      "kind": "additivity",
+      "metric": "pd",
+      "across": "dimension",
+      "allowed": false
+    },
+    {
+      "id": "g.el_dim",
+      "kind": "additivity",
+      "metric": "expected_loss",
+      "across": "dimension",
+      "allowed": true
+    },
+    {
+      "id": "g.coverage",
+      "kind": "ratio",
+      "numerator": 1.5,
+      "denominator": 100,
+      "scale": 100,
+      "expected": 1.5
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewer": null,
+    "reviewed_on": null,
+    "notes": "Drafted from public, general industry conventions; not yet reviewed by a named domain owner."
+  }
+}

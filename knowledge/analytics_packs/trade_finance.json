@@ -1,0 +1,120 @@
+{
+  "schema_version": "0081.1",
+  "pack_id": "trade_finance",
+  "name": "Trade Finance",
+  "family": "business_line",
+  "description": "Letters of credit, guarantees, documentary collections, and supply-chain finance.",
+  "source_domains": [
+    "trade_finance"
+  ],
+  "builds_on": [],
+  "reviewer_agents": [
+    "agents/risk",
+    "agents/credit_risk/counterparty_limits"
+  ],
+  "dimensions": [
+    {
+      "name": "instrument",
+      "description": "LC, standby LC, guarantee, supply-chain finance",
+      "synonyms": [
+        "product"
+      ]
+    },
+    {
+      "name": "country",
+      "description": "Importer or exporter country",
+      "synonyms": [
+        "corridor"
+      ]
+    },
+    {
+      "name": "tenor_bucket",
+      "description": "Tenor bucket",
+      "synonyms": []
+    }
+  ],
+  "metrics": [
+    {
+      "name": "trade_assets",
+      "description": "Trade finance assets outstanding",
+      "unit": "currency",
+      "additivity": "semi_additive",
+      "synonyms": [
+        "trade book"
+      ]
+    },
+    {
+      "name": "contingent_exposure",
+      "description": "Issued but undrawn LCs and guarantees",
+      "unit": "currency",
+      "additivity": "semi_additive",
+      "synonyms": [
+        "off-balance-sheet exposure"
+      ]
+    },
+    {
+      "name": "fee_income",
+      "description": "Trade fees in the period",
+      "unit": "currency",
+      "additivity": "additive",
+      "synonyms": [
+        "commissions"
+      ]
+    },
+    {
+      "name": "average_tenor",
+      "description": "Balance-weighted average tenor",
+      "unit": "days",
+      "additivity": "non_additive",
+      "synonyms": [
+        "tenor"
+      ]
+    }
+  ],
+  "conventions": [
+    {
+      "id": "conv.contingent",
+      "rule": "Contingent exposures are off-balance-sheet; show them separately from funded trade assets."
+    },
+    {
+      "id": "conv.country_risk",
+      "rule": "Country dimension follows the risk-transfer country, not only the booking location."
+    }
+  ],
+  "insight_rules": [],
+  "caveats": [
+    {
+      "id": "cv.short_tenor",
+      "trigger": "always",
+      "text": "Trade books are short-tenor and self-liquidating; period-end balances turn over quickly and can mislead on trend."
+    }
+  ],
+  "chart_conventions": [
+    {
+      "id": "ch.corridor",
+      "rule": "Show trade corridors as a sorted table or bar by exposure, not as a map when fewer than ten countries matter."
+    }
+  ],
+  "golden_cases": [
+    {
+      "id": "g.fee_time",
+      "kind": "additivity",
+      "metric": "fee_income",
+      "across": "time",
+      "allowed": true
+    },
+    {
+      "id": "g.tenor_dim",
+      "kind": "additivity",
+      "metric": "average_tenor",
+      "across": "dimension",
+      "allowed": false
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewer": null,
+    "reviewed_on": null,
+    "notes": "Drafted from public, general industry conventions; not yet reviewed by a named domain owner."
+  }
+}

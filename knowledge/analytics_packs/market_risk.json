@@ -1,0 +1,170 @@
+{
+  "schema_version": "0081.1",
+  "pack_id": "market_risk",
+  "name": "Market Risk",
+  "family": "risk",
+  "description": "Trading-book risk: VaR, expected shortfall, sensitivities, stress, and backtesting.",
+  "source_domains": [
+    "market_risk"
+  ],
+  "builds_on": [],
+  "reviewer_agents": [
+    "agents/risk",
+    "agents/backtest_review"
+  ],
+  "dimensions": [
+    {
+      "name": "desk",
+      "description": "Desk or business",
+      "synonyms": [
+        "book"
+      ]
+    },
+    {
+      "name": "risk_factor",
+      "description": "Risk-factor class (rates, credit, equity, FX, commodity)",
+      "synonyms": []
+    },
+    {
+      "name": "scenario",
+      "description": "Stress scenario",
+      "synonyms": []
+    }
+  ],
+  "metrics": [
+    {
+      "name": "var",
+      "description": "Value at risk at a stated confidence and horizon",
+      "unit": "currency",
+      "additivity": "non_additive",
+      "synonyms": [
+        "VaR"
+      ]
+    },
+    {
+      "name": "expected_shortfall",
+      "description": "Average loss beyond the VaR quantile",
+      "unit": "currency",
+      "additivity": "non_additive",
+      "synonyms": [
+        "ES",
+        "CVaR"
+      ]
+    },
+    {
+      "name": "stress_loss",
+      "description": "Loss under a named scenario",
+      "unit": "currency",
+      "additivity": "additive",
+      "synonyms": [
+        "stress P&L"
+      ]
+    },
+    {
+      "name": "sensitivity",
+      "description": "First-order sensitivity to a named risk factor",
+      "unit": "currency",
+      "additivity": "additive",
+      "synonyms": [
+        "delta",
+        "DV01",
+        "CS01"
+      ]
+    },
+    {
+      "name": "backtesting_exceptions",
+      "description": "Days where the loss exceeded VaR",
+      "unit": "count",
+      "additivity": "additive",
+      "synonyms": [
+        "breaches",
+        "exceptions"
+      ]
+    },
+    {
+      "name": "limit_utilization",
+      "description": "Risk measure divided by its limit",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "utilization"
+      ]
+    }
+  ],
+  "conventions": [
+    {
+      "id": "conv.var_params",
+      "rule": "Always state confidence, horizon, and lookback for VaR and ES (e.g., 99%, 1-day, 1-year)."
+    },
+    {
+      "id": "conv.diversification",
+      "rule": "VaR and ES are not additive: the firm total is less than the sum of desks; show the diversification benefit."
+    },
+    {
+      "id": "conv.stress_additive",
+      "rule": "A single scenario's losses add across desks because the scenario is the same."
+    }
+  ],
+  "insight_rules": [
+    {
+      "id": "ir.var",
+      "applies_to": "var",
+      "suppress_kinds": [
+        "contributor",
+        "concentration"
+      ],
+      "reason": "Use component or incremental VaR, not additive contribution."
+    },
+    {
+      "id": "ir.es",
+      "applies_to": "expected_shortfall",
+      "suppress_kinds": [
+        "contributor",
+        "concentration"
+      ],
+      "reason": "Same as VaR: sub-additive, use component allocation."
+    }
+  ],
+  "caveats": [
+    {
+      "id": "cv.window",
+      "trigger": "metric:var",
+      "text": "VaR moves when the historical window rolls volatile days in or out, even with no position change."
+    }
+  ],
+  "chart_conventions": [
+    {
+      "id": "ch.backtest",
+      "rule": "Plot daily P&L against negative VaR with exceptions highlighted."
+    }
+  ],
+  "golden_cases": [
+    {
+      "id": "g.var_dim",
+      "kind": "additivity",
+      "metric": "var",
+      "across": "dimension",
+      "allowed": false
+    },
+    {
+      "id": "g.stress_dim",
+      "kind": "additivity",
+      "metric": "stress_loss",
+      "across": "dimension",
+      "allowed": true
+    },
+    {
+      "id": "g.exc_time",
+      "kind": "additivity",
+      "metric": "backtesting_exceptions",
+      "across": "time",
+      "allowed": true
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewer": null,
+    "reviewed_on": null,
+    "notes": "Drafted from public, general industry conventions; not yet reviewed by a named domain owner."
+  }
+}

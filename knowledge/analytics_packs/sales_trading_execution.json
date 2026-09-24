@@ -1,0 +1,147 @@
+{
+  "schema_version": "0081.1",
+  "pack_id": "sales_trading_execution",
+  "name": "Sales, Trading & Execution",
+  "family": "markets",
+  "description": "Client franchise and execution quality: revenues, market share, hit ratios, and transaction costs.",
+  "source_domains": [
+    "execution",
+    "sales_trading",
+    "market_structure"
+  ],
+  "builds_on": [
+    "specs/0012-execution-scheduling"
+  ],
+  "reviewer_agents": [
+    "agents/optimization/execution_optimization",
+    "agents/trading_strategies/market_making_microstructure"
+  ],
+  "dimensions": [
+    {
+      "name": "desk",
+      "description": "Trading desk",
+      "synonyms": [
+        "business"
+      ]
+    },
+    {
+      "name": "client",
+      "description": "Client or client segment",
+      "synonyms": []
+    },
+    {
+      "name": "venue",
+      "description": "Execution venue",
+      "synonyms": []
+    },
+    {
+      "name": "order_type",
+      "description": "Algo, RFQ, voice, block",
+      "synonyms": []
+    }
+  ],
+  "metrics": [
+    {
+      "name": "trading_revenue",
+      "description": "Sales and trading revenue in the period",
+      "unit": "currency",
+      "additivity": "additive",
+      "synonyms": [
+        "markets revenue",
+        "P&L"
+      ]
+    },
+    {
+      "name": "market_share",
+      "description": "Firm volume divided by market volume",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "share"
+      ]
+    },
+    {
+      "name": "hit_ratio",
+      "description": "Trades won divided by quotes or RFQs",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "win rate"
+      ]
+    },
+    {
+      "name": "implementation_shortfall",
+      "description": "Execution cost versus arrival price",
+      "unit": "bps",
+      "additivity": "non_additive",
+      "synonyms": [
+        "slippage",
+        "IS"
+      ]
+    },
+    {
+      "name": "notional_traded",
+      "description": "Notional executed in the period",
+      "unit": "currency",
+      "additivity": "additive",
+      "synonyms": [
+        "volume"
+      ]
+    }
+  ],
+  "conventions": [
+    {
+      "id": "conv.is_sign",
+      "rule": "State the slippage sign: positive = cost to the client, in bps of arrival price."
+    },
+    {
+      "id": "conv.benchmark",
+      "rule": "Execution benchmarks (arrival, VWAP, close) are not interchangeable; name one."
+    }
+  ],
+  "insight_rules": [
+    {
+      "id": "ir.hit",
+      "applies_to": "hit_ratio",
+      "suppress_kinds": [
+        "contributor"
+      ],
+      "reason": "Ratios attribute via counts of wins and quotes."
+    }
+  ],
+  "caveats": [
+    {
+      "id": "cv.volatility",
+      "trigger": "metric:implementation_shortfall",
+      "text": "Execution costs rise with market volatility; compare in similar regimes."
+    }
+  ],
+  "chart_conventions": [
+    {
+      "id": "ch.tca",
+      "rule": "Show transaction-cost distributions (box or percentile table), not only averages."
+    }
+  ],
+  "golden_cases": [
+    {
+      "id": "g.rev_dim",
+      "kind": "additivity",
+      "metric": "trading_revenue",
+      "across": "dimension",
+      "allowed": true
+    },
+    {
+      "id": "g.share_dim",
+      "kind": "additivity",
+      "metric": "market_share",
+      "across": "dimension",
+      "allowed": false
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewer": null,
+    "reviewed_on": null,
+    "notes": "Drafted from public, general industry conventions; not yet reviewed by a named domain owner."
+  }
+}

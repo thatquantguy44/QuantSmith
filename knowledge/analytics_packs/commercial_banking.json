@@ -1,0 +1,175 @@
+{
+  "schema_version": "0081.1",
+  "pack_id": "commercial_banking",
+  "name": "Commercial & Corporate Banking",
+  "family": "business_line",
+  "description": "Commercial and industrial loans, commercial real estate, small business, and corporate relationship lending.",
+  "source_domains": [
+    "commercial_lending",
+    "corporate_banking",
+    "commercial_real_estate",
+    "small_business"
+  ],
+  "builds_on": [
+    "knowledge/credit_risk",
+    "specs/0073-wholesale-credit-measurement"
+  ],
+  "reviewer_agents": [
+    "agents/risk",
+    "agents/credit_risk/counterparty_limits"
+  ],
+  "dimensions": [
+    {
+      "name": "segment",
+      "description": "Small business, middle market, large corporate",
+      "synonyms": [
+        "client segment"
+      ]
+    },
+    {
+      "name": "industry",
+      "description": "Borrower industry classification (e.g., NAICS)",
+      "synonyms": [
+        "sector"
+      ]
+    },
+    {
+      "name": "risk_rating",
+      "description": "Internal obligor risk grade",
+      "synonyms": [
+        "grade",
+        "rating"
+      ]
+    },
+    {
+      "name": "property_type",
+      "description": "CRE property type (office, multifamily, retail, industrial)",
+      "synonyms": []
+    }
+  ],
+  "metrics": [
+    {
+      "name": "loans_outstanding",
+      "description": "Funded loan balances at a point in time",
+      "unit": "currency",
+      "additivity": "semi_additive",
+      "synonyms": [
+        "balances",
+        "funded exposure"
+      ]
+    },
+    {
+      "name": "commitments",
+      "description": "Total committed lines at a point in time",
+      "unit": "currency",
+      "additivity": "semi_additive",
+      "synonyms": [
+        "committed exposure"
+      ]
+    },
+    {
+      "name": "line_utilization",
+      "description": "Outstanding divided by commitments",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "utilization"
+      ]
+    },
+    {
+      "name": "loan_spread",
+      "description": "Weighted average spread over the reference rate",
+      "unit": "bps",
+      "additivity": "non_additive",
+      "synonyms": [
+        "margin",
+        "spread"
+      ]
+    },
+    {
+      "name": "criticized_ratio",
+      "description": "Criticized and classified loans divided by total loans",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "criticized",
+        "classified"
+      ]
+    },
+    {
+      "name": "dscr",
+      "description": "Net operating income divided by debt service",
+      "unit": "multiple",
+      "additivity": "non_additive",
+      "synonyms": [
+        "debt service coverage"
+      ]
+    }
+  ],
+  "conventions": [
+    {
+      "id": "conv.exposure",
+      "rule": "Distinguish funded (outstanding) from unfunded (commitment) exposure; do not add them without stating the conversion."
+    },
+    {
+      "id": "conv.spread_ref",
+      "rule": "Spreads are quoted over a named reference rate (e.g., SOFR); state it."
+    },
+    {
+      "id": "conv.obligor_vs_facility",
+      "rule": "Aggregate to the obligor or group before concentration analysis; one obligor can hold many facilities."
+    }
+  ],
+  "insight_rules": [
+    {
+      "id": "ir.spread_no_contrib",
+      "applies_to": "loan_spread",
+      "suppress_kinds": [
+        "contributor"
+      ],
+      "reason": "Spreads are balance-weighted averages; decompose into mix and rate effects instead."
+    }
+  ],
+  "caveats": [
+    {
+      "id": "cv.cre_values",
+      "trigger": "dimension:property_type",
+      "text": "CRE collateral values are appraisal-based and lag markets; current LTVs may be stale."
+    }
+  ],
+  "chart_conventions": [
+    {
+      "id": "ch.industry_bar",
+      "rule": "Show industry concentration as a sorted bar of share of exposure; highlight names above the concentration limit."
+    }
+  ],
+  "golden_cases": [
+    {
+      "id": "g.loans_dim",
+      "kind": "additivity",
+      "metric": "loans_outstanding",
+      "across": "dimension",
+      "allowed": true
+    },
+    {
+      "id": "g.util_dim",
+      "kind": "additivity",
+      "metric": "line_utilization",
+      "across": "dimension",
+      "allowed": false
+    },
+    {
+      "id": "g.spread",
+      "kind": "bps_change",
+      "from_pct": 2.1,
+      "to_pct": 2.35,
+      "expected_bps": 25.0
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewer": null,
+    "reviewed_on": null,
+    "notes": "Drafted from public, general industry conventions; not yet reviewed by a named domain owner."
+  }
+}

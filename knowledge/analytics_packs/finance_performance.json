@@ -1,0 +1,179 @@
+{
+  "schema_version": "0081.1",
+  "pack_id": "finance_performance",
+  "name": "Finance & Performance Management",
+  "family": "finance_treasury",
+  "description": "Firm, segment, and product financial performance: revenue, expense, margins, and returns.",
+  "source_domains": [
+    "finance",
+    "financial_reporting",
+    "fpa",
+    "accounting"
+  ],
+  "builds_on": [],
+  "reviewer_agents": [
+    "agents/reporting-agent",
+    "agents/analytics/metrics_semantic_layer"
+  ],
+  "dimensions": [
+    {
+      "name": "segment",
+      "description": "Reportable segment or business",
+      "synonyms": [
+        "business line",
+        "LOB"
+      ]
+    },
+    {
+      "name": "legal_entity",
+      "description": "Legal entity",
+      "synonyms": []
+    },
+    {
+      "name": "cost_center",
+      "description": "Cost center",
+      "synonyms": []
+    },
+    {
+      "name": "scenario",
+      "description": "Actual, plan, forecast",
+      "synonyms": [
+        "version"
+      ]
+    }
+  ],
+  "metrics": [
+    {
+      "name": "revenue",
+      "description": "Total net revenue in the period",
+      "unit": "currency",
+      "additivity": "additive",
+      "synonyms": [
+        "net revenue",
+        "top line"
+      ]
+    },
+    {
+      "name": "net_interest_income",
+      "description": "Interest income minus interest expense",
+      "unit": "currency",
+      "additivity": "additive",
+      "synonyms": [
+        "NII"
+      ]
+    },
+    {
+      "name": "noninterest_expense",
+      "description": "Operating expense in the period",
+      "unit": "currency",
+      "additivity": "additive",
+      "synonyms": [
+        "expenses",
+        "opex"
+      ]
+    },
+    {
+      "name": "efficiency_ratio",
+      "description": "Noninterest expense divided by revenue",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "cost-to-income"
+      ]
+    },
+    {
+      "name": "net_interest_margin",
+      "description": "Annualized NII divided by average earning assets",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "NIM"
+      ]
+    },
+    {
+      "name": "rotce",
+      "description": "Annualized net income to common divided by average tangible common equity",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "return on tangible equity",
+        "ROTCE"
+      ]
+    }
+  ],
+  "conventions": [
+    {
+      "id": "conv.scenario",
+      "rule": "Never mix actual, plan, and forecast in one series; compare actual to plan explicitly."
+    },
+    {
+      "id": "conv.allocations",
+      "rule": "Segment results depend on allocation methodology (FTP, overhead); state it and its date."
+    },
+    {
+      "id": "conv.fte",
+      "rule": "State whether NII and NIM are on a fully taxable-equivalent basis."
+    }
+  ],
+  "insight_rules": [
+    {
+      "id": "ir.ratios",
+      "applies_to": "efficiency_ratio",
+      "suppress_kinds": [
+        "contributor"
+      ],
+      "reason": "Attribute via expense and revenue separately."
+    },
+    {
+      "id": "ir.nim",
+      "applies_to": "net_interest_margin",
+      "suppress_kinds": [
+        "contributor"
+      ],
+      "reason": "Attribute via rate and volume effects."
+    }
+  ],
+  "caveats": [
+    {
+      "id": "cv.restatement",
+      "trigger": "always",
+      "text": "Prior periods can be restated for re-segmentation; use the restated basis for comparisons."
+    }
+  ],
+  "chart_conventions": [
+    {
+      "id": "ch.variance",
+      "rule": "Show actual vs plan as paired bars or a variance table; order segments by size."
+    }
+  ],
+  "golden_cases": [
+    {
+      "id": "g.eff",
+      "kind": "ratio",
+      "numerator": 60,
+      "denominator": 100,
+      "scale": 100,
+      "expected": 60.0
+    },
+    {
+      "id": "g.rev_dim",
+      "kind": "additivity",
+      "metric": "revenue",
+      "across": "dimension",
+      "allowed": true
+    },
+    {
+      "id": "g.nim_dim",
+      "kind": "additivity",
+      "metric": "net_interest_margin",
+      "across": "dimension",
+      "allowed": false
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewer": null,
+    "reviewed_on": null,
+    "notes": "Drafted from public, general industry conventions; not yet reviewed by a named domain owner."
+  }
+}

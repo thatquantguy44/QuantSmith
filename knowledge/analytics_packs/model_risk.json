@@ -1,0 +1,118 @@
+{
+  "schema_version": "0081.1",
+  "pack_id": "model_risk",
+  "name": "Model Risk Management",
+  "family": "risk",
+  "description": "Model inventory, validation status, findings, performance monitoring, and overrides.",
+  "source_domains": [
+    "model_risk_management"
+  ],
+  "builds_on": [],
+  "reviewer_agents": [
+    "agents/role_operations/governance_readiness_checklist",
+    "agents/machine_learning/mlops_monitoring"
+  ],
+  "dimensions": [
+    {
+      "name": "model_tier",
+      "description": "Model risk tier",
+      "synonyms": [
+        "materiality"
+      ]
+    },
+    {
+      "name": "model_type",
+      "description": "Model family",
+      "synonyms": []
+    },
+    {
+      "name": "owner_group",
+      "description": "Owning business",
+      "synonyms": []
+    }
+  ],
+  "metrics": [
+    {
+      "name": "model_count",
+      "description": "Models in inventory at a point in time",
+      "unit": "count",
+      "additivity": "semi_additive",
+      "synonyms": [
+        "inventory"
+      ]
+    },
+    {
+      "name": "overdue_validations",
+      "description": "Models past their validation due date",
+      "unit": "count",
+      "additivity": "semi_additive",
+      "synonyms": [
+        "overdue"
+      ]
+    },
+    {
+      "name": "open_findings",
+      "description": "Open validation findings at a point in time",
+      "unit": "count",
+      "additivity": "semi_additive",
+      "synonyms": [
+        "findings"
+      ]
+    },
+    {
+      "name": "override_rate",
+      "description": "Overridden model outputs divided by total outputs",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "overrides"
+      ]
+    }
+  ],
+  "conventions": [
+    {
+      "id": "conv.tier",
+      "rule": "Report findings and overdue counts by tier; high-tier models carry more weight."
+    },
+    {
+      "id": "conv.inventory_def",
+      "rule": "Model counts depend on the inventory definition (model vs. tool vs. EUC); state it."
+    }
+  ],
+  "insight_rules": [],
+  "caveats": [
+    {
+      "id": "cv.governance",
+      "trigger": "always",
+      "text": "Inventory data reflects governance records, which can lag actual model use."
+    }
+  ],
+  "chart_conventions": [
+    {
+      "id": "ch.aging",
+      "rule": "Show findings as an aging table by severity and tier."
+    }
+  ],
+  "golden_cases": [
+    {
+      "id": "g.count_dim",
+      "kind": "additivity",
+      "metric": "model_count",
+      "across": "dimension",
+      "allowed": true
+    },
+    {
+      "id": "g.override_dim",
+      "kind": "additivity",
+      "metric": "override_rate",
+      "across": "dimension",
+      "allowed": false
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewer": null,
+    "reviewed_on": null,
+    "notes": "Drafted from public, general industry conventions; not yet reviewed by a named domain owner."
+  }
+}

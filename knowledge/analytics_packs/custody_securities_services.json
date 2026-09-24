@@ -1,0 +1,119 @@
+{
+  "schema_version": "0081.1",
+  "pack_id": "custody_securities_services",
+  "name": "Custody & Securities Services",
+  "family": "business_line",
+  "description": "Custody, fund administration, and asset servicing for institutional clients.",
+  "source_domains": [
+    "custody",
+    "securities_services",
+    "fund_administration"
+  ],
+  "builds_on": [],
+  "reviewer_agents": [
+    "agents/risk",
+    "agents/data_quality"
+  ],
+  "dimensions": [
+    {
+      "name": "service",
+      "description": "Custody, fund accounting, transfer agency, depositary",
+      "synonyms": []
+    },
+    {
+      "name": "market",
+      "description": "Settlement market",
+      "synonyms": []
+    },
+    {
+      "name": "client_type",
+      "description": "Asset manager, pension, insurer, fund",
+      "synonyms": []
+    }
+  ],
+  "metrics": [
+    {
+      "name": "assets_under_custody",
+      "description": "Assets under custody and administration at a point in time",
+      "unit": "currency",
+      "additivity": "semi_additive",
+      "synonyms": [
+        "AUC",
+        "AUC/A"
+      ]
+    },
+    {
+      "name": "servicing_fees",
+      "description": "Servicing fee revenue in the period",
+      "unit": "currency",
+      "additivity": "additive",
+      "synonyms": [
+        "fees"
+      ]
+    },
+    {
+      "name": "nav_error_count",
+      "description": "Net asset value errors in the period",
+      "unit": "count",
+      "additivity": "additive",
+      "synonyms": [
+        "NAV errors"
+      ]
+    },
+    {
+      "name": "settlement_fail_rate",
+      "description": "Failed settlements divided by instructions",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "fail rate"
+      ]
+    }
+  ],
+  "conventions": [
+    {
+      "id": "conv.auc_market",
+      "rule": "AUC/A moves with markets; separate new business from valuation effects."
+    },
+    {
+      "id": "conv.fee_bps",
+      "rule": "Custody fees are often quoted in bps of AUC plus transaction charges; state the fee basis."
+    }
+  ],
+  "insight_rules": [],
+  "caveats": [
+    {
+      "id": "cv.valuation",
+      "trigger": "metric:assets_under_custody",
+      "text": "Most AUC/A change is market valuation, not client activity."
+    }
+  ],
+  "chart_conventions": [
+    {
+      "id": "ch.market_table",
+      "rule": "Show per-market settlement metrics as a sorted table with counts beside rates."
+    }
+  ],
+  "golden_cases": [
+    {
+      "id": "g.auc_time",
+      "kind": "additivity",
+      "metric": "assets_under_custody",
+      "across": "time",
+      "allowed": false
+    },
+    {
+      "id": "g.fees_time",
+      "kind": "additivity",
+      "metric": "servicing_fees",
+      "across": "time",
+      "allowed": true
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewer": null,
+    "reviewed_on": null,
+    "notes": "Drafted from public, general industry conventions; not yet reviewed by a named domain owner."
+  }
+}
