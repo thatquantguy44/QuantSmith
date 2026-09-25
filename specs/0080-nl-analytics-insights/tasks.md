@@ -28,10 +28,10 @@
 | T-004 | Interpreter registration hook; stub-LLM test proving one validator for all interpreters. | REQ-003, AC-004 | done | |
 | T-005 | `authorize.py`: clearance check via `0058`; existence masking in answers and clarifications. | REQ-004, AC-005 | done | |
 | T-006 | `execute.py`: injected reader, as-of filter, row count, latest period, content hash. | REQ-005, NFR-001, NFR-002, AC-006 | done | Two-dimension grouping composes `0008`'s public `compute()` per partition rather than its private `group_by` path, so it works for 0/1/2 declared dimensions. |
-| T-007 | `chart.py`: form rule, finding-first titles, units/labels/footnote/alt text, Vega-Lite and Markdown table, `to_panel` rendered via `0015`. | REQ-006, AC-007, AC-008 | todo | |
-| T-008 | `insights.py`: level, change, contributors, trend, outliers, concentration with the values each rests on. | REQ-007, AC-009 | todo | |
-| T-009 | `narrate.py`: template narrative, grounding validator (numbers, causal phrases), caveat triggers. | REQ-008, AC-010, AC-011 | todo | |
-| T-010 | `respond.py`: `answer()` entry point and `ChatResponse` with typed status for every path. | REQ-009, NFR-006, AC-012, AC-022 | todo | |
+| T-007 | `chart.py`: form rule, finding-first titles, units/labels/footnote/alt text, Vega-Lite and Markdown table, `to_panel` rendered via `0015`. | REQ-006, AC-007, AC-008 | done | `execute.py`'s `Result` extended with a per-period `series` (needed for the time-series/outlier shapes; noted below). |
+| T-008 | `insights.py`: level, change, contributors, trend, outliers, concentration with the values each rests on. | REQ-007, AC-009 | done | Outlier z-score falls back to a tiny epsilon std when the trailing baseline is perfectly flat, so a real jump off a flat series is still flagged rather than silently skipped (division-by-zero guard would otherwise hide it). |
+| T-009 | `narrate.py`: template narrative, grounding validator (numbers, causal phrases), caveat triggers. | REQ-008, AC-010, AC-011 | done | |
+| T-010 | `respond.py`: `answer()` entry point and `ChatResponse` with typed status for every path. | REQ-009, NFR-006, AC-012, AC-022 | done | Multi-metric `compare` charts (two-measure scatter) are wired into `chart.py` but `respond.py`'s single-plan `answer()` doesn't orchestrate two plans yet — tracked in Follow-ups, matches the spec's own multi-metric non-goal. |
 | T-011 | `templates/data/writeback_contract.md` and contract loader/validator (targets, schema, key, allowed columns, source-table deny-list). | REQ-010, AC-013 | todo | |
 | T-012 | `writeback.py`: `build_records`, `publish` (dry-run default, approval, idempotency), `reverse` by run id (tombstone). | REQ-010, REQ-011, AC-014, AC-015 | todo | |
 | T-013 | `prior_insights` as-of lookup and `prior_insight` comparison kind. | REQ-012, NFR-002, AC-016 | todo | |
@@ -60,12 +60,12 @@ Every acceptance criterion must be named by at least one test.
 | AC-004 | `test_ac004_llm_style_interpreter_shares_the_same_validator` | done |
 | AC-005 | `test_ac005_restricted_metric_is_masked`, `test_ac005_public_metric_passes_through`, `test_ac005_restricted_dimension_is_dropped_not_named` | done |
 | AC-006 | `test_ac006_execute_respects_as_of_and_hashes`, `test_ac006_execute_groups_by_declared_dimensions`, `test_ac006_execute_applies_filters` | done |
-| AC-007 | `test_ac007_form_rule_by_result_shape` | todo |
-| AC-008 | `test_ac008_chart_promotes_to_panel_and_renders` | todo |
-| AC-009 | `test_ac009_insights_match_hand_computed` | todo |
-| AC-010 | `test_ac010_grounding_rejects_unbacked_numbers_and_flags_causal` | todo |
-| AC-011 | `test_ac011_caveats_triggered` | todo |
-| AC-012 | `test_ac012_chat_response_complete` | todo |
+| AC-007 | `test_ac007_form_rule_by_result_shape`, `test_ac007_vega_lite_and_markdown_are_minimal_and_reflect_data` | done |
+| AC-008 | `test_ac008_chart_promotes_to_panel_and_renders` | done |
+| AC-009 | `test_ac009_insights_match_hand_computed`, `test_ac009_trend_and_outlier_match_hand_computed` | done |
+| AC-010 | `test_ac010_grounding_rejects_unbacked_numbers_and_flags_causal` | done |
+| AC-011 | `test_ac011_caveats_triggered` | done |
+| AC-012 | `test_ac012_chat_response_complete` | done |
 | AC-013 | `test_ac013_writeback_contract_rejections` | todo |
 | AC-014 | `test_ac014_dry_run_default_and_idempotent_commit` | todo |
 | AC-015 | `test_ac015_approval_required_and_reversal_by_run_id` | todo |
@@ -79,7 +79,7 @@ Every acceptance criterion must be named by at least one test.
 | AC-024 | `test_ac024_cross_pack_term_conflict_clarifies` | todo |
 | AC-025 | `test_ac025_draft_pack_caveat_and_writeback_gate` | todo |
 | AC-026 | `test_ac026_generic_fallback_and_restrict_only` | todo |
-| AC-022 | `test_ac022_typed_status_on_every_failure_path` | todo |
+| AC-022 | `test_ac022_typed_status_on_every_failure_path` | done |
 
 ## Follow-ups
 
@@ -88,6 +88,10 @@ Tracked work intentionally deferred (no silent "temporary" shortcuts — P8).
 - Shared-database write-back adapter (Postgres / SQL Server via the existing
   `SQLDataSource` classes, or a warehouse) — deferred; SQLite (T-020) is the
   first target.
+- `respond.answer()` orchestrating a two-metric plan pair for the scatter
+  chart shape; `chart.choose_chart(..., compare=...)` supports it already,
+  `answer()` still resolves one plan per question (matches the spec's own
+  "one metric per plan in the first slice" assumption).
 - Chat-surface adapter (Claude chat / Slack / `0057` console `QueryEngine`).
 - Multi-metric plans beyond a two-measure scatter.
 - Non-additive metric contribution (distinct counts, medians) — depends on

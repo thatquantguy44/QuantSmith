@@ -88,16 +88,25 @@ hashing.
 **`Clarification`** — `reason`, `candidates: tuple[str, ...]` (post-masking),
 `question`.
 
-**`Result`** — rows keyed by dimension tuple and period, `row_count`,
-`latest_period`, `as_of`, `content_hash` (SHA-256 of canonical plan + rows).
+**`Result`** — `values` (the whole-window aggregate, keyed by dimension
+tuple — "the current level") and `series` (the same aggregation done again
+per period, ascending, so a chart or an insight never re-reads the data to
+learn how the level moved period to period), `row_count`, `latest_period`,
+`as_of`, `content_hash` (SHA-256 of canonical plan + `values` + `series`).
 
 **`ChartSpec`** — `chart_type ∈ CHART_TYPES`, `title` (finding-first),
 `x`, `y`, `series`, `units`, `sort`, `zero_baseline: bool`, `footnote`
-(source, as-of, metric owner), `alt_text`. Pie and dual-axis are not
-representable (not in `CHART_TYPES`).
+(source, as-of, metric owner), `alt_text`, plus `metric`/`dimensions`/`data`
+(the exact rendered rows, self-contained for Vega-Lite and the Markdown
+fallback alike). Pie and dual-axis are not representable (not in
+`CHART_TYPES`).
 
-**`InsightSet`** — ordered `Insight(kind, statement_template, values: dict)`;
-kinds: `level`, `change`, `contributor`, `trend`, `outlier`, `concentration`.
+**`InsightSet`** — ordered `Insight(kind, statement, values: dict)` (this
+spec's field name is `statement_template`; the shipped field is `statement`
+— the fully-rendered sentence, not a fill-in-the-blanks template, since 0080
+has no second templating layer for insight text; `values` is what a
+narrative is grounded against, not the template's slots). Kinds: `level`,
+`change`, `contributor`, `trend`, `outlier`, `concentration`.
 
 **`ChatResponse`** — `status ∈ {answered, clarification_needed, masked, empty,
 stale, write_rejected}`, `reason`, `headline`, `insights`, `chart`,
