@@ -1,7 +1,7 @@
 # Tasks: Natural-Language Analytics — Visualization, Interpretation, and Write-Back
 
 - **Spec:** 0080-nl-analytics-insights (`spec.md`, `plan.md`)
-- **Last updated:** 2026-09-24
+- **Last updated:** 2026-09-25
 
 > Ordered, testable units of work. Every task cites the requirement(s) it advances
 > and carries a Definition of Done. No task without a requirement.
@@ -32,15 +32,15 @@
 | T-008 | `insights.py`: level, change, contributors, trend, outliers, concentration with the values each rests on. | REQ-007, AC-009 | done | Outlier z-score falls back to a tiny epsilon std when the trailing baseline is perfectly flat, so a real jump off a flat series is still flagged rather than silently skipped (division-by-zero guard would otherwise hide it). |
 | T-009 | `narrate.py`: template narrative, grounding validator (numbers, causal phrases), caveat triggers. | REQ-008, AC-010, AC-011 | done | |
 | T-010 | `respond.py`: `answer()` entry point and `ChatResponse` with typed status for every path. | REQ-009, NFR-006, AC-012, AC-022 | done | Multi-metric `compare` charts (two-measure scatter) are wired into `chart.py` but `respond.py`'s single-plan `answer()` doesn't orchestrate two plans yet — tracked in Follow-ups, matches the spec's own multi-metric non-goal. |
-| T-011 | `templates/data/writeback_contract.md` and contract loader/validator (targets, schema, key, allowed columns, source-table deny-list). | REQ-010, AC-013 | todo | |
-| T-012 | `writeback.py`: `build_records`, `publish` (dry-run default, approval, idempotency), `reverse` by run id (tombstone). | REQ-010, REQ-011, AC-014, AC-015 | todo | |
-| T-013 | `prior_insights` as-of lookup and `prior_insight` comparison kind. | REQ-012, NFR-002, AC-016 | todo | |
+| T-011 | `templates/data/writeback_contract.md` and contract loader/validator (targets, schema, key, allowed columns, source-table deny-list). | REQ-010, AC-013 | done | `load_contract` parses name, `auto_approve`, and the deny-list from a filled-in copy; schema and idempotency key are the one system-wide insight-record shape (`SCHEMA_COLUMNS`), not per-file, so `columns`/`idempotency_key` aren't parsed. A file still carrying the template's own placeholders is rejected. |
+| T-012 | `writeback.py`: `build_records`, `publish` (dry-run default, approval, idempotency), `reverse` by run id (tombstone). | REQ-010, REQ-011, AC-014, AC-015 | done | `WriteBackWriter.reverse` takes a caller-supplied `reversed_at` (not just `run_id`) — needed for `prior_insights`' as-of bound on a reversed record to be exact, per NFR-002; the spec's own interface sketch omitted it, noted here rather than silently deviating. |
+| T-013 | `prior_insights` as-of lookup and `prior_insight` comparison kind. | REQ-012, NFR-002, AC-016 | done | Persisted comparison is total-level only (from the `level` insight row); reconstructing a per-dimension breakdown from stored `contributor` rows is a documented follow-up. `respond.py`'s `comparison_key()` joins on metric+dimensions, not the window, so "since yesterday" matches across two different rolling windows; a `reference == "yesterday"` comparison shifts the lookup's as-of back one period so a same-day persisted record can never stand in for yesterday's. |
 | T-014 | Emit `0070` envelope and audit events per stage, with redaction and privacy-flag propagation; replay test. | REQ-013, NFR-001, NFR-004, AC-017, AC-020 | todo | |
 | T-015 | Agents `agents/analytics/data_visualization/` and `agents/analytics/nl_analytics/` (four files each, `Spec-Driven Role`), catalog rows, group README handoffs. | REQ-014, AC-018 | todo | |
 | T-016 | Import/source scan test (stdlib only, no credentials or network) and privacy test. | NFR-003, NFR-004, AC-019, AC-020 | todo | |
 | T-017 | 100k-row benchmark test. | NFR-005, AC-021 | todo | |
 | T-018 | `cli.py` and `examples/nl_analytics/` (synthetic three-day transcript, committed sample response) plus `docs/0080_synthetic_data_disclosure.md`. | REQ-009, REQ-012 | todo | |
-| T-020 | `writeback_sqlite.py`: `SQLiteWriter` + reader over stdlib `sqlite3` (schema from contract, `ON CONFLICT DO NOTHING` idempotency, tombstone reversal, as-of prior-insight read); runs AC-014/015/016 against both the recording writer and SQLite (`:memory:` and a temp file). First supported target, resolved by the owner 2026-09-24. | REQ-010, REQ-011, REQ-012, AC-014, AC-015, AC-016 | todo | |
+| T-020 | `writeback_sqlite.py`: `SQLiteWriter` + reader over stdlib `sqlite3` (schema from contract, `ON CONFLICT DO NOTHING` idempotency, tombstone reversal, as-of prior-insight read); runs AC-014/015/016 against both the recording writer and SQLite (`:memory:` and a temp file). First supported target, resolved by the owner 2026-09-24. | REQ-010, REQ-011, REQ-012, AC-014, AC-015, AC-016 | done | Table name is fixed at construction from the contract (`nl_analytics_writeback_<name>`), never from a record or a later call; every statement is parameterized. |
 | T-019 | Update `specs/README.md`, `src/quantsmith/pipelines/README.md` or package README, `docs/handoff.md`, `docs/handoffs/future_features.md`, and `CHANGELOG.md` on ship. | REQ-014 | todo | |
 
 | T-021 | `domain.py`: apply `0081` packs (vocabulary, units, additivity, insight suppression, caveats, chart conventions), term-conflict clarification, and generic fallback. | REQ-015, REQ-017, AC-023, AC-024, AC-026 | todo | Packs and validator shipped by `0081`. |
@@ -66,10 +66,10 @@ Every acceptance criterion must be named by at least one test.
 | AC-010 | `test_ac010_grounding_rejects_unbacked_numbers_and_flags_causal` | done |
 | AC-011 | `test_ac011_caveats_triggered` | done |
 | AC-012 | `test_ac012_chat_response_complete` | done |
-| AC-013 | `test_ac013_writeback_contract_rejections` | todo |
-| AC-014 | `test_ac014_dry_run_default_and_idempotent_commit` | todo |
-| AC-015 | `test_ac015_approval_required_and_reversal_by_run_id` | todo |
-| AC-016 | `test_ac016_since_yesterday_uses_prior_insight_as_of` | todo |
+| AC-013 | `test_ac013_writeback_contract_rejections` | done |
+| AC-014 | `test_ac014_dry_run_default_and_idempotent_commit` (parametrized: recording writer + SQLite) | done |
+| AC-015 | `test_ac015_approval_required_and_reversal_by_run_id` | done |
+| AC-016 | `test_ac016_since_yesterday_uses_prior_insight_as_of`, `test_ac016_respond_yesterday_reference_shifts_as_of_by_one` | done |
 | AC-017 | `test_ac017_replay_is_byte_identical` | todo |
 | AC-018 | agent-contract + `agent-catalog` gates | todo |
 | AC-019 | `test_ac019_stdlib_only_no_credentials_or_network` | todo |
@@ -97,3 +97,10 @@ Tracked work intentionally deferred (no silent "temporary" shortcuts — P8).
 - Non-additive metric contribution (distinct counts, medians) — depends on
   `0008`'s own follow-up.
 - Promoting persisted insights into `0048`/`0056` knowledge candidates.
+- Per-dimension prior-insight comparisons — `prior_insights` currently
+  reconstructs a total level only, from the persisted `level` row; a group
+  breakdown would need reassembling stored `contributor` rows, not built here.
+- `ChatResponse.writeback` stays `None` — `build_records`/`publish` take the
+  plan/result/insights directly (not the `ChatResponse` itself), since the
+  response doesn't carry them; wiring `answer()` end to end with a
+  write-back request is part of the CLI/example (T-018) or a later task.

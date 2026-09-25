@@ -771,13 +771,16 @@ the package — reads, writes, and any LLM call are caller-injected.
 | `insights.py` | REQ-007 | Level, change, per-group contribution (shares sum to the total change), trend, trailing-baseline outliers, and concentration (HHI) — each `Insight` carries the exact numbers it rests on. |
 | `narrate.py` | REQ-008 | `template_narrative` renders the deterministic default; `ground` rejects any narrative number not backed by the insight set (RISK-002) and flags causal wording (RISK-007); `default_caveats` triggers on synthetic data, a small sample, staleness, and a partial final period. |
 | `respond.py` | REQ-009, NFR-006 | `answer()` composes every stage; `ChatResponse` carries a typed `status` on every path (`answered`/`clarification_needed`/`masked`/`empty`/`stale`/`write_rejected`) and refuses to construct a non-answer that carries a chart or an empty reason. |
+| `writeback.py` | REQ-010, REQ-011, REQ-012 | `WriteBackContract` (fixed schema, idempotency key, source-table deny-list, approval rule) plus `load_contract` parsing a filled-in `templates/data/writeback_contract.md`; `build_records` (one row per insight, keyed by a hash of run id and position); `publish` (dry-run default, approval unless `auto_approve`, idempotency delegated to the injected writer); `reverse` (tombstone by run id, caller-supplied `reversed_at`); `prior_insights` (the most recent persisted level visible as of a bound, never reading a clock). |
+| `writeback_sqlite.py` | REQ-010, REQ-011, REQ-012 | `SQLiteWriter`: the first supported write-back target — a local file, parameterized statements only, `INSERT ... ON CONFLICT(record_key) DO NOTHING` for idempotency, a tombstone `UPDATE` for reversal, and a `read()` method usable directly as a `prior_insights` reader. |
 
-Tests: `tests/test_nl_analytics.py` (25 acceptance tests, T-001–T-010).
+Tests: `tests/test_nl_analytics.py` (33 tests, T-001–T-013, T-020).
 
 ```sh
 PYTHONPATH=src python3 -m pytest tests/test_nl_analytics.py -q
 ```
 
-Remaining (spec `0080` tasks T-011 onward): write-back to SQLite, the `0070`
-audit envelope, and the `analytics/data_visualization` /
-`analytics/nl_analytics` agents.
+Remaining (spec `0080` tasks T-014 onward): the `0070` audit envelope and
+replay, the `analytics/data_visualization` / `analytics/nl_analytics`
+agents, the CLI and worked example, the 100k-row benchmark, and applying
+`0081`'s domain packs once at least one family is reviewed.

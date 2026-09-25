@@ -1454,19 +1454,25 @@ manual-task persistence question stays deferred until a real consumer needs it.
     point-in-time, closing the multi-day gap `0055`/`0059` leave open. Adds
     `agents/analytics/data_visualization/` (promoting the P3 backlog row) and
     `agents/analytics/nl_analytics/`. **Status (17 REQ, 6 NFR, 26 AC, 22
-    tasks): the deterministic core is built and tested — T-001 through T-010**
-    (`src/quantsmith/nl_analytics/`: `plan.py`, `interpret.py`, `authorize.py`,
-    `execute.py`, `chart.py`, `insights.py`, `narrate.py`, `respond.py`;
-    25 acceptance tests in `tests/test_nl_analytics.py`). A question answers
-    end to end through `respond.answer()`: interpret, validate, authorize,
-    execute, choose a chart, compute insights, ground the narrative, and
-    return a typed `ChatResponse` — with no side effects, so nothing here
-    needed the pack reviews or the open questions below to start. First
-    write-back target resolved (owner, 2026-09-24): **SQLite** through stdlib
-    `sqlite3` against a local gitignored file (T-020); a shared database
-    adapter is deferred until a team needs one. **Remaining:** write-back
-    (T-011/T-012/T-020), the `0070` audit envelope and replay (T-013/T-014),
-    the two agents (T-015), and the CLI/example (T-016–T-018); domain-pack
+    tasks): the full chat-and-write-back pipeline is built and tested —
+    T-001 through T-013 and T-020** (`src/quantsmith/nl_analytics/`:
+    `plan.py`, `interpret.py`, `authorize.py`, `execute.py`, `chart.py`,
+    `insights.py`, `narrate.py`, `respond.py`, `writeback.py`,
+    `writeback_sqlite.py`; 33 tests in `tests/test_nl_analytics.py`). A
+    question answers end to end through `respond.answer()` with no side
+    effects; separately, `writeback.build_records`/`publish`/`reverse` and
+    `writeback.prior_insights` (bounded strictly by as-of, never a clock)
+    give a caller the pieces to persist and later compare against a chat
+    answer's insights — dry-run by default, append-only, idempotent, and
+    reversible by run id, all proven against both an in-memory writer and a
+    real SQLite file. Nothing here needed the pack reviews or the open
+    questions below to start. First write-back target resolved (owner,
+    2026-09-24): **SQLite** through stdlib `sqlite3` against a local
+    gitignored file; a shared database adapter is deferred until a team
+    needs one. **Remaining:** the `0070` audit envelope and replay (T-014),
+    the two agents (T-015), and the CLI/example (T-016–T-018, which also
+    wires `answer()` to write-back end to end — `ChatResponse` itself
+    doesn't carry the plan/result `build_records` needs); domain-pack
     application (T-021/T-022) once `0081`'s families are reviewed. **Open
     questions:** first chat surface, whether insights also become
     `0048`/`0056` knowledge candidates, and the approval model.

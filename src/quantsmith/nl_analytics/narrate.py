@@ -50,8 +50,7 @@ def _flatten_numbers(value: object, out: set) -> None:
         return
     if isinstance(value, (int, float)):
         out.add(float(value))
-        if abs(value) <= 1:
-            out.add(float(value) * 100)  # a ratio may be written as a percent
+        out.add(float(value) * 100)  # any ratio may be written as a percent (a >100% move included)
     elif isinstance(value, dict):
         for v in value.values():
             _flatten_numbers(v, out)

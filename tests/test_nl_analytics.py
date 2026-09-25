@@ -7,6 +7,9 @@ proves.
 
 from __future__ import annotations
 
+import json
+import sqlite3
+
 import pytest
 
 from quantsmith.pipelines.dashboard_spec import DashboardSpec
@@ -488,3 +491,235 @@ def test_ac022_typed_status_on_every_failure_path(layer):
             ChatResponse(status=r.status, reason="x", headline="", insights=(),
                         chart=object.__new__(_CS), vega_lite=None, markdown_table=None,
                         plan_echo="", caveats=(), citations=())
+
+
+# --- T-011/T-012/T-020: write-back contract, publish/reverse, SQLite -------
+
+
+from quantsmith.nl_analytics.writeback import (
+    WriteBackContract,
+    WriteBackError,
+    build_records,
+    default_contract,
+    load_contract,
+    prior_insights,
+    publish,
+    reverse,
+)
+from quantsmith.nl_analytics.writeback_sqlite import SQLiteWriter, open_writer
+from quantsmith.nl_analytics.respond import comparison_key
+
+
+class _RecordingWriter:
+    """An in-memory stand-in for the `WriteBackWriter` protocol."""
+
+    def __init__(self):
+        self.rows = {}
+
+    def write(self, records):
+        written = 0
+        for r in records:
+            if r["record_key"] not in self.rows:
+                self.rows[r["record_key"]] = dict(r)
+                written += 1
+        return written
+
+    def reverse(self, run_id, reversed_at):
+        count = 0
+        for r in self.rows.values():
+            if r["run_id"] == run_id and r["reversed_at"] is None:
+                r["reversed_at"] = reversed_at
+                count += 1
+        return count
+
+    def read(self, key):
+        metric, *dims = key.split("|")
+        dims_json = json.dumps(dims, sort_keys=True)
+        return [r for r in self.rows.values() if r["metric"] == metric and r["dimensions_json"] == dims_json]
+
+
+def _built_records(layer, run_id="run-1", created_at=10, value=42.0):
+    rows = [Fact(period=10, dims={"desk": "rates"}, measures={"cost": value})]
+    plan = _plan(dims=(), window=TimeWindow(10, 10, "day"))
+    result = execute(plan, layer, reader=lambda p: rows, as_of=10)
+    insight_set = compute_insights(result)
+    records = build_records(
+        plan, result, insight_set, run_id=run_id, question="funding cost",
+        metric_definition_hash="hash-of-def", author_handle="anon-1",
+        interpreter_mode="keyword/1", created_at=created_at,
+    )
+    return plan, result, records
+
+
+def test_ac013_writeback_contract_rejections(layer):
+    with pytest.raises(WriteBackError):
+        WriteBackContract(name="x", columns=("only", "two"), idempotency_key="record_key",
+                          source_tables_denied=())
+
+    contract = default_contract("test", source_tables_denied=("fact_*", "source_*"))
+    _, _, records = _built_records(layer)
+    writer = _RecordingWriter()
+
+    with pytest.raises(WriteBackError):
+        publish(records, contract, writer, target_table="fact_positions", dry_run=True)
+
+    bad_records = [dict(records[0])]
+    del bad_records[0]["headline"]  # missing a required column
+    with pytest.raises(WriteBackError):
+        publish(bad_records, contract, writer, dry_run=True)
+
+    bad_records2 = [dict(records[0], extra_column="nope")]
+    with pytest.raises(WriteBackError):
+        publish(bad_records2, contract, writer, dry_run=True)
+
+
+def test_load_contract_parses_template_fields(tmp_path):
+    filled = tmp_path / "test_writeback_contract.md"
+    filled.write_text(
+        "# Write-Back Contract: test\n\n"
+        "## Target\n\n- **Name:** test — a test target\n\n"
+        "## Approval\n\n- **`auto_approve`:** `true` — always commit\n\n"
+        "## Source-Table Deny-List\n\n- `fact_*`\n- `source_*`\n\n"
+        "## Reversal\n\n- some other section\n",
+        encoding="utf-8",
+    )
+    contract = load_contract(str(filled))
+    assert contract.name == "test"
+    assert contract.auto_approve is True
+    assert contract.source_tables_denied == ("fact_*", "source_*")
+    assert contract.targets_denied_table("fact_positions")
+    assert not contract.targets_denied_table("other_table")
+
+    with pytest.raises(WriteBackError):
+        load_contract("templates/data/writeback_contract.md")  # unfilled <target-name>
+
+
+# --- AC-014 / AC-015: dry-run default, idempotent commit, approval, reversal
+
+
+@pytest.mark.parametrize("make_writer", [
+    lambda: _RecordingWriter(),
+    lambda: SQLiteWriter(sqlite3.connect(":memory:"), default_contract("sqlite-test")),
+])
+def test_ac014_dry_run_default_and_idempotent_commit(layer, make_writer):
+    contract = default_contract("sqlite-test", source_tables_denied=("fact_*",))
+    _, _, records = _built_records(layer)
+    writer = make_writer()
+
+    dry = publish(records, contract, writer, dry_run=True)
+    assert dry.status == "dry_run"
+    assert dry.records == tuple(dict(r) for r in records)
+    assert dry.written_count == 0
+
+    committed = publish(records, contract, writer, dry_run=False, approved=True)
+    assert committed.status == "committed"
+    assert committed.written_count == len(records)
+
+    committed_again = publish(records, contract, writer, dry_run=False, approved=True)
+    assert committed_again.written_count == 0
+
+
+def test_ac015_approval_required_and_reversal_by_run_id(layer):
+    contract = default_contract("t")
+    _, _, records = _built_records(layer, run_id="run-approve")
+    writer = _RecordingWriter()
+
+    with pytest.raises(WriteBackError):
+        publish(records, contract, writer, dry_run=False, approved=False)
+
+    auto_contract = default_contract("t", auto_approve=True)
+    outcome = publish(records, auto_contract, writer, dry_run=False, approved=False)
+    assert outcome.status == "committed"
+
+    reversed_outcome = reverse("run-approve", 999, auto_contract, writer)
+    assert reversed_outcome.status == "reversed"
+    assert reversed_outcome.written_count == len(records)
+    assert all(r["reversed_at"] == 999 for r in writer.rows.values() if r["run_id"] == "run-approve")
+
+    with pytest.raises(WriteBackError):
+        reverse("", 1, auto_contract, writer)
+
+
+# --- AC-016: "since yesterday" uses the persisted, as-of-bounded prior insight
+
+
+def test_ac016_since_yesterday_uses_prior_insight_as_of(layer):
+    contract = default_contract("t", auto_approve=True)
+    writer = _RecordingWriter()
+
+    # Two persisted days for the same governed question.
+    plan1, result1, records1 = _built_records(layer, run_id="run-yesterday", created_at=1)
+    publish(records1, contract, writer, dry_run=False)
+    plan2, result2, records2 = _built_records(layer, run_id="run-today", created_at=2)
+    publish(records2, contract, writer, dry_run=False)
+    key = comparison_key(plan1)
+
+    # Bounded strictly to "yesterday" (as_of=1): only run-yesterday is visible,
+    # even though run-today already exists in the store.
+    prior_yesterday = prior_insights(writer.read, key, as_of=1)
+    assert prior_yesterday is not None and prior_yesterday.run_id == "run-yesterday"
+
+    # A wider as-of (2, "today") legitimately sees the most recent persisted
+    # record, including one created today — a record created strictly after
+    # the as-of is what must never leak in, not same-day records in general.
+    prior_today = prior_insights(writer.read, key, as_of=2)
+    assert prior_today is not None and prior_today.run_id == "run-today"
+
+    # Nothing existed before either record was created.
+    assert prior_insights(writer.read, key, as_of=0) is None
+
+    # Reversal is bounded the same way: reversed at period 1 means invisible
+    # from period 1 onward, but the reversal itself never leaks backwards.
+    reverse("run-yesterday", 1, contract, writer)
+    assert prior_insights(writer.read, key, as_of=0) is None  # still never existed at 0
+    assert prior_insights(writer.read, key, as_of=1) is None  # reversed_at=1 is not > as_of=1
+
+    # The store is never mutated by a read.
+    before = {k: dict(v) for k, v in writer.rows.items()}
+    prior_insights(writer.read, key, as_of=2)
+    assert before == writer.rows
+
+
+def test_ac016_respond_yesterday_reference_shifts_as_of_by_one(layer):
+    """The 'since yesterday' phrase respond.py resolves shifts the lookup's
+    as-of back one period, so a same-day persisted record never stands in
+    for yesterday's (AC-016's own scenario, exercised through answer())."""
+    contract = default_contract("t", auto_approve=True)
+    writer = _RecordingWriter()
+    # Different levels so the test can tell which one respond.py actually used.
+    plan_yday, _, records_yday = _built_records(layer, run_id="run-yday", created_at=9, value=42.0)
+    publish(records_yday, contract, writer, dry_run=False)
+    plan_today, _, records_today = _built_records(layer, run_id="run-today", created_at=10, value=999.0)
+    publish(records_today, contract, writer, dry_run=False)
+
+    def lookup(key, as_of):
+        return prior_insights(writer.read, key, as_of)
+
+    # The KeywordInterpreter reads "yesterday" in the question as both a
+    # relative window (yesterday-only, period 9) and a prior_insight
+    # comparison — rows must exist at period 9 for the plan's own window.
+    rows = [Fact(period=9, dims={"desk": "rates"}, measures={"cost": 100.0})]
+    ctx = AnswerContext(
+        layer=layer, reader=lambda p: rows, as_of=10,
+        interpret_context=InterpretContext(today_period=10, default_grain="day"),
+        prior_insight_lookup=lookup,
+    )
+    response = answer("funding cost since yesterday", ctx)
+    assert response.status == "answered"
+    change = next(i for i in response.insights if i.kind == "change")
+    assert change.values["prior"] == pytest.approx(42.0)  # run-yday's level, not run-today's 999
+
+
+def test_writeback_sqlite_file_target(tmp_path, layer):
+    contract = default_contract("file-test", auto_approve=True)
+    db_path = str(tmp_path / "nl_analytics.sqlite3")
+    writer = open_writer(db_path, contract)
+
+    plan, result, records = _built_records(layer, run_id="run-file")
+    committed = publish(records, contract, writer, dry_run=False)
+    assert committed.written_count == len(records)
+
+    reopened = open_writer(db_path, contract)
+    key = comparison_key(plan)
+    prior = prior_insights(reopened.read, key, as_of=10)
+    assert prior is not None and prior.run_id == "run-file"
