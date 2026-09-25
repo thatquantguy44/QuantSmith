@@ -26,15 +26,20 @@ Reader = Callable[[QueryPlan], Sequence[Fact]]
 
 @dataclass(frozen=True)
 class Result:
-    """The computed answer to a plan: values keyed by dimension-value tuple.
+    """The computed answer to a plan.
 
-    An ungrouped plan (``plan.dimensions == ()``) has one entry keyed by
-    ``()``. ``content_hash`` covers the plan and the values, so two runs over
-    identical inputs are provably identical (NFR-001).
+    ``values`` aggregates the whole window into one number per dimension-value
+    tuple — "the current level" (an ungrouped plan has one entry keyed by
+    ``()``). ``series`` is the same aggregation done separately per period, in
+    ascending period order, so trend and outlier insights and a time-series
+    chart have something to work from without a second read of the data.
+    ``content_hash`` covers the plan, ``values``, and ``series``, so two runs
+    over identical inputs are provably identical (NFR-001).
     """
 
     plan: QueryPlan
     values: Dict[Tuple[str, ...], float]
+    series: Dict[int, Dict[Tuple[str, ...], float]]
     row_count: int
     latest_period: Optional[int]
     as_of: int
@@ -65,13 +70,28 @@ def execute(plan: QueryPlan, layer: SemanticLayer, reader: Reader, as_of: int) -
         groups.setdefault(key, []).append(r)
     if not groups:
         groups[tuple("" for _ in plan.dimensions)] = []
-
     values = {key: layer.compute(plan.metric, rows) for key, rows in groups.items()}
+
+    by_period: Dict[int, list] = {}
+    for r in filtered:
+        by_period.setdefault(r.period, []).append(r)
+    series: Dict[int, Dict[Tuple[str, ...], float]] = {}
+    for period in sorted(by_period):
+        period_groups: Dict[Tuple[str, ...], list] = {}
+        for r in by_period[period]:
+            key = tuple(r.dims.get(d, "") for d in plan.dimensions)
+            period_groups.setdefault(key, []).append(r)
+        series[period] = {key: layer.compute(plan.metric, rows) for key, rows in period_groups.items()}
+
     latest_period = max((r.period for r in filtered), default=None)
 
     payload = {
         "plan": plan.to_canonical_dict(),
         "values": {"|".join(k): v for k, v in sorted(values.items())},
+        "series": {
+            str(period): {"|".join(k): v for k, v in sorted(vals.items())}
+            for period, vals in sorted(series.items())
+        },
         "row_count": len(filtered),
         "latest_period": latest_period,
         "as_of": as_of,
@@ -83,6 +103,7 @@ def execute(plan: QueryPlan, layer: SemanticLayer, reader: Reader, as_of: int) -
     return Result(
         plan=plan,
         values=values,
+        series=series,
         row_count=len(filtered),
         latest_period=latest_period,
         as_of=as_of,
