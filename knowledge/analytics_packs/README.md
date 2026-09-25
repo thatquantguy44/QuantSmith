@@ -132,14 +132,14 @@ validation, and changes only that pack's `review` block.
 
 | Pack | Covers | Selected by `sources/*.yml` domain | Reviewer agent(s) | Builds on | Status |
 | --- | --- | --- | --- | --- | --- |
-| `climate_esg_risk` | Financed emissions, physical and transition risk exposure, and sustainability metrics. (4 metrics) | `climate`, `esg` | `risk`, `research_analyst` | — | draft |
-| `counterparty_risk_xva` | Derivative and securities-financing counterparty exposure and valuation adjustments. (5 metrics) | `counterparty_credit_risk`, `xva` | `credit_risk/counterparty_limits`, `risk` | `specs/0073-wholesale-credit-measurement` | draft |
+| `climate_esg_risk` | Financed emissions, physical and transition risk exposure, and sustainability metrics. (4 metrics) | `climate`, `esg` | `enterprise_risk/climate_esg_risk`, `research_analyst` | `instructions/enterprise_risk.md` | draft |
+| `counterparty_risk_xva` | Derivative and securities-financing counterparty exposure and valuation adjustments. (5 metrics) | `counterparty_credit_risk`, `xva` | `enterprise_risk/counterparty_credit_risk`, `credit_risk/counterparty_limits` | `instructions/enterprise_risk.md`, `specs/0073-wholesale-credit-measurement` | draft |
 | `credit_risk` | Wholesale and retail credit exposure, expected loss, allowance, and credit quality. (6 metrics) | `credit_risk`, `expected_credit_loss`, `regulatory_capital` | `credit_risk/counterparty_limits`, `risk` | `knowledge/credit_risk`, `specs/0072-credit-risk-domain-foundation`, `specs/0073-wholesale-credit-measurement` | draft |
-| `liquidity_risk` | Regulatory and internal liquidity metrics, buffers, and funding concentration. (5 metrics) | `liquidity`, `liquidity_risk` | `risk`, `portfolio_management/liquidity_cash_management` | — | draft |
+| `liquidity_risk` | Regulatory and internal liquidity metrics, buffers, and funding concentration. (5 metrics) | `liquidity`, `liquidity_risk` | `enterprise_risk/liquidity_treasury_risk`, `portfolio_management/liquidity_cash_management` | `instructions/enterprise_risk.md` | draft |
 | `market_risk` | Trading-book risk: VaR, expected shortfall, sensitivities, stress, and backtesting. (6 metrics) | `market_risk` | `risk`, `backtest_review` | — | draft |
-| `model_risk` | Model inventory, validation status, findings, performance monitoring, and overrides. (4 metrics) | `model_risk_management` | `role_operations/governance_readiness_checklist`, `machine_learning/mlops_monitoring` | — | draft |
-| `operational_risk` | Operational loss events, risk and control self-assessments, key risk indicators, and issues. (5 metrics) | `operational_risk` | `risk`, `alerts/incident_notification` | — | draft |
-| `treasury_alm_irrbb` | Balance-sheet interest-rate risk, funds transfer pricing, and net interest income sensitivity. (5 metrics) | `alm`, `irrbb`, `treasury` | `risk`, `portfolio_management/liquidity_cash_management` | — | draft |
+| `model_risk` | Model inventory, validation status, findings, performance monitoring, and overrides. (4 metrics) | `model_risk_management` | `enterprise_risk/model_risk_management`, `role_operations/governance_readiness_checklist`, `machine_learning/mlops_monitoring` | `instructions/enterprise_risk.md` | draft |
+| `operational_risk` | Operational loss events, risk and control self-assessments, key risk indicators, and issues. (5 metrics) | `operational_risk` | `enterprise_risk/operational_risk`, `alerts/incident_notification` | `instructions/enterprise_risk.md` | draft |
+| `treasury_alm_irrbb` | Balance-sheet interest-rate risk, funds transfer pricing, and net interest income sensitivity. (5 metrics) | `alm`, `irrbb`, `treasury` | `enterprise_risk/liquidity_treasury_risk`, `portfolio_management/liquidity_cash_management` | `instructions/enterprise_risk.md` | draft |
 
 ### Finance & treasury (`finance_treasury`)
 
@@ -152,7 +152,7 @@ validation, and changes only that pack's `review` block.
 
 | Pack | Covers | Selected by `sources/*.yml` domain | Reviewer agent(s) | Builds on | Status |
 | --- | --- | --- | --- | --- | --- |
-| `aml_financial_crime` | Transaction monitoring, sanctions screening, KYC, and suspicious activity reporting. (6 metrics) | `aml`, `sanctions`, `kyc`, `financial_crime` | `risk`, `alerts/alert_policy` | — | draft |
+| `aml_financial_crime` | Transaction monitoring, sanctions screening, KYC, and suspicious activity reporting. (6 metrics) | `aml`, `sanctions`, `kyc`, `financial_crime` | `enterprise_risk/aml_financial_crime`, `alerts/alert_policy` | `instructions/enterprise_risk.md` | draft |
 | `consumer_compliance` | Complaints, fair lending, UDAAP, and conduct risk indicators. (4 metrics) | `consumer_compliance`, `fair_lending`, `conduct` | `credit_risk/fair_lending_review`, `risk` | `knowledge/credit_risk`, `specs/0074-retail-underwriting-fairness-harness` | draft |
 | `fraud` | First- and third-party fraud across cards, payments, and digital channels. (4 metrics) | `fraud` | `machine_learning/unsupervised_anomaly`, `risk` | — | draft |
 

@@ -8,9 +8,11 @@
     "climate",
     "esg"
   ],
-  "builds_on": [],
+  "builds_on": [
+    "instructions/enterprise_risk.md"
+  ],
   "reviewer_agents": [
-    "agents/risk",
+    "agents/enterprise_risk/climate_esg_risk",
     "agents/research_analyst"
   ],
   "dimensions": [

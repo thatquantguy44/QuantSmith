@@ -10,9 +10,11 @@
     "kyc",
     "financial_crime"
   ],
-  "builds_on": [],
+  "builds_on": [
+    "instructions/enterprise_risk.md"
+  ],
   "reviewer_agents": [
-    "agents/risk",
+    "agents/enterprise_risk/aml_financial_crime",
     "agents/alerts/alert_policy"
   ],
   "dimensions": [

@@ -10,8 +10,8 @@
 > direction included. See item 1 of *What's Next* and items 29–30.
 
 The SDK has a working v1: a **spec-driven engineering framework** over the six
-software-development stages, **171 agents** in `agents/`,
-**35 quality gates**, **36 instruction standards**, and CI that
+software-development stages, **177 agents** in `agents/`,
+**35 quality gates**, **37 instruction standards**, and CI that
 enforces the deterministic gates. It remains primarily a scaffold to be copied
 into quant repos, with `src/quantsmith/pipelines/`, `src/quantsmith/orchestration/`,
 and `src/quantsmith/text_intelligence/` holding runnable, dependency-light
@@ -35,7 +35,7 @@ it via stable IDs (`REQ`/`NFR`/`AC`/`RISK`/`T`).
 - `specs/NNNN-slug/{spec,plan,tasks}.md` from `templates/spec/`; worked example at
   `specs/0001-daily-momentum-signal/`.
 
-**Agents (171, verified by the `agent-catalog` gate — treat `agents/README.md`
+**Agents (177, verified by the `agent-catalog` gate — treat `agents/README.md`
 as the live count, not the number here)** — all on the four-file contract
 (`README`/`prompt`/`instructions`/`tasks`) with a `Spec-Driven Role`:
 
@@ -64,7 +64,7 @@ as the live count, not the number here)** — all on the four-file contract
   `doc-counts`, `quantsmith-version`, `agent-attribution`, `handoff-sync`, `upstream-drift`, `ownership`, `persistent-knowledge`, `knowledge`, `memory`, `access`, `role-context`,
   `model-plugin`, `source-catalog`.
 
-**Instructions (36)** — constitution, SDD method, point-in-time, and the domain
+**Instructions (37)** — constitution, SDD method, point-in-time, and the domain
 standards; see `README.md`'s "Public Instructions" table for the current list
 (this file lists categories, not every filename, to avoid drifting again).
 
@@ -295,7 +295,7 @@ designs**: create and
 approve one only when the foundation it consumes — `0063` or `0072` — has frozen
 that contract and the prior dependency named above is satisfied. Do not add
 agents merely to fill the map; prefer a canonical knowledge artifact or tested
-runtime that an existing agent can use. **Next unreserved spec number: `0082`.**
+runtime that an existing agent can use. **Next unreserved spec number: `0083`.**
 Reserving a number here does not create the directory; copy `templates/spec/`
 only when that slice becomes active.
 
@@ -718,7 +718,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
     to populate `sources/` as real sources come into use.
 
 14. **P1 Generalization & Team Onboarding — making QuantSmith self-serve across
-    domains.** QuantSmith is now a comprehensive framework (171 agents, 60 specs,
+    domains.** QuantSmith is now a comprehensive framework (177 agents, 60 specs,
     33 gates, 35 standards); the next phase is reducing discovery friction and
     enabling team-intuitive adoption without deep codebase reading.
     - **P0 Phase 1a: Role profiles** (`roles/{portfolio_manager,risk_manager,quant_researcher,data_engineer,compliance_officer}.md`):
@@ -1495,7 +1495,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
     references to `knowledge/credit_risk` / `knowledge/short_term_markets`,
     and golden cases the validator recomputes. Selection reuses the
     `domain:` tags already on every `sources/*.yml` entry. `analytics_packs.py`
-    (stdlib) validates and selects; 14 acceptance tests in
+    (stdlib) validates and selects; 16 acceptance tests in
     `tests/test_analytics_packs.py`. **Honest status:** all 40 packs are
     `draft`, written from general public conventions; `0080` may use them in
     chat with an "unreviewed domain pack" caveat, but write-back needs every
@@ -1505,6 +1505,31 @@ manual-task persistence question stays deferred until a real consumer needs it.
     `--mark-reviewed <pack_id> --reviewer … --date …` command make each review
     one checked diff to one JSON file. **Next:** review pack by pack (0 of 40
     reviewed); start with the families behind the first `0080` questions.
+
+31. **Enterprise risk agents (spec `0082`, Approved and built) — a real gap
+    `0081` found, fixed.** Building `0081` surfaced that 27 of its 40 packs
+    named `agents/risk` as reviewer, and checking `agents/risk/README.md`
+    against what those packs needed showed a genuine mismatch: its charter
+    is investment/portfolio risk, not operational loss events, model-inventory
+    governance, derivative counterparty exposure, AML program health,
+    bank-level liquidity/IRRBB, or climate/ESG risk. Adds six agents under
+    `agents/enterprise_risk/` — `operational_risk`, `model_risk_management`,
+    `counterparty_credit_risk`, `aml_financial_crime`,
+    `liquidity_treasury_risk`, `climate_esg_risk` — each stating what it
+    never does (approve a model, price a derivative, file a SAR, set a
+    funding strategy, assert a scenario's probability) and to whom that
+    decision belongs, under a new shared standard,
+    `instructions/enterprise_risk.md`. Re-points exactly the 7 `0081` packs
+    where `agents/risk` was a real mismatch (`operational_risk`,
+    `model_risk`, `counterparty_risk_xva`, `aml_financial_crime`,
+    `liquidity_risk`, `treasury_alm_irrbb`, `climate_esg_risk`); leaves
+    `agents/risk/` and the other 20 packs that correctly use it as a
+    secondary reviewer unchanged. Checked first, before building: securities
+    financing (`agents/securities_financing/`) and credit risk
+    (`agents/credit_risk/`) already had correctly-scoped agents — this gap
+    was specific to these six disciplines, not a general shortage. Contract
+    only, no runtime, matching `0022`/`0033`'s precedent; `agent-catalog`
+    gate and the `0081` validator both pass.
 
 ## Open Questions For The Owner
 
@@ -1521,7 +1546,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
 
 ## Risks
 
-- Breadth: 171 agents is useful only if each stays narrow and inspectable.
+- Breadth: 177 agents is useful only if each stays narrow and inspectable.
 - Heuristic gates (`leakage`, `backtest`, `secret-scan` fallback) can false-positive
   or miss; keep them advisory unless a repo's layout makes them reliable.
 - Docs can drift from the code; the `docs-link`, `agent-catalog`, and `spec-index` gates help, but

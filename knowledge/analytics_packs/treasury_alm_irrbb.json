@@ -9,9 +9,11 @@
     "irrbb",
     "treasury"
   ],
-  "builds_on": [],
+  "builds_on": [
+    "instructions/enterprise_risk.md"
+  ],
   "reviewer_agents": [
-    "agents/risk",
+    "agents/enterprise_risk/liquidity_treasury_risk",
     "agents/portfolio_management/liquidity_cash_management"
   ],
   "dimensions": [
