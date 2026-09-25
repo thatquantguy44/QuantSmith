@@ -9,11 +9,12 @@
     "xva"
   ],
   "builds_on": [
+    "instructions/enterprise_risk.md",
     "specs/0073-wholesale-credit-measurement"
   ],
   "reviewer_agents": [
-    "agents/credit_risk/counterparty_limits",
-    "agents/risk"
+    "agents/enterprise_risk/counterparty_credit_risk",
+    "agents/credit_risk/counterparty_limits"
   ],
   "dimensions": [
     {

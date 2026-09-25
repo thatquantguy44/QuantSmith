@@ -7,8 +7,11 @@
   "source_domains": [
     "model_risk_management"
   ],
-  "builds_on": [],
+  "builds_on": [
+    "instructions/enterprise_risk.md"
+  ],
   "reviewer_agents": [
+    "agents/enterprise_risk/model_risk_management",
     "agents/role_operations/governance_readiness_checklist",
     "agents/machine_learning/mlops_monitoring"
   ],

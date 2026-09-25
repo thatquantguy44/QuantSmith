@@ -42,6 +42,13 @@ patterns locally rather than expecting them to update in place.
 - Spec `0081`: 40 analytics domain packs across seven financial-services
   families (`knowledge/analytics_packs/`), the `analytics_packs.py` validator
   and selector, and `tests/test_analytics_packs.py`. All packs ship `draft`.
+- Spec `0082`: six `agents/enterprise_risk/` agents (operational, model risk
+  management, counterparty credit/XVA, AML/financial crime, liquidity and
+  treasury risk, climate/ESG risk) and `instructions/enterprise_risk.md`,
+  fixing a gap `0081` found — 27 of its 40 packs fell back to the generic
+  `agents/risk`, whose charter is investment/portfolio risk, not these six
+  disciplines. Re-points the 7 mismatched packs; `agents/risk` and the other
+  20 packs are unchanged.
 
 ### Changed
 - `docs/packaging.md` updated — the Python-package phase is now active (real code

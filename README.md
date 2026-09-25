@@ -13,9 +13,9 @@ signal and model **reproducible, leakage-safe, and traceable to a spec**.
 [![CI](https://github.com/joshualutkemuller/QuantSmith/actions/workflows/ci.yml/badge.svg)](https://github.com/joshualutkemuller/QuantSmith/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](pyproject.toml)
 [![Approach: Spec-Driven](https://img.shields.io/badge/Approach-Spec--Driven-ff6f00)](instructions/spec_driven_development.md)
-[![Agents: 171](https://img.shields.io/badge/Agents-171-6f42c1)](agents/README.md)
+[![Agents: 177](https://img.shields.io/badge/Agents-177-6f42c1)](agents/README.md)
 [![Quality Gates: 35](https://img.shields.io/badge/Quality%20Gates-35-2ea44f)](hooks/README.md)
-[![Specs: 68](https://img.shields.io/badge/Specs-68-0969da)](specs/README.md)
+[![Specs: 69](https://img.shields.io/badge/Specs-69-0969da)](specs/README.md)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](.github/GIT_GUIDELINES.md)
 
 <br/>
@@ -65,7 +65,7 @@ signal and model **reproducible, leakage-safe, and traceable to a spec**.
 | 🧠 Plan research from a hypothesis | Spec-driven planning agents + traceable requirements |
 | 🔎 Catch leakage & time-alignment bugs | Point-in-time standards + `leakage`/`backtest` gates |
 | 📝 Document features, models, backtests | Templates, cards, and reproducible run artifacts |
-| 🤖 Reuse research workflows | 171 narrow, inspectable agent roles across the stack |
+| 🤖 Reuse research workflows | 177 narrow, inspectable agent roles across the stack |
 | 🚦 Stop mistakes before commit/push | 35 quality gates, advisory by default, CI-enforceable |
 | 🗣️ Share a common vocabulary | An [agentic dictionary](agentic_dictionary.md) for the team |
 
@@ -504,6 +504,7 @@ the [spec index](specs/README.md).
 | [`0073`](specs/0073-wholesale-credit-measurement/) | Wholesale credit measurement — facility-level EL/EAD/RWA composing `0072`'s own arithmetic, plus counterparty exposure aggregation, limit-breach detection, and concentration as a full in-SDK reference runtime; rating and PD/LGD estimation stay adopter-plugin-only by design | `wholesale_credit_measurement.py` (measurement + limits only; no rating/PD model) |
 | [`0074`](specs/0074-retail-underwriting-fairness-harness/) | Retail underwriting fairness harness — disparity measurement and proxy-feature association composing `0072`'s own arithmetic, plus a less-discriminatory-alternative search over caller-supplied cutoffs; no scorecard ships, resolving the last open scoping question and closing the last high-severity gap in `0072`'s register | `retail_fairness_harness.py` (fairness testing only; no scoring model) |
 | [`0081`](specs/0081-analytics-domain-packs/) | Analytics domain packs — 40 pluggable financial-services packs across seven families (business lines, markets, risk, finance, control, operations, cross-cutting), each declaring metric vocabulary, unit, and additivity, suppress-only insight rules, caveats, chart conventions, reviewer agents, and self-checking golden cases; selected by `sources/*.yml` domain tags for `0080` natural-language analytics; all ship `draft`, write-back requires named review | `analytics_packs.py` (validator + selection; packs in `knowledge/analytics_packs/`) |
+| [`0082`](specs/0082-enterprise-risk-agents/) | Enterprise risk agents — six agents (operational, model risk management, counterparty credit/XVA, AML/financial crime, liquidity/treasury/IRRBB, climate/ESG risk) fixing a real gap `0081` found: 27 of 40 packs fell back to the generic `agents/risk`, whose charter is investment/portfolio risk, not these six disciplines; re-points the 7 mismatched packs, leaves `agents/risk` and the other 20 unchanged; contract-only, no runtime | `agents/enterprise_risk/`, `instructions/enterprise_risk.md` |
 | [`0055`](specs/0055-workflow-scheduling-operations/) | Workflow scheduling operations — registry validation, cron dry-run evidence, idempotent dispatch, JSONL ledger, manual reminders, daily reports, alert handoff, memory candidates | `workflow_scheduling.py` |
 | [`0060`](specs/0060-scheduler-monitoring/) | Scheduler monitoring — executable report and alert-preview CLI plus caller-injected alert delivery over the workflow-scheduling runtime | `workflow_scheduling.py` *(extended)*, `workflow_scheduling_cli.py` |
 | [`0047`](specs/0047-downstream-contract/) | Downstream consumer contract — `DashboardSpec.schema_version` + compatibility check, release-notify workflow, and a copyable `quantsmith-version` gate for a separate consuming repository | `dashboard_spec.py` *(extended)* |
