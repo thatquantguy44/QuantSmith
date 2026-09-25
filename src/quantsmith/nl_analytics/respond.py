@@ -80,7 +80,10 @@ class AnswerContext:
     staleness_caveat_periods: int = 2
     staleness_hard_periods: int = 30
     units: str = ""
-    prior_insight_lookup: Optional[Callable[[str, int], Optional[Result]]] = None
+    # Returns anything with a ``.values`` mapping compute_insights can read —
+    # typically a ``writeback.PriorInsight`` (T-013 not wired here; see
+    # writeback.prior_insights and comparison_key()).
+    prior_insight_lookup: Optional[Callable[[str, int], Optional[object]]] = None
     plan_config: Dict = field(default_factory=dict)
 
 
@@ -156,12 +159,24 @@ def answer(question: str, context: AnswerContext) -> ChatResponse:
     )
 
 
-def _resolve_comparison(plan: QueryPlan, context: AnswerContext) -> Optional[Result]:
+def comparison_key(plan: QueryPlan) -> str:
+    """The identity key a persisted "prior insight" comparison matches on:
+    what was asked (metric + declared dimensions), not the rolling window —
+    see ``writeback.prior_insights``."""
+    return "|".join((plan.metric, *plan.dimensions))
+
+
+def _resolve_comparison(plan: QueryPlan, context: AnswerContext) -> Optional[object]:
     comp = plan.comparison
     if comp.kind == "prior_insight":
         if context.prior_insight_lookup is None:
             return None
-        return context.prior_insight_lookup(comp.reference, context.as_of)
+        # "Yesterday" means strictly before today: exclude anything already
+        # persisted today by looking up as of one period earlier, not the
+        # current as-of itself (AC-016). A reference this module does not
+        # recognize falls back to the current as-of unshifted.
+        lookup_as_of = context.as_of - 1 if comp.reference == "yesterday" else context.as_of
+        return context.prior_insight_lookup(comparison_key(plan), lookup_as_of)
 
     length = plan.window.end_period - plan.window.start_period + 1
     shift = length if comp.kind == "prior_period" else _PERIODS_PER_YEAR.get(plan.window.grain, 365)
