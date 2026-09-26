@@ -1,0 +1,130 @@
+{
+  "schema_version": "0081.1",
+  "pack_id": "collections_recovery",
+  "name": "Collections & Recovery",
+  "family": "operations",
+  "description": "Delinquent account treatment, roll rates, cures, and recoveries.",
+  "source_domains": [
+    "collections",
+    "recovery"
+  ],
+  "builds_on": [
+    "knowledge/credit_risk"
+  ],
+  "reviewer_agents": [
+    "agents/risk",
+    "agents/credit_risk/fair_lending_review"
+  ],
+  "dimensions": [
+    {
+      "name": "delinquency_bucket",
+      "description": "Days-past-due bucket",
+      "synonyms": [
+        "DPD bucket"
+      ]
+    },
+    {
+      "name": "strategy",
+      "description": "Treatment strategy",
+      "synonyms": []
+    },
+    {
+      "name": "agency",
+      "description": "Internal team or external agency",
+      "synonyms": []
+    }
+  ],
+  "metrics": [
+    {
+      "name": "roll_rate",
+      "description": "Balances rolling to the next delinquency bucket divided by the starting bucket",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "roll-forward rate"
+      ]
+    },
+    {
+      "name": "cure_rate",
+      "description": "Balances returning to current divided by delinquent balances",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "cures"
+      ]
+    },
+    {
+      "name": "recoveries",
+      "description": "Amounts recovered on charged-off accounts in the period",
+      "unit": "currency",
+      "additivity": "additive",
+      "synonyms": [
+        "recovery cash"
+      ]
+    },
+    {
+      "name": "recovery_rate",
+      "description": "Recoveries divided by charged-off balance",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "recovery percentage"
+      ]
+    }
+  ],
+  "conventions": [
+    {
+      "id": "conv.roll_basis",
+      "rule": "Roll rates compare the same balances month over month; state count or balance basis."
+    },
+    {
+      "id": "conv.treatment",
+      "rule": "Treatment choices must follow consumer-protection rules; analytics cannot recommend actions for individuals."
+    }
+  ],
+  "insight_rules": [
+    {
+      "id": "ir.rates",
+      "applies_to": "*_rate",
+      "suppress_kinds": [
+        "contributor"
+      ],
+      "reason": "Attribute via numerator and denominator balances."
+    }
+  ],
+  "caveats": [
+    {
+      "id": "cv.policy",
+      "trigger": "always",
+      "text": "Changes in charge-off or forbearance policy change roll and cure rates mechanically."
+    }
+  ],
+  "chart_conventions": [
+    {
+      "id": "ch.roll",
+      "rule": "Show roll rates as a bucket-to-bucket matrix table."
+    }
+  ],
+  "golden_cases": [
+    {
+      "id": "g.rec_time",
+      "kind": "additivity",
+      "metric": "recoveries",
+      "across": "time",
+      "allowed": true
+    },
+    {
+      "id": "g.roll_dim",
+      "kind": "additivity",
+      "metric": "roll_rate",
+      "across": "dimension",
+      "allowed": false
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewer": null,
+    "reviewed_on": null,
+    "notes": "Drafted from public, general industry conventions; not yet reviewed by a named domain owner."
+  }
+}

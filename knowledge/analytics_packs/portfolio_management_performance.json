@@ -1,0 +1,131 @@
+{
+  "schema_version": "0081.1",
+  "pack_id": "portfolio_management_performance",
+  "name": "Portfolio Management & Performance Attribution",
+  "family": "cross_cutting",
+  "description": "Portfolio positioning, risk budgets, and performance attribution for any managed book.",
+  "source_domains": [
+    "portfolio_management",
+    "performance_attribution"
+  ],
+  "builds_on": [
+    "instructions/portfolio_management.md"
+  ],
+  "reviewer_agents": [
+    "agents/portfolio_management/performance_attribution",
+    "agents/portfolio_management/risk_budgeting"
+  ],
+  "dimensions": [
+    {
+      "name": "portfolio",
+      "description": "Portfolio or book",
+      "synonyms": []
+    },
+    {
+      "name": "sector",
+      "description": "Sector or segment",
+      "synonyms": []
+    },
+    {
+      "name": "factor",
+      "description": "Risk factor",
+      "synonyms": []
+    }
+  ],
+  "metrics": [
+    {
+      "name": "active_weight",
+      "description": "Portfolio weight minus benchmark weight",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "overweight",
+        "underweight"
+      ]
+    },
+    {
+      "name": "allocation_effect",
+      "description": "Brinson allocation effect for the period",
+      "unit": "pct",
+      "additivity": "additive",
+      "synonyms": [
+        "allocation"
+      ],
+      "additivity_rationale": "Single-period Brinson effects sum across segments to the active return by construction."
+    },
+    {
+      "name": "selection_effect",
+      "description": "Brinson selection effect for the period",
+      "unit": "pct",
+      "additivity": "additive",
+      "synonyms": [
+        "selection"
+      ],
+      "additivity_rationale": "Single-period Brinson effects sum across segments to the active return by construction."
+    },
+    {
+      "name": "ex_ante_tracking_error",
+      "description": "Forecast tracking error from the risk model",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "predicted TE"
+      ]
+    },
+    {
+      "name": "turnover",
+      "description": "Traded value divided by average portfolio value",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "turnover"
+      ]
+    }
+  ],
+  "conventions": [
+    {
+      "id": "conv.attribution_additive",
+      "rule": "Single-period attribution effects add across segments to the total active return; multi-period effects need a linking method, which must be named."
+    },
+    {
+      "id": "conv.weights",
+      "rule": "Weights sum to 100% within a portfolio; active weights sum to zero."
+    }
+  ],
+  "insight_rules": [],
+  "caveats": [
+    {
+      "id": "cv.linking",
+      "trigger": "metric:allocation_effect",
+      "text": "Multi-period attribution depends on the linking method; results are not unique."
+    }
+  ],
+  "chart_conventions": [
+    {
+      "id": "ch.attribution",
+      "rule": "Show attribution as grouped bars (allocation, selection) by segment, sorted by total effect."
+    }
+  ],
+  "golden_cases": [
+    {
+      "id": "g.alloc_dim",
+      "kind": "additivity",
+      "metric": "allocation_effect",
+      "across": "dimension",
+      "allowed": true
+    },
+    {
+      "id": "g.aw_dim",
+      "kind": "additivity",
+      "metric": "active_weight",
+      "across": "dimension",
+      "allowed": false
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewer": null,
+    "reviewed_on": null,
+    "notes": "Drafted from public, general industry conventions; not yet reviewed by a named domain owner."
+  }
+}

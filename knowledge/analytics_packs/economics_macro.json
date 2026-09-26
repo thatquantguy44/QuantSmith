@@ -1,0 +1,138 @@
+{
+  "schema_version": "0081.1",
+  "pack_id": "economics_macro",
+  "name": "Economics & Macro",
+  "family": "cross_cutting",
+  "description": "Macroeconomic indicators, policy rates, and regimes used as context across the firm.",
+  "source_domains": [
+    "macro",
+    "labor"
+  ],
+  "builds_on": [
+    "specs/0033-economists-agents",
+    "specs/0045-fred-point-in-time"
+  ],
+  "reviewer_agents": [
+    "agents/economists/macro_indicator_analyst",
+    "agents/economists/monetary_policy_analyst"
+  ],
+  "dimensions": [
+    {
+      "name": "indicator",
+      "description": "Economic series",
+      "synonyms": [
+        "series"
+      ]
+    },
+    {
+      "name": "country",
+      "description": "Country or region",
+      "synonyms": []
+    },
+    {
+      "name": "vintage",
+      "description": "Release vintage",
+      "synonyms": []
+    }
+  ],
+  "metrics": [
+    {
+      "name": "yoy_change",
+      "description": "Year-over-year percent change",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "annual change",
+        "YoY"
+      ]
+    },
+    {
+      "name": "level",
+      "description": "Series level in its native unit",
+      "unit": "index",
+      "additivity": "non_additive",
+      "synonyms": [
+        "value"
+      ]
+    },
+    {
+      "name": "policy_rate",
+      "description": "Central bank policy rate",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "fed funds",
+        "policy rate"
+      ]
+    },
+    {
+      "name": "unemployment_rate",
+      "description": "Unemployment rate",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "jobless rate"
+      ]
+    }
+  ],
+  "conventions": [
+    {
+      "id": "conv.vintage",
+      "rule": "Use first-release or as-of vintages for historical questions; revisions must not leak backwards (see spec 0045)."
+    },
+    {
+      "id": "conv.sa",
+      "rule": "State seasonal adjustment; do not compare adjusted and unadjusted series."
+    },
+    {
+      "id": "conv.policy_bps",
+      "rule": "Policy rate changes are reported in basis points."
+    }
+  ],
+  "insight_rules": [
+    {
+      "id": "ir.levels",
+      "applies_to": "*",
+      "suppress_kinds": [
+        "contributor",
+        "concentration"
+      ],
+      "reason": "Macro series are not additive across countries or indicators."
+    }
+  ],
+  "caveats": [
+    {
+      "id": "cv.revisions",
+      "trigger": "always",
+      "text": "Recent data points are preliminary and likely to be revised."
+    }
+  ],
+  "chart_conventions": [
+    {
+      "id": "ch.recession",
+      "rule": "Shade recession periods when showing long histories."
+    }
+  ],
+  "golden_cases": [
+    {
+      "id": "g.hike",
+      "kind": "bps_change",
+      "from_pct": 5.25,
+      "to_pct": 5.5,
+      "expected_bps": 25.0
+    },
+    {
+      "id": "g.unemp_dim",
+      "kind": "additivity",
+      "metric": "unemployment_rate",
+      "across": "dimension",
+      "allowed": false
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewer": null,
+    "reviewed_on": null,
+    "notes": "Drafted from public, general industry conventions; not yet reviewed by a named domain owner."
+  }
+}

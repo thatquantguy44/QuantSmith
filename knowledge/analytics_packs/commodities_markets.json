@@ -1,0 +1,148 @@
+{
+  "schema_version": "0081.1",
+  "pack_id": "commodities_markets",
+  "name": "Commodities",
+  "family": "markets",
+  "description": "Energy, metals, and agricultural futures: curves, roll, and inventories.",
+  "source_domains": [
+    "commodities"
+  ],
+  "builds_on": [
+    "specs/0022-asset-class-mechanics-agents"
+  ],
+  "reviewer_agents": [
+    "agents/asset_classes/commodities",
+    "agents/trading_strategies/carry"
+  ],
+  "dimensions": [
+    {
+      "name": "commodity",
+      "description": "Commodity (WTI, Brent, natural gas, gold, corn)",
+      "synonyms": [
+        "product"
+      ]
+    },
+    {
+      "name": "contract_month",
+      "description": "Futures delivery month",
+      "synonyms": [
+        "expiry"
+      ]
+    },
+    {
+      "name": "location",
+      "description": "Delivery or pricing hub",
+      "synonyms": []
+    }
+  ],
+  "metrics": [
+    {
+      "name": "front_month_price",
+      "description": "Nearest-expiry futures settlement price",
+      "unit": "currency_per_unit",
+      "additivity": "non_additive",
+      "synonyms": [
+        "price",
+        "front month"
+      ]
+    },
+    {
+      "name": "curve_slope",
+      "description": "Deferred minus front-month price, as a percent of front",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "contango",
+        "backwardation"
+      ]
+    },
+    {
+      "name": "roll_yield",
+      "description": "Annualized return from rolling futures along the curve",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "roll return"
+      ]
+    },
+    {
+      "name": "open_interest",
+      "description": "Open futures contracts at a point in time",
+      "unit": "count",
+      "additivity": "semi_additive",
+      "synonyms": [
+        "OI"
+      ]
+    },
+    {
+      "name": "inventory",
+      "description": "Reported physical inventory at a point in time",
+      "unit": "quantity",
+      "additivity": "semi_additive",
+      "synonyms": [
+        "stocks",
+        "storage"
+      ]
+    }
+  ],
+  "conventions": [
+    {
+      "id": "conv.units",
+      "rule": "State the price unit (USD/bbl, USD/MMBtu, USD/oz, cents/bu); do not compare across units."
+    },
+    {
+      "id": "conv.continuous",
+      "rule": "Continuous futures series must state the roll rule; unadjusted splices create false jumps."
+    },
+    {
+      "id": "conv.contango",
+      "rule": "Contango means deferred above front (positive slope); backwardation the reverse."
+    }
+  ],
+  "insight_rules": [
+    {
+      "id": "ir.price",
+      "applies_to": "front_month_price",
+      "suppress_kinds": [
+        "contributor",
+        "concentration"
+      ],
+      "reason": "Prices are not additive across commodities."
+    }
+  ],
+  "caveats": [
+    {
+      "id": "cv.roll",
+      "trigger": "metric:front_month_price",
+      "text": "Front-month series jump at contract rolls; the change may reflect the roll, not the market."
+    }
+  ],
+  "chart_conventions": [
+    {
+      "id": "ch.curve",
+      "rule": "Plot forward curves with contract month on the x-axis, one line per observation date."
+    }
+  ],
+  "golden_cases": [
+    {
+      "id": "g.oi_time",
+      "kind": "additivity",
+      "metric": "open_interest",
+      "across": "time",
+      "allowed": false
+    },
+    {
+      "id": "g.price_dim",
+      "kind": "additivity",
+      "metric": "front_month_price",
+      "across": "dimension",
+      "allowed": false
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewer": null,
+    "reviewed_on": null,
+    "notes": "Drafted from public, general industry conventions; not yet reviewed by a named domain owner."
+  }
+}

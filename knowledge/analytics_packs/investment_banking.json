@@ -1,0 +1,153 @@
+{
+  "schema_version": "0081.1",
+  "pack_id": "investment_banking",
+  "name": "Investment Banking",
+  "family": "business_line",
+  "description": "Advisory, equity and debt capital markets underwriting, and the deal pipeline.",
+  "source_domains": [
+    "investment_banking",
+    "capital_markets_origination"
+  ],
+  "builds_on": [],
+  "reviewer_agents": [
+    "agents/research_analyst",
+    "agents/risk"
+  ],
+  "dimensions": [
+    {
+      "name": "product",
+      "description": "M&A advisory, ECM, DCM, leveraged finance",
+      "synonyms": [
+        "business"
+      ]
+    },
+    {
+      "name": "sector",
+      "description": "Client industry group",
+      "synonyms": [
+        "coverage group"
+      ]
+    },
+    {
+      "name": "deal_stage",
+      "description": "Pipeline stage (mandate, launched, closed)",
+      "synonyms": []
+    }
+  ],
+  "metrics": [
+    {
+      "name": "fee_revenue",
+      "description": "Investment banking fees recognized in the period",
+      "unit": "currency",
+      "additivity": "additive",
+      "synonyms": [
+        "IB fees",
+        "revenue"
+      ]
+    },
+    {
+      "name": "deal_volume",
+      "description": "Credited deal value in the period",
+      "unit": "currency",
+      "additivity": "additive",
+      "synonyms": [
+        "league table volume"
+      ]
+    },
+    {
+      "name": "deal_count",
+      "description": "Number of credited deals",
+      "unit": "count",
+      "additivity": "additive",
+      "synonyms": [
+        "deals"
+      ]
+    },
+    {
+      "name": "wallet_share",
+      "description": "Firm fees divided by the total industry fee pool",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "market share"
+      ]
+    },
+    {
+      "name": "pipeline_value",
+      "description": "Expected fees in the pipeline at a point in time",
+      "unit": "currency",
+      "additivity": "semi_additive",
+      "synonyms": [
+        "backlog"
+      ]
+    }
+  ],
+  "conventions": [
+    {
+      "id": "conv.league_credit",
+      "rule": "League-table credit follows the data provider's rules (full vs apportioned credit); state which."
+    },
+    {
+      "id": "conv.recognition",
+      "rule": "Advisory fees are recognized at completion; announced deals are not revenue."
+    }
+  ],
+  "insight_rules": [
+    {
+      "id": "ir.share_no_contrib",
+      "applies_to": "wallet_share",
+      "suppress_kinds": [
+        "contributor"
+      ],
+      "reason": "Market share is a ratio; attribute via firm fees and the fee pool separately."
+    }
+  ],
+  "caveats": [
+    {
+      "id": "cv.lumpy",
+      "trigger": "metric:fee_revenue",
+      "text": "Fees are lumpy and driven by a few large deals; one quarter's change is rarely a trend."
+    },
+    {
+      "id": "cv.mnpi",
+      "trigger": "always",
+      "text": "Pipeline and live-deal data are likely material non-public information; confirm information-barrier clearance before sharing."
+    }
+  ],
+  "chart_conventions": [
+    {
+      "id": "ch.pipeline",
+      "rule": "Show the pipeline as a stage funnel or stacked bar by stage; never mix it with recognized revenue on one axis."
+    }
+  ],
+  "golden_cases": [
+    {
+      "id": "g.fees_dim",
+      "kind": "additivity",
+      "metric": "fee_revenue",
+      "across": "dimension",
+      "allowed": true
+    },
+    {
+      "id": "g.share_dim",
+      "kind": "additivity",
+      "metric": "wallet_share",
+      "across": "dimension",
+      "allowed": false
+    },
+    {
+      "id": "g.share",
+      "kind": "ratio",
+      "numerator": 150,
+      "denominator": 3000,
+      "scale": 100,
+      "expected": 5.0
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewer": null,
+    "reviewed_on": null,
+    "notes": "Drafted from public, general industry conventions; not yet reviewed by a named domain owner."
+  }
+}

@@ -1,0 +1,151 @@
+{
+  "schema_version": "0081.1",
+  "pack_id": "payments",
+  "name": "Payments",
+  "family": "business_line",
+  "description": "Card issuing and acquiring, ACH, wires, and real-time payments: volumes, authorization, disputes, and economics.",
+  "source_domains": [
+    "payments",
+    "cards_network",
+    "merchant_acquiring"
+  ],
+  "builds_on": [],
+  "reviewer_agents": [
+    "agents/risk",
+    "agents/monitoring/pipeline_monitoring"
+  ],
+  "dimensions": [
+    {
+      "name": "rail",
+      "description": "Card, ACH, wire, RTP/FedNow",
+      "synonyms": [
+        "network",
+        "payment type"
+      ]
+    },
+    {
+      "name": "merchant_category",
+      "description": "Merchant category code group",
+      "synonyms": [
+        "MCC"
+      ]
+    },
+    {
+      "name": "channel",
+      "description": "Card-present, card-not-present, mobile",
+      "synonyms": []
+    }
+  ],
+  "metrics": [
+    {
+      "name": "payment_volume",
+      "description": "Value of payments processed in the period",
+      "unit": "currency",
+      "additivity": "additive",
+      "synonyms": [
+        "TPV",
+        "processing volume"
+      ]
+    },
+    {
+      "name": "transaction_count",
+      "description": "Payments processed in the period",
+      "unit": "count",
+      "additivity": "additive",
+      "synonyms": [
+        "transactions"
+      ]
+    },
+    {
+      "name": "authorization_rate",
+      "description": "Approved authorizations divided by attempts",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "approval rate",
+        "auth rate"
+      ]
+    },
+    {
+      "name": "chargeback_rate",
+      "description": "Chargebacks divided by transactions",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "dispute rate"
+      ]
+    },
+    {
+      "name": "net_revenue_yield",
+      "description": "Net payments revenue divided by payment volume",
+      "unit": "bps",
+      "additivity": "non_additive",
+      "synonyms": [
+        "take rate"
+      ]
+    }
+  ],
+  "conventions": [
+    {
+      "id": "conv.value_vs_count",
+      "rule": "Report value and count separately; average ticket = value / count."
+    },
+    {
+      "id": "conv.gross_net",
+      "rule": "Interchange and scheme fees make gross and net revenue differ materially; label which."
+    }
+  ],
+  "insight_rules": [
+    {
+      "id": "ir.auth",
+      "applies_to": "authorization_rate",
+      "suppress_kinds": [
+        "contributor"
+      ],
+      "reason": "Approval rate is a ratio; attribute via declines by reason."
+    }
+  ],
+  "caveats": [
+    {
+      "id": "cv.calendar",
+      "trigger": "always",
+      "text": "Payment volumes follow business days, month-end, and holidays; compare like-for-like calendars."
+    }
+  ],
+  "chart_conventions": [
+    {
+      "id": "ch.daily",
+      "rule": "Show daily volume with weekends and holidays marked, or aggregate to business days."
+    }
+  ],
+  "golden_cases": [
+    {
+      "id": "g.vol_dim",
+      "kind": "additivity",
+      "metric": "payment_volume",
+      "across": "dimension",
+      "allowed": true
+    },
+    {
+      "id": "g.auth_dim",
+      "kind": "additivity",
+      "metric": "authorization_rate",
+      "across": "dimension",
+      "allowed": false
+    },
+    {
+      "id": "g.take_rate",
+      "kind": "ratio",
+      "numerator": 1.5,
+      "denominator": 1000,
+      "scale": 10000,
+      "expected": 15.0
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewer": null,
+    "reviewed_on": null,
+    "notes": "Drafted from public, general industry conventions; not yet reviewed by a named domain owner."
+  }
+}

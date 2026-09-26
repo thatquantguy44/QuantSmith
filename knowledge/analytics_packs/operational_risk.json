@@ -1,0 +1,129 @@
+{
+  "schema_version": "0081.1",
+  "pack_id": "operational_risk",
+  "name": "Operational Risk",
+  "family": "risk",
+  "description": "Operational loss events, risk and control self-assessments, key risk indicators, and issues.",
+  "source_domains": [
+    "operational_risk"
+  ],
+  "builds_on": [
+    "instructions/enterprise_risk.md"
+  ],
+  "reviewer_agents": [
+    "agents/enterprise_risk/operational_risk",
+    "agents/alerts/incident_notification"
+  ],
+  "dimensions": [
+    {
+      "name": "event_type",
+      "description": "Basel event type (e.g., external fraud; execution, delivery and process management)",
+      "synonyms": [
+        "loss category"
+      ]
+    },
+    {
+      "name": "business_line",
+      "description": "Business line",
+      "synonyms": []
+    },
+    {
+      "name": "control",
+      "description": "Control identifier",
+      "synonyms": []
+    }
+  ],
+  "metrics": [
+    {
+      "name": "gross_loss",
+      "description": "Gross operational loss amount recognized in the period",
+      "unit": "currency",
+      "additivity": "additive",
+      "synonyms": [
+        "op loss"
+      ]
+    },
+    {
+      "name": "net_loss",
+      "description": "Gross loss minus recoveries and insurance",
+      "unit": "currency",
+      "additivity": "additive",
+      "synonyms": [
+        "net op loss"
+      ]
+    },
+    {
+      "name": "event_count",
+      "description": "Loss events recognized in the period",
+      "unit": "count",
+      "additivity": "additive",
+      "synonyms": [
+        "events"
+      ]
+    },
+    {
+      "name": "open_issues",
+      "description": "Open audit or control issues at a point in time",
+      "unit": "count",
+      "additivity": "semi_additive",
+      "synonyms": [
+        "issues"
+      ]
+    },
+    {
+      "name": "kri_breaches",
+      "description": "Key risk indicator threshold breaches in the period",
+      "unit": "count",
+      "additivity": "additive",
+      "synonyms": [
+        "KRI breaches"
+      ]
+    }
+  ],
+  "conventions": [
+    {
+      "id": "conv.dates",
+      "rule": "Loss events have occurrence, discovery, and accounting dates; state which one periods are based on."
+    },
+    {
+      "id": "conv.threshold",
+      "rule": "Loss data has a collection threshold; small events below it are excluded."
+    }
+  ],
+  "insight_rules": [],
+  "caveats": [
+    {
+      "id": "cv.fat_tail",
+      "trigger": "metric:gross_loss",
+      "text": "Operational losses are fat-tailed; a single event can dominate a period, so show median and count alongside totals."
+    }
+  ],
+  "chart_conventions": [
+    {
+      "id": "ch.event_type",
+      "rule": "Show losses by event type as a sorted bar with event counts beside amounts."
+    }
+  ],
+  "golden_cases": [
+    {
+      "id": "g.loss_time",
+      "kind": "additivity",
+      "metric": "gross_loss",
+      "across": "time",
+      "allowed": true
+    },
+    {
+      "id": "g.issues_time",
+      "kind": "additivity",
+      "metric": "open_issues",
+      "across": "time",
+      "allowed": false
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewer": null,
+    "reviewed_on": null,
+    "notes": "Drafted from public, general industry conventions; not yet reviewed by a named domain owner."
+  }
+}

@@ -1,0 +1,145 @@
+{
+  "schema_version": "0081.1",
+  "pack_id": "securities_financing_prime",
+  "name": "Securities Lending & Prime Brokerage",
+  "family": "markets",
+  "description": "Securities lending, borrow costs, and prime brokerage client financing.",
+  "source_domains": [
+    "securities_lending",
+    "prime_brokerage"
+  ],
+  "builds_on": [
+    "specs/0023-securities-lending-workflow",
+    "specs/0028-financing-cost-analysis",
+    "specs/0066-securities-lending-model-correction"
+  ],
+  "reviewer_agents": [
+    "agents/securities_financing/securities_lending",
+    "agents/securities_financing/financing_cost_analysis"
+  ],
+  "dimensions": [
+    {
+      "name": "security",
+      "description": "Security on loan",
+      "synonyms": [
+        "ticker"
+      ]
+    },
+    {
+      "name": "borrow_category",
+      "description": "General collateral or special (hard to borrow)",
+      "synonyms": [
+        "GC/special"
+      ]
+    },
+    {
+      "name": "client",
+      "description": "Prime client or lender",
+      "synonyms": []
+    }
+  ],
+  "metrics": [
+    {
+      "name": "on_loan_value",
+      "description": "Market value on loan at a point in time",
+      "unit": "currency",
+      "additivity": "semi_additive",
+      "synonyms": [
+        "loan balance"
+      ]
+    },
+    {
+      "name": "borrow_fee",
+      "description": "Annualized lending fee",
+      "unit": "bps",
+      "additivity": "non_additive",
+      "synonyms": [
+        "fee",
+        "borrow cost"
+      ]
+    },
+    {
+      "name": "utilization",
+      "description": "Value on loan divided by lendable value",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "lendable utilization"
+      ]
+    },
+    {
+      "name": "lending_revenue",
+      "description": "Lending revenue in the period",
+      "unit": "currency",
+      "additivity": "additive",
+      "synonyms": [
+        "sec lending revenue"
+      ]
+    },
+    {
+      "name": "client_debit_balance",
+      "description": "Prime client margin loans at a point in time",
+      "unit": "currency",
+      "additivity": "semi_additive",
+      "synonyms": [
+        "debits",
+        "financing balance"
+      ]
+    }
+  ],
+  "conventions": [
+    {
+      "id": "conv.fee_rebate",
+      "rule": "Cash-collateralized loans pay a rebate; fee = benchmark rate minus rebate. State which is quoted."
+    },
+    {
+      "id": "conv.specials",
+      "rule": "Specials are a small share of balance but most of revenue; show GC and specials separately."
+    }
+  ],
+  "insight_rules": [
+    {
+      "id": "ir.fee",
+      "applies_to": "borrow_fee",
+      "suppress_kinds": [
+        "contributor"
+      ],
+      "reason": "Fees are balance-weighted; attribute through revenue by security."
+    }
+  ],
+  "caveats": [
+    {
+      "id": "cv.recall",
+      "trigger": "always",
+      "text": "Borrow can be recalled; availability and fees can change daily."
+    }
+  ],
+  "chart_conventions": [
+    {
+      "id": "ch.specials",
+      "rule": "Show revenue concentration by security as a sorted bar of top names."
+    }
+  ],
+  "golden_cases": [
+    {
+      "id": "g.rev_time",
+      "kind": "additivity",
+      "metric": "lending_revenue",
+      "across": "time",
+      "allowed": true
+    },
+    {
+      "id": "g.fee_dim",
+      "kind": "additivity",
+      "metric": "borrow_fee",
+      "across": "dimension",
+      "allowed": false
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewer": null,
+    "reviewed_on": null,
+    "notes": "Drafted from public, general industry conventions; not yet reviewed by a named domain owner."
+  }
+}

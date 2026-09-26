@@ -1,0 +1,150 @@
+{
+  "schema_version": "0081.1",
+  "pack_id": "derivatives_structured",
+  "name": "Derivatives & Structured Products",
+  "family": "markets",
+  "description": "Listed and OTC options, swaps, and structured notes: notionals, valuations, and greeks.",
+  "source_domains": [
+    "derivatives",
+    "options",
+    "structured_products"
+  ],
+  "builds_on": [],
+  "reviewer_agents": [
+    "agents/trading_strategies/volatility_options",
+    "agents/risk"
+  ],
+  "dimensions": [
+    {
+      "name": "underlying",
+      "description": "Underlying asset",
+      "synonyms": [
+        "reference asset"
+      ]
+    },
+    {
+      "name": "product_type",
+      "description": "Option, swap, forward, structured note",
+      "synonyms": []
+    },
+    {
+      "name": "expiry_bucket",
+      "description": "Time-to-expiry bucket",
+      "synonyms": [
+        "tenor"
+      ]
+    },
+    {
+      "name": "clearing",
+      "description": "Cleared or bilateral",
+      "synonyms": []
+    }
+  ],
+  "metrics": [
+    {
+      "name": "notional",
+      "description": "Gross notional at a point in time",
+      "unit": "currency",
+      "additivity": "semi_additive",
+      "synonyms": [
+        "face"
+      ]
+    },
+    {
+      "name": "mark_to_market",
+      "description": "Net present value at a point in time",
+      "unit": "currency",
+      "additivity": "semi_additive",
+      "synonyms": [
+        "MTM",
+        "fair value"
+      ]
+    },
+    {
+      "name": "delta",
+      "description": "Value change per unit move in the underlying, in underlying-equivalent currency",
+      "unit": "currency",
+      "additivity": "additive",
+      "synonyms": [
+        "delta equivalent"
+      ]
+    },
+    {
+      "name": "vega",
+      "description": "Value change per one-vol-point move in implied volatility",
+      "unit": "currency",
+      "additivity": "additive",
+      "synonyms": [
+        "vol sensitivity"
+      ]
+    },
+    {
+      "name": "implied_volatility",
+      "description": "Option-implied volatility",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "IV"
+      ]
+    }
+  ],
+  "conventions": [
+    {
+      "id": "conv.notional_not_risk",
+      "rule": "Notional is size, not risk or value; never present notional as exposure."
+    },
+    {
+      "id": "conv.greek_units",
+      "rule": "State each greek's bump size and unit (e.g., vega per 1 vol point, delta in underlying-equivalent currency)."
+    },
+    {
+      "id": "conv.greeks_same_underlying",
+      "rule": "Greeks add only across positions on the same underlying and bump definition."
+    }
+  ],
+  "insight_rules": [
+    {
+      "id": "ir.iv",
+      "applies_to": "implied_volatility",
+      "suppress_kinds": [
+        "contributor"
+      ],
+      "reason": "Implied volatility is a price parameter, not an additive quantity."
+    }
+  ],
+  "caveats": [
+    {
+      "id": "cv.model",
+      "trigger": "metric:mark_to_market",
+      "text": "OTC valuations are model-dependent; state the valuation source and date."
+    }
+  ],
+  "chart_conventions": [
+    {
+      "id": "ch.surface",
+      "rule": "Show a volatility surface as a table or small multiples by expiry; avoid 3-D charts."
+    }
+  ],
+  "golden_cases": [
+    {
+      "id": "g.vega_dim",
+      "kind": "additivity",
+      "metric": "vega",
+      "across": "dimension",
+      "allowed": true
+    },
+    {
+      "id": "g.notional_time",
+      "kind": "additivity",
+      "metric": "notional",
+      "across": "time",
+      "allowed": false
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewer": null,
+    "reviewed_on": null,
+    "notes": "Drafted from public, general industry conventions; not yet reviewed by a named domain owner."
+  }
+}

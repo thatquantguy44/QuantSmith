@@ -1,0 +1,158 @@
+{
+  "schema_version": "0081.1",
+  "pack_id": "regulatory_capital_reporting",
+  "name": "Regulatory Capital & Reporting",
+  "family": "finance_treasury",
+  "description": "Capital ratios, risk-weighted assets, leverage, stress capital, and regulatory reports.",
+  "source_domains": [
+    "regulatory_capital",
+    "regulatory_reporting"
+  ],
+  "builds_on": [
+    "knowledge/credit_risk"
+  ],
+  "reviewer_agents": [
+    "agents/risk",
+    "agents/credit_risk/counterparty_limits"
+  ],
+  "dimensions": [
+    {
+      "name": "risk_type",
+      "description": "Credit, market, operational RWA",
+      "synonyms": [
+        "RWA type"
+      ]
+    },
+    {
+      "name": "approach",
+      "description": "Standardized or advanced",
+      "synonyms": []
+    },
+    {
+      "name": "legal_entity",
+      "description": "Reporting entity",
+      "synonyms": []
+    },
+    {
+      "name": "report",
+      "description": "Report name (e.g., FR Y-9C, Call Report, FFIEC 101)",
+      "synonyms": []
+    }
+  ],
+  "metrics": [
+    {
+      "name": "cet1_ratio",
+      "description": "Common equity tier 1 capital divided by risk-weighted assets",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "CET1"
+      ]
+    },
+    {
+      "name": "rwa",
+      "description": "Risk-weighted assets at a point in time",
+      "unit": "currency",
+      "additivity": "semi_additive",
+      "synonyms": [
+        "risk-weighted assets"
+      ]
+    },
+    {
+      "name": "cet1_capital",
+      "description": "CET1 capital at a point in time",
+      "unit": "currency",
+      "additivity": "semi_additive",
+      "synonyms": [
+        "common equity tier 1"
+      ]
+    },
+    {
+      "name": "leverage_ratio",
+      "description": "Tier 1 capital divided by the leverage exposure measure",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "SLR",
+        "tier 1 leverage"
+      ]
+    },
+    {
+      "name": "capital_buffer_headroom",
+      "description": "CET1 ratio minus the requirement including buffers",
+      "unit": "bps",
+      "additivity": "non_additive",
+      "synonyms": [
+        "headroom",
+        "management buffer"
+      ]
+    }
+  ],
+  "conventions": [
+    {
+      "id": "conv.approach",
+      "rule": "Ratios differ under standardized and advanced approaches; name the binding one."
+    },
+    {
+      "id": "conv.as_reported",
+      "rule": "Distinguish as-reported regulatory filings from internal estimates; filings are fixed once submitted."
+    },
+    {
+      "id": "conv.rwa_additive",
+      "rule": "RWA adds across risk types and portfolios within one approach."
+    }
+  ],
+  "insight_rules": [
+    {
+      "id": "ir.cet1",
+      "applies_to": "cet1_ratio",
+      "suppress_kinds": [
+        "contributor"
+      ],
+      "reason": "Attribute ratio change via capital and RWA drivers (a capital walk)."
+    }
+  ],
+  "caveats": [
+    {
+      "id": "cv.not_advice",
+      "trigger": "always",
+      "text": "Informational analytics only, not a regulatory capital determination."
+    }
+  ],
+  "chart_conventions": [
+    {
+      "id": "ch.walk",
+      "rule": "Show capital ratio changes as a walk: opening, earnings, distributions, RWA change, other, closing."
+    }
+  ],
+  "golden_cases": [
+    {
+      "id": "g.cet1",
+      "kind": "ratio",
+      "numerator": 13,
+      "denominator": 100,
+      "scale": 100,
+      "expected": 13.0
+    },
+    {
+      "id": "g.rwa_dim",
+      "kind": "additivity",
+      "metric": "rwa",
+      "across": "dimension",
+      "allowed": true
+    },
+    {
+      "id": "g.headroom",
+      "kind": "bps_change",
+      "from_pct": 12.5,
+      "to_pct": 13.1,
+      "expected_bps": 60.0
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewer": null,
+    "reviewed_on": null,
+    "notes": "Drafted from public, general industry conventions; not yet reviewed by a named domain owner."
+  }
+}
