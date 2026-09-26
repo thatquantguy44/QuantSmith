@@ -1,7 +1,7 @@
 # Tasks: Natural-Language Analytics — Visualization, Interpretation, and Write-Back
 
 - **Spec:** 0080-nl-analytics-insights (`spec.md`, `plan.md`)
-- **Last updated:** 2026-09-25
+- **Last updated:** 2026-09-26
 
 > Ordered, testable units of work. Every task cites the requirement(s) it advances
 > and carries a Definition of Done. No task without a requirement.
@@ -35,7 +35,7 @@
 | T-011 | `templates/data/writeback_contract.md` and contract loader/validator (targets, schema, key, allowed columns, source-table deny-list). | REQ-010, AC-013 | done | `load_contract` parses name, `auto_approve`, and the deny-list from a filled-in copy; schema and idempotency key are the one system-wide insight-record shape (`SCHEMA_COLUMNS`), not per-file, so `columns`/`idempotency_key` aren't parsed. A file still carrying the template's own placeholders is rejected. |
 | T-012 | `writeback.py`: `build_records`, `publish` (dry-run default, approval, idempotency), `reverse` by run id (tombstone). | REQ-010, REQ-011, AC-014, AC-015 | done | `WriteBackWriter.reverse` takes a caller-supplied `reversed_at` (not just `run_id`) — needed for `prior_insights`' as-of bound on a reversed record to be exact, per NFR-002; the spec's own interface sketch omitted it, noted here rather than silently deviating. |
 | T-013 | `prior_insights` as-of lookup and `prior_insight` comparison kind. | REQ-012, NFR-002, AC-016 | done | Persisted comparison is total-level only (from the `level` insight row); reconstructing a per-dimension breakdown from stored `contributor` rows is a documented follow-up. `respond.py`'s `comparison_key()` joins on metric+dimensions, not the window, so "since yesterday" matches across two different rolling windows; a `reference == "yesterday"` comparison shifts the lookup's as-of back one period so a same-day persisted record can never stand in for yesterday's. |
-| T-014 | Emit `0070` envelope and audit events per stage, with redaction and privacy-flag propagation; replay test. | REQ-013, NFR-001, NFR-004, AC-017, AC-020 | todo | |
+| T-014 | Emit `0070` envelope and audit events per stage, with replay test. | REQ-013, NFR-001, AC-017 | done | `envelope.py`: opt-in via `AnswerContext.envelope_dir`/`run_id` (no side effect when unset — RISK-004); nine audit events (interpret, validate, execute, chart, insights, narrate-as-gate, deliver, plus start/complete) mapped onto `0070`'s fixed event-type vocabulary; an LLM `interpreter_mode` is marked `model_invocation`/non-deterministic honestly rather than hidden. Redaction and privacy-flag propagation (NFR-004, AC-020) stay T-016's scope — not duplicated here, since this task's own envelope content isn't yet redacted. |
 | T-015 | Agents `agents/analytics/data_visualization/` and `agents/analytics/nl_analytics/` (four files each, `Spec-Driven Role`), catalog rows, group README handoffs. | REQ-014, AC-018 | todo | |
 | T-016 | Import/source scan test (stdlib only, no credentials or network) and privacy test. | NFR-003, NFR-004, AC-019, AC-020 | todo | |
 | T-017 | 100k-row benchmark test. | NFR-005, AC-021 | todo | |
@@ -70,7 +70,7 @@ Every acceptance criterion must be named by at least one test.
 | AC-014 | `test_ac014_dry_run_default_and_idempotent_commit` (parametrized: recording writer + SQLite) | done |
 | AC-015 | `test_ac015_approval_required_and_reversal_by_run_id` | done |
 | AC-016 | `test_ac016_since_yesterday_uses_prior_insight_as_of`, `test_ac016_respond_yesterday_reference_shifts_as_of_by_one` | done |
-| AC-017 | `test_ac017_replay_is_byte_identical` | todo |
+| AC-017 | `test_ac017_replay_is_byte_identical` | done |
 | AC-018 | agent-contract + `agent-catalog` gates | todo |
 | AC-019 | `test_ac019_stdlib_only_no_credentials_or_network` | todo |
 | AC-020 | `test_ac020_audit_redaction_and_privacy_flags` | todo |

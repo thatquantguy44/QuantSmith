@@ -85,6 +85,15 @@ class AnswerContext:
     # writeback.prior_insights and comparison_key()).
     prior_insight_lookup: Optional[Callable[[str, int], Optional[object]]] = None
     plan_config: Dict = field(default_factory=dict)
+    # Opt-in 0070 envelope emission (REQ-013, T-014). Both or neither: a
+    # request with envelope_dir set but no run_id is an error, since the
+    # envelope needs a caller-assigned run id (the same convention every
+    # other run/record id in this package follows) and this module never
+    # invents one. Leaving both unset keeps the chat path free of side
+    # effects, as documented in envelope.py.
+    envelope_dir: Optional[str] = None
+    run_id: Optional[str] = None
+    envelope_actor_clearance: str = "public"
 
 
 def _refuse(status: str, reason: str, plan_echo: str = "") -> ChatResponse:
@@ -151,12 +160,28 @@ def answer(question: str, context: AnswerContext) -> ChatResponse:
         f"as of period {context.as_of}",
     )
 
-    return ChatResponse(
+    final = ChatResponse(
         status="answered", reason="", headline=insight_set[0].statement,
         insights=insight_set, chart=chart, vega_lite=to_vega_lite(chart),
         markdown_table=to_markdown_table(chart), plan_echo=describe_plan(plan),
         caveats=caveats, citations=citations,
     )
+
+    if context.envelope_dir is not None:
+        if not context.run_id:
+            raise ResponseError("envelope_dir is set but run_id is not (REQ-013 needs a caller-assigned run id)")
+        # Local import: envelope.py imports ChatResponse from this module, so
+        # importing it at module level here would be circular. Emission is
+        # opt-in and only ever reached when a caller actually asked for one.
+        from .envelope import emit_answer_evidence
+
+        envelope_path = emit_answer_evidence(
+            question, plan, result, chart, insight_set, final, context.envelope_dir,
+            run_id=context.run_id, actor_clearance=context.envelope_actor_clearance,
+        )
+        final = replace(final, envelope_uri=str(envelope_path))
+
+    return final
 
 
 def comparison_key(plan: QueryPlan) -> str:

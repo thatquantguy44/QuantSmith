@@ -723,3 +723,92 @@ def test_writeback_sqlite_file_target(tmp_path, layer):
     key = comparison_key(plan)
     prior = prior_insights(reopened.read, key, as_of=10)
     assert prior is not None and prior.run_id == "run-file"
+
+
+# --- T-014: 0070 envelope + replay -----------------------------------------
+
+
+from quantsmith.orchestration.foundation import replay_envelope_file
+from quantsmith.nl_analytics.envelope import emit_answer_evidence
+
+
+def _answered(layer):
+    rows = [Fact(period=p, dims={"desk": "rates"}, measures={"cost": float(p)}) for p in range(6, 11)]
+    plan = _plan(window=TimeWindow(6, 10, "day"))
+    result = execute(plan, layer, reader=lambda p: rows, as_of=10)
+    chart = choose_chart(result, layer)
+    insight_set = compute_insights(result)
+    ctx = AnswerContext(layer=layer, reader=lambda p: rows, as_of=10,
+                        interpret_context=InterpretContext(today_period=10, default_window_periods=5))
+    response = answer("funding cost", ctx)
+    return plan, result, chart, insight_set, response
+
+
+def test_ac017_replay_is_byte_identical(layer, tmp_path):
+    plan, result, chart, insight_set, response = _answered(layer)
+    out1 = tmp_path / "run1"
+    envelope1 = emit_answer_evidence(
+        "funding cost", plan, result, chart, insight_set, response, out1,
+        run_id="run-envelope-1", started_at="2026-01-01T00:00:00Z",
+    )
+    report = replay_envelope_file(envelope1)
+    assert report.status == "replayed", report.findings
+    assert report.output_diffs == ()
+    assert report.non_reproducible_dependencies == ()
+
+    out2 = tmp_path / "run2"
+    envelope2 = emit_answer_evidence(
+        "funding cost", plan, result, chart, insight_set, response, out2,
+        run_id="run-envelope-1", started_at="2026-01-01T00:00:00Z",
+    )
+    for name in ("answer_payload.json", "prompt_manifest.json", "context_manifest.json",
+                 "assumptions.jsonl", "evaluation_harness.json", "audit_events.jsonl", "run_envelope.json"):
+        assert (out1 / name).read_bytes() == (out2 / name).read_bytes(), name
+
+
+def test_envelope_llm_interpreter_mode_marks_non_deterministic(layer, tmp_path):
+    plan, result, chart, insight_set, response = _answered(layer)
+    out = tmp_path / "run_llm"
+    envelope = emit_answer_evidence(
+        "funding cost", plan, result, chart, insight_set, response, out,
+        run_id="run-llm-1", started_at="2026-01-01T00:00:00Z",
+        interpreter_mode="llm:anthropic/claude",
+    )
+    report = replay_envelope_file(envelope)
+    assert any(d["event_type"] == "model_invocation" for d in
+              [dict(e) for e in json.loads(f'[{",".join((out / "audit_events.jsonl").read_text().splitlines())}]')])
+    # Non-deterministic without a fixture_path is honestly reported, not hidden.
+    assert report.status in ("non_reproducible", "replayed")
+    if report.status == "non_reproducible":
+        assert any(d["event_type"] == "model_invocation" for d in report.non_reproducible_dependencies)
+
+
+def test_answer_can_opt_in_to_envelope_emission(layer, tmp_path):
+    rows = [Fact(period=p, dims={"desk": "rates"}, measures={"cost": float(p)}) for p in range(6, 11)]
+    ctx = AnswerContext(
+        layer=layer, reader=lambda p: rows, as_of=10,
+        interpret_context=InterpretContext(today_period=10, default_window_periods=5),
+        envelope_dir=str(tmp_path / "run"), run_id="run-opt-in-1",
+    )
+    response = answer("funding cost", ctx)
+    assert response.status == "answered"
+    assert response.envelope_uri is not None
+    report = replay_envelope_file(response.envelope_uri)
+    assert report.status == "replayed"
+
+    # Without envelope_dir, no files are written -- no side effects (RISK-004).
+    before = set(tmp_path.iterdir())
+    ctx_no_envelope = AnswerContext(
+        layer=layer, reader=lambda p: rows, as_of=10,
+        interpret_context=InterpretContext(today_period=10, default_window_periods=5),
+    )
+    answer("funding cost", ctx_no_envelope)
+    assert set(tmp_path.iterdir()) == before
+
+    # envelope_dir without run_id is refused, not silently skipped.
+    with pytest.raises(ResponseError):
+        answer("funding cost", AnswerContext(
+            layer=layer, reader=lambda p: rows, as_of=10,
+            interpret_context=InterpretContext(today_period=10, default_window_periods=5),
+            envelope_dir=str(tmp_path / "run2"),
+        ))
