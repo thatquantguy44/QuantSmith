@@ -1,0 +1,147 @@
+{
+  "schema_version": "0081.1",
+  "pack_id": "counterparty_risk_xva",
+  "name": "Counterparty Credit Risk & XVA",
+  "family": "risk",
+  "description": "Derivative and securities-financing counterparty exposure and valuation adjustments.",
+  "source_domains": [
+    "counterparty_credit_risk",
+    "xva"
+  ],
+  "builds_on": [
+    "instructions/enterprise_risk.md",
+    "specs/0073-wholesale-credit-measurement"
+  ],
+  "reviewer_agents": [
+    "agents/enterprise_risk/counterparty_credit_risk",
+    "agents/credit_risk/counterparty_limits"
+  ],
+  "dimensions": [
+    {
+      "name": "counterparty",
+      "description": "Counterparty or netting set",
+      "synonyms": [
+        "netting set"
+      ]
+    },
+    {
+      "name": "product",
+      "description": "Product group",
+      "synonyms": []
+    },
+    {
+      "name": "csa",
+      "description": "Collateral agreement terms",
+      "synonyms": [
+        "CSA"
+      ]
+    }
+  ],
+  "metrics": [
+    {
+      "name": "current_exposure",
+      "description": "Positive mark-to-market after netting and collateral",
+      "unit": "currency",
+      "additivity": "semi_additive",
+      "synonyms": [
+        "CE"
+      ]
+    },
+    {
+      "name": "pfe",
+      "description": "Potential future exposure at a stated confidence and horizon",
+      "unit": "currency",
+      "additivity": "non_additive",
+      "synonyms": [
+        "peak exposure"
+      ]
+    },
+    {
+      "name": "expected_exposure",
+      "description": "Expected positive exposure profile",
+      "unit": "currency",
+      "additivity": "semi_additive",
+      "synonyms": [
+        "EE",
+        "EPE"
+      ]
+    },
+    {
+      "name": "cva",
+      "description": "Credit valuation adjustment",
+      "unit": "currency",
+      "additivity": "additive",
+      "synonyms": [
+        "CVA"
+      ]
+    },
+    {
+      "name": "limit_utilization",
+      "description": "Exposure divided by the counterparty limit",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "utilization"
+      ]
+    }
+  ],
+  "conventions": [
+    {
+      "id": "conv.netting",
+      "rule": "Exposure aggregates within a legally enforceable netting set first; do not sum gross MTMs."
+    },
+    {
+      "id": "conv.pfe_quantile",
+      "rule": "PFE is a quantile; PFEs do not add across netting sets."
+    },
+    {
+      "id": "conv.xva_sign",
+      "rule": "State the XVA sign convention (charge to the firm shown as negative or positive)."
+    }
+  ],
+  "insight_rules": [
+    {
+      "id": "ir.pfe",
+      "applies_to": "pfe",
+      "suppress_kinds": [
+        "contributor"
+      ],
+      "reason": "Quantiles are not additive; use incremental or marginal allocation."
+    }
+  ],
+  "caveats": [
+    {
+      "id": "cv.wrong_way",
+      "trigger": "always",
+      "text": "Wrong-way risk (exposure rising as counterparty credit worsens) is not visible in exposure alone."
+    }
+  ],
+  "chart_conventions": [
+    {
+      "id": "ch.profile",
+      "rule": "Show exposure profiles against time horizon with the limit as a reference line."
+    }
+  ],
+  "golden_cases": [
+    {
+      "id": "g.pfe_dim",
+      "kind": "additivity",
+      "metric": "pfe",
+      "across": "dimension",
+      "allowed": false
+    },
+    {
+      "id": "g.cva_dim",
+      "kind": "additivity",
+      "metric": "cva",
+      "across": "dimension",
+      "allowed": true
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewer": null,
+    "reviewed_on": null,
+    "notes": "Drafted from public, general industry conventions; not yet reviewed by a named domain owner."
+  }
+}

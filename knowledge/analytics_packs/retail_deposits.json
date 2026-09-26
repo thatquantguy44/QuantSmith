@@ -1,0 +1,181 @@
+{
+  "schema_version": "0081.1",
+  "pack_id": "retail_deposits",
+  "name": "Retail Deposits",
+  "family": "business_line",
+  "description": "Consumer checking, savings, money market, and certificate-of-deposit balances, pricing, and account dynamics.",
+  "source_domains": [
+    "retail_deposits",
+    "deposits"
+  ],
+  "builds_on": [],
+  "reviewer_agents": [
+    "agents/risk",
+    "agents/portfolio_management/liquidity_cash_management"
+  ],
+  "dimensions": [
+    {
+      "name": "product",
+      "description": "Deposit product (checking, savings, MMDA, CD)",
+      "synonyms": [
+        "account type"
+      ]
+    },
+    {
+      "name": "segment",
+      "description": "Customer segment",
+      "synonyms": [
+        "tier"
+      ]
+    },
+    {
+      "name": "channel",
+      "description": "Acquisition or servicing channel",
+      "synonyms": []
+    },
+    {
+      "name": "region",
+      "description": "Geography or footprint market",
+      "synonyms": [
+        "market",
+        "state"
+      ]
+    }
+  ],
+  "metrics": [
+    {
+      "name": "deposit_balance",
+      "description": "Deposit balance at a point in time",
+      "unit": "currency",
+      "additivity": "semi_additive",
+      "synonyms": [
+        "deposits",
+        "balances"
+      ]
+    },
+    {
+      "name": "net_new_deposits",
+      "description": "Inflows minus outflows over the period",
+      "unit": "currency",
+      "additivity": "additive",
+      "synonyms": [
+        "net flows",
+        "deposit growth"
+      ]
+    },
+    {
+      "name": "deposit_rate",
+      "description": "Weighted average rate paid on interest-bearing deposits",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "cost of deposits",
+        "rate paid"
+      ]
+    },
+    {
+      "name": "deposit_beta",
+      "description": "Change in deposit rate divided by change in the policy rate over the same cycle",
+      "unit": "ratio",
+      "additivity": "non_additive",
+      "synonyms": [
+        "beta",
+        "pass-through"
+      ]
+    },
+    {
+      "name": "account_count",
+      "description": "Open accounts at a point in time",
+      "unit": "count",
+      "additivity": "semi_additive",
+      "synonyms": [
+        "accounts"
+      ]
+    },
+    {
+      "name": "attrition_rate",
+      "description": "Accounts closed in the period divided by opening accounts",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "churn",
+        "closure rate"
+      ]
+    }
+  ],
+  "conventions": [
+    {
+      "id": "conv.balance_basis",
+      "rule": "State whether a balance is period-end or period-average; never sum balances across periods."
+    },
+    {
+      "id": "conv.beta_window",
+      "rule": "A deposit beta is measured over a stated rate cycle using the same start and end dates for the deposit rate and the policy rate."
+    },
+    {
+      "id": "conv.ib_split",
+      "rule": "Keep interest-bearing and noninterest-bearing balances distinguishable; the rate paid applies to interest-bearing balances only."
+    }
+  ],
+  "insight_rules": [
+    {
+      "id": "ir.beta_no_contrib",
+      "applies_to": "deposit_beta",
+      "suppress_kinds": [
+        "contributor",
+        "concentration"
+      ],
+      "reason": "A beta is a ratio of changes; it cannot be decomposed into additive contributions."
+    }
+  ],
+  "caveats": [
+    {
+      "id": "cv.period_end",
+      "trigger": "metric:deposit_balance",
+      "text": "Period-end balances can swing on the last day (payroll, tax dates, window dressing); compare period averages before drawing conclusions."
+    }
+  ],
+  "chart_conventions": [
+    {
+      "id": "ch.balance_line",
+      "rule": "Plot balances as a line over time and label whether the series is period-end or average."
+    }
+  ],
+  "golden_cases": [
+    {
+      "id": "g.bal_time",
+      "kind": "additivity",
+      "metric": "deposit_balance",
+      "across": "time",
+      "allowed": false
+    },
+    {
+      "id": "g.bal_dim",
+      "kind": "additivity",
+      "metric": "deposit_balance",
+      "across": "dimension",
+      "allowed": true
+    },
+    {
+      "id": "g.rate_move",
+      "kind": "bps_change",
+      "from_pct": 1.5,
+      "to_pct": 1.75,
+      "expected_bps": 25.0
+    },
+    {
+      "id": "g.beta",
+      "kind": "ratio",
+      "numerator": 0.9,
+      "denominator": 3.0,
+      "scale": 1,
+      "expected": 0.3
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewer": null,
+    "reviewed_on": null,
+    "notes": "Drafted from public, general industry conventions; not yet reviewed by a named domain owner."
+  }
+}

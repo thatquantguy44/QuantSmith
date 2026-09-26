@@ -1,0 +1,167 @@
+{
+  "schema_version": "0081.1",
+  "pack_id": "rates_fixed_income",
+  "name": "Rates & Government Bonds",
+  "family": "markets",
+  "description": "Government bonds, swaps, and interest-rate curves: yields, spreads, and rate sensitivity.",
+  "source_domains": [
+    "fixed_income_rates",
+    "rates"
+  ],
+  "builds_on": [
+    "specs/0022-asset-class-mechanics-agents",
+    "specs/0045-fred-point-in-time"
+  ],
+  "reviewer_agents": [
+    "agents/asset_classes/fixed_income_rates",
+    "agents/risk"
+  ],
+  "dimensions": [
+    {
+      "name": "tenor",
+      "description": "Curve point or maturity bucket",
+      "synonyms": [
+        "maturity",
+        "bucket"
+      ]
+    },
+    {
+      "name": "instrument",
+      "description": "Bond, bill, swap, future",
+      "synonyms": []
+    },
+    {
+      "name": "currency",
+      "description": "Curve currency",
+      "synonyms": [
+        "ccy"
+      ]
+    },
+    {
+      "name": "curve",
+      "description": "Curve name (treasury, SOFR swap)",
+      "synonyms": []
+    }
+  ],
+  "metrics": [
+    {
+      "name": "yield",
+      "description": "Yield to maturity",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "rate",
+        "YTM"
+      ]
+    },
+    {
+      "name": "curve_spread",
+      "description": "Difference between two curve points (e.g., 10y minus 2y)",
+      "unit": "bps",
+      "additivity": "non_additive",
+      "synonyms": [
+        "2s10s",
+        "slope"
+      ]
+    },
+    {
+      "name": "dv01",
+      "description": "Change in value for a one-basis-point parallel move in yield",
+      "unit": "currency",
+      "additivity": "additive",
+      "synonyms": [
+        "PV01",
+        "BPV"
+      ]
+    },
+    {
+      "name": "modified_duration",
+      "description": "Percent price change per 100 bp yield change",
+      "unit": "years",
+      "additivity": "non_additive",
+      "synonyms": [
+        "duration"
+      ]
+    },
+    {
+      "name": "notional",
+      "description": "Notional outstanding at a point in time",
+      "unit": "currency",
+      "additivity": "semi_additive",
+      "synonyms": [
+        "face"
+      ]
+    }
+  ],
+  "conventions": [
+    {
+      "id": "conv.bps",
+      "rule": "Report changes in yields and spreads in basis points (1 bp = 0.01 percentage point), not percent change."
+    },
+    {
+      "id": "conv.daycount",
+      "rule": "State the day-count and compounding convention (e.g., ACT/360, 30/360, semi-annual) for any yield."
+    },
+    {
+      "id": "conv.dv01_sign",
+      "rule": "State the DV01 sign convention (value change for a +1 bp move); signs differ across systems."
+    },
+    {
+      "id": "conv.vintage",
+      "rule": "Macro and rate series can be revised; use vintage data for historical as-of questions."
+    }
+  ],
+  "insight_rules": [
+    {
+      "id": "ir.yield_no_contrib",
+      "applies_to": "yield",
+      "suppress_kinds": [
+        "contributor",
+        "concentration"
+      ],
+      "reason": "Yields are rates; attribute P&L through DV01 times the bp move instead."
+    }
+  ],
+  "caveats": [
+    {
+      "id": "cv.pct_change",
+      "trigger": "metric:yield",
+      "text": "A move from 4.00% to 4.20% is +20 bp, not +5%; this response reports basis points."
+    }
+  ],
+  "chart_conventions": [
+    {
+      "id": "ch.curve",
+      "rule": "Plot curves with tenor on the x-axis (ordered by maturity, not alphabetically) and one line per date."
+    }
+  ],
+  "golden_cases": [
+    {
+      "id": "g.bps",
+      "kind": "bps_change",
+      "from_pct": 4.0,
+      "to_pct": 4.2,
+      "expected_bps": 20.0
+    },
+    {
+      "id": "g.dv01_dim",
+      "kind": "additivity",
+      "metric": "dv01",
+      "across": "dimension",
+      "allowed": true
+    },
+    {
+      "id": "g.yield_dim",
+      "kind": "additivity",
+      "metric": "yield",
+      "across": "dimension",
+      "allowed": false
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewer": null,
+    "reviewed_on": null,
+    "notes": "Drafted from public, general industry conventions; not yet reviewed by a named domain owner."
+  }
+}

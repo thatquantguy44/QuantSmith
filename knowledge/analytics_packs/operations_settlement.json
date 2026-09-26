@@ -1,0 +1,127 @@
+{
+  "schema_version": "0081.1",
+  "pack_id": "operations_settlement",
+  "name": "Operations & Settlement",
+  "family": "operations",
+  "description": "Trade processing, settlement, reconciliations, and operational service levels.",
+  "source_domains": [
+    "operations",
+    "settlement",
+    "clearing"
+  ],
+  "builds_on": [],
+  "reviewer_agents": [
+    "agents/monitoring/pipeline_monitoring",
+    "agents/data_quality"
+  ],
+  "dimensions": [
+    {
+      "name": "process",
+      "description": "Process (confirmation, settlement, reconciliation)",
+      "synonyms": []
+    },
+    {
+      "name": "market",
+      "description": "Market or CSD",
+      "synonyms": []
+    },
+    {
+      "name": "asset_class",
+      "description": "Asset class",
+      "synonyms": []
+    }
+  ],
+  "metrics": [
+    {
+      "name": "stp_rate",
+      "description": "Trades processed without manual touch divided by trades",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "straight-through processing"
+      ]
+    },
+    {
+      "name": "settlement_fails",
+      "description": "Failed settlements in the period",
+      "unit": "count",
+      "additivity": "additive",
+      "synonyms": [
+        "fails"
+      ]
+    },
+    {
+      "name": "fail_value",
+      "description": "Value of failed settlements at a point in time",
+      "unit": "currency",
+      "additivity": "semi_additive",
+      "synonyms": [
+        "fails outstanding"
+      ]
+    },
+    {
+      "name": "open_breaks",
+      "description": "Unreconciled breaks at a point in time",
+      "unit": "count",
+      "additivity": "semi_additive",
+      "synonyms": [
+        "breaks"
+      ]
+    },
+    {
+      "name": "break_age",
+      "description": "Median age of open breaks",
+      "unit": "days",
+      "additivity": "non_additive",
+      "synonyms": [
+        "aging"
+      ]
+    }
+  ],
+  "conventions": [
+    {
+      "id": "conv.cycle",
+      "rule": "State the settlement cycle (e.g., T+1) and whether fails are counted by instruction or value."
+    },
+    {
+      "id": "conv.aging",
+      "rule": "Break aging uses business days from creation; state the calendar."
+    }
+  ],
+  "insight_rules": [],
+  "caveats": [
+    {
+      "id": "cv.cycle_change",
+      "trigger": "always",
+      "text": "Settlement cycle changes (e.g., T+2 to T+1) break historical comparisons."
+    }
+  ],
+  "chart_conventions": [
+    {
+      "id": "ch.aging",
+      "rule": "Show break aging as stacked bars by age bucket in age order."
+    }
+  ],
+  "golden_cases": [
+    {
+      "id": "g.fails_time",
+      "kind": "additivity",
+      "metric": "settlement_fails",
+      "across": "time",
+      "allowed": true
+    },
+    {
+      "id": "g.breaks_time",
+      "kind": "additivity",
+      "metric": "open_breaks",
+      "across": "time",
+      "allowed": false
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewer": null,
+    "reviewed_on": null,
+    "notes": "Drafted from public, general industry conventions; not yet reviewed by a named domain owner."
+  }
+}

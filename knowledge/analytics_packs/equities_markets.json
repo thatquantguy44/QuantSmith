@@ -1,0 +1,172 @@
+{
+  "schema_version": "0081.1",
+  "pack_id": "equities_markets",
+  "name": "Equities",
+  "family": "markets",
+  "description": "Cash equities and equity indices: prices, returns, volumes, valuation, and risk.",
+  "source_domains": [
+    "equities"
+  ],
+  "builds_on": [
+    "specs/0022-asset-class-mechanics-agents"
+  ],
+  "reviewer_agents": [
+    "agents/asset_classes/equities",
+    "agents/trading_strategies/value_factor"
+  ],
+  "dimensions": [
+    {
+      "name": "ticker",
+      "description": "Security identifier",
+      "synonyms": [
+        "symbol",
+        "stock",
+        "security"
+      ]
+    },
+    {
+      "name": "sector",
+      "description": "Sector classification (e.g., GICS)",
+      "synonyms": []
+    },
+    {
+      "name": "index",
+      "description": "Index membership",
+      "synonyms": [
+        "benchmark"
+      ]
+    },
+    {
+      "name": "region",
+      "description": "Listing region",
+      "synonyms": []
+    }
+  ],
+  "metrics": [
+    {
+      "name": "total_return",
+      "description": "Price return plus reinvested dividends over the period",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "return",
+        "performance"
+      ]
+    },
+    {
+      "name": "volume",
+      "description": "Shares traded in the period",
+      "unit": "count",
+      "additivity": "additive",
+      "synonyms": [
+        "shares traded"
+      ]
+    },
+    {
+      "name": "adv",
+      "description": "Average daily traded value over a trailing window",
+      "unit": "currency",
+      "additivity": "non_additive",
+      "synonyms": [
+        "average daily volume",
+        "liquidity"
+      ]
+    },
+    {
+      "name": "market_cap",
+      "description": "Price times shares outstanding at a point in time",
+      "unit": "currency",
+      "additivity": "semi_additive",
+      "synonyms": [
+        "capitalization"
+      ]
+    },
+    {
+      "name": "realized_volatility",
+      "description": "Annualized standard deviation of daily returns",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "vol",
+        "volatility"
+      ]
+    },
+    {
+      "name": "pe_ratio",
+      "description": "Price divided by earnings per share",
+      "unit": "multiple",
+      "additivity": "non_additive",
+      "synonyms": [
+        "P/E",
+        "multiple"
+      ]
+    }
+  ],
+  "conventions": [
+    {
+      "id": "conv.adjusted",
+      "rule": "Use split- and dividend-adjusted prices for returns; state the adjustment basis."
+    },
+    {
+      "id": "conv.pit_universe",
+      "rule": "Index membership and fundamentals are point-in-time; use constituents as of each date, not today's list."
+    },
+    {
+      "id": "conv.annualize_vol",
+      "rule": "Annualize daily volatility with the square root of trading days (commonly 252); state the convention."
+    }
+  ],
+  "insight_rules": [
+    {
+      "id": "ir.returns",
+      "applies_to": "total_return",
+      "suppress_kinds": [
+        "contributor"
+      ],
+      "reason": "Returns compound; use weight-times-return contribution only for a stated single period."
+    }
+  ],
+  "caveats": [
+    {
+      "id": "cv.survivorship",
+      "trigger": "dimension:ticker",
+      "text": "Delisted names drop out of current lists; historical screens need point-in-time universes."
+    }
+  ],
+  "chart_conventions": [
+    {
+      "id": "ch.log_scale",
+      "rule": "Use a log scale for long price histories; use indexed-to-100 lines to compare securities."
+    }
+  ],
+  "golden_cases": [
+    {
+      "id": "g.vol_time",
+      "kind": "additivity",
+      "metric": "volume",
+      "across": "time",
+      "allowed": true
+    },
+    {
+      "id": "g.mcap_time",
+      "kind": "additivity",
+      "metric": "market_cap",
+      "across": "time",
+      "allowed": false
+    },
+    {
+      "id": "g.pe",
+      "kind": "ratio",
+      "numerator": 50,
+      "denominator": 2.5,
+      "scale": 1,
+      "expected": 20.0
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewer": null,
+    "reviewed_on": null,
+    "notes": "Drafted from public, general industry conventions; not yet reviewed by a named domain owner."
+  }
+}

@@ -1,0 +1,156 @@
+{
+  "schema_version": "0081.1",
+  "pack_id": "customer_marketing_analytics",
+  "name": "Customer & Marketing Analytics",
+  "family": "cross_cutting",
+  "description": "Acquisition, engagement, cross-sell, attrition, and customer value across products.",
+  "source_domains": [
+    "customer",
+    "marketing"
+  ],
+  "builds_on": [
+    "specs/0009-experimentation"
+  ],
+  "reviewer_agents": [
+    "agents/analytics/experimentation",
+    "agents/machine_learning/causal_uplift"
+  ],
+  "dimensions": [
+    {
+      "name": "segment",
+      "description": "Customer segment",
+      "synonyms": []
+    },
+    {
+      "name": "channel",
+      "description": "Acquisition or engagement channel",
+      "synonyms": []
+    },
+    {
+      "name": "campaign",
+      "description": "Campaign",
+      "synonyms": []
+    },
+    {
+      "name": "cohort",
+      "description": "Acquisition cohort",
+      "synonyms": []
+    }
+  ],
+  "metrics": [
+    {
+      "name": "new_customers",
+      "description": "Customers acquired in the period",
+      "unit": "count",
+      "additivity": "additive",
+      "synonyms": [
+        "acquisitions"
+      ]
+    },
+    {
+      "name": "active_customers",
+      "description": "Active customers at a point in time",
+      "unit": "count",
+      "additivity": "semi_additive",
+      "synonyms": [
+        "actives"
+      ]
+    },
+    {
+      "name": "attrition_rate",
+      "description": "Customers lost divided by customers at start",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "churn"
+      ]
+    },
+    {
+      "name": "products_per_customer",
+      "description": "Average products held per customer",
+      "unit": "ratio",
+      "additivity": "non_additive",
+      "synonyms": [
+        "cross-sell ratio"
+      ]
+    },
+    {
+      "name": "cost_per_acquisition",
+      "description": "Marketing spend divided by new customers",
+      "unit": "currency",
+      "additivity": "non_additive",
+      "synonyms": [
+        "CPA"
+      ]
+    },
+    {
+      "name": "nps",
+      "description": "Net promoter score",
+      "unit": "score",
+      "additivity": "non_additive",
+      "synonyms": [
+        "net promoter score"
+      ]
+    }
+  ],
+  "conventions": [
+    {
+      "id": "conv.active_def",
+      "rule": "State the definition of active (e.g., a transaction in the last 90 days)."
+    },
+    {
+      "id": "conv.causal",
+      "rule": "Campaign results are causal only with a control group; otherwise report association (see experimentation)."
+    }
+  ],
+  "insight_rules": [
+    {
+      "id": "ir.nps",
+      "applies_to": "nps",
+      "suppress_kinds": [
+        "contributor"
+      ],
+      "reason": "NPS is a difference of shares; it cannot be decomposed additively."
+    }
+  ],
+  "caveats": [
+    {
+      "id": "cv.privacy",
+      "trigger": "always",
+      "text": "Customer-level results are aggregated; no individual-level output."
+    },
+    {
+      "id": "cv.selection",
+      "trigger": "dimension:campaign",
+      "text": "Targeted campaigns select customers; compare against a holdout before claiming lift."
+    }
+  ],
+  "chart_conventions": [
+    {
+      "id": "ch.cohort",
+      "rule": "Show retention as a cohort table or one line per cohort by months since acquisition."
+    }
+  ],
+  "golden_cases": [
+    {
+      "id": "g.new_time",
+      "kind": "additivity",
+      "metric": "new_customers",
+      "across": "time",
+      "allowed": true
+    },
+    {
+      "id": "g.active_time",
+      "kind": "additivity",
+      "metric": "active_customers",
+      "across": "time",
+      "allowed": false
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewer": null,
+    "reviewed_on": null,
+    "notes": "Drafted from public, general industry conventions; not yet reviewed by a named domain owner."
+  }
+}

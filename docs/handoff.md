@@ -2,9 +2,16 @@
 
 ## Snapshot
 
+> **Current top priority (owner, 2026-09-24): natural-language analytics —
+> spec `0080`.** Ask a data question in plain language; get a governed chart,
+> a grounded interpretation, and opt-in write-back to SQLite. It reads each
+> dataset through the `0081` analytics domain packs (40 packs spanning the
+> firm). It outranks every other item on this roadmap, the credit-risk
+> direction included. See item 1 of *What's Next* and items 29–30.
+
 The SDK has a working v1: a **spec-driven engineering framework** over the six
-software-development stages, **171 agents** in `agents/`,
-**35 quality gates**, **36 instruction standards**, and CI that
+software-development stages, **177 agents** in `agents/`,
+**35 quality gates**, **37 instruction standards**, and CI that
 enforces the deterministic gates. It remains primarily a scaffold to be copied
 into quant repos, with `src/quantsmith/pipelines/`, `src/quantsmith/orchestration/`,
 and `src/quantsmith/text_intelligence/` holding runnable, dependency-light
@@ -28,7 +35,7 @@ it via stable IDs (`REQ`/`NFR`/`AC`/`RISK`/`T`).
 - `specs/NNNN-slug/{spec,plan,tasks}.md` from `templates/spec/`; worked example at
   `specs/0001-daily-momentum-signal/`.
 
-**Agents (171, verified by the `agent-catalog` gate — treat `agents/README.md`
+**Agents (177, verified by the `agent-catalog` gate — treat `agents/README.md`
 as the live count, not the number here)** — all on the four-file contract
 (`README`/`prompt`/`instructions`/`tasks`) with a `Spec-Driven Role`:
 
@@ -57,7 +64,7 @@ as the live count, not the number here)** — all on the four-file contract
   `doc-counts`, `quantsmith-version`, `agent-attribution`, `handoff-sync`, `upstream-drift`, `ownership`, `persistent-knowledge`, `knowledge`, `memory`, `access`, `role-context`,
   `model-plugin`, `source-catalog`.
 
-**Instructions (36)** — constitution, SDD method, point-in-time, and the domain
+**Instructions (37)** — constitution, SDD method, point-in-time, and the domain
 standards; see `README.md`'s "Public Instructions" table for the current list
 (this file lists categories, not every filename, to avoid drifting again).
 
@@ -103,6 +110,16 @@ advisory-by-default deployment decision. The chain builds on
 
 ## What's Next (prioritized)
 
+> ### #1 priority — Natural-language analytics (spec `0080`, Draft)
+>
+> **The owner has made this the single highest priority, ahead of everything
+> below — including the credit-risk direction and the ranked list.** If only
+> one thing moves, it is this: get `0080` approved, answer its three remaining
+> open questions (first chat surface, knowledge-candidate promotion, approval
+> model), and build from T-001. First write-back target is resolved: SQLite.
+> Domain knowledge is in place: spec `0081` ships 40 draft analytics domain
+> packs plus their validator (item 30); `0080` T-021/T-022 wire them in.
+
 > ### New direction — Credit Risk Domain Foundation (spec `0072`, Approved)
 >
 > **This is the SDK's first deliberate expansion beyond the investment side of
@@ -135,20 +152,32 @@ advisory-by-default deployment decision. The chain builds on
 > `0071` corpora inside a `0070` envelope as labeled derived evidence, never as
 > unattributed decision inputs.
 >
-> **The owner's decision, not the agent's:** where `0072` ranks against the five
-> priorities below. It is deliberately listed apart from them rather than
+> **The owner's decision, not the agent's:** where `0072` ranks against
+> priorities (2)–(6) below — it sits below `0080`, which the owner ranked
+> first. It is deliberately listed apart from them rather than
 > inserted into their order. It is also the one item here now blocked on a
 > person rather than on work — the pack is built, and no record can reach
 > `reviewed` without a named credit-domain reviewer (see item 24 and the spec's
 > open questions).
 
-**Highest priority, in order: (1) the short-term-markets domain foundation,
-(2) the knowledge base, (3) scheduler monitoring, (4) prompt/context/harness
-engineering, (5) NLP/LLM quant text intelligence.** Everything else in this
-section is real, tracked work, but these five are what should get attention first
-if only one thing can move at a time:
+**Highest priority, in order: (1) natural-language analytics, (2) the
+short-term-markets domain foundation, (3) the knowledge base, (4) scheduler
+monitoring, (5) prompt/context/harness engineering, (6) NLP/LLM quant text
+intelligence.** Everything else in this section is real, tracked work, but
+these six are what should get attention first if only one thing can move at a
+time:
 
-1. **Short-term-markets domain foundation (item 21, spec `0063`, Approved).**
+1. **Natural-language analytics (item 29, spec `0080`, Draft) — ranked #1 by
+   the owner on 2026-09-24.** Ask a data question in plain language; get back
+   a governed chart, a grounded interpretation, and — opt-in and approved —
+   the insights published to a database so tomorrow's "what changed since
+   yesterday" can compare against them. It reuses what is already built
+   (`0008` metrics, `0058` access, `0014`–`0018` dashboards, `0070` replay)
+   rather than adding a new foundation. **Next:** approve the spec, answer its
+   three remaining open questions (first chat surface, knowledge-candidate
+   promotion, approval model), then build from T-001. First write-back
+   target resolved 2026-09-24: SQLite (local, gitignored file).
+2. **Short-term-markets domain foundation (item 21, spec `0063`, Approved).**
    Build the shared expert contract before adding more agents or isolated
    models: U.S.-first product taxonomy, explicit economic viewpoints and sign
    conventions, rate/price/collateral conventions, lifecycle state models,
@@ -156,7 +185,7 @@ if only one thing can move at a time:
    register, and deterministic golden cases. Follow-on work is deliberately
    split into bounded specs `0064`–`0069`; their reserved scopes, dependencies,
    and activation rule are in the Planned specs table below.
-2. **Knowledge base (item 15, "Company knowledge over time").** The
+3. **Knowledge base (item 15, "Company knowledge over time").** The
    read/write runtime and both front ends are built (`0048`/`0049`/`0057`),
    and per-person access control now closes the enforcement gap
    (`0058`) — but the store itself is still five reference records
@@ -168,7 +197,7 @@ if only one thing can move at a time:
    MCP exposure (item 17) is the next step *after* there is real content
    worth a team reaching for over the network — building the server first
    would expose an empty store.
-3. **Scheduler deployment/adoption (specs `0055` and `0060`).** The SDK-level
+4. **Scheduler deployment/adoption (specs `0055` and `0060`).** The SDK-level
    monitoring slice is built: `0060` connects routed alerts to caller-injected
    delivery senders, provides `workflow_scheduling_cli` report and alert-preview
    commands, updates the worked example, and resolves deployment as advisory by
@@ -177,7 +206,7 @@ if only one thing can move at a time:
    thresholds—plus a future persisted manual-task format only if a concrete
    consumer needs it. Do not add network or credential ownership to the SDK to
    make a demonstration look deployed.
-4. **Prompt / Context / Harness Engineering Foundation (spec `0070`, Approved, foundation implemented).**
+5. **Prompt / Context / Harness Engineering Foundation (spec `0070`, Approved, foundation implemented).**
    The typed run envelope, prompt/context manifests, assumption ledger,
    evaluation harness, audit schema, replay engine/CLI, composite gate, two
    examples, and Quant Model Factory producer are built. Spec `0071` now proves
@@ -186,7 +215,7 @@ if only one thing can move at a time:
    approve the Draft contract, then require new agentic producers to emit a
    `0070` envelope rather than adding another orchestration ledger. Do not
    activate `0064`–`0069` through this cross-cutting work.
-5. **NLP, LLM, and Quant Text Intelligence Foundation (spec `0071`, Approved, foundation implemented).**
+6. **NLP, LLM, and Quant Text Intelligence Foundation (spec `0071`, Approved, foundation implemented).**
    The standard-library `text_intelligence` package, CLI, templates, source
    fixture, synthetic disclosure, composite gate, 16-AC test module, and two
    committed examples are built. They cover immutable corpora/source spans,
@@ -266,7 +295,7 @@ designs**: create and
 approve one only when the foundation it consumes — `0063` or `0072` — has frozen
 that contract and the prior dependency named above is satisfied. Do not add
 agents merely to fill the map; prefer a canonical knowledge artifact or tested
-runtime that an existing agent can use. **Next unreserved spec number: `0080`.**
+runtime that an existing agent can use. **Next unreserved spec number: `0083`.**
 Reserving a number here does not create the directory; copy `templates/spec/`
 only when that slice becomes active.
 
@@ -345,8 +374,9 @@ manual-task persistence question stays deferred until a real consumer needs it.
      `DashboardSpec` now renders to **seven targets** — Power BI, Excel, React
      (`0015`/`0016`) and Streamlit, Looker, Superset, Qlik (`0018`) — each with a
      `tooling/` agent. **Open Data Analyst track:** executable emitters for
-     Looker/Superset/Qlik and a `powerbi_publish` provider (payload/agents exist), an
-     optional `analytics/data_visualization` agent, and optional continuous-metric /
+     Looker/Superset/Qlik and a `powerbi_publish` provider (payload/agents exist),
+     natural-language analytics (spec `0080`, Draft — item 29, which also promotes
+     the `analytics/data_visualization` agent), and optional continuous-metric /
      sequential experiment designs.
    - **Data Engineer — group fully staffed; two runtime nodes.** The
      `agents/data_engineering/` group now has all six agents: `pipeline_orchestration`
@@ -688,7 +718,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
     to populate `sources/` as real sources come into use.
 
 14. **P1 Generalization & Team Onboarding — making QuantSmith self-serve across
-    domains.** QuantSmith is now a comprehensive framework (171 agents, 60 specs,
+    domains.** QuantSmith is now a comprehensive framework (177 agents, 60 specs,
     33 gates, 35 standards); the next phase is reducing discovery friction and
     enabling team-intuitive adoption without deep codebase reading.
     - **P0 Phase 1a: Role profiles** (`roles/{portfolio_manager,risk_manager,quant_researcher,data_engineer,compliance_officer}.md`):
@@ -1401,6 +1431,106 @@ manual-task persistence question stays deferred until a real consumer needs it.
     `tests/test_credit_risk_worked_example.py`.
 
 
+29. **Natural-language analytics — visualization, interpretation, and
+    write-back (spec `0080`, Draft; ranked #1 priority by the owner).** The Data
+    Analyst track has governed metrics (`0008`), seven dashboard renderers
+    (`0014`–`0018`), storytelling, access control (`0058`), and replayable
+    agent runs (`0070`), but no path from a user's *question* to an answer.
+    `0080` defines one: an interpreter seam (deterministic keyword baseline;
+    LLM via `adapters/llm_runtime/` as a drop-in) turns the question into a
+    typed `QueryPlan` over governed metrics only — no SQL field exists — or
+    asks a clarification rather than guessing; `0058` clearance is checked
+    before execution with existence masking; the `0008` layer executes over a
+    caller-injected read-only reader bounded by as-of; a declared form rule
+    picks the chart (line/bar/KPI/scatter/table, Vega-Lite plus a Markdown
+    fallback, promotable to a `DashboardSpec` panel); a deterministic insight
+    set (level, change, contributors, trend, outliers, concentration) backs a
+    narrative whose every number must ground to a computed value. The answer
+    returns as a `ChatResponse`; **write-back** is opt-in, declared per target
+    in a write-back contract, dry-run by default, approval-gated,
+    append-only, idempotent, and reversible by run id through a
+    caller-injected writer — never touching source tables. Persisted
+    insights make "what changed since yesterday / this week" answerable
+    point-in-time, closing the multi-day gap `0055`/`0059` leave open. Adds
+    `agents/analytics/data_visualization/` (promoting the P3 backlog row) and
+    `agents/analytics/nl_analytics/`. **Status (17 REQ, 6 NFR, 26 AC, 22
+    tasks): the full chat-and-write-back pipeline is built and tested —
+    T-001 through T-013 and T-020** (`src/quantsmith/nl_analytics/`:
+    `plan.py`, `interpret.py`, `authorize.py`, `execute.py`, `chart.py`,
+    `insights.py`, `narrate.py`, `respond.py`, `writeback.py`,
+    `writeback_sqlite.py`; 33 tests in `tests/test_nl_analytics.py`). A
+    question answers end to end through `respond.answer()` with no side
+    effects; separately, `writeback.build_records`/`publish`/`reverse` and
+    `writeback.prior_insights` (bounded strictly by as-of, never a clock)
+    give a caller the pieces to persist and later compare against a chat
+    answer's insights — dry-run by default, append-only, idempotent, and
+    reversible by run id, all proven against both an in-memory writer and a
+    real SQLite file. Nothing here needed the pack reviews or the open
+    questions below to start. First write-back target resolved (owner,
+    2026-09-24): **SQLite** through stdlib `sqlite3` against a local
+    gitignored file; a shared database adapter is deferred until a team
+    needs one. **Remaining:** the `0070` audit envelope and replay (T-014),
+    the two agents (T-015), and the CLI/example (T-016–T-018, which also
+    wires `answer()` to write-back end to end — `ChatResponse` itself
+    doesn't carry the plan/result `build_records` needs); domain-pack
+    application (T-021/T-022) once `0081`'s families are reviewed. **Open
+    questions:** first chat surface, whether insights also become
+    `0048`/`0056` knowledge candidates, and the approval model.
+
+30. **Analytics domain packs (spec `0081`, Draft; packs drafted, validator
+    built) — the domain knowledge behind item 29.** Forty JSON packs in
+    `knowledge/analytics_packs/`, spanning a bank front to back across seven
+    families: business lines (deposits, cards, mortgages, commercial, treasury
+    services, trade finance, investment banking, wealth, asset management,
+    payments, custody, insurance), markets (equities, rates, credit, FX,
+    commodities, derivatives, digital assets, short-term funding, securities
+    financing, sales & trading), risk (credit, counterparty/XVA, market,
+    liquidity, ALM/IRRBB, operational, model, climate), finance (performance,
+    regulatory capital), control (AML, fraud, consumer compliance), operations
+    (settlement, collections), and cross-cutting (customer, macro, portfolio
+    attribution). Each pack declares metric vocabulary, unit, and additivity
+    class — so VaR, PFE, PDs, and rates are never summed and balances never
+    summed across time, by construction — plus suppress-only insight rules,
+    caveats, chart conventions, existing reviewer agents, `builds_on`
+    references to `knowledge/credit_risk` / `knowledge/short_term_markets`,
+    and golden cases the validator recomputes. Selection reuses the
+    `domain:` tags already on every `sources/*.yml` entry. `analytics_packs.py`
+    (stdlib) validates and selects; 16 acceptance tests in
+    `tests/test_analytics_packs.py`. **Honest status:** all 40 packs are
+    `draft`, written from general public conventions; `0080` may use them in
+    chat with an "unreviewed domain pack" caveat, but write-back needs every
+    applied pack reviewed by a named person with a date. **Reviewer
+    (resolved 2026-09-24):** Joshua Lutkemuller, CFA reviews all seven
+    families. Per-family review sheets (`--review-sheet <family>`) and a
+    `--mark-reviewed <pack_id> --reviewer … --date …` command make each review
+    one checked diff to one JSON file. **Next:** review pack by pack (0 of 40
+    reviewed); start with the families behind the first `0080` questions.
+
+31. **Enterprise risk agents (spec `0082`, Approved and built) — a real gap
+    `0081` found, fixed.** Building `0081` surfaced that 27 of its 40 packs
+    named `agents/risk` as reviewer, and checking `agents/risk/README.md`
+    against what those packs needed showed a genuine mismatch: its charter
+    is investment/portfolio risk, not operational loss events, model-inventory
+    governance, derivative counterparty exposure, AML program health,
+    bank-level liquidity/IRRBB, or climate/ESG risk. Adds six agents under
+    `agents/enterprise_risk/` — `operational_risk`, `model_risk_management`,
+    `counterparty_credit_risk`, `aml_financial_crime`,
+    `liquidity_treasury_risk`, `climate_esg_risk` — each stating what it
+    never does (approve a model, price a derivative, file a SAR, set a
+    funding strategy, assert a scenario's probability) and to whom that
+    decision belongs, under a new shared standard,
+    `instructions/enterprise_risk.md`. Re-points exactly the 7 `0081` packs
+    where `agents/risk` was a real mismatch (`operational_risk`,
+    `model_risk`, `counterparty_risk_xva`, `aml_financial_crime`,
+    `liquidity_risk`, `treasury_alm_irrbb`, `climate_esg_risk`); leaves
+    `agents/risk/` and the other 20 packs that correctly use it as a
+    secondary reviewer unchanged. Checked first, before building: securities
+    financing (`agents/securities_financing/`) and credit risk
+    (`agents/credit_risk/`) already had correctly-scoped agents — this gap
+    was specific to these six disciplines, not a general shortage. Contract
+    only, no runtime, matching `0022`/`0033`'s precedent; `agent-catalog`
+    gate and the `0081` validator both pass.
+
 ## Open Questions For The Owner
 
 - Copyable scaffold, Python package, or CLI/copier? (Directionally answered in
@@ -1416,7 +1546,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
 
 ## Risks
 
-- Breadth: 171 agents is useful only if each stays narrow and inspectable.
+- Breadth: 177 agents is useful only if each stays narrow and inspectable.
 - Heuristic gates (`leakage`, `backtest`, `secret-scan` fallback) can false-positive
   or miss; keep them advisory unless a repo's layout makes them reliable.
 - Docs can drift from the code; the `docs-link`, `agent-catalog`, and `spec-index` gates help, but

@@ -1,0 +1,157 @@
+{
+  "schema_version": "0081.1",
+  "pack_id": "short_term_markets_funding",
+  "name": "Short-Term Markets & Funding",
+  "family": "markets",
+  "description": "Repo, money markets, and short-dated cash products: rates, haircuts, and funding structure.",
+  "source_domains": [
+    "short_term_markets",
+    "repo",
+    "money_markets",
+    "funding",
+    "cash_products",
+    "collateral"
+  ],
+  "builds_on": [
+    "knowledge/short_term_markets",
+    "specs/0063-short-term-markets-domain-foundation"
+  ],
+  "reviewer_agents": [
+    "agents/securities_financing/repo_financing",
+    "agents/securities_financing/collateral_management"
+  ],
+  "dimensions": [
+    {
+      "name": "collateral_type",
+      "description": "Collateral class (UST, agency MBS, equities)",
+      "synonyms": [
+        "collateral"
+      ]
+    },
+    {
+      "name": "term",
+      "description": "Overnight, term, or open",
+      "synonyms": [
+        "tenor"
+      ]
+    },
+    {
+      "name": "venue",
+      "description": "Tri-party, bilateral, cleared (FICC)",
+      "synonyms": []
+    },
+    {
+      "name": "counterparty_type",
+      "description": "Counterparty sector",
+      "synonyms": []
+    }
+  ],
+  "metrics": [
+    {
+      "name": "repo_rate",
+      "description": "Repo rate for the trade or index",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "rate",
+        "GC rate"
+      ]
+    },
+    {
+      "name": "spread_to_benchmark",
+      "description": "Rate minus a named benchmark (e.g., SOFR)",
+      "unit": "bps",
+      "additivity": "non_additive",
+      "synonyms": [
+        "spread to SOFR"
+      ]
+    },
+    {
+      "name": "haircut",
+      "description": "Collateral haircut",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "margin"
+      ]
+    },
+    {
+      "name": "funding_balance",
+      "description": "Repo or money-market balance at a point in time",
+      "unit": "currency",
+      "additivity": "semi_additive",
+      "synonyms": [
+        "financing",
+        "book size"
+      ]
+    },
+    {
+      "name": "weighted_average_maturity",
+      "description": "Balance-weighted days to maturity",
+      "unit": "days",
+      "additivity": "non_additive",
+      "synonyms": [
+        "WAM"
+      ]
+    }
+  ],
+  "conventions": [
+    {
+      "id": "conv.stm_pack",
+      "rule": "Taxonomy, economic viewpoint, sign conventions, and lifecycle follow knowledge/short_term_markets; this pack adds analytics defaults only."
+    },
+    {
+      "id": "conv.viewpoint",
+      "rule": "State the economic viewpoint (cash lender or cash borrower); the same trade is repo for one and reverse repo for the other."
+    },
+    {
+      "id": "conv.act360",
+      "rule": "Money-market rates are generally ACT/360; state the convention."
+    }
+  ],
+  "insight_rules": [
+    {
+      "id": "ir.rate",
+      "applies_to": "repo_rate",
+      "suppress_kinds": [
+        "contributor"
+      ],
+      "reason": "Rates are balance-weighted; attribute via mix and rate effects."
+    }
+  ],
+  "caveats": [
+    {
+      "id": "cv.quarter_end",
+      "trigger": "always",
+      "text": "Month- and quarter-end balance-sheet constraints distort repo rates and volumes; compare like calendar positions."
+    }
+  ],
+  "chart_conventions": [
+    {
+      "id": "ch.rates_bps",
+      "rule": "Show rate differences to benchmark in bps on a line chart with month- and quarter-ends marked."
+    }
+  ],
+  "golden_cases": [
+    {
+      "id": "g.sofr",
+      "kind": "bps_change",
+      "from_pct": 5.31,
+      "to_pct": 5.33,
+      "expected_bps": 2.0
+    },
+    {
+      "id": "g.bal_time",
+      "kind": "additivity",
+      "metric": "funding_balance",
+      "across": "time",
+      "allowed": false
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewer": null,
+    "reviewed_on": null,
+    "notes": "Drafted from public, general industry conventions; not yet reviewed by a named domain owner."
+  }
+}

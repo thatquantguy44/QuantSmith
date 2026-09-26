@@ -1,0 +1,122 @@
+{
+  "schema_version": "0081.1",
+  "pack_id": "treasury_cash_management",
+  "name": "Treasury & Cash Management Services",
+  "family": "business_line",
+  "description": "Transaction banking for corporate clients: operating balances, liquidity products, and payment and receivables services.",
+  "source_domains": [
+    "cash_management",
+    "transaction_banking"
+  ],
+  "builds_on": [],
+  "reviewer_agents": [
+    "agents/portfolio_management/liquidity_cash_management",
+    "agents/risk"
+  ],
+  "dimensions": [
+    {
+      "name": "service",
+      "description": "Service line (ACH, wires, lockbox, liquidity, merchant)",
+      "synonyms": [
+        "product"
+      ]
+    },
+    {
+      "name": "client_segment",
+      "description": "Client segment",
+      "synonyms": []
+    },
+    {
+      "name": "currency",
+      "description": "Settlement currency",
+      "synonyms": [
+        "ccy"
+      ]
+    }
+  ],
+  "metrics": [
+    {
+      "name": "operating_balances",
+      "description": "Client operating deposit balances at a point in time",
+      "unit": "currency",
+      "additivity": "semi_additive",
+      "synonyms": [
+        "operational deposits"
+      ]
+    },
+    {
+      "name": "fee_revenue",
+      "description": "Treasury services fee revenue in the period",
+      "unit": "currency",
+      "additivity": "additive",
+      "synonyms": [
+        "fees"
+      ]
+    },
+    {
+      "name": "earnings_credit_rate",
+      "description": "Rate credited against service charges on analyzed accounts",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "ECR"
+      ]
+    },
+    {
+      "name": "transaction_count",
+      "description": "Payments processed in the period",
+      "unit": "count",
+      "additivity": "additive",
+      "synonyms": [
+        "transactions",
+        "items"
+      ]
+    }
+  ],
+  "conventions": [
+    {
+      "id": "conv.ecr",
+      "rule": "Earnings credit offsets fees rather than paying interest; do not mix ECR with deposit rates paid."
+    },
+    {
+      "id": "conv.operational",
+      "rule": "Operational deposits are defined by the liquidity rules; state the definition used."
+    }
+  ],
+  "insight_rules": [],
+  "caveats": [
+    {
+      "id": "cv.soft_dollar",
+      "trigger": "metric:fee_revenue",
+      "text": "Fee revenue can be paid in balances (soft dollars) rather than cash; hard- and soft-dollar fees are not comparable without conversion."
+    }
+  ],
+  "chart_conventions": [
+    {
+      "id": "ch.volume_value",
+      "rule": "Show transaction count and value as separate panels; they move differently."
+    }
+  ],
+  "golden_cases": [
+    {
+      "id": "g.fees_time",
+      "kind": "additivity",
+      "metric": "fee_revenue",
+      "across": "time",
+      "allowed": true
+    },
+    {
+      "id": "g.ecr_dim",
+      "kind": "additivity",
+      "metric": "earnings_credit_rate",
+      "across": "dimension",
+      "allowed": false
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewer": null,
+    "reviewed_on": null,
+    "notes": "Drafted from public, general industry conventions; not yet reviewed by a named domain owner."
+  }
+}

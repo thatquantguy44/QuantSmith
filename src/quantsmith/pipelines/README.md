@@ -727,3 +727,60 @@ Tests: `tests/test_mcp_servers.py` (one test per acceptance criterion, 20 total)
 ```sh
 PYTHONPATH=src python3 -m pytest tests/test_mcp_servers.py -q
 ```
+
+## `analytics_packs.py` — spec `0081`
+
+Validates, selects, and interprets the analytics domain packs in
+`knowledge/analytics_packs/` (40 packs, seven families) that natural-language
+analytics (`0080`) applies by data type. Packs are data; this module is the
+only code. Standard library only.
+
+| Component | Spec | What it guarantees |
+| --- | --- | --- |
+| `validate_pack` / `validate_catalog` | REQ-001–REQ-003, REQ-005–REQ-009 | Required fields and schema version; unit/additivity vocabularies; rate-like units non-additive unless justified; insight-rule and caveat targets exist; golden cases recomputed; `reviewed` needs a named reviewer and date; reviewer agents and `builds_on` paths exist; every family covered; README lists every pack. |
+| `can_sum`, `suppressed_insights` | REQ-003, REQ-011 | Additivity decides summing across dimensions/time; non-additive metrics never get contributor insights; rules only add suppressions. |
+| `select_packs` → `Selection` | REQ-004, REQ-005 | `sources/*.yml` domain tags select packs deterministically; cross-pack term conflicts surfaced; `all_reviewed` is the write-back gate. |
+| `coverage_report`, CLI | REQ-010 | Counts by family and review status; source tags that select no pack (info). |
+| `review_sheet`, `mark_reviewed`, `--review-sheet` / `--mark-reviewed` | REQ-012 | Per-family Markdown review sheet; one-pack named review that refuses empty names, bad dates, and packs that fail validation. |
+
+Tests: `tests/test_analytics_packs.py` (16 acceptance tests).
+
+```sh
+PYTHONPATH=src python3 -m quantsmith.pipelines.analytics_packs --report
+PYTHONPATH=src python3 -m pytest tests/test_analytics_packs.py -q
+```
+
+## `nl_analytics/` — spec `0080`
+
+A question in plain language becomes a governed `QueryPlan` over `0008`
+metrics (no SQL or code field exists on it), is checked against the viewer's
+`0058` clearance, executes over caller-injected rows, and returns as a chart
+plus a grounded, arithmetic-backed narrative. Not under `pipelines/` — it is
+its own package, `src/quantsmith/nl_analytics/`, since it composes several
+existing runtimes (`0008`, `0058`, `0014`/`0015`) rather than being one.
+Standard library only; no database, credential, or network code anywhere in
+the package — reads, writes, and any LLM call are caller-injected.
+
+| Module | Spec | What it guarantees |
+| --- | --- | --- |
+| `plan.py` | REQ-001, REQ-002 | `QueryPlan`/`TimeWindow`/`Comparison`/`Filter` frozen dataclasses with no field that can carry SQL or code; `validate_plan` is the one gate every interpreter's output passes; `describe_plan` renders the plain-language echo. |
+| `interpret.py` | REQ-002, REQ-003 | `Interpreter` protocol plus the deterministic `KeywordInterpreter` baseline (metric/dimension synonyms, relative-date phrases, declared defaults); `register_interpreter` lets an LLM backend plug in and share the same validator (AC-004). |
+| `authorize.py` | REQ-004 | `0058` clearance check before execution; a restricted metric is indistinguishable from a nonexistent one, including in clarification candidate lists (existence masking, AC-005). |
+| `execute.py` | REQ-005, NFR-001, NFR-002 | Injected read-only reader; rows filtered to the plan's window and as-of bound before any aggregation; a whole-window `values` aggregate plus a per-period `series`; a content hash over both. |
+| `chart.py` | REQ-006 | A declared, deterministic form rule (line / bar / kpi / scatter / table) from `dashboard_spec.CHART_TYPES` — pie and dual-axis are not representable; Vega-Lite and Markdown-table renderings; `to_panel` promotes a chart to a governed `DashboardSpec` `Panel`. |
+| `insights.py` | REQ-007 | Level, change, per-group contribution (shares sum to the total change), trend, trailing-baseline outliers, and concentration (HHI) — each `Insight` carries the exact numbers it rests on. |
+| `narrate.py` | REQ-008 | `template_narrative` renders the deterministic default; `ground` rejects any narrative number not backed by the insight set (RISK-002) and flags causal wording (RISK-007); `default_caveats` triggers on synthetic data, a small sample, staleness, and a partial final period. |
+| `respond.py` | REQ-009, NFR-006 | `answer()` composes every stage; `ChatResponse` carries a typed `status` on every path (`answered`/`clarification_needed`/`masked`/`empty`/`stale`/`write_rejected`) and refuses to construct a non-answer that carries a chart or an empty reason. |
+| `writeback.py` | REQ-010, REQ-011, REQ-012 | `WriteBackContract` (fixed schema, idempotency key, source-table deny-list, approval rule) plus `load_contract` parsing a filled-in `templates/data/writeback_contract.md`; `build_records` (one row per insight, keyed by a hash of run id and position); `publish` (dry-run default, approval unless `auto_approve`, idempotency delegated to the injected writer); `reverse` (tombstone by run id, caller-supplied `reversed_at`); `prior_insights` (the most recent persisted level visible as of a bound, never reading a clock). |
+| `writeback_sqlite.py` | REQ-010, REQ-011, REQ-012 | `SQLiteWriter`: the first supported write-back target — a local file, parameterized statements only, `INSERT ... ON CONFLICT(record_key) DO NOTHING` for idempotency, a tombstone `UPDATE` for reversal, and a `read()` method usable directly as a `prior_insights` reader. |
+
+Tests: `tests/test_nl_analytics.py` (33 tests, T-001–T-013, T-020).
+
+```sh
+PYTHONPATH=src python3 -m pytest tests/test_nl_analytics.py -q
+```
+
+Remaining (spec `0080` tasks T-014 onward): the `0070` audit envelope and
+replay, the `analytics/data_visualization` / `analytics/nl_analytics`
+agents, the CLI and worked example, the 100k-row benchmark, and applying
+`0081`'s domain packs once at least one family is reviewed.

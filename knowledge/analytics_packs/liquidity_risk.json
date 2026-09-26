@@ -1,0 +1,147 @@
+{
+  "schema_version": "0081.1",
+  "pack_id": "liquidity_risk",
+  "name": "Liquidity Risk",
+  "family": "risk",
+  "description": "Regulatory and internal liquidity metrics, buffers, and funding concentration.",
+  "source_domains": [
+    "liquidity",
+    "liquidity_risk"
+  ],
+  "builds_on": [
+    "instructions/enterprise_risk.md"
+  ],
+  "reviewer_agents": [
+    "agents/enterprise_risk/liquidity_treasury_risk",
+    "agents/portfolio_management/liquidity_cash_management"
+  ],
+  "dimensions": [
+    {
+      "name": "legal_entity",
+      "description": "Legal entity",
+      "synonyms": [
+        "entity"
+      ]
+    },
+    {
+      "name": "currency",
+      "description": "Currency",
+      "synonyms": []
+    },
+    {
+      "name": "time_bucket",
+      "description": "Maturity or survival bucket",
+      "synonyms": []
+    }
+  ],
+  "metrics": [
+    {
+      "name": "lcr",
+      "description": "High-quality liquid assets divided by 30-day stressed net outflows",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "liquidity coverage ratio"
+      ]
+    },
+    {
+      "name": "nsfr",
+      "description": "Available stable funding divided by required stable funding",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "net stable funding ratio"
+      ]
+    },
+    {
+      "name": "hqla",
+      "description": "High-quality liquid assets after haircuts at a point in time",
+      "unit": "currency",
+      "additivity": "semi_additive",
+      "synonyms": [
+        "liquidity buffer"
+      ]
+    },
+    {
+      "name": "net_cash_outflows",
+      "description": "Stressed 30-day net cash outflows",
+      "unit": "currency",
+      "additivity": "semi_additive",
+      "synonyms": [
+        "NCO"
+      ]
+    },
+    {
+      "name": "survival_horizon",
+      "description": "Days until the buffer is exhausted under stress",
+      "unit": "days",
+      "additivity": "non_additive",
+      "synonyms": [
+        "survival days"
+      ]
+    }
+  ],
+  "conventions": [
+    {
+      "id": "conv.entity_trap",
+      "rule": "Liquidity at one entity may not be transferable to another; do not assume consolidated totals are available everywhere."
+    },
+    {
+      "id": "conv.lcr_level",
+      "rule": "HQLA levels (1, 2A, 2B) carry different haircuts and caps; state the level."
+    }
+  ],
+  "insight_rules": [
+    {
+      "id": "ir.ratios",
+      "applies_to": "lcr",
+      "suppress_kinds": [
+        "contributor"
+      ],
+      "reason": "Attribute LCR change via HQLA and outflow changes."
+    }
+  ],
+  "caveats": [
+    {
+      "id": "cv.daily",
+      "trigger": "metric:lcr",
+      "text": "Reported LCR is often a period average; daily values are more volatile."
+    }
+  ],
+  "chart_conventions": [
+    {
+      "id": "ch.buffer",
+      "rule": "Show the ratio with the regulatory minimum as a reference line."
+    }
+  ],
+  "golden_cases": [
+    {
+      "id": "g.lcr",
+      "kind": "ratio",
+      "numerator": 120,
+      "denominator": 100,
+      "scale": 100,
+      "expected": 120.0
+    },
+    {
+      "id": "g.hqla_time",
+      "kind": "additivity",
+      "metric": "hqla",
+      "across": "time",
+      "allowed": false
+    },
+    {
+      "id": "g.lcr_dim",
+      "kind": "additivity",
+      "metric": "lcr",
+      "across": "dimension",
+      "allowed": false
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewer": null,
+    "reviewed_on": null,
+    "notes": "Drafted from public, general industry conventions; not yet reviewed by a named domain owner."
+  }
+}

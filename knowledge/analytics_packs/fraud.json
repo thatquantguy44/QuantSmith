@@ -1,0 +1,119 @@
+{
+  "schema_version": "0081.1",
+  "pack_id": "fraud",
+  "name": "Fraud",
+  "family": "control_compliance",
+  "description": "First- and third-party fraud across cards, payments, and digital channels.",
+  "source_domains": [
+    "fraud"
+  ],
+  "builds_on": [],
+  "reviewer_agents": [
+    "agents/machine_learning/unsupervised_anomaly",
+    "agents/risk"
+  ],
+  "dimensions": [
+    {
+      "name": "fraud_type",
+      "description": "Card-not-present, account takeover, application, scam",
+      "synonyms": [
+        "typology"
+      ]
+    },
+    {
+      "name": "channel",
+      "description": "Channel",
+      "synonyms": []
+    },
+    {
+      "name": "product",
+      "description": "Product",
+      "synonyms": []
+    }
+  ],
+  "metrics": [
+    {
+      "name": "fraud_losses",
+      "description": "Gross fraud losses recognized in the period",
+      "unit": "currency",
+      "additivity": "additive",
+      "synonyms": [
+        "fraud loss"
+      ]
+    },
+    {
+      "name": "fraud_loss_rate",
+      "description": "Fraud losses divided by payment volume",
+      "unit": "bps",
+      "additivity": "non_additive",
+      "synonyms": [
+        "fraud bps"
+      ]
+    },
+    {
+      "name": "detection_rate",
+      "description": "Fraud value detected before loss divided by total fraud value",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "catch rate"
+      ]
+    },
+    {
+      "name": "false_positive_ratio",
+      "description": "Legitimate transactions declined per fraudulent transaction caught",
+      "unit": "ratio",
+      "additivity": "non_additive",
+      "synonyms": [
+        "FP ratio"
+      ]
+    }
+  ],
+  "conventions": [
+    {
+      "id": "conv.loss_timing",
+      "rule": "Fraud is confirmed with a lag; recent periods are understated until claims mature."
+    },
+    {
+      "id": "conv.gross_net",
+      "rule": "State whether losses are before or after recoveries and chargebacks."
+    }
+  ],
+  "insight_rules": [],
+  "caveats": [
+    {
+      "id": "cv.maturity",
+      "trigger": "metric:fraud_losses",
+      "text": "The most recent weeks are incomplete because fraud reporting lags."
+    }
+  ],
+  "chart_conventions": [
+    {
+      "id": "ch.bps",
+      "rule": "Show fraud losses in bps of volume alongside absolute losses."
+    }
+  ],
+  "golden_cases": [
+    {
+      "id": "g.bps",
+      "kind": "ratio",
+      "numerator": 0.5,
+      "denominator": 1000,
+      "scale": 10000,
+      "expected": 5.0
+    },
+    {
+      "id": "g.loss_dim",
+      "kind": "additivity",
+      "metric": "fraud_losses",
+      "across": "dimension",
+      "allowed": true
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewer": null,
+    "reviewed_on": null,
+    "notes": "Drafted from public, general industry conventions; not yet reviewed by a named domain owner."
+  }
+}

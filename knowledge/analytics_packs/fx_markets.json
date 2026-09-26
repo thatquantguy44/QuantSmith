@@ -1,0 +1,147 @@
+{
+  "schema_version": "0081.1",
+  "pack_id": "fx_markets",
+  "name": "Foreign Exchange",
+  "family": "markets",
+  "description": "Spot and forward FX, FX options, and currency exposure.",
+  "source_domains": [
+    "fx"
+  ],
+  "builds_on": [
+    "specs/0022-asset-class-mechanics-agents"
+  ],
+  "reviewer_agents": [
+    "agents/asset_classes/fx",
+    "agents/trading_strategies/carry"
+  ],
+  "dimensions": [
+    {
+      "name": "currency_pair",
+      "description": "Currency pair in market quoting order (e.g., EURUSD)",
+      "synonyms": [
+        "pair",
+        "cross"
+      ]
+    },
+    {
+      "name": "tenor",
+      "description": "Forward or option tenor",
+      "synonyms": []
+    },
+    {
+      "name": "region",
+      "description": "Region",
+      "synonyms": []
+    }
+  ],
+  "metrics": [
+    {
+      "name": "spot_rate",
+      "description": "Spot exchange rate in the pair's quoting convention",
+      "unit": "index",
+      "additivity": "non_additive",
+      "synonyms": [
+        "spot",
+        "rate"
+      ]
+    },
+    {
+      "name": "forward_points",
+      "description": "Forward minus spot, in pips",
+      "unit": "index",
+      "additivity": "non_additive",
+      "synonyms": [
+        "points",
+        "swap points"
+      ]
+    },
+    {
+      "name": "implied_volatility",
+      "description": "Option-implied volatility",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "vol",
+        "IV"
+      ]
+    },
+    {
+      "name": "net_exposure",
+      "description": "Net currency position at a point in time, in reporting currency",
+      "unit": "currency",
+      "additivity": "semi_additive",
+      "synonyms": [
+        "FX position"
+      ]
+    },
+    {
+      "name": "carry",
+      "description": "Annualized interest differential earned holding the pair",
+      "unit": "pct",
+      "additivity": "non_additive",
+      "synonyms": [
+        "forward carry"
+      ]
+    }
+  ],
+  "conventions": [
+    {
+      "id": "conv.quote",
+      "rule": "Quote pairs in market convention (base/quote) and state direction: a rising EURUSD is euro appreciation."
+    },
+    {
+      "id": "conv.pips",
+      "rule": "A pip is 0.0001 for most pairs and 0.01 for JPY pairs."
+    },
+    {
+      "id": "conv.fixing",
+      "rule": "Name the fixing (e.g., WM/Reuters 4pm London) used for any reported rate."
+    }
+  ],
+  "insight_rules": [
+    {
+      "id": "ir.spot",
+      "applies_to": "spot_rate",
+      "suppress_kinds": [
+        "contributor",
+        "concentration"
+      ],
+      "reason": "Exchange rates are prices, not quantities; aggregate exposures, not rates."
+    }
+  ],
+  "caveats": [
+    {
+      "id": "cv.direction",
+      "trigger": "metric:spot_rate",
+      "text": "Direction depends on quoting convention; the response states which currency strengthened."
+    }
+  ],
+  "chart_conventions": [
+    {
+      "id": "ch.fx_rebase",
+      "rule": "Compare currencies against one base as indexed lines, all quoted the same direction."
+    }
+  ],
+  "golden_cases": [
+    {
+      "id": "g.exp_dim",
+      "kind": "additivity",
+      "metric": "net_exposure",
+      "across": "dimension",
+      "allowed": true
+    },
+    {
+      "id": "g.spot_dim",
+      "kind": "additivity",
+      "metric": "spot_rate",
+      "across": "dimension",
+      "allowed": false
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewer": null,
+    "reviewed_on": null,
+    "notes": "Drafted from public, general industry conventions; not yet reviewed by a named domain owner."
+  }
+}

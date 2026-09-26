@@ -1,0 +1,133 @@
+{
+  "schema_version": "0081.1",
+  "pack_id": "consumer_compliance",
+  "name": "Consumer Compliance & Conduct",
+  "family": "control_compliance",
+  "description": "Complaints, fair lending, UDAAP, and conduct risk indicators.",
+  "source_domains": [
+    "consumer_compliance",
+    "fair_lending",
+    "conduct"
+  ],
+  "builds_on": [
+    "knowledge/credit_risk",
+    "specs/0074-retail-underwriting-fairness-harness"
+  ],
+  "reviewer_agents": [
+    "agents/credit_risk/fair_lending_review",
+    "agents/risk"
+  ],
+  "dimensions": [
+    {
+      "name": "product",
+      "description": "Product",
+      "synonyms": []
+    },
+    {
+      "name": "issue",
+      "description": "Complaint issue category",
+      "synonyms": [
+        "reason"
+      ]
+    },
+    {
+      "name": "channel",
+      "description": "Channel",
+      "synonyms": []
+    }
+  ],
+  "metrics": [
+    {
+      "name": "complaints",
+      "description": "Complaints received in the period",
+      "unit": "count",
+      "additivity": "additive",
+      "synonyms": [
+        "complaint volume"
+      ]
+    },
+    {
+      "name": "complaints_per_10k_accounts",
+      "description": "Complaints per 10,000 accounts",
+      "unit": "ratio",
+      "additivity": "non_additive",
+      "synonyms": [
+        "complaint rate"
+      ]
+    },
+    {
+      "name": "time_to_resolve",
+      "description": "Median days to resolve a complaint",
+      "unit": "days",
+      "additivity": "non_additive",
+      "synonyms": [
+        "resolution time"
+      ]
+    },
+    {
+      "name": "adverse_impact_ratio",
+      "description": "Approval rate of a group divided by that of the reference group",
+      "unit": "ratio",
+      "additivity": "non_additive",
+      "synonyms": [
+        "AIR"
+      ]
+    }
+  ],
+  "conventions": [
+    {
+      "id": "conv.fairness",
+      "rule": "Disparity measures follow knowledge/credit_risk and spec 0074: measured at the applied cutoff, with the reference group named."
+    },
+    {
+      "id": "conv.protected",
+      "rule": "Protected-attribute data is segregated and used only for fairness testing, never as a dimension in general analytics."
+    }
+  ],
+  "insight_rules": [
+    {
+      "id": "ir.air",
+      "applies_to": "adverse_impact_ratio",
+      "suppress_kinds": [
+        "contributor",
+        "concentration"
+      ],
+      "reason": "Fairness ratios are reviewed through fair-lending review, not decomposed ad hoc."
+    }
+  ],
+  "caveats": [
+    {
+      "id": "cv.review",
+      "trigger": "metric:adverse_impact_ratio",
+      "text": "Fair-lending results require review by fair_lending_review before any use."
+    }
+  ],
+  "chart_conventions": [
+    {
+      "id": "ch.complaints",
+      "rule": "Show complaint rates per 10,000 accounts, not raw counts, when comparing products of different size."
+    }
+  ],
+  "golden_cases": [
+    {
+      "id": "g.c_time",
+      "kind": "additivity",
+      "metric": "complaints",
+      "across": "time",
+      "allowed": true
+    },
+    {
+      "id": "g.rate_dim",
+      "kind": "additivity",
+      "metric": "complaints_per_10k_accounts",
+      "across": "dimension",
+      "allowed": false
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewer": null,
+    "reviewed_on": null,
+    "notes": "Drafted from public, general industry conventions; not yet reviewed by a named domain owner."
+  }
+}

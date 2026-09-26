@@ -756,11 +756,22 @@ def test_handoff_reserves_child_specs_and_next_number_AC_018():
     handoff = (ROOT / "docs" / "handoff.md").read_text(encoding="utf-8")
     for spec in ("0073", "0074", "0075", "0076", "0077", "0078", "0079"):
         assert f"`{spec}`" in handoff
-    assert "Next unreserved spec number: `0080`" in handoff
+    # The next number must sit after 0072's last reserved child (0079); it
+    # advances as later specs land, so assert the bound, not one value.
+    assert _next_unreserved(handoff) >= 80
 
     index = (ROOT / "specs" / "README.md").read_text(encoding="utf-8")
     assert "0072-credit-risk-domain-foundation" in index
-    assert "Next unreserved spec number: `0080`" in index
+    assert _next_unreserved(index) >= 80
+    assert _next_unreserved(index) == _next_unreserved(handoff)
+
+
+def _next_unreserved(text: str) -> int:
+    import re
+
+    m = re.search(r"Next unreserved spec number: `(\d{4})`", text)
+    assert m, "no 'Next unreserved spec number' statement found"
+    return int(m.group(1))
 
 
 def test_instructions_and_agents_cite_canonical_pack_AC_019():

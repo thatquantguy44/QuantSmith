@@ -421,6 +421,28 @@ This is why `retail_underwriting` above is not an agent yet: no SDK runtime
 scores or decides anything, only tests the fairness of a decision an
 adopter's own model already made.
 
+## Enterprise Risk Agents (`enterprise_risk/`)
+
+Grouped in the `enterprise_risk/` category folder under spec
+`0082-enterprise-risk-agents`. Built because spec `0081`'s 40 analytics
+domain packs found 27 of them falling back to `agents/risk` for disciplines
+its own charter (investment/portfolio risk) never covered — see the group's
+own `README.md` for the finding. `agents/risk/` is unchanged and correct for
+what it already reviews.
+
+| Agent | Handles | Feeds mainly |
+| --- | --- | --- |
+| `enterprise_risk/operational_risk/` | Loss events by Basel type and business line, KRI breaches, near-miss/loss separation; never approves or closes a control finding | `alerts/incident_notification`, `role_operations/governance_readiness_checklist` |
+| `enterprise_risk/model_risk_management/` | Model-inventory validation currency, finding severity/age, override rate; never approves or rejects a model | `role_operations/governance_readiness_checklist`, `machine_learning/mlops_monitoring` |
+| `enterprise_risk/counterparty_credit_risk/` | Netted derivative/securities-financing exposure, PFE vs. limit, wrong-way risk; never prices a derivative or sets a CSA term | `credit_risk/counterparty_limits`, `risk` |
+| `enterprise_risk/aml_financial_crime/` | Alert/case/SAR funnel health, false-positive rate, KYC currency, aggregate only; never determines suspicion or files a SAR | `alerts/alert_policy`, a named compliance officer |
+| `enterprise_risk/liquidity_treasury_risk/` | LCR/NSFR vs. minimum and buffer, NII/EVE sensitivity, entity/currency traps; never sets a funding or hedging strategy | ALCO's own process, `risk` |
+| `enterprise_risk/climate_esg_risk/` | Financed-emissions data quality, transition-sector exposure, physical-hazard mapping; never asserts scenario probability or target adequacy | `research_analyst`, the disclosure committee |
+
+All six are contract-only today (no SDK runtime); their inputs are always
+caller-supplied, the posture `agents/credit_risk/counterparty_limits` took
+before its own runtime existed.
+
 ## Formulaic Alpha Agents (`formulaic_alphas/`)
 
 Grouped in the `formulaic_alphas/` category folder; they operationalize the
