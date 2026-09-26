@@ -10,7 +10,7 @@
 > direction included. See item 1 of *What's Next* and items 29–30.
 
 The SDK has a working v1: a **spec-driven engineering framework** over the six
-software-development stages, **177 agents** in `agents/`,
+software-development stages, **179 agents** in `agents/`,
 **35 quality gates**, **37 instruction standards**, and CI that
 enforces the deterministic gates. It remains primarily a scaffold to be copied
 into quant repos, with `src/quantsmith/pipelines/`, `src/quantsmith/orchestration/`,
@@ -35,7 +35,7 @@ it via stable IDs (`REQ`/`NFR`/`AC`/`RISK`/`T`).
 - `specs/NNNN-slug/{spec,plan,tasks}.md` from `templates/spec/`; worked example at
   `specs/0001-daily-momentum-signal/`.
 
-**Agents (177, verified by the `agent-catalog` gate — treat `agents/README.md`
+**Agents (179, verified by the `agent-catalog` gate — treat `agents/README.md`
 as the live count, not the number here)** — all on the four-file contract
 (`README`/`prompt`/`instructions`/`tasks`) with a `Spec-Driven Role`:
 
@@ -718,7 +718,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
     to populate `sources/` as real sources come into use.
 
 14. **P1 Generalization & Team Onboarding — making QuantSmith self-serve across
-    domains.** QuantSmith is now a comprehensive framework (177 agents, 60 specs,
+    domains.** QuantSmith is now a comprehensive framework (179 agents, 69 specs,
     33 gates, 35 standards); the next phase is reducing discovery friction and
     enabling team-intuitive adoption without deep codebase reading.
     - **P0 Phase 1a: Role profiles** (`roles/{portfolio_manager,risk_manager,quant_researcher,data_engineer,compliance_officer}.md`):
@@ -1453,9 +1453,10 @@ manual-task persistence question stays deferred until a real consumer needs it.
     insights make "what changed since yesterday / this week" answerable
     point-in-time, closing the multi-day gap `0055`/`0059` leave open. Adds
     `agents/analytics/data_visualization/` (promoting the P3 backlog row) and
-    `agents/analytics/nl_analytics/`. **Status (17 REQ, 6 NFR, 26 AC, 22
-    tasks): the chat pipeline, write-back, and the `0070` audit envelope are
-    all built and tested — T-001 through T-014 and T-020**
+    `agents/analytics/nl_analytics/` — both shipped, contract-only, per
+    REQ-014. **Status (17 REQ, 6 NFR, 26 AC, 22 tasks): the chat pipeline,
+    write-back, the `0070` audit envelope, and the two agent contracts are
+    all built and tested — T-001 through T-015 and T-020**
     (`src/quantsmith/nl_analytics/`: `plan.py`, `interpret.py`,
     `authorize.py`, `execute.py`, `chart.py`, `insights.py`, `narrate.py`,
     `respond.py`, `writeback.py`, `writeback_sqlite.py`, `envelope.py`; 36
@@ -1473,12 +1474,12 @@ manual-task persistence question stays deferred until a real consumer needs it.
     questions below to start. First write-back target resolved (owner,
     2026-09-24): **SQLite** through stdlib `sqlite3` against a local
     gitignored file; a shared database adapter is deferred until a team
-    needs one. **Remaining:** the two agents (T-015), the CLI/example
-    (T-016–T-018, which also wires `answer()` to write-back end to end —
-    `ChatResponse` itself doesn't carry the plan/result `build_records`
-    needs), envelope redaction/privacy-flag propagation (T-016's scope, not
-    T-014's), and domain-pack application (T-021/T-022) once `0081`'s
-    families are reviewed. **Open questions:** first chat surface, whether
+    needs one. **Remaining:** the CLI/example (T-016–T-018, which also wires
+    `answer()` to write-back end to end — `ChatResponse` itself doesn't
+    carry the plan/result `build_records` needs), envelope
+    redaction/privacy-flag propagation (T-016's scope, not T-014's), and
+    domain-pack application (T-021/T-022) once `0081`'s families are
+    reviewed. **Open questions:** first chat surface, whether
     insights also become `0048`/`0056` knowledge candidates, and the
     approval model.
 
@@ -1551,7 +1552,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
 
 ## Risks
 
-- Breadth: 177 agents is useful only if each stays narrow and inspectable.
+- Breadth: 179 agents is useful only if each stays narrow and inspectable.
 - Heuristic gates (`leakage`, `backtest`, `secret-scan` fallback) can false-positive
   or miss; keep them advisory unless a repo's layout makes them reliable.
 - Docs can drift from the code; the `docs-link`, `agent-catalog`, and `spec-index` gates help, but

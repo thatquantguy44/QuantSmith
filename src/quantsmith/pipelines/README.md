@@ -775,14 +775,18 @@ the package — reads, writes, and any LLM call are caller-injected.
 | `writeback_sqlite.py` | REQ-010, REQ-011, REQ-012 | `SQLiteWriter`: the first supported write-back target — a local file, parameterized statements only, `INSERT ... ON CONFLICT(record_key) DO NOTHING` for idempotency, a tombstone `UPDATE` for reversal, and a `read()` method usable directly as a `prior_insights` reader. |
 | `envelope.py` | REQ-013, NFR-001 | `emit_answer_evidence` records one already-answered question as a `0070` orchestration bundle (prompt/context manifests, assumption ledger, evaluation harness, nine audit events spanning interpret through deliver) that `0070`'s own `replay_envelope_file` validates and replays offline; re-emitting from identical inputs is byte-identical. Opt-in from `answer()` via `AnswerContext.envelope_dir`/`run_id` — unset by default, so the chat path keeps no side effects. |
 
-Tests: `tests/test_nl_analytics.py` (36 tests, T-001–T-014, T-020).
+Tests: `tests/test_nl_analytics.py` (36 tests, T-001–T-015, T-020).
 
 ```sh
 PYTHONPATH=src python3 -m pytest tests/test_nl_analytics.py -q
 ```
 
-Remaining (spec `0080` tasks T-015 onward): the `analytics/data_visualization`
-/ `analytics/nl_analytics` agents, the CLI and worked example (which also
-wires `answer()` to write-back end to end), the 100k-row benchmark, envelope
-redaction/privacy-flag propagation (NFR-004, AC-020 — T-016's scope), and
-applying `0081`'s domain packs once at least one family is reviewed.
+Agent contracts: `agents/analytics/data_visualization/` (chart choice, owning
+`chart.py`'s form rule) and `agents/analytics/nl_analytics/` (orchestrates the
+whole package), both shipped contract-only (T-015).
+
+Remaining (spec `0080` tasks T-016 onward): the CLI and worked example (which
+also wires `answer()` to write-back end to end), the 100k-row benchmark,
+envelope redaction/privacy-flag propagation (NFR-004, AC-020 — T-016's
+scope), and applying `0081`'s domain packs once at least one family is
+reviewed.
