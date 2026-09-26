@@ -773,14 +773,16 @@ the package — reads, writes, and any LLM call are caller-injected.
 | `respond.py` | REQ-009, NFR-006 | `answer()` composes every stage; `ChatResponse` carries a typed `status` on every path (`answered`/`clarification_needed`/`masked`/`empty`/`stale`/`write_rejected`) and refuses to construct a non-answer that carries a chart or an empty reason. |
 | `writeback.py` | REQ-010, REQ-011, REQ-012 | `WriteBackContract` (fixed schema, idempotency key, source-table deny-list, approval rule) plus `load_contract` parsing a filled-in `templates/data/writeback_contract.md`; `build_records` (one row per insight, keyed by a hash of run id and position); `publish` (dry-run default, approval unless `auto_approve`, idempotency delegated to the injected writer); `reverse` (tombstone by run id, caller-supplied `reversed_at`); `prior_insights` (the most recent persisted level visible as of a bound, never reading a clock). |
 | `writeback_sqlite.py` | REQ-010, REQ-011, REQ-012 | `SQLiteWriter`: the first supported write-back target — a local file, parameterized statements only, `INSERT ... ON CONFLICT(record_key) DO NOTHING` for idempotency, a tombstone `UPDATE` for reversal, and a `read()` method usable directly as a `prior_insights` reader. |
+| `envelope.py` | REQ-013, NFR-001 | `emit_answer_evidence` records one already-answered question as a `0070` orchestration bundle (prompt/context manifests, assumption ledger, evaluation harness, nine audit events spanning interpret through deliver) that `0070`'s own `replay_envelope_file` validates and replays offline; re-emitting from identical inputs is byte-identical. Opt-in from `answer()` via `AnswerContext.envelope_dir`/`run_id` — unset by default, so the chat path keeps no side effects. |
 
-Tests: `tests/test_nl_analytics.py` (33 tests, T-001–T-013, T-020).
+Tests: `tests/test_nl_analytics.py` (36 tests, T-001–T-014, T-020).
 
 ```sh
 PYTHONPATH=src python3 -m pytest tests/test_nl_analytics.py -q
 ```
 
-Remaining (spec `0080` tasks T-014 onward): the `0070` audit envelope and
-replay, the `analytics/data_visualization` / `analytics/nl_analytics`
-agents, the CLI and worked example, the 100k-row benchmark, and applying
-`0081`'s domain packs once at least one family is reviewed.
+Remaining (spec `0080` tasks T-015 onward): the `analytics/data_visualization`
+/ `analytics/nl_analytics` agents, the CLI and worked example (which also
+wires `answer()` to write-back end to end), the 100k-row benchmark, envelope
+redaction/privacy-flag propagation (NFR-004, AC-020 — T-016's scope), and
+applying `0081`'s domain packs once at least one family is reviewed.
