@@ -37,7 +37,7 @@
 | T-013 | `prior_insights` as-of lookup and `prior_insight` comparison kind. | REQ-012, NFR-002, AC-016 | done | Persisted comparison is total-level only (from the `level` insight row); reconstructing a per-dimension breakdown from stored `contributor` rows is a documented follow-up. `respond.py`'s `comparison_key()` joins on metric+dimensions, not the window, so "since yesterday" matches across two different rolling windows; a `reference == "yesterday"` comparison shifts the lookup's as-of back one period so a same-day persisted record can never stand in for yesterday's. |
 | T-014 | Emit `0070` envelope and audit events per stage, with replay test. | REQ-013, NFR-001, AC-017 | done | `envelope.py`: opt-in via `AnswerContext.envelope_dir`/`run_id` (no side effect when unset — RISK-004); nine audit events (interpret, validate, execute, chart, insights, narrate-as-gate, deliver, plus start/complete) mapped onto `0070`'s fixed event-type vocabulary; an LLM `interpreter_mode` is marked `model_invocation`/non-deterministic honestly rather than hidden. Redaction and privacy-flag propagation (NFR-004, AC-020) stay T-016's scope — not duplicated here, since this task's own envelope content isn't yet redacted. |
 | T-015 | Agents `agents/analytics/data_visualization/` and `agents/analytics/nl_analytics/` (four files each, `Spec-Driven Role`), catalog rows, group README handoffs. | REQ-014, AC-018 | done | Contract-only, per REQ-014: each hands off to `metrics_semantic_layer`, `data_visualization`/`dashboard_design`, and `sql-integration-agent` rather than duplicating them; `data_visualization` documents `chart.py` as its runtime, `nl_analytics` documents the whole `src/quantsmith/nl_analytics/` package. |
-| T-016 | Import/source scan test (stdlib only, no credentials or network) and privacy test. | NFR-003, NFR-004, AC-019, AC-020 | todo | |
+| T-016 | Import/source scan test (stdlib only, no credentials or network) and privacy test. | NFR-003, NFR-004, AC-019, AC-020 | done | `dataset_privacy` is caller-declared on `AnswerContext`/`emit_answer_evidence` (never inferred); when any flag is set the question text is redacted out of every rendered artifact and replaced by its hash, and an LLM-backed interpret event carries the flags as the `adapters/llm_runtime/` privacy block that call would use. Redaction scope is the one genuinely free-text field this package carries (the question) — governed plan/result values stay in full since they're vocabulary-controlled, not free text; per-dimension result redaction is a documented follow-up. |
 | T-017 | 100k-row benchmark test. | NFR-005, AC-021 | todo | |
 | T-018 | `cli.py` and `examples/nl_analytics/` (synthetic three-day transcript, committed sample response) plus `docs/0080_synthetic_data_disclosure.md`. | REQ-009, REQ-012 | todo | |
 | T-020 | `writeback_sqlite.py`: `SQLiteWriter` + reader over stdlib `sqlite3` (schema from contract, `ON CONFLICT DO NOTHING` idempotency, tombstone reversal, as-of prior-insight read); runs AC-014/015/016 against both the recording writer and SQLite (`:memory:` and a temp file). First supported target, resolved by the owner 2026-09-24. | REQ-010, REQ-011, REQ-012, AC-014, AC-015, AC-016 | done | Table name is fixed at construction from the contract (`nl_analytics_writeback_<name>`), never from a record or a later call; every statement is parameterized. |
@@ -72,8 +72,8 @@ Every acceptance criterion must be named by at least one test.
 | AC-016 | `test_ac016_since_yesterday_uses_prior_insight_as_of`, `test_ac016_respond_yesterday_reference_shifts_as_of_by_one` | done |
 | AC-017 | `test_ac017_replay_is_byte_identical` | done |
 | AC-018 | agent-contract + `agent-catalog` gates | done |
-| AC-019 | `test_ac019_stdlib_only_no_credentials_or_network` | todo |
-| AC-020 | `test_ac020_audit_redaction_and_privacy_flags` | todo |
+| AC-019 | `test_ac019_stdlib_only_no_credentials_or_network` | done |
+| AC-020 | `test_ac020_audit_redaction_and_privacy_flags` | done |
 | AC-021 | `test_ac021_benchmark_100k_rows` | todo |
 | AC-023 | `test_ac023_pack_units_and_additivity_applied` | todo |
 | AC-024 | `test_ac024_cross_pack_term_conflict_clarifies` | todo |
@@ -104,3 +104,10 @@ Tracked work intentionally deferred (no silent "temporary" shortcuts — P8).
   plan/result/insights directly (not the `ChatResponse` itself), since the
   response doesn't carry them; wiring `answer()` end to end with a
   write-back request is part of the CLI/example (T-018) or a later task.
+- Per-dimension privacy redaction (T-016) — envelope redaction covers the
+  question text, the package's one genuinely free-text field; a computed
+  result's per-dimension values (e.g. a client-name dimension) are not
+  scanned or redacted, since every dimension value comes from the governed
+  semantic layer's declared vocabulary, not free text. If a future dataset's
+  declared dimension values are themselves sensitive, redacting them would
+  need the caller's own dimension-level classification, not built here.

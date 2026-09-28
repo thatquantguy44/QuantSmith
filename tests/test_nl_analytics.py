@@ -812,3 +812,94 @@ def test_answer_can_opt_in_to_envelope_emission(layer, tmp_path):
             interpret_context=InterpretContext(today_period=10, default_window_periods=5),
             envelope_dir=str(tmp_path / "run2"),
         ))
+
+
+# --- AC-019: standard library only, no credentials, no network -------------
+
+
+def test_ac019_stdlib_only_no_credentials_or_network():
+    import ast
+    import sys
+    from pathlib import Path
+
+    pkg_dir = Path("src/quantsmith/nl_analytics")
+    py_files = sorted(pkg_dir.glob("*.py"))
+    assert py_files, "expected nl_analytics package files to scan"
+
+    stdlib = set(sys.stdlib_module_names)
+    network_patterns = ("socket", "urllib.request", "http.client", "requests", "ftplib", "smtplib", "asyncio")
+    credential_re = __import__("re").compile(
+        r"(?i)\b(password|passwd|api[_-]?key|secret[_-]?key|access[_-]?key|auth[_-]?token)\s*="
+    )
+    conn_string_re = __import__("re").compile(r"[a-zA-Z][\w+.-]*://[^\s\"']*:[^\s\"'@]*@")
+
+    for path in py_files:
+        source = path.read_text(encoding="utf-8")
+        tree = ast.parse(source, filename=str(path))
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                names = [alias.name for alias in node.names]
+            elif isinstance(node, ast.ImportFrom):
+                if node.level > 0:
+                    continue  # relative import within the package itself
+                names = [node.module] if node.module else []
+            else:
+                continue
+            for name in names:
+                if name is None:
+                    continue
+                root = name.split(".")[0]
+                assert root in stdlib or root == "quantsmith", (
+                    f"{path}: non-stdlib, non-quantsmith import {name!r}"
+                )
+                assert name not in network_patterns and root not in network_patterns, (
+                    f"{path}: network-capable import {name!r}"
+                )
+
+        assert not credential_re.search(source), f"{path}: looks like a hardcoded credential"
+        assert not conn_string_re.search(source), f"{path}: looks like a connection string"
+
+
+# --- AC-020: audit redaction and LLM adapter privacy flags -----------------
+
+
+def test_ac020_audit_redaction_and_privacy_flags(layer, tmp_path):
+    plan, result, chart, insight_set, response = _answered(layer)
+    out = tmp_path / "run_pii"
+    secret_question = "what was the funding cost for client Jane Doe's account"
+    envelope = emit_answer_evidence(
+        secret_question, plan, result, chart, insight_set, response, out,
+        run_id="run-pii-1", started_at="2026-01-01T00:00:00Z",
+        interpreter_mode="llm:anthropic/claude",
+        dataset_privacy={"contains_pii": True},
+    )
+
+    payload = json.loads((out / "answer_payload.json").read_text())
+    assert payload["question"] != secret_question
+    assert secret_question not in (out / "prompt.md").read_text()
+    assert secret_question not in (out / "run_envelope.json").read_text()
+    assert secret_question not in (out / "context_manifest.json").read_text()
+    assert secret_question not in (out / "audit_events.jsonl").read_text()
+    import hashlib
+    assert payload["question_hash"] == f"sha256:{hashlib.sha256(secret_question.encode('utf-8')).hexdigest()}"
+
+    events = [json.loads(line) for line in (out / "audit_events.jsonl").read_text().splitlines()]
+    interpret_event = next(e for e in events if e["event_type"] == "model_invocation")
+    assert interpret_event["payload_ref"]["privacy"] == {
+        "contains_pii": True, "contains_mnpi": False, "contains_restricted_positions": False,
+    }
+
+    manifest = json.loads((out / "prompt_manifest.json").read_text())
+    assert manifest["privacy"]["contains_pii"] is True
+
+    report = replay_envelope_file(envelope)
+    assert report.status in ("replayed", "non_reproducible")
+
+    # No privacy classification declared: the question passes through in full.
+    out_public = tmp_path / "run_public"
+    emit_answer_evidence(
+        secret_question, plan, result, chart, insight_set, response, out_public,
+        run_id="run-public-1", started_at="2026-01-01T00:00:00Z",
+    )
+    payload_public = json.loads((out_public / "answer_payload.json").read_text())
+    assert payload_public["question"] == secret_question

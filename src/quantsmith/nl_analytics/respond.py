@@ -94,6 +94,12 @@ class AnswerContext:
     envelope_dir: Optional[str] = None
     run_id: Optional[str] = None
     envelope_actor_clearance: str = "public"
+    envelope_interpreter_mode: str = "keyword/1"
+    # Caller-declared classification of the dataset behind the question
+    # (``contains_pii`` / ``contains_mnpi`` / ``contains_restricted_positions``
+    # — NFR-004, AC-020); never inferred. Only consulted when an envelope is
+    # emitted — see envelope.py's PRIVACY_FLAGS and redaction behavior.
+    dataset_privacy: Dict[str, bool] = field(default_factory=dict)
 
 
 def _refuse(status: str, reason: str, plan_echo: str = "") -> ChatResponse:
@@ -178,6 +184,8 @@ def answer(question: str, context: AnswerContext) -> ChatResponse:
         envelope_path = emit_answer_evidence(
             question, plan, result, chart, insight_set, final, context.envelope_dir,
             run_id=context.run_id, actor_clearance=context.envelope_actor_clearance,
+            interpreter_mode=context.envelope_interpreter_mode,
+            dataset_privacy=context.dataset_privacy,
         )
         final = replace(final, envelope_uri=str(envelope_path))
 
