@@ -1455,33 +1455,38 @@ manual-task persistence question stays deferred until a real consumer needs it.
     `agents/analytics/data_visualization/` (promoting the P3 backlog row) and
     `agents/analytics/nl_analytics/` — both shipped, contract-only, per
     REQ-014. **Status (17 REQ, 6 NFR, 26 AC, 22 tasks): the chat pipeline,
-    write-back, the `0070` audit envelope, and the two agent contracts are
-    all built and tested — T-001 through T-015 and T-020**
-    (`src/quantsmith/nl_analytics/`: `plan.py`, `interpret.py`,
+    write-back, the `0070` audit envelope, its privacy redaction, and the
+    two agent contracts are all built and tested — T-001 through T-016 and
+    T-020** (`src/quantsmith/nl_analytics/`: `plan.py`, `interpret.py`,
     `authorize.py`, `execute.py`, `chart.py`, `insights.py`, `narrate.py`,
-    `respond.py`, `writeback.py`, `writeback_sqlite.py`, `envelope.py`; 36
+    `respond.py`, `writeback.py`, `writeback_sqlite.py`, `envelope.py`; 38
     tests in `tests/test_nl_analytics.py`). A question answers end to end
     through `respond.answer()` with no side effects by default; opting in
     (`AnswerContext.envelope_dir`/`run_id`) records the run as a `0070`
     bundle that `0070`'s own replay engine validates and replays offline,
-    byte-identically on identical inputs. Separately,
-    `writeback.build_records`/`publish`/`reverse` and
-    `writeback.prior_insights` (bounded strictly by as-of, never a clock)
-    give a caller the pieces to persist and later compare against a chat
-    answer's insights — dry-run by default, append-only, idempotent, and
-    reversible by run id, all proven against both an in-memory writer and a
-    real SQLite file. Nothing here needed the pack reviews or the open
-    questions below to start. First write-back target resolved (owner,
+    byte-identically on identical inputs. A caller-declared
+    `dataset_privacy` (`contains_pii`/`contains_mnpi`/
+    `contains_restricted_positions`, never inferred) redacts the question
+    out of every rendered artifact when set, replacing it with its hash, and
+    tags an LLM-backed interpret step with the privacy block an
+    `adapters/llm_runtime/` request for it would carry; an import/source
+    scan test proves the package stays stdlib-only with no credential or
+    network code. Separately, `writeback.build_records`/`publish`/`reverse`
+    and `writeback.prior_insights` (bounded strictly by as-of, never a
+    clock) give a caller the pieces to persist and later compare against a
+    chat answer's insights — dry-run by default, append-only, idempotent,
+    and reversible by run id, all proven against both an in-memory writer
+    and a real SQLite file. Nothing here needed the pack reviews or the
+    open questions below to start. First write-back target resolved (owner,
     2026-09-24): **SQLite** through stdlib `sqlite3` against a local
     gitignored file; a shared database adapter is deferred until a team
-    needs one. **Remaining:** the CLI/example (T-016–T-018, which also wires
-    `answer()` to write-back end to end — `ChatResponse` itself doesn't
-    carry the plan/result `build_records` needs), envelope
-    redaction/privacy-flag propagation (T-016's scope, not T-014's), and
-    domain-pack application (T-021/T-022) once `0081`'s families are
-    reviewed. **Open questions:** first chat surface, whether
-    insights also become `0048`/`0056` knowledge candidates, and the
-    approval model.
+    needs one. **Remaining:** the 100k-row benchmark (T-017), the
+    CLI/example (T-018, which also wires `answer()` to write-back end to
+    end — `ChatResponse` itself doesn't carry the plan/result
+    `build_records` needs), and domain-pack application (T-021/T-022) once
+    `0081`'s families are reviewed. **Open questions:** first chat surface,
+    whether insights also become `0048`/`0056` knowledge candidates, and
+    the approval model.
 
 30. **Analytics domain packs (spec `0081`, Draft; packs drafted, validator
     built) — the domain knowledge behind item 29.** Forty JSON packs in

@@ -22,6 +22,7 @@ Standard library only.
 from __future__ import annotations
 
 import datetime as _dt
+import hashlib
 import json
 import re
 from pathlib import Path
@@ -48,6 +49,14 @@ from .respond import ChatResponse
 
 _PRODUCER_SCHEMA = "quantsmith.orchestration.producer.nl_analytics.v1"
 
+#: Recognized dataset-privacy classification keys (spec ``0080`` NFR-004,
+#: AC-020), matching ``adapters/llm_runtime/adapter_contract.md``'s
+#: ``privacy`` block. A key absent from a caller-supplied ``dataset_privacy``
+#: mapping is treated as ``False``.
+PRIVACY_FLAGS = ("contains_pii", "contains_mnpi", "contains_restricted_positions")
+
+_REDACTED = "[REDACTED: dataset carries a declared privacy classification]"
+
 
 def emit_answer_evidence(
     question: str,
@@ -65,6 +74,7 @@ def emit_answer_evidence(
     repo_revision: str = "unknown",
     interpreter_mode: str = "keyword/1",
     release_profile: str = "release_bound",
+    dataset_privacy: Optional[Mapping[str, bool]] = None,
 ) -> Path:
     """Emit a validated ``0070`` envelope for one answered question.
 
@@ -73,6 +83,21 @@ def emit_answer_evidence(
     this module never invents one. Raises
     :class:`~quantsmith.orchestration.foundation.OrchestrationValidationError`
     if the emitted bundle does not validate.
+
+    ``dataset_privacy`` is the caller's declared classification of the
+    dataset behind ``question`` (``contains_pii`` / ``contains_mnpi`` /
+    ``contains_restricted_positions`` — spec ``0080`` NFR-004, AC-020); this
+    module never infers it. When any flag is set, the raw question text is
+    redacted out of every rendered artifact (``answer_payload.json``,
+    ``prompt.md``) and replaced with its hash — the interpreted plan and
+    computed result stay in full, since both are governed vocabulary and
+    numbers, not free text (T-016's scope stops at the one genuinely
+    free-text field this package carries; redacting per-dimension result
+    values is a documented follow-up, not needed by any current caller).
+    When the interpreter is LLM-backed (``interpreter_mode`` not
+    ``keyword*``), the flags are also recorded on the ``interpret`` audit
+    event as the privacy block an ``adapters/llm_runtime/`` request for that
+    call would carry, per the adapter contract.
     """
     out = Path(output_dir)
     out.mkdir(parents=True, exist_ok=True)
@@ -82,13 +107,20 @@ def emit_answer_evidence(
     review_date = _format_date(started.date() + _dt.timedelta(days=365))
     safe_run_id = _safe_id(run_id)
     is_llm = not interpreter_mode.startswith("keyword")
+    privacy = {flag: bool((dataset_privacy or {}).get(flag, False)) for flag in PRIVACY_FLAGS}
+    is_restricted = any(privacy.values())
+    question_hash = f"sha256:{hashlib.sha256(question.encode('utf-8')).hexdigest()}"
+    question_display = _REDACTED if is_restricted else question
 
     payload_path = out / "answer_payload.json"
-    _write_json(payload_path, _answer_payload(question, plan, result, chart, insight_set, response))
+    _write_json(
+        payload_path,
+        _answer_payload(question_display, question_hash, plan, result, chart, insight_set, response),
+    )
     payload_hash = sha256_file(payload_path)
 
     prompt_path = out / "prompt.md"
-    prompt_path.write_text(_render_prompt(question, plan), encoding="utf-8")
+    prompt_path.write_text(_render_prompt(question_display, plan), encoding="utf-8")
     prompt_hash = sha256_file(prompt_path)
 
     context_path = out / "context_note.md"
@@ -106,14 +138,17 @@ def emit_answer_evidence(
             "role_layers": [{"role": "user", "source_path": "prompt.md", "hash": prompt_hash}],
             "variables": [
                 {"name": "question", "required": True},
+                {"name": "question_hash", "required": True},
                 {"name": "metric", "required": True},
                 {"name": "interpreter_mode", "required": True},
             ],
             "rendered_variables": {
-                "question": question,
+                "question": question_display,
+                "question_hash": question_hash,
                 "metric": plan.metric,
                 "interpreter_mode": interpreter_mode,
             },
+            "privacy": privacy,
             "model_constraints": {
                 "providers": ["external_llm"] if is_llm else ["deterministic"],
                 "models": [interpreter_mode],
@@ -160,7 +195,7 @@ def emit_answer_evidence(
                     "content_hash": context_hash,
                     "access_level": actor_clearance,
                     "caller_clearance": actor_clearance,
-                    "retrieval_query": question,
+                    "retrieval_query": question_display,
                     "selection_rule": "execute() over the plan's window, bounded by as_of",
                     "rank": 1,
                     "budget": {
@@ -267,7 +302,7 @@ def emit_answer_evidence(
         audit_path,
         _audit_events(
             run_id=run_id, safe_run_id=safe_run_id, actor_id=actor_id, started=started,
-            payload_hash=payload_hash, response=response, is_llm=is_llm,
+            payload_hash=payload_hash, response=response, is_llm=is_llm, privacy=privacy,
         ),
     )
     audit_hash = sha256_file(audit_path)
@@ -278,7 +313,7 @@ def emit_answer_evidence(
         {
             "schema_version": SCHEMA_VERSION_RUN,
             "run_id": run_id,
-            "objective": f"Answer '{question}' as a governed, replayable nl_analytics run.",
+            "objective": f"Answer '{question_display}' as a governed, replayable nl_analytics run.",
             "spec_id": "0080-nl-analytics-insights",
             "stage": "implementation",
             "mode": "external_provider" if is_llm else "deterministic",
@@ -328,13 +363,14 @@ def emit_answer_evidence(
 
 
 def _answer_payload(
-    question: str, plan: QueryPlan, result: Result, chart: Optional[ChartSpec],
-    insight_set: Sequence[Insight], response: ChatResponse,
+    question_display: str, question_hash: str, plan: QueryPlan, result: Result,
+    chart: Optional[ChartSpec], insight_set: Sequence[Insight], response: ChatResponse,
 ) -> dict[str, Any]:
     return {
         "schema_version": _PRODUCER_SCHEMA,
         "producer": "quantsmith.nl_analytics.respond.answer",
-        "question": question,
+        "question": question_display,
+        "question_hash": question_hash,
         "plan": plan.to_canonical_dict(),
         "plan_hash": plan.content_hash(),
         "result": {
@@ -395,7 +431,7 @@ def _harness_payload(*, run_id: str, safe_run_id: str, response: ChatResponse, i
 
 def _audit_events(
     *, run_id: str, safe_run_id: str, actor_id: str, started: _dt.datetime,
-    payload_hash: str, response: ChatResponse, is_llm: bool,
+    payload_hash: str, response: ChatResponse, is_llm: bool, privacy: Mapping[str, bool],
 ) -> list[Mapping[str, Any]]:
     def evt(offset: int, event_id: str, event_type: str, parents: list[str], summary: str, **extra: Any) -> dict:
         return _event(run_id, event_id, event_type, started + _dt.timedelta(seconds=offset), actor_id, parents, payload_hash, summary, **extra)
@@ -409,13 +445,23 @@ def _audit_events(
     narrate_id = f"evt-{safe_run_id}-narrate"
     deliver_id = f"evt-{safe_run_id}-deliver"
 
+    interpret_extra: dict[str, Any] = {
+        "provider": "external_llm" if is_llm else "python", "deterministic": not is_llm,
+        "tool_name": "quantsmith.nl_analytics.interpret.interpret",
+    }
+    if is_llm:
+        # The privacy block an adapters/llm_runtime/ request for this call
+        # would carry, per its adapter contract — propagated from the
+        # caller's declared dataset classification (NFR-004, AC-020), never
+        # inferred here.
+        interpret_extra["privacy"] = dict(privacy)
+
     return [
         evt(0, started_id, "run_started", [], "nl_analytics answer() run started."),
         evt(
             1, interpret_id, "model_invocation" if is_llm else "tool_plugin_call", [started_id],
             "Question interpreted into a governed QueryPlan.",
-            payload_extra={"provider": "external_llm" if is_llm else "python", "deterministic": not is_llm,
-                          "tool_name": "quantsmith.nl_analytics.interpret.interpret"},
+            payload_extra=interpret_extra,
         ),
         evt(2, validate_id, "tool_plugin_call", [interpret_id], "Plan validated and authorized against the metric registry and viewer clearance.",
             payload_extra={"provider": "python", "deterministic": True, "tool_name": "quantsmith.nl_analytics.plan.validate_plan"}),
