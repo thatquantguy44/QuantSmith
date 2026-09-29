@@ -903,3 +903,47 @@ def test_ac020_audit_redaction_and_privacy_flags(layer, tmp_path):
     )
     payload_public = json.loads((out_public / "answer_payload.json").read_text())
     assert payload_public["question"] == secret_question
+
+
+# --- AC-021: 100k-row benchmark ---------------------------------------------
+
+
+def test_ac021_benchmark_100k_rows(layer):
+    """T-017: the deterministic path (excluding data fetch/LLM calls) answers
+    a question over 100,000 synthetic fact rows in under 2s. A trivial
+    calibration workload measures the runner's own speed first, so a
+    genuinely under-provisioned CI runner is skipped with a recorded reason
+    rather than failing on wall-clock noise it has no control over."""
+    import time
+
+    desks = [f"desk-{i}" for i in range(200)]
+    currencies = ("USD", "EUR", "JPY", "GBP", "CHF")
+    rows = [
+        Fact(period=period, dims={"desk": desk, "currency": currency}, measures={"cost": float(period)})
+        for period in range(1, 101)
+        for desk in desks
+        for currency in currencies
+    ]
+    assert len(rows) == 100_000
+
+    calibration_start = time.perf_counter()
+    sum(i * i for i in range(2_000_000))
+    calibration_elapsed = time.perf_counter() - calibration_start
+    if calibration_elapsed > 0.5:
+        pytest.skip(
+            f"runner under-provisioned for a timing benchmark "
+            f"(calibration workload took {calibration_elapsed:.2f}s)"
+        )
+
+    ctx = AnswerContext(
+        layer=layer, reader=lambda p: rows, as_of=100,
+        interpret_context=InterpretContext(today_period=100, default_window_periods=100),
+    )
+
+    start = time.perf_counter()
+    response = answer("funding cost by desk", ctx)
+    elapsed = time.perf_counter() - start
+
+    assert response.status == "answered"
+    assert response.chart is not None
+    assert elapsed < 2.0, f"deterministic path over 100k rows took {elapsed:.2f}s (NFR-005 budget: 2s)"

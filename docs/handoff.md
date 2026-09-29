@@ -1455,12 +1455,13 @@ manual-task persistence question stays deferred until a real consumer needs it.
     `agents/analytics/data_visualization/` (promoting the P3 backlog row) and
     `agents/analytics/nl_analytics/` — both shipped, contract-only, per
     REQ-014. **Status (17 REQ, 6 NFR, 26 AC, 22 tasks): the chat pipeline,
-    write-back, the `0070` audit envelope, its privacy redaction, and the
-    two agent contracts are all built and tested — T-001 through T-016 and
-    T-020** (`src/quantsmith/nl_analytics/`: `plan.py`, `interpret.py`,
-    `authorize.py`, `execute.py`, `chart.py`, `insights.py`, `narrate.py`,
-    `respond.py`, `writeback.py`, `writeback_sqlite.py`, `envelope.py`; 38
-    tests in `tests/test_nl_analytics.py`). A question answers end to end
+    write-back, the `0070` audit envelope, its privacy redaction, the
+    100k-row performance budget, and the two agent contracts are all built
+    and tested — T-001 through T-017 and T-020** (`src/quantsmith/nl_analytics/`:
+    `plan.py`, `interpret.py`, `authorize.py`, `execute.py`, `chart.py`,
+    `insights.py`, `narrate.py`, `respond.py`, `writeback.py`,
+    `writeback_sqlite.py`, `envelope.py`; 39 tests in
+    `tests/test_nl_analytics.py`). A question answers end to end
     through `respond.answer()` with no side effects by default; opting in
     (`AnswerContext.envelope_dir`/`run_id`) records the run as a `0070`
     bundle that `0070`'s own replay engine validates and replays offline,
@@ -1480,12 +1481,16 @@ manual-task persistence question stays deferred until a real consumer needs it.
     open questions below to start. First write-back target resolved (owner,
     2026-09-24): **SQLite** through stdlib `sqlite3` against a local
     gitignored file; a shared database adapter is deferred until a team
-    needs one. **Remaining:** the 100k-row benchmark (T-017), the
-    CLI/example (T-018, which also wires `answer()` to write-back end to
-    end — `ChatResponse` itself doesn't carry the plan/result
-    `build_records` needs), and domain-pack application (T-021/T-022) once
-    `0081`'s families are reviewed. **Open questions:** first chat surface,
-    whether insights also become `0048`/`0056` knowledge candidates, and
+    needs one. `answer()` answers a question over 100,000 synthetic fact
+    rows well inside the 2s budget (NFR-005), with a fixed-workload
+    calibration run first so a genuinely under-provisioned CI runner is
+    skipped with a recorded reason rather than failing on wall-clock noise.
+    **Remaining:** the CLI/example (T-018, which also wires `answer()` to
+    write-back end to end — `ChatResponse` itself doesn't carry the
+    plan/result `build_records` needs), and domain-pack application
+    (T-021/T-022) once `0081`'s families are reviewed. **Open questions:**
+    first chat surface, whether insights also become `0048`/`0056` knowledge
+    candidates, and
     the approval model.
 
 30. **Analytics domain packs (spec `0081`, Draft; packs drafted, validator
