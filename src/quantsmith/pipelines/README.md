@@ -775,7 +775,7 @@ the package — reads, writes, and any LLM call are caller-injected.
 | `writeback_sqlite.py` | REQ-010, REQ-011, REQ-012 | `SQLiteWriter`: the first supported write-back target — a local file, parameterized statements only, `INSERT ... ON CONFLICT(record_key) DO NOTHING` for idempotency, a tombstone `UPDATE` for reversal, and a `read()` method usable directly as a `prior_insights` reader. |
 | `envelope.py` | REQ-013, NFR-001, NFR-003, NFR-004 | `emit_answer_evidence` records one already-answered question as a `0070` orchestration bundle (prompt/context manifests, assumption ledger, evaluation harness, nine audit events spanning interpret through deliver) that `0070`'s own `replay_envelope_file` validates and replays offline; re-emitting from identical inputs is byte-identical. Opt-in from `answer()` via `AnswerContext.envelope_dir`/`run_id` — unset by default, so the chat path keeps no side effects. A caller-declared `dataset_privacy` (`contains_pii`/`contains_mnpi`/`contains_restricted_positions`, via `AnswerContext.dataset_privacy` — never inferred) redacts the question out of every rendered artifact and replaces it with its hash, and tags an LLM-backed interpret event with the privacy block an `adapters/llm_runtime/` request for that call would carry. |
 
-Tests: `tests/test_nl_analytics.py` (38 tests, T-001–T-016, T-020).
+Tests: `tests/test_nl_analytics.py` (39 tests, T-001–T-017, T-020).
 
 ```sh
 PYTHONPATH=src python3 -m pytest tests/test_nl_analytics.py -q
@@ -789,6 +789,12 @@ An import/source scan test (`test_ac019_stdlib_only_no_credentials_or_network`)
 proves the package imports only the standard library and in-repo modules and
 carries no credential-shaped string or connection string (T-016, NFR-003).
 
-Remaining (spec `0080` tasks T-017 onward): the 100k-row benchmark, the CLI
-and worked example (which also wires `answer()` to write-back end to end),
-and applying `0081`'s domain packs once at least one family is reviewed.
+A benchmark test (`test_ac021_benchmark_100k_rows`, T-017) answers a question
+over 100,000 synthetic fact rows through `answer()` end to end well inside the
+2s budget (NFR-005); a cheap fixed-workload calibration runs first so a
+genuinely under-provisioned CI runner is skipped with a recorded reason
+rather than failing on wall-clock noise.
+
+Remaining (spec `0080` task T-018 onward): the CLI and worked example (which
+also wires `answer()` to write-back end to end), and applying `0081`'s
+domain packs once at least one family is reviewed.
