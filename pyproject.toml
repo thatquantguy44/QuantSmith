@@ -34,6 +34,7 @@ quantsmith-text-intelligence = "quantsmith.text_intelligence.cli:main"
 quantsmith-sec-lending = "quantsmith.quant.agentic_quant.cli.sec_lending:main"
 quantsmith-rebalancer = "quantsmith.quant.agentic_quant.cli.rebalancer:main"
 quantsmith-sp500 = "quantsmith.quant.agentic_quant.cli.sp500:main"
+quantsmith-nl-analytics = "quantsmith.nl_analytics.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

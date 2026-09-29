@@ -770,12 +770,13 @@ the package — reads, writes, and any LLM call are caller-injected.
 | `chart.py` | REQ-006 | A declared, deterministic form rule (line / bar / kpi / scatter / table) from `dashboard_spec.CHART_TYPES` — pie and dual-axis are not representable; Vega-Lite and Markdown-table renderings; `to_panel` promotes a chart to a governed `DashboardSpec` `Panel`. |
 | `insights.py` | REQ-007 | Level, change, per-group contribution (shares sum to the total change), trend, trailing-baseline outliers, and concentration (HHI) — each `Insight` carries the exact numbers it rests on. |
 | `narrate.py` | REQ-008 | `template_narrative` renders the deterministic default; `ground` rejects any narrative number not backed by the insight set (RISK-002) and flags causal wording (RISK-007); `default_caveats` triggers on synthetic data, a small sample, staleness, and a partial final period. |
-| `respond.py` | REQ-009, NFR-006 | `answer()` composes every stage; `ChatResponse` carries a typed `status` on every path (`answered`/`clarification_needed`/`masked`/`empty`/`stale`/`write_rejected`) and refuses to construct a non-answer that carries a chart or an empty reason. |
+| `respond.py` | REQ-009, REQ-010, REQ-011, NFR-006 | `answer()` composes every stage; `ChatResponse` carries a typed `status` on every path (`answered`/`clarification_needed`/`masked`/`empty`/`stale`/`write_rejected`) and refuses to construct a non-answer that carries a chart or an empty reason. Write-back is opt-in end to end via `AnswerContext.writeback` (`WriteBackRequest`): `answer()` itself calls `build_records`/`publish` with the plan/result/insights it already computed and attaches the `WriteBackOutcome` to `ChatResponse.writeback` — or returns `write_rejected` (never raises) when the commit is refused. |
 | `writeback.py` | REQ-010, REQ-011, REQ-012 | `WriteBackContract` (fixed schema, idempotency key, source-table deny-list, approval rule) plus `load_contract` parsing a filled-in `templates/data/writeback_contract.md`; `build_records` (one row per insight, keyed by a hash of run id and position); `publish` (dry-run default, approval unless `auto_approve`, idempotency delegated to the injected writer); `reverse` (tombstone by run id, caller-supplied `reversed_at`); `prior_insights` (the most recent persisted level visible as of a bound, never reading a clock). |
 | `writeback_sqlite.py` | REQ-010, REQ-011, REQ-012 | `SQLiteWriter`: the first supported write-back target — a local file, parameterized statements only, `INSERT ... ON CONFLICT(record_key) DO NOTHING` for idempotency, a tombstone `UPDATE` for reversal, and a `read()` method usable directly as a `prior_insights` reader. |
 | `envelope.py` | REQ-013, NFR-001, NFR-003, NFR-004 | `emit_answer_evidence` records one already-answered question as a `0070` orchestration bundle (prompt/context manifests, assumption ledger, evaluation harness, nine audit events spanning interpret through deliver) that `0070`'s own `replay_envelope_file` validates and replays offline; re-emitting from identical inputs is byte-identical. Opt-in from `answer()` via `AnswerContext.envelope_dir`/`run_id` — unset by default, so the chat path keeps no side effects. A caller-declared `dataset_privacy` (`contains_pii`/`contains_mnpi`/`contains_restricted_positions`, via `AnswerContext.dataset_privacy` — never inferred) redacts the question out of every rendered artifact and replaces it with its hash, and tags an LLM-backed interpret event with the privacy block an `adapters/llm_runtime/` request for that call would carry. |
+| `cli.py` | REQ-009, REQ-012 | `quantsmith-nl-analytics ask "<question>" --registry ... --data ... [--publish --commit --approve --db ...] [--envelope-dir ... --run-id ...]` (registered in `pyproject.toml`) — a local, stdlib-only CLI over a registry/fact-rows JSON pair; every I/O call is a file the caller named, never a network location or credential. |
 
-Tests: `tests/test_nl_analytics.py` (39 tests, T-001–T-017, T-020).
+Tests: `tests/test_nl_analytics.py` (49 tests, T-001–T-018, T-020).
 
 ```sh
 PYTHONPATH=src python3 -m pytest tests/test_nl_analytics.py -q
@@ -794,6 +795,17 @@ over 100,000 synthetic fact rows through `answer()` end to end well inside the
 2s budget (NFR-005); a cheap fixed-workload calibration runs first so a
 genuinely under-provisioned CI runner is skipped with a recorded reason
 rather than failing on wall-clock noise.
+
+`examples/nl_analytics/` (T-018) is a worked example: a one-metric registry,
+nine synthetic fact rows, a three-command transcript over three days (a level
+question, a grouped question with no `--publish`, then a "since yesterday"
+question comparing against the first day's persisted record), and a
+committed `sample_response.json` a test byte-checks against a live re-run of
+the same transcript. `docs/0080_synthetic_data_disclosure.md` discloses the
+synthetic data per `instructions/data_provenance.md`.
+
+Remaining (spec `0080`): T-021/T-022, domain-pack application, blocked on at
+least one `0081` pack family being reviewed by its owner.
 
 Remaining (spec `0080` task T-018 onward): the CLI and worked example (which
 also wires `answer()` to write-back end to end), and applying `0081`'s

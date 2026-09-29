@@ -39,7 +39,7 @@
 | T-015 | Agents `agents/analytics/data_visualization/` and `agents/analytics/nl_analytics/` (four files each, `Spec-Driven Role`), catalog rows, group README handoffs. | REQ-014, AC-018 | done | Contract-only, per REQ-014: each hands off to `metrics_semantic_layer`, `data_visualization`/`dashboard_design`, and `sql-integration-agent` rather than duplicating them; `data_visualization` documents `chart.py` as its runtime, `nl_analytics` documents the whole `src/quantsmith/nl_analytics/` package. |
 | T-016 | Import/source scan test (stdlib only, no credentials or network) and privacy test. | NFR-003, NFR-004, AC-019, AC-020 | done | `dataset_privacy` is caller-declared on `AnswerContext`/`emit_answer_evidence` (never inferred); when any flag is set the question text is redacted out of every rendered artifact and replaced by its hash, and an LLM-backed interpret event carries the flags as the `adapters/llm_runtime/` privacy block that call would use. Redaction scope is the one genuinely free-text field this package carries (the question) — governed plan/result values stay in full since they're vocabulary-controlled, not free text; per-dimension result redaction is a documented follow-up. |
 | T-017 | 100k-row benchmark test. | NFR-005, AC-021 | done | 200 desks × 5 currencies × 100 periods = 100,000 rows, answered end to end through `answer()` (keyword interpreter, no data fetch or LLM in the timed section — the row list is built before the clock starts). A cheap fixed-workload calibration runs first so a genuinely under-provisioned CI runner is skipped with a recorded reason rather than failing on wall-clock noise, per the AC's own wording. |
-| T-018 | `cli.py` and `examples/nl_analytics/` (synthetic three-day transcript, committed sample response) plus `docs/0080_synthetic_data_disclosure.md`. | REQ-009, REQ-012 | todo | |
+| T-018 | `cli.py` and `examples/nl_analytics/` (synthetic three-day transcript, committed sample response) plus `docs/0080_synthetic_data_disclosure.md`. | REQ-009, REQ-012 | done | `cli.py` (`quantsmith-nl-analytics ask`, registered in `pyproject.toml`) also wires `answer()` to write-back end to end: `AnswerContext.writeback` (a new `WriteBackRequest`) makes `answer()` itself call `build_records`/`publish` and attach the `WriteBackOutcome`, returning the previously-unused `write_rejected` status (typed, NFR-006) instead of raising when a commit is refused — closing the gap `respond.py`'s own Follow-ups section named. `examples/nl_analytics/` walks three real CLI invocations over three synthetic days (level, then grouped, then a genuine "since yesterday" `prior_insight` comparison against day 1's persisted record); `sample_response.json` is the committed, byte-checked output of the third. |
 | T-020 | `writeback_sqlite.py`: `SQLiteWriter` + reader over stdlib `sqlite3` (schema from contract, `ON CONFLICT DO NOTHING` idempotency, tombstone reversal, as-of prior-insight read); runs AC-014/015/016 against both the recording writer and SQLite (`:memory:` and a temp file). First supported target, resolved by the owner 2026-09-24. | REQ-010, REQ-011, REQ-012, AC-014, AC-015, AC-016 | done | Table name is fixed at construction from the contract (`nl_analytics_writeback_<name>`), never from a record or a later call; every statement is parameterized. |
 | T-019 | Update `specs/README.md`, `src/quantsmith/pipelines/README.md` or package README, `docs/handoff.md`, `docs/handoffs/future_features.md`, and `CHANGELOG.md` on ship. | REQ-014 | todo | |
 
@@ -100,10 +100,11 @@ Tracked work intentionally deferred (no silent "temporary" shortcuts — P8).
 - Per-dimension prior-insight comparisons — `prior_insights` currently
   reconstructs a total level only, from the persisted `level` row; a group
   breakdown would need reassembling stored `contributor` rows, not built here.
-- `ChatResponse.writeback` stays `None` — `build_records`/`publish` take the
-  plan/result/insights directly (not the `ChatResponse` itself), since the
-  response doesn't carry them; wiring `answer()` end to end with a
-  write-back request is part of the CLI/example (T-018) or a later task.
+- ~~`ChatResponse.writeback` stays `None`~~ — resolved by T-018:
+  `AnswerContext.writeback` (`WriteBackRequest`) makes `answer()` call
+  `build_records`/`publish` itself using the plan/result/insights it already
+  computed, and attaches the `WriteBackOutcome` to `ChatResponse.writeback`
+  (or returns `write_rejected` if the commit is refused).
 - Per-dimension privacy redaction (T-016) — envelope redaction covers the
   question text, the package's one genuinely free-text field; a computed
   result's per-dimension values (e.g. a client-name dimension) are not
