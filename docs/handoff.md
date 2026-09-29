@@ -1454,43 +1454,41 @@ manual-task persistence question stays deferred until a real consumer needs it.
     point-in-time, closing the multi-day gap `0055`/`0059` leave open. Adds
     `agents/analytics/data_visualization/` (promoting the P3 backlog row) and
     `agents/analytics/nl_analytics/` — both shipped, contract-only, per
-    REQ-014. **Status (17 REQ, 6 NFR, 26 AC, 22 tasks): the chat pipeline,
-    write-back, the `0070` audit envelope, its privacy redaction, the
-    100k-row performance budget, and the two agent contracts are all built
-    and tested — T-001 through T-017 and T-020** (`src/quantsmith/nl_analytics/`:
-    `plan.py`, `interpret.py`, `authorize.py`, `execute.py`, `chart.py`,
-    `insights.py`, `narrate.py`, `respond.py`, `writeback.py`,
-    `writeback_sqlite.py`, `envelope.py`; 39 tests in
-    `tests/test_nl_analytics.py`). A question answers end to end
-    through `respond.answer()` with no side effects by default; opting in
-    (`AnswerContext.envelope_dir`/`run_id`) records the run as a `0070`
-    bundle that `0070`'s own replay engine validates and replays offline,
-    byte-identically on identical inputs. A caller-declared
-    `dataset_privacy` (`contains_pii`/`contains_mnpi`/
+    REQ-014. **Status (17 REQ, 6 NFR, 26 AC, 22 tasks): every task except the
+    two blocked on `0081`'s pack review is built and tested — T-001 through
+    T-018 and T-020** (`src/quantsmith/nl_analytics/`: `plan.py`,
+    `interpret.py`, `authorize.py`, `execute.py`, `chart.py`, `insights.py`,
+    `narrate.py`, `respond.py`, `writeback.py`, `writeback_sqlite.py`,
+    `envelope.py`, `cli.py`; 49 tests in `tests/test_nl_analytics.py`). A
+    question answers end to end through `respond.answer()` with no side
+    effects by default; opting in (`AnswerContext.envelope_dir`/`run_id`)
+    records the run as a `0070` bundle that `0070`'s own replay engine
+    validates and replays offline, byte-identically on identical inputs. A
+    caller-declared `dataset_privacy` (`contains_pii`/`contains_mnpi`/
     `contains_restricted_positions`, never inferred) redacts the question
     out of every rendered artifact when set, replacing it with its hash, and
     tags an LLM-backed interpret step with the privacy block an
     `adapters/llm_runtime/` request for it would carry; an import/source
     scan test proves the package stays stdlib-only with no credential or
-    network code. Separately, `writeback.build_records`/`publish`/`reverse`
-    and `writeback.prior_insights` (bounded strictly by as-of, never a
-    clock) give a caller the pieces to persist and later compare against a
-    chat answer's insights — dry-run by default, append-only, idempotent,
-    and reversible by run id, all proven against both an in-memory writer
-    and a real SQLite file. Nothing here needed the pack reviews or the
-    open questions below to start. First write-back target resolved (owner,
-    2026-09-24): **SQLite** through stdlib `sqlite3` against a local
-    gitignored file; a shared database adapter is deferred until a team
-    needs one. `answer()` answers a question over 100,000 synthetic fact
-    rows well inside the 2s budget (NFR-005), with a fixed-workload
-    calibration run first so a genuinely under-provisioned CI runner is
-    skipped with a recorded reason rather than failing on wall-clock noise.
-    **Remaining:** the CLI/example (T-018, which also wires `answer()` to
-    write-back end to end — `ChatResponse` itself doesn't carry the
-    plan/result `build_records` needs), and domain-pack application
-    (T-021/T-022) once `0081`'s families are reviewed. **Open questions:**
-    first chat surface, whether insights also become `0048`/`0056` knowledge
-    candidates, and
+    network code, and `answer()` answers a question over 100,000 synthetic
+    fact rows well inside the 2s NFR-005 budget. Write-back is now wired
+    fully end to end: `AnswerContext.writeback` (`WriteBackRequest`) makes
+    `answer()` itself build and publish records from the plan/result/insights
+    it already computed and attach the outcome to `ChatResponse.writeback`
+    — dry-run by default, append-only, idempotent, reversible by run id,
+    and a refused commit returns the previously-unused `write_rejected`
+    typed status (NFR-006) rather than raising. First write-back target
+    resolved (owner, 2026-09-24): **SQLite** through stdlib `sqlite3`
+    against a local gitignored file; a shared database adapter is deferred
+    until a team needs one. `cli.py` (`quantsmith-nl-analytics ask`, in
+    `pyproject.toml`) and `examples/nl_analytics/` (registry, synthetic
+    fact rows, a three-day transcript, a byte-checked committed sample
+    response, `docs/0080_synthetic_data_disclosure.md`) walk the whole
+    thing — level question, grouped question, then a genuine "since
+    yesterday" comparison against a persisted record — with real CLI
+    invocations. **Remaining:** domain-pack application (T-021/T-022) once
+    `0081`'s families are reviewed. **Open questions:** first chat surface,
+    whether insights also become `0048`/`0056` knowledge candidates, and
     the approval model.
 
 30. **Analytics domain packs (spec `0081`, Draft; packs drafted, validator

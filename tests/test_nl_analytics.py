@@ -8,7 +8,11 @@ proves.
 from __future__ import annotations
 
 import json
+import os
 import sqlite3
+import subprocess
+import sys
+from pathlib import Path
 
 import pytest
 
@@ -36,7 +40,7 @@ from quantsmith.nl_analytics.execute import execute
 from quantsmith.nl_analytics.chart import ChartError, choose_chart, is_minimal_vega_lite, to_markdown_table, to_panel, to_vega_lite
 from quantsmith.nl_analytics.insights import compute_insights
 from quantsmith.nl_analytics.narrate import default_caveats, ground, template_narrative
-from quantsmith.nl_analytics.respond import AnswerContext, ChatResponse, ResponseError, answer
+from quantsmith.nl_analytics.respond import AnswerContext, ChatResponse, ResponseError, WriteBackRequest, answer
 
 
 @pytest.fixture
@@ -947,3 +951,193 @@ def test_ac021_benchmark_100k_rows(layer):
     assert response.status == "answered"
     assert response.chart is not None
     assert elapsed < 2.0, f"deterministic path over 100k rows took {elapsed:.2f}s (NFR-005 budget: 2s)"
+
+
+# --- T-018: answer() wired end to end to write-back -------------------------
+
+
+def test_answer_writeback_dry_run_by_default(layer):
+    rows = [Fact(period=10, dims={"desk": "rates"}, measures={"cost": 42.0})]
+    contract = default_contract("cli_default")
+    writer = _RecordingWriter()
+    ctx = AnswerContext(
+        layer=layer, reader=lambda p: rows, as_of=10,
+        interpret_context=InterpretContext(today_period=10, default_window_periods=1),
+        run_id="run-wb-1",
+        writeback=WriteBackRequest(contract=contract, writer=writer),
+    )
+    response = answer("funding cost", ctx)
+    assert response.status == "answered"
+    assert response.run_id == "run-wb-1"
+    assert response.writeback is not None
+    assert response.writeback.status == "dry_run"
+    assert response.writeback.written_count == 0
+    assert writer.rows == {}  # dry run never calls the writer
+
+
+def test_answer_writeback_commits_and_is_idempotent(layer):
+    rows = [Fact(period=10, dims={"desk": "rates"}, measures={"cost": 42.0})]
+    contract = default_contract("cli_default", auto_approve=True)
+    writer = _RecordingWriter()
+
+    def _ctx():
+        return AnswerContext(
+            layer=layer, reader=lambda p: rows, as_of=10,
+            interpret_context=InterpretContext(today_period=10, default_window_periods=1),
+            run_id="run-wb-2",
+            writeback=WriteBackRequest(contract=contract, writer=writer, dry_run=False),
+        )
+
+    first = answer("funding cost", _ctx())
+    assert first.writeback.status == "committed"
+    assert first.writeback.written_count > 0
+    first_count = len(writer.rows)
+
+    second = answer("funding cost", _ctx())
+    assert second.writeback.status == "committed"
+    assert second.writeback.written_count == 0  # identical run_id -> identical keys
+    assert len(writer.rows) == first_count
+
+
+def test_answer_writeback_without_approval_is_write_rejected(layer):
+    rows = [Fact(period=10, dims={"desk": "rates"}, measures={"cost": 42.0})]
+    contract = default_contract("cli_default")  # auto_approve=False
+    writer = _RecordingWriter()
+    ctx = AnswerContext(
+        layer=layer, reader=lambda p: rows, as_of=10,
+        interpret_context=InterpretContext(today_period=10, default_window_periods=1),
+        run_id="run-wb-3",
+        writeback=WriteBackRequest(contract=contract, writer=writer, dry_run=False, approved=False),
+    )
+    response = answer("funding cost", ctx)
+    assert response.status == "write_rejected"
+    assert response.reason
+    assert response.chart is None  # AC-022: a non-answer never carries a chart
+    assert writer.rows == {}
+
+
+def test_answer_writeback_without_run_id_is_refused(layer):
+    rows = [Fact(period=10, dims={"desk": "rates"}, measures={"cost": 42.0})]
+    contract = default_contract("cli_default")
+    ctx = AnswerContext(
+        layer=layer, reader=lambda p: rows, as_of=10,
+        interpret_context=InterpretContext(today_period=10, default_window_periods=1),
+        writeback=WriteBackRequest(contract=contract, writer=_RecordingWriter()),
+    )
+    with pytest.raises(ResponseError):
+        answer("funding cost", ctx)
+
+
+def test_answer_writeback_against_sqlite(layer, tmp_path):
+    rows = [Fact(period=10, dims={"desk": "rates"}, measures={"cost": 42.0})]
+    contract = default_contract("cli_default", auto_approve=True)
+    writer = open_writer(str(tmp_path / "nl_analytics.db"), contract)
+    ctx = AnswerContext(
+        layer=layer, reader=lambda p: rows, as_of=10,
+        interpret_context=InterpretContext(today_period=10, default_window_periods=1),
+        run_id="run-wb-sqlite-1",
+        writeback=WriteBackRequest(contract=contract, writer=writer, dry_run=False),
+    )
+    response = answer("funding cost", ctx)
+    assert response.writeback.status == "committed"
+    assert response.writeback.written_count > 0
+    assert writer.read(comparison_key(_plan()))
+
+
+# --- T-018: cli.py and examples/nl_analytics/ -------------------------------
+
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+_EXAMPLE_DIR = _REPO_ROOT / "examples" / "nl_analytics"
+
+
+def _run_cli(*args, env=None):
+    full_env = {**os.environ, "PYTHONPATH": str(_REPO_ROOT / "src")}
+    if env:
+        full_env.update(env)
+    return subprocess.run(
+        [sys.executable, "-m", "quantsmith.nl_analytics.cli", *args],
+        cwd=str(_REPO_ROOT), capture_output=True, text=True, env=full_env,
+    )
+
+
+def test_cli_ask_answers_from_the_worked_example(tmp_path):
+    result = _run_cli(
+        "ask", "what is total funding cost",
+        "--registry", str(_EXAMPLE_DIR / "registry.json"),
+        "--data", str(_EXAMPLE_DIR / "data.json"),
+        "--today", "1", "--window", "1", "--json",
+    )
+    assert result.returncode == 0, result.stderr
+    payload = json.loads(result.stdout)
+    assert payload["status"] == "answered"
+    assert payload["headline"] == "funding_cost is 250 as of period 1."
+    assert payload["writeback"] is None  # no --db/--publish: no side effects
+
+
+def test_cli_transcript_reproduces_the_committed_sample_response(tmp_path):
+    """Runs the exact three-day transcript from transcript.md and checks day
+    3's JSON output matches the committed sample_response.json byte-for-byte
+    on every field (T-018)."""
+    db = tmp_path / "nl_analytics_demo.db"
+
+    day1 = _run_cli(
+        "ask", "what is total funding cost",
+        "--registry", str(_EXAMPLE_DIR / "registry.json"),
+        "--data", str(_EXAMPLE_DIR / "data.json"),
+        "--today", "1", "--window", "1", "--db", str(db),
+        "--publish", "--commit", "--approve", "--run-id", "run-day1", "--author", "desk-analyst",
+    )
+    assert day1.returncode == 0, day1.stderr
+    assert "write-back: committed (1 record(s), run_id=run-day1)" in day1.stdout
+
+    day2 = _run_cli(
+        "ask", "what is total funding cost by desk",
+        "--registry", str(_EXAMPLE_DIR / "registry.json"),
+        "--data", str(_EXAMPLE_DIR / "data.json"),
+        "--today", "2", "--window", "1", "--db", str(db),
+    )
+    assert day2.returncode == 0, day2.stderr
+    assert "write-back:" not in day2.stdout  # not published
+
+    day3 = _run_cli(
+        "ask", "what is total funding cost since yesterday",
+        "--registry", str(_EXAMPLE_DIR / "registry.json"),
+        "--data", str(_EXAMPLE_DIR / "data.json"),
+        "--today", "3", "--window", "1", "--db", str(db),
+        "--publish", "--commit", "--approve", "--run-id", "run-day3", "--author", "desk-analyst", "--json",
+    )
+    assert day3.returncode == 0, day3.stderr
+    actual = json.loads(day3.stdout)
+    expected = json.loads((_EXAMPLE_DIR / "sample_response.json").read_text(encoding="utf-8"))
+    assert actual == expected
+
+
+def test_cli_publish_without_run_id_errors(tmp_path):
+    result = _run_cli(
+        "ask", "what is total funding cost",
+        "--registry", str(_EXAMPLE_DIR / "registry.json"),
+        "--data", str(_EXAMPLE_DIR / "data.json"),
+        "--today", "1", "--window", "1", "--db", str(tmp_path / "x.db"),
+        "--publish", "--commit", "--approve",
+    )
+    assert result.returncode == 2
+    assert "--run-id" in result.stderr
+
+
+def test_cli_publish_without_db_errors():
+    result = _run_cli(
+        "ask", "what is total funding cost",
+        "--registry", str(_EXAMPLE_DIR / "registry.json"),
+        "--data", str(_EXAMPLE_DIR / "data.json"),
+        "--today", "1", "--window", "1", "--publish", "--run-id", "run-x",
+    )
+    assert result.returncode == 2
+    assert "--db" in result.stderr
+
+
+def test_example_disclosure_exists_and_is_declared():
+    disclosure = _REPO_ROOT / "docs" / "0080_synthetic_data_disclosure.md"
+    assert disclosure.exists()
+    text = disclosure.read_text(encoding="utf-8")
+    assert "examples/nl_analytics" in text
+    assert "Generation method" in text

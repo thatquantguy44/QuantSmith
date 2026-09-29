@@ -10,18 +10,28 @@ Standard library only.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field, replace
+import hashlib
+import json
+from dataclasses import asdict, dataclass, field, replace
 from typing import Callable, Dict, Optional, Tuple
 
 from quantsmith.pipelines.metrics_semantic_layer import SemanticLayer
 
 from .authorize import AccessPolicy, authorize_clarification, authorize_plan
 from .chart import ChartSpec, choose_chart, to_markdown_table, to_vega_lite
-from .execute import Reader, Result, execute
+from .execute import Reader, execute
 from .insights import Insight, compute_insights
 from .interpret import Interpreter, InterpretContext, interpret
 from .narrate import default_caveats, ground, template_narrative
 from .plan import Clarification, PlanError, QueryPlan, TimeWindow, describe_plan, validate_plan
+from .writeback import (
+    WriteBackContract,
+    WriteBackError,
+    WriteBackOutcome,
+    WriteBackWriter,
+    build_records,
+    publish,
+)
 
 RESPONSE_STATUSES = ("answered", "clarification_needed", "masked", "empty", "stale", "write_rejected")
 
@@ -34,6 +44,29 @@ _PERIODS_PER_YEAR = {"day": 365, "week": 52, "month": 12, "quarter": 4, "year": 
 class ResponseError(ValueError):
     """Raised by :class:`ChatResponse` when a non-answer status carries a chart,
     or any status carries no reason (NFR-006)."""
+
+
+@dataclass(frozen=True)
+class WriteBackRequest:
+    """Opt-in end-to-end write-back for one answer (REQ-010, REQ-011, T-018).
+
+    Set on :class:`AnswerContext` alongside ``run_id`` — the write-back's
+    records are keyed by the same caller-assigned run id an envelope for
+    this run would use, never a separately invented one. Publishing is
+    dry-run unless both ``dry_run=False`` and (``approved=True`` or the
+    contract's own ``auto_approve``) — the same rule ``writeback.publish``
+    itself enforces; a refused commit becomes a ``write_rejected``
+    :class:`ChatResponse`, never a raised exception (NFR-006).
+    """
+
+    contract: WriteBackContract
+    writer: WriteBackWriter
+    author_handle: str = "nl_analytics"
+    dry_run: bool = True
+    approved: bool = False
+    # Caller-supplied, like every other timestamp in this package — never a
+    # clock. Defaults to the request's own as_of when unset.
+    created_at: Optional[int] = None
 
 
 @dataclass(frozen=True)
@@ -52,7 +85,7 @@ class ChatResponse:
     citations: Tuple[str, ...]
     run_id: Optional[str] = None
     envelope_uri: Optional[str] = None
-    writeback: Optional[object] = None
+    writeback: Optional[WriteBackOutcome] = None
 
     def __post_init__(self) -> None:
         if self.status not in RESPONSE_STATUSES:
@@ -100,6 +133,10 @@ class AnswerContext:
     # — NFR-004, AC-020); never inferred. Only consulted when an envelope is
     # emitted — see envelope.py's PRIVACY_FLAGS and redaction behavior.
     dataset_privacy: Dict[str, bool] = field(default_factory=dict)
+    # Opt-in end-to-end write-back (REQ-010, REQ-011, T-018). Requires
+    # ``run_id`` (shared with envelope emission, if both are requested);
+    # unset by default, so asking a question never writes anywhere.
+    writeback: Optional[WriteBackRequest] = None
 
 
 def _refuse(status: str, reason: str, plan_echo: str = "") -> ChatResponse:
@@ -107,6 +144,11 @@ def _refuse(status: str, reason: str, plan_echo: str = "") -> ChatResponse:
         status=status, reason=reason, headline="", insights=(), chart=None, vega_lite=None,
         markdown_table=None, plan_echo=plan_echo, caveats=(), citations=(),
     )
+
+
+def _metric_definition_hash(layer: SemanticLayer, metric: str) -> str:
+    canonical = json.dumps(asdict(layer.definition(metric)), sort_keys=True, separators=(",", ":"))
+    return f"sha256:{hashlib.sha256(canonical.encode('utf-8')).hexdigest()}"
 
 
 def answer(question: str, context: AnswerContext) -> ChatResponse:
@@ -172,6 +214,28 @@ def answer(question: str, context: AnswerContext) -> ChatResponse:
         markdown_table=to_markdown_table(chart), plan_echo=describe_plan(plan),
         caveats=caveats, citations=citations,
     )
+
+    if context.writeback is not None:
+        if not context.run_id:
+            raise ResponseError("writeback is set but run_id is not (a write-back record is keyed by a caller-assigned run id)")
+        request = context.writeback
+        records = build_records(
+            plan, result, insight_set, run_id=context.run_id, question=question,
+            metric_definition_hash=_metric_definition_hash(context.layer, plan.metric),
+            author_handle=request.author_handle, interpreter_mode=plan.interpreter,
+            created_at=request.created_at if request.created_at is not None else context.as_of,
+        )
+        try:
+            outcome = publish(
+                records, request.contract, request.writer,
+                dry_run=request.dry_run, approved=request.approved,
+            )
+        except WriteBackError as exc:
+            # A refused commit is a typed non-answer, never a raised
+            # exception through the chat path (NFR-006) — the caller asked
+            # a valid question but its write-back could not be committed.
+            return _refuse("write_rejected", str(exc), describe_plan(plan))
+        final = replace(final, run_id=context.run_id, writeback=outcome)
 
     if context.envelope_dir is not None:
         if not context.run_id:

@@ -1,0 +1,53 @@
+{
+  "caveats": [
+    "Small sample: only 3 row(s) behind this answer."
+  ],
+  "chart": {
+    "chart_type": "kpi",
+    "data": [
+      {
+        "metric": "funding_cost",
+        "value": 255.0
+      }
+    ],
+    "dimensions": [],
+    "metric": "funding_cost",
+    "title": "funding_cost is 255"
+  },
+  "citations": [
+    "funding_cost \u2014 owner: treasury-ops",
+    "as of period 3"
+  ],
+  "envelope_uri": null,
+  "headline": "funding_cost is 255 as of period 3.",
+  "insights": [
+    {
+      "kind": "level",
+      "statement": "funding_cost is 255 as of period 3.",
+      "values": {
+        "as_of": 3,
+        "level": 255.0
+      }
+    },
+    {
+      "kind": "change",
+      "statement": "funding_cost is up 5 (+2.0%) versus the comparison period.",
+      "values": {
+        "absolute": 5.0,
+        "now": 255.0,
+        "percent": 0.02,
+        "prior": 250.0
+      }
+    }
+  ],
+  "markdown_table": "| metric | value |\n| --- | --- |\n| funding_cost | 255.0 |",
+  "plan_echo": "metric 'funding_cost'; for periods 2-2 (day); compared to prior_insight (yesterday)",
+  "reason": "",
+  "run_id": "run-day3",
+  "status": "answered",
+  "writeback": {
+    "run_id": "run-day3",
+    "status": "committed",
+    "written_count": 2
+  }
+}
