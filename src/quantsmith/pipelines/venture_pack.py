@@ -184,6 +184,9 @@ def validate_overlay(overlay: Mapping[str, Any], conventions: Mapping[str, Any])
     prohibited = set(conventions["prohibited_source_classes"])
     enabled = set(overlay.get("enabled_source_classes", []))
     errors = [f"overlay enables prohibited source class: {c}" for c in sorted(enabled & prohibited)]
+    store_root = overlay.get("store_root")
+    if store_root is not None and not str(store_root).replace("\\", "/").startswith("knowledge_local/"):
+        errors.append("overlay store_root must be under the gitignored knowledge_local/")
     for key in overlay:
         if re.search(r"(secret|password|token|api_key)", key, re.I) and overlay[key]:
             errors.append(f"overlay holds a secret-like value in {key!r}; use a credential reference")
@@ -200,6 +203,7 @@ def reviewable_records(pack: Mapping[str, Any]) -> List[Mapping[str, Any]]:
         out.extend(conv[key])
     out.extend(conv["data_time"]["contracts"])
     out.extend(conv.get("mark_review_flags", []))
+    out.extend(conv[k] for k in ("product_rules", "retrieval_contract") if k in conv)
     norm = conv["normalization"]
     for key in ("numeral_units", "calendar_offsets", "number_locales", "currency_markers"):
         out.extend(norm.get(key, []))
@@ -217,7 +221,7 @@ def validate_review(rec: Mapping[str, Any]) -> List[str]:
     if not isinstance(review, Mapping):
         return [f"review: {rid} is {status} without a review record"]
     errors = [f"review: {rid} review lacks {f}" for f in ("reviewer", "review_date", "scope")
-              if not str(review.get(f, "")).strip()]
+              if not _filled(review.get(f))]
     try:
         date.fromisoformat(str(review.get("review_date", "")))
     except ValueError:
@@ -292,6 +296,11 @@ def run_golden_cases(pack: Mapping[str, Any]) -> List[str]:
 
 
 # ---------------------------------------------------------------- validation
+def _filled(value: Any) -> bool:
+    """True only for a non-empty string. ``None`` is never filled (``str(None)`` is the text 'None')."""
+    return isinstance(value, str) and bool(value.strip())
+
+
 def _dupes(ids: Sequence[str]) -> List[str]:
     seen, dup = set(), []
     for i in ids:
@@ -302,7 +311,7 @@ def _dupes(ids: Sequence[str]) -> List[str]:
 
 
 def _cited(rec: Mapping[str, Any]) -> bool:
-    return bool(str(rec.get("citation", "")).strip())
+    return _filled(rec.get("citation"))
 
 
 def validate_pack(pack: Mapping[str, Any], root: Path = Path(".")) -> List[str]:
@@ -352,7 +361,7 @@ def validate_pack(pack: Mapping[str, Any], root: Path = Path(".")) -> List[str]:
     errors += [f"channels: missing family {c}" for c in
                sorted(REQUIRED_CHANNELS - {c["id"].split(".", 1)[1] for c in chans})]
     for c in chans:
-        errors += [f"channels: {c['id']} lacks {f}" for f in CHANNEL_FIELDS if not str(c.get(f, "")).strip()]
+        errors += [f"channels: {c['id']} lacks {f}" for f in CHANNEL_FIELDS if not _filled(c.get(f))]
         if not _cited(c):
             errors.append(f"channels: {c['id']} lacks citation")
 
@@ -361,7 +370,7 @@ def validate_pack(pack: Mapping[str, Any], root: Path = Path(".")) -> List[str]:
     errors += [f"models: missing family {m}" for m in
                sorted(REQUIRED_MODELS - {m["id"].split(".", 1)[1] for m in models})]
     for m in models:
-        errors += [f"models: {m['id']} lacks {f}" for f in MODEL_FIELDS if not str(m.get(f, "")).strip()]
+        errors += [f"models: {m['id']} lacks {f}" for f in MODEL_FIELDS if not _filled(m.get(f))]
 
     # coverage (REQ-008/016/019)
     cov = pack["coverage"]

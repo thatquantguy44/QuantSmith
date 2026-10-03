@@ -19,6 +19,7 @@ cd "$QF_ROOT"
 
 md_files=$(find . -type f -name '*.md' \
   -not -path './.git/*' \
+  -not -path './knowledge_local/*' \
   -not -path '*/node_modules/*' \
   -not -path '*/dist/*' \
   -not -path '*/dist-single/*' | sort)

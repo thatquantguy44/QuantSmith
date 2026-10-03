@@ -239,3 +239,20 @@ def test_ac022_review_signoff_rules(pack):
     bad = copy.deepcopy(pack)
     bad["channels"]["channels"][0]["review_status"] = "reviewed"
     assert any("without a review record" in e for e in validate_pack(bad, ROOT))
+
+
+def test_none_is_never_a_name_in_review_signoff():
+    """str(None) is 'None'; a missing reviewer, date, scope, or citation must not read as filled in."""
+    from quantsmith.pipelines.venture_pack import validate_review
+    base = {"id": "x", "citation": "NVCA Model Legal Documents (public)", "review_status": "reviewed"}
+    good = {"reviewer": "A. Reviewer", "review_date": "2026-10-02", "scope": "definition"}
+    assert validate_review({**base, "review": good}) == []
+    for field in ("reviewer", "review_date", "scope"):
+        assert validate_review({**base, "review": {**good, field: None}}), field
+    pack = load_pack(ROOT)
+    bad = copy.deepcopy(pack)
+    bad["channels"]["channels"][0]["citation"] = None
+    assert any("citation" in e for e in validate_pack(bad, ROOT))
+    bad = copy.deepcopy(pack)
+    bad["channels"]["channels"][0]["lead_time"] = None
+    assert any("lead_time" in e for e in validate_pack(bad, ROOT))
