@@ -10,6 +10,7 @@ by world region plus cross-cutting capabilities. Foundation spec:
 
 | Agent | Handles | Never |
 | --- | --- | --- |
+| `entity_resolution/` | Cross-source, cross-script company identity decisions with reasons | Merge on a name alone |
 | `multilingual_document_nlp/` | Source-anchored extraction and normalization from start-up documents in Mandarin, Bahasa, Vietnamese, Thai, Filipino, English | Legal translation or interpretation |
 
 ## Regions

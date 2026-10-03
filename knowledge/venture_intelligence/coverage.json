@@ -116,7 +116,8 @@
       "workflow": "Cross-source company identity resolution",
       "never": "Merge entities without a registry identifier",
       "creating_spec": "0088",
-      "status": "planned"
+      "status": "built",
+      "path": "agents/venture_intelligence/entity_resolution"
     },
     {
       "id": "deal_sourcing",

@@ -1,0 +1,32 @@
+source_id: "venture_fixture"
+name: "QuantSmith Synthetic Venture Fixtures"
+type: file_feed
+owner: "quant-research"
+description: >
+  Synthetic start-up, round, and filing records used by tests and examples (spec 0088). Not real. Venture and intelligence source (spec 0088); endpoints, terms, and
+  coverage are unverified until confirmed against current documentation.
+
+domain: ["testing"]
+access_level: public
+
+quality:
+  completeness: high
+  timeliness: "static"
+  known_issues:
+    - "synthetic only; never real entities (spec 0025)"
+  last_assessed: "2026-10-02"
+
+point_in_time:
+  supports_asof: true
+  known_at_policy: "event"
+  revision_policy: "record source file or endpoint, public timestamp when available, and retrieval timestamp; retain dated snapshots where the source keeps no history"
+
+connection:
+  method: file_download
+  endpoint_or_host: "tests/fixtures (in-test constructed)"
+  credential_ref: "not_required_public_access"
+
+documentation_uri: "specs/0088-venture-sources-pit-ingestion/"
+status: active
+
+data_contract_refs: ["specs/0088-venture-sources-pit-ingestion/"]

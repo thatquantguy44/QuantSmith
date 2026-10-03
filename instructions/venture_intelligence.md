@@ -45,6 +45,7 @@ against a named person or entity. The decision belongs to the accountable human
 | Agent | Never |
 | --- | --- |
 | `multilingual_document_nlp` | Give a legal translation, interpret legal effect, or certify authenticity |
+| `entity_resolution` | Merge records on a name alone or collapse a parent and subsidiary |
 | `southeast_asia/regional_lead` | Recommend or rank investments, or rule on regulatory permissibility |
 | `southeast_asia/entity_structure_analyst` | Designate, attribute, or accuse; conclude a structure is unlawful |
 | `southeast_asia/funding_ecosystem_analyst` | Recommend, size, or value an investment |

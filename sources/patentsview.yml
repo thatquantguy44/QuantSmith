@@ -1,0 +1,34 @@
+source_id: "patentsview"
+name: "PatentsView (USPTO patent data)"
+type: api
+owner: "quant-research"
+description: >
+  Granted US patents and published applications: inventors, assignees, classifications, citations. Venture and intelligence source (spec 0088); endpoints, terms, and
+  coverage are unverified until confirmed against current documentation.
+
+domain: ["patents", "technology_scouting"]
+access_level: public
+
+quality:
+  completeness: medium
+  timeliness: "weekly-ish bulk and API updates; grant data lags filing by years"
+  known_issues:
+    - "publication and grant dates are public; filing date is not when the world knew"
+    - "assignee names are not normalized to legal entities"
+    - "API terms and endpoint change; confirm in documentation (unverified)"
+  last_assessed: "2026-10-02"
+
+point_in_time:
+  supports_asof: true
+  known_at_policy: "published"
+  revision_policy: "record source file or endpoint, public timestamp when available, and retrieval timestamp; retain dated snapshots where the source keeps no history"
+
+connection:
+  method: rest_api
+  endpoint_or_host: "https://search.patentsview.org/api/"
+  credential_ref: "not_required_public_access"
+
+documentation_uri: "https://patentsview.org/apis/purpose"
+status: evaluating
+
+data_contract_refs: ["specs/0088-venture-sources-pit-ingestion/"]
