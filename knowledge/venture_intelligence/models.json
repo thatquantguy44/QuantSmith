@@ -95,10 +95,11 @@
       "validation": "Interval estimates and null comparison; sensitivity to tail parameters.",
       "failure_modes": "Small samples; tail-dominated results; false precision.",
       "decision_path_class": "analytic_support",
-      "status": "catalog_only",
+      "status": "reference_implementation",
       "citation": "unverified",
       "review_status": "draft",
-      "review": null
+      "review": null,
+      "implementation": "src/quantsmith/pipelines/venture_fund_analytics.py (simulate_fund, bootstrap_fund, simulate_reserves); scenario tool, not a forecast"
     }
   ]
 }

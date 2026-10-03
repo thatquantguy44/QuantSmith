@@ -496,6 +496,60 @@
       "citation": "unverified",
       "review_status": "draft",
       "review": null
+    },
+    {
+      "id": "term.xirr",
+      "term": "XIRR",
+      "definition": "Annualised internal rate of return on dated cash flows (Actual/365), contributions negative and distributions positive, with the latest NAV a terminal inflow; reports every root because flows that change sign more than once may have several.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.peer_percentile_rank",
+      "term": "Peer Percentile Rank",
+      "definition": "Position of a fund's metric among peers of the same vintage as (count below + half the ties) / n; refused below ten peers.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.mark_review_flag",
+      "term": "Mark Review Flag",
+      "definition": "A question about a valuation mark, with the numbers behind it, raised by a consistency check; the valuation committee decides the mark.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.follow_on_reserve",
+      "term": "Follow-On Reserve",
+      "definition": "Capital held back to invest again in existing portfolio companies; simulations of it depend on assumed selection skill and dilution.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.equal_outcome_null",
+      "term": "Equal-Outcome Null",
+      "definition": "The comparison in which every company returns the cohort mean, used to test whether a power-law story adds anything beyond the average.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.gross_fund_multiple",
+      "term": "Gross Fund Multiple",
+      "definition": "Proceeds over invested capital before fees, carry, timing, and partial-loss detail; not an LP return.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
     }
   ]
 }

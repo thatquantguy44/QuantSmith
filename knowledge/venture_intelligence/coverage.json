@@ -262,8 +262,9 @@
       "workflow": "Fund metrics, J-curve, and benchmark comparison",
       "never": "Set or certify a valuation",
       "creating_spec": "0091",
-      "status": "planned",
-      "decision_path_class": "analytic_support"
+      "status": "built",
+      "decision_path_class": "analytic_support",
+      "path": "agents/venture_intelligence/fund_performance_analyst"
     },
     {
       "id": "valuation_marks_reviewer",
@@ -271,8 +272,9 @@
       "workflow": "Review of private-company marks for consistency",
       "never": "Approve a mark",
       "creating_spec": "0091",
-      "status": "planned",
-      "decision_path_class": "analytic_support"
+      "status": "built",
+      "decision_path_class": "analytic_support",
+      "path": "agents/venture_intelligence/valuation_marks_reviewer"
     },
     {
       "id": "portfolio_reserve_analyst",
@@ -280,8 +282,9 @@
       "workflow": "Reserve and follow-on policy simulation",
       "never": "Decide follow-on investments",
       "creating_spec": "0091",
-      "status": "planned",
-      "decision_path_class": "analytic_support"
+      "status": "built",
+      "decision_path_class": "analytic_support",
+      "path": "agents/venture_intelligence/portfolio_reserve_analyst"
     },
     {
       "id": "intelligence_brief_writer",
@@ -417,7 +420,7 @@
     },
     {
       "spec": "0091",
-      "scope": "Fund analytics and predictive models",
+      "scope": "Fund and portfolio analytics (multiples, XIRR, J-curve, PME, peer rank, mark review, fund and reserve simulation)",
       "depends_on": [
         "0088",
         "0026"
@@ -446,6 +449,16 @@
         "0083",
         "0071",
         "0084"
+      ],
+      "closes": []
+    },
+    {
+      "spec": "0095",
+      "scope": "Predictive models: round-progression survival, technology emergence, network link, funding anomaly, sector nowcast",
+      "depends_on": [
+        "0088",
+        "0091",
+        "0026"
       ],
       "closes": []
     }

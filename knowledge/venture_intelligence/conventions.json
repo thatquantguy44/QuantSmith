@@ -171,6 +171,26 @@
       "citation": "unverified",
       "review_status": "draft",
       "review": null
+    },
+    {
+      "id": "conv.xirr",
+      "name": "XIRR",
+      "formula": "rate r such that sum(cashflow_i / (1+r)^(days_i/365)) = 0 over dated flows, contributions negative, distributions positive, latest NAV a terminal inflow; all roots reported, the root nearest a 10% guess is the headline",
+      "unit": "fraction per year",
+      "measured_on": "report date",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "conv.peer_percentile",
+      "name": "Peer percentile rank",
+      "formula": "(count below + 0.5 x ties) / n among peers of the same vintage; at least 10 peers required",
+      "unit": "fraction",
+      "measured_on": "report date",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
     }
   ],
   "stage_naming": {
@@ -1413,5 +1433,55 @@
     "citation": "unverified",
     "review_status": "draft",
     "review": null
-  }
+  },
+  "mark_review_flags": [
+    {
+      "id": "flag.missing_basis",
+      "code": "missing_basis",
+      "description": "The mark names no valuation basis.",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "flag.stale_mark",
+      "code": "stale_mark",
+      "description": "The mark is older than the policy's maximum age at the as-of date.",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "flag.markup_without_new_round",
+      "code": "markup_without_new_round",
+      "description": "A last-round-based mark rose above the prior mark with no new round since the prior mark.",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "flag.mark_predates_latest_round",
+      "code": "mark_predates_latest_round",
+      "description": "A priced round occurred after the mark date.",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "flag.down_round_not_reflected",
+      "code": "down_round_not_reflected",
+      "description": "A later round priced below the mark's implied price by more than the tolerance.",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "flag.price_deviates_from_last_round",
+      "code": "price_deviates_from_last_round",
+      "description": "A last-round-based mark's implied price differs from the last round price by more than the tolerance.",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    }
+  ]
 }
