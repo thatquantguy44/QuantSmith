@@ -202,7 +202,6 @@ def make_folds(
     if n_folds < 1 or len(days) < n_folds + 1:
         return []
 
-    gap = horizon + embargo
     block = len(days) // (n_folds + 1)
     if block == 0:
         return []
@@ -483,7 +482,6 @@ def _spearman(a: Sequence[float], b: Sequence[float]) -> float:
 
 
 def _pearson(a: Sequence[float], b: Sequence[float]) -> float:
-    n = len(a)
     ma, mb = _mean(a), _mean(b)
     cov = sum((x - ma) * (y - mb) for x, y in zip(a, b))
     va = math.sqrt(sum((x - ma) ** 2 for x in a))
