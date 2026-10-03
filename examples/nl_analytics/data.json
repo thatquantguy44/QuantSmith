@@ -1,0 +1,11 @@
+[
+  {"period": 1, "dims": {"desk": "rates"}, "measures": {"cost": 120.0}},
+  {"period": 1, "dims": {"desk": "credit"}, "measures": {"cost": 80.0}},
+  {"period": 1, "dims": {"desk": "fx"}, "measures": {"cost": 50.0}},
+  {"period": 2, "dims": {"desk": "rates"}, "measures": {"cost": 125.0}},
+  {"period": 2, "dims": {"desk": "credit"}, "measures": {"cost": 82.0}},
+  {"period": 2, "dims": {"desk": "fx"}, "measures": {"cost": 48.0}},
+  {"period": 3, "dims": {"desk": "rates"}, "measures": {"cost": 140.0}},
+  {"period": 3, "dims": {"desk": "credit"}, "measures": {"cost": 83.0}},
+  {"period": 3, "dims": {"desk": "fx"}, "measures": {"cost": 47.0}}
+]

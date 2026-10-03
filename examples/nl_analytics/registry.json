@@ -1,0 +1,12 @@
+{
+  "metrics": [
+    {
+      "name": "funding_cost",
+      "owner": "treasury-ops",
+      "grain": "day",
+      "dimensions": ["desk"],
+      "source": "cost",
+      "agg": "sum"
+    }
+  ]
+}

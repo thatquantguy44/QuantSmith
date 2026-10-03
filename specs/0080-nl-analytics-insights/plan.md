@@ -3,7 +3,7 @@
 - **Spec:** 0080-nl-analytics-insights (`spec.md`)
 - **Status:** Draft
 - **Author:** Joshua Lutkemuller, CFA
-- **Last updated:** 2026-09-25
+- **Last updated:** 2026-09-26
 
 > HOW. This plan requires an approved `spec.md`. Every requirement in the spec
 > appears in the traceability matrix below.
@@ -59,6 +59,7 @@ question ──▶ interpret ──▶ validate ──▶ authorize ──▶ ex
 | `respond.py` | `answer(question, context) -> ChatResponse` — the single entry point composing the stages and emitting the `0070` envelope. |
 | `writeback.py` | `WriteBackContract` loader/validator; `build_records(plan, result, insights, ...)` (takes the plan/result/insights directly — `ChatResponse` doesn't carry them; a deviation from this row's original `build_records(response)` sketch); `publish(records, contract, writer, *, dry_run=True, approved=False)`; `reverse(run_id, reversed_at, contract, writer)` (`reversed_at` is caller-supplied, not read from a clock — needed for `prior_insights`' as-of bound on a reversed record; the original sketch omitted it); `prior_insights(reader, key, as_of)`. |
 | `writeback_sqlite.py` | The first supported write-back target: `SQLiteWriter` implementing the injected-writer protocol over stdlib `sqlite3` — creates the insight table from the contract schema, `INSERT ... ON CONFLICT(record_key) DO NOTHING` for idempotency, tombstone reversal by `run_id` (`UPDATE ... SET reversed_at`), and a matching reader for `prior_insights`. Parameterized statements only; the path comes from the contract, never from the question. |
+| `envelope.py` | `emit_answer_evidence(question, plan, result, chart, insight_set, response, output_dir, *, run_id, ...)` — a `0070` orchestration bundle (prompt/context manifests, a two-item assumption ledger, a nine-layer evaluation harness, nine audit events covering interpret/validate/execute/chart/insights/narrate/deliver) for one already-answered question. Opt-in from `answer()` via `AnswerContext.envelope_dir`/`run_id`, never automatic. |
 | `cli.py` | `quantsmith-nl-analytics ask "<question>" --registry … --data … [--publish --approve]` for local use and the worked example. |
 
 Supporting artifacts:

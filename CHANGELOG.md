@@ -38,7 +38,10 @@ patterns locally rather than expecting them to update in place.
 - Trackers: `specs/README.md` (spec index) and
   `src/quantsmith/pipelines/README.md` (runtime catalog).
 - Spec `0080` (Draft): natural-language analytics — governed question-to-chart
-  workflow with grounded interpretation and approved SQLite write-back.
+  workflow with grounded interpretation and approved SQLite write-back, an
+  opt-in `0070` audit envelope, a `quantsmith-nl-analytics` CLI, and a
+  worked example (`examples/nl_analytics/`) with a disclosed synthetic
+  three-day transcript.
 - Spec `0081`: 40 analytics domain packs across seven financial-services
   families (`knowledge/analytics_packs/`), the `analytics_packs.py` validator
   and selector, and `tests/test_analytics_packs.py`. All packs ship `draft`.
