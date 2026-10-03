@@ -451,3 +451,35 @@ Merging republished copies of one news item into a single original report before
 ### Screening Criteria
 
 The explicit, caller-stated rules a longlist is filtered and ordered by; ordering reflects the criteria, never overall merit.
+
+### Analysis of Competing Hypotheses
+
+A structured method that rates each piece of evidence against every hypothesis and ranks hypotheses by fewest inconsistencies; the result informs the analyst and is not itself a conclusion.
+
+### Diagnostic Evidence
+
+Evidence rated differently across hypotheses; evidence consistent with all of them is non-diagnostic and supports none.
+
+### Corroboration Status
+
+Whether a claim is a single source, an echo of one origin, supported by several origins in one channel, or corroborated across independent channels.
+
+### Origin Identifier
+
+The identifier of where a piece of information first came from; republished and syndicated copies share one origin and count once.
+
+### Information Requirement
+
+A recorded question about missing evidence, linked to the decision it informs and to lawful candidate channels, awaiting human approval.
+
+### Effective Ownership
+
+A holder's share of a company through all equity chains: the product of percentages along each path, summed across paths; contractual links are never multiplied.
+
+### List Match
+
+A name-comparison hit against a restricted-party or sanctions list snapshot; an indicator with a false-positive risk, never a finding.
+
+### Dual-Use Indicator
+
+A resemblance between a technology description and a caller-supplied control-list entry, turned into a question for counsel; not a classification.

@@ -45,6 +45,12 @@ against a named person or entity. The decision belongs to the accountable human
 | Agent | Never |
 | --- | --- |
 | `multilingual_document_nlp` | Give a legal translation, interpret legal effect, or certify authenticity |
+| `source_reliability_grader` | Override a human analyst's grade, or grade on reputation alone |
+| `confidence_language_reviewer` | Change a judgement's direction or strength |
+| `competing_hypotheses_analyst` | Select or state the conclusion for the analyst |
+| `collection_gap_tracker` | Initiate, task, or recommend collection from non-public or prohibited sources |
+| `ownership_screen` | Designate, attribute, accuse, or recommend screening or enforcement action |
+| `dual_use_indicator` | Rule on export-control classification, licence need, or end-use legality |
 | `patent_ip_analyst` | Assess legal validity, infringement, or freedom to operate, or value a patent |
 | `hiring_signal_analyst` | Identify, profile, track, or rank individuals, or infer sensitive attributes |
 | `narrative_news_analyst` | Present narrative as fact, or attribute an influence campaign to any actor |
