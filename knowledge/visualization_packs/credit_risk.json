@@ -1,0 +1,85 @@
+{
+  "schema_version": "0093.1",
+  "pack_id": "credit_risk",
+  "name": "Credit Risk — visual stories",
+  "analytics_pack_ids": [
+    "credit_risk"
+  ],
+  "reviewer_agents": [
+    "agents/analytics/data_storytelling",
+    "agents/analytics/data_visualization",
+    "agents/credit_risk/counterparty_limits",
+    "agents/risk"
+  ],
+  "review": {
+    "status": "draft",
+    "reviewer": null,
+    "reviewed_on": null
+  },
+  "recipes": [
+    {
+      "recipe_id": "exposure_profile",
+      "intent": "exposure",
+      "decision": "Which portfolios hold the largest observed credit exposures?",
+      "audiences": [
+        "executive",
+        "analyst"
+      ],
+      "sections": [
+        {
+          "section_id": "exposure",
+          "metric": "ead",
+          "dimensions": [
+            "portfolio"
+          ],
+          "view": "breakdown",
+          "chart_rule": "shape",
+          "fallback_reason": "",
+          "interpretation": "Do the observed exposures warrant a review against portfolio-specific limits?",
+          "caveats": [
+            "Exposure is a single-period snapshot; no concentration threshold is inferred."
+          ]
+        }
+      ],
+      "action": "Review the observed portfolio exposures against approved limits and underwriting context."
+    },
+    {
+      "recipe_id": "loss_quality",
+      "intent": "quality",
+      "decision": "How do expected losses and default probabilities compare across stages?",
+      "audiences": [
+        "executive",
+        "analyst"
+      ],
+      "sections": [
+        {
+          "section_id": "loss",
+          "metric": "expected_loss",
+          "dimensions": [
+            "stage"
+          ],
+          "view": "breakdown",
+          "chart_rule": "shape",
+          "fallback_reason": "",
+          "interpretation": "Are default definitions and loss horizons comparable across these stages?",
+          "caveats": []
+        },
+        {
+          "section_id": "probability",
+          "metric": "pd",
+          "dimensions": [
+            "stage"
+          ],
+          "view": "breakdown",
+          "chart_rule": "shape",
+          "fallback_reason": "",
+          "interpretation": "Does the governed probability calculation use the intended population and weighting?",
+          "caveats": [
+            "Default probabilities are not summed; the registered aggregation defines the weighting."
+          ]
+        }
+      ],
+      "action": "Validate the measurement bases and investigate the observed stage differences."
+    }
+  ]
+}
