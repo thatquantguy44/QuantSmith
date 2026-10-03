@@ -78,6 +78,13 @@
       "severity": "medium",
       "owner_spec": "0094",
       "status": "open"
+    },
+    {
+      "id": "gap.kk_uz_fil_month_lexicons",
+      "title": "Kazakh, Uzbek, and Filipino month-name lexicons are unverified and need native-speaker review",
+      "severity": "medium",
+      "owner_spec": "0094",
+      "status": "open"
     }
   ]
 }

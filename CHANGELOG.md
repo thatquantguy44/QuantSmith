@@ -33,7 +33,10 @@ patterns locally rather than expecting them to update in place.
   agents, signal and sourcing agents, tradecraft and screening-support agents),
   eleven public source entries with `known_at` policies, and the stdlib helpers
   `venture_pack.py`, `venture_ingestion.py`, `venture_tradecraft.py` with tests.
-  Spec `0094` (Asian-language NLP foundation) is written, not yet built.
+  `quantsmith.asian_nlp` (spec `0094`): dependency-free language/script identification,
+  segmentation baseline, rule-based amount/currency/date/era-year/fiscal-period extraction
+  with verbatim spans for 12 languages, per-language evaluation, and baseline-vs-model
+  comparison, with 240 synthetic fixture cases and 220 tests.
 - Reference runtimes with tests for specs `0001`, `0006`–`0019`
   (`src/quantsmith/pipelines/`, `src/quantsmith/adapters/`): momentum signal,
   return forecasting, portfolio construction, execution scheduling, the optimization

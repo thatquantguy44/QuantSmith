@@ -49,7 +49,7 @@ config/venture_overlay.example.yml        (adopter-local overlay template; real 
 | 0090 | Tradecraft and screening-support agents | Built (Draft) |
 | 0091 | Fund/portfolio analytics and predictive models | Reserved |
 | 0092 | Retrieval wiring (`0052`–`0054`) and product writers | Reserved |
-| 0094 | Asian-language NLP foundation (`0093` is taken by another agent) | Spec only (Draft) |
+| 0094 | Asian-language NLP foundation (`0093` is taken by another agent) | Built (Draft) |
 
 ## Interfaces & Data Contracts
 

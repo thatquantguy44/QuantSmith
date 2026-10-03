@@ -320,6 +320,428 @@
         "citation": "unverified",
         "review_status": "draft",
         "review": null
+      },
+      {
+        "id": "norm.th_lan",
+        "symbol": "ล้าน",
+        "multiplier": 1000000,
+        "languages": [
+          "th"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.th_saen",
+        "symbol": "แสน",
+        "multiplier": 100000,
+        "languages": [
+          "th"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.th_muen",
+        "symbol": "หมื่น",
+        "multiplier": 10000,
+        "languages": [
+          "th"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.th_phan",
+        "symbol": "พัน",
+        "multiplier": 1000,
+        "languages": [
+          "th"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.vi_nghin",
+        "symbol": "nghìn",
+        "multiplier": 1000,
+        "languages": [
+          "vi"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.vi_ngan",
+        "symbol": "ngàn",
+        "multiplier": 1000,
+        "languages": [
+          "vi"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.vi_trieu",
+        "symbol": "triệu",
+        "multiplier": 1000000,
+        "languages": [
+          "vi"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.vi_ty",
+        "symbol": "tỷ",
+        "multiplier": 1000000000,
+        "languages": [
+          "vi"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.vi_ti",
+        "symbol": "tỉ",
+        "multiplier": 1000000000,
+        "languages": [
+          "vi"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.id_ribu",
+        "symbol": "ribu",
+        "multiplier": 1000,
+        "languages": [
+          "id/ms"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.id_juta",
+        "symbol": "juta",
+        "multiplier": 1000000,
+        "languages": [
+          "id/ms"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.id_miliar",
+        "symbol": "miliar",
+        "multiplier": 1000000000,
+        "languages": [
+          "id/ms"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.id_milyar",
+        "symbol": "milyar",
+        "multiplier": 1000000000,
+        "languages": [
+          "id/ms"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.id_triliun",
+        "symbol": "triliun",
+        "multiplier": 1000000000000,
+        "languages": [
+          "id/ms"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.ru_tys",
+        "symbol": "тыс",
+        "multiplier": 1000,
+        "languages": [
+          "ru",
+          "kk"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.ru_mln",
+        "symbol": "млн",
+        "multiplier": 1000000,
+        "languages": [
+          "ru",
+          "kk"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.ru_mlrd",
+        "symbol": "млрд",
+        "multiplier": 1000000000,
+        "languages": [
+          "ru",
+          "kk"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.ru_trln",
+        "symbol": "трлн",
+        "multiplier": 1000000000000,
+        "languages": [
+          "ru",
+          "kk"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.ru_million",
+        "symbol": "миллион",
+        "multiplier": 1000000,
+        "languages": [
+          "ru"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.ru_millionov",
+        "symbol": "миллионов",
+        "multiplier": 1000000,
+        "languages": [
+          "ru"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.ru_milliona",
+        "symbol": "миллиона",
+        "multiplier": 1000000,
+        "languages": [
+          "ru"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.ru_milliard",
+        "symbol": "миллиард",
+        "multiplier": 1000000000,
+        "languages": [
+          "ru"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.ru_milliardov",
+        "symbol": "миллиардов",
+        "multiplier": 1000000000,
+        "languages": [
+          "ru"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.ru_milliarda",
+        "symbol": "миллиарда",
+        "multiplier": 1000000000,
+        "languages": [
+          "ru"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.uz_ming",
+        "symbol": "ming",
+        "multiplier": 1000,
+        "languages": [
+          "uz"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.uz_mln",
+        "symbol": "mln",
+        "multiplier": 1000000,
+        "languages": [
+          "uz"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.uz_mlrd",
+        "symbol": "mlrd",
+        "multiplier": 1000000000,
+        "languages": [
+          "uz"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.fil_libo",
+        "symbol": "libo",
+        "multiplier": 1000,
+        "languages": [
+          "fil"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.fil_milyon",
+        "symbol": "milyon",
+        "multiplier": 1000000,
+        "languages": [
+          "fil"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.fil_bilyon",
+        "symbol": "bilyon",
+        "multiplier": 1000000000,
+        "languages": [
+          "fil"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.en_thousand",
+        "symbol": "thousand",
+        "multiplier": 1000,
+        "languages": [
+          "en"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.en_million",
+        "symbol": "million",
+        "multiplier": 1000000,
+        "languages": [
+          "en"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.en_billion",
+        "symbol": "billion",
+        "multiplier": 1000000000,
+        "languages": [
+          "en"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.en_trillion",
+        "symbol": "trillion",
+        "multiplier": 1000000000000,
+        "languages": [
+          "en"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.en_mn",
+        "symbol": "mn",
+        "multiplier": 1000000,
+        "languages": [
+          "en"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.en_bn",
+        "symbol": "bn",
+        "multiplier": 1000000000,
+        "languages": [
+          "en"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.ru_tysyach",
+        "symbol": "тысяч",
+        "multiplier": 1000,
+        "languages": [
+          "ru"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.ru_tysyachi",
+        "symbol": "тысячи",
+        "multiplier": 1000,
+        "languages": [
+          "ru"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
       }
     ],
     "calendar_offsets": [
@@ -506,6 +928,11 @@
         "symbol": "兆",
         "rule": "Means 10^12 in modern Japanese and Mainland usage but 10^6 in some older or regional usage; flag, never guess.",
         "citation": "unverified"
+      },
+      {
+        "symbol": "bilion",
+        "rule": "Malay bilion is 10^9 in some usage and 10^12 in others; flag, never guess.",
+        "citation": "unverified"
       }
     ],
     "fiscal_year_conventions": [
@@ -543,7 +970,377 @@
       }
     ],
     "fiscal_year_rule": "State the fiscal year-end for every annual figure; never assume a calendar year.",
-    "script_variant_rule": "Cyrillic and Latin forms of one name (and different transliteration standards or years) are never merged without a registry identifier."
+    "script_variant_rule": "Cyrillic and Latin forms of one name (and different transliteration standards or years) are never merged without a registry identifier.",
+    "currency_markers": [
+      {
+        "id": "cur.cny",
+        "code": "CNY",
+        "prefix_markers": [
+          "RMB",
+          "CNY",
+          "CN¥"
+        ],
+        "suffix_markers": [
+          "人民币",
+          "人民幣",
+          "RMB",
+          "CNY",
+          "yuan"
+        ],
+        "note": "",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "cur.usd",
+        "code": "USD",
+        "prefix_markers": [
+          "US$",
+          "USD"
+        ],
+        "suffix_markers": [
+          "美元",
+          "美金",
+          "USD",
+          "美圓",
+          "US dollars",
+          "dollars US",
+          "долларов США"
+        ],
+        "note": "",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "cur.hkd",
+        "code": "HKD",
+        "prefix_markers": [
+          "HK$",
+          "HKD"
+        ],
+        "suffix_markers": [
+          "港元",
+          "港币",
+          "港幣",
+          "HKD"
+        ],
+        "note": "",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "cur.twd",
+        "code": "TWD",
+        "prefix_markers": [
+          "NT$",
+          "TWD"
+        ],
+        "suffix_markers": [
+          "新台币",
+          "新臺幣",
+          "台币",
+          "台幣",
+          "TWD",
+          "新台幣"
+        ],
+        "note": "",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "cur.jpy",
+        "code": "JPY",
+        "prefix_markers": [
+          "JPY"
+        ],
+        "suffix_markers": [
+          "日元",
+          "日圓",
+          "円",
+          "JPY",
+          "yen"
+        ],
+        "note": "",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "cur.krw",
+        "code": "KRW",
+        "prefix_markers": [
+          "₩",
+          "KRW"
+        ],
+        "suffix_markers": [
+          "韩元",
+          "韓元",
+          "원",
+          "KRW",
+          "won"
+        ],
+        "note": "",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "cur.thb",
+        "code": "THB",
+        "prefix_markers": [
+          "฿",
+          "THB"
+        ],
+        "suffix_markers": [
+          "บาท",
+          "泰铢",
+          "泰銖",
+          "THB",
+          "baht"
+        ],
+        "note": "",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "cur.idr",
+        "code": "IDR",
+        "prefix_markers": [
+          "Rp",
+          "IDR"
+        ],
+        "suffix_markers": [
+          "rupiah",
+          "IDR"
+        ],
+        "note": "",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "cur.vnd",
+        "code": "VND",
+        "prefix_markers": [
+          "₫",
+          "VND"
+        ],
+        "suffix_markers": [
+          "đồng",
+          "đ",
+          "VND",
+          "dong"
+        ],
+        "note": "",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "cur.myr",
+        "code": "MYR",
+        "prefix_markers": [
+          "RM",
+          "MYR"
+        ],
+        "suffix_markers": [
+          "ringgit",
+          "MYR"
+        ],
+        "note": "",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "cur.sgd",
+        "code": "SGD",
+        "prefix_markers": [
+          "S$",
+          "SGD"
+        ],
+        "suffix_markers": [
+          "SGD",
+          "Singapore dollars"
+        ],
+        "note": "",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "cur.php",
+        "code": "PHP",
+        "prefix_markers": [
+          "₱",
+          "PHP"
+        ],
+        "suffix_markers": [
+          "piso",
+          "PHP",
+          "pesos",
+          "peso"
+        ],
+        "note": "",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "cur.inr",
+        "code": "INR",
+        "prefix_markers": [
+          "₹",
+          "INR"
+        ],
+        "suffix_markers": [
+          "rupees",
+          "rupee",
+          "INR"
+        ],
+        "note": "",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "cur.kzt",
+        "code": "KZT",
+        "prefix_markers": [
+          "₸",
+          "KZT"
+        ],
+        "suffix_markers": [
+          "тенге",
+          "теңге",
+          "KZT",
+          "tenge"
+        ],
+        "note": "",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "cur.uzs",
+        "code": "UZS",
+        "prefix_markers": [
+          "UZS"
+        ],
+        "suffix_markers": [
+          "сум",
+          "so'm",
+          "so‘m",
+          "soʻm",
+          "UZS"
+        ],
+        "note": "",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "cur.rub",
+        "code": "RUB",
+        "prefix_markers": [
+          "₽",
+          "RUB"
+        ],
+        "suffix_markers": [
+          "рублей",
+          "рубля",
+          "рубль",
+          "руб",
+          "RUB"
+        ],
+        "note": "",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "cur.eur",
+        "code": "EUR",
+        "prefix_markers": [
+          "€",
+          "EUR"
+        ],
+        "suffix_markers": [
+          "欧元",
+          "歐元",
+          "EUR",
+          "euros",
+          "euro"
+        ],
+        "note": "",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "cur.gbp",
+        "code": "GBP",
+        "prefix_markers": [
+          "£",
+          "GBP"
+        ],
+        "suffix_markers": [
+          "英镑",
+          "英鎊",
+          "GBP"
+        ],
+        "note": "",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      }
+    ],
+    "currency_ambiguous": [
+      {
+        "marker": "$",
+        "resolution": {},
+        "note": "dollar sign could be USD, HKD, SGD, AUD, others; flag unless a prefix names the currency",
+        "citation": "unverified"
+      },
+      {
+        "marker": "¥",
+        "resolution": {
+          "zh": "CNY",
+          "ja": "JPY"
+        },
+        "note": "yen/yuan sign; resolved only by stated language",
+        "citation": "unverified"
+      },
+      {
+        "marker": "元",
+        "resolution": {},
+        "note": "generic dollar/yuan unit in Chinese text; flag unless a prefix or word names the currency",
+        "citation": "unverified"
+      },
+      {
+        "marker": "块",
+        "resolution": {},
+        "note": "colloquial dollar/yuan; flag",
+        "citation": "unverified"
+      },
+      {
+        "marker": "Rs",
+        "resolution": {},
+        "note": "rupee abbreviation used in several countries; flag",
+        "citation": "unverified"
+      },
+      {
+        "marker": "dollars",
+        "resolution": {},
+        "note": "generic English word; flag",
+        "citation": "unverified"
+      }
+    ]
   },
   "prohibited_source_classes": [
     "non_public_collection",

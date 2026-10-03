@@ -1,7 +1,7 @@
 # Spec: Asian-Language NLP Foundation
 
 - **ID:** 0094-asian-language-nlp-foundation
-- **Status:** Draft
+- **Status:** Draft (built)
 - **Author:** Joshua Lutkemuller, CFA
 - **Approver:**
 - **Last updated:** 2026-10-02
