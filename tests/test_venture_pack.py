@@ -219,3 +219,23 @@ def test_ac021_regions_leads_and_contract_files(pack):
             assert (ROOT / agent["path"] / f).is_file()
     regional = {a["id"] for a in pack["coverage"]["agents"] if a["group"] == "regional"}
     assert len([r for r in regional if r.endswith("_lead")]) == 10
+
+
+def test_ac022_review_signoff_rules(pack):
+    from quantsmith.pipelines.venture_pack import review_summary, validate_review
+    assert review_summary(pack)["reviewed"] == 0 and review_summary(pack)["total"] > 50
+    base = {"id": "x", "citation": "NVCA Model Legal Documents (public)", "review_status": "draft", "review": None}
+    assert validate_review(base) == []
+    good = dict(base, review_status="reviewed",
+                review={"reviewer": "A. Reviewer", "review_date": "2026-10-02", "scope": "definition"})
+    assert validate_review(good) == []
+    assert validate_review(dict(good, review=None))
+    assert validate_review(dict(good, review=dict(good["review"], reviewer="")))
+    assert validate_review(dict(good, review=dict(good["review"], review_date="yesterday")))
+    assert validate_review(dict(base, review=good["review"]))            # draft carrying a review
+    unv = dict(good, citation="unverified")
+    assert validate_review(unv)
+    assert validate_review(dict(unv, review=dict(good["review"], accepts_unverified=True))) == []
+    bad = copy.deepcopy(pack)
+    bad["channels"]["channels"][0]["review_status"] = "reviewed"
+    assert any("without a review record" in e for e in validate_pack(bad, ROOT))

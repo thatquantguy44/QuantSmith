@@ -23,7 +23,9 @@
       "review_gates": [
         "Source grading",
         "Human reviewer sign-off"
-      ]
+      ],
+      "review_status": "draft",
+      "review": null
     },
     {
       "id": "workflow.signal_to_thesis",
@@ -46,7 +48,9 @@
       "review_gates": [
         "Corroboration rule",
         "Deception-risk check"
-      ]
+      ],
+      "review_status": "draft",
+      "review": null
     },
     {
       "id": "workflow.technology_landscape",
@@ -67,7 +71,9 @@
       ],
       "review_gates": [
         "Coverage disclosure"
-      ]
+      ],
+      "review_status": "draft",
+      "review": null
     },
     {
       "id": "workflow.portfolio_fund_review",
@@ -89,7 +95,9 @@
       "review_gates": [
         "Convention check",
         "Independent review of marks"
-      ]
+      ],
+      "review_status": "draft",
+      "review": null
     },
     {
       "id": "workflow.counter_diligence",
@@ -115,7 +123,9 @@
         "Named human review",
         "No designation or attribution",
         "Counsel on jurisdictional rules"
-      ]
+      ],
+      "review_status": "draft",
+      "review": null
     }
   ],
   "person_adjacent_rule": "Public professional-role facts only; minimize retained personal data; never infer sensitive attributes."

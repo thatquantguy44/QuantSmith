@@ -29,6 +29,14 @@ workflows are decision-support-only with named review), citation discipline, and
 recomputes every golden case. It does **not** certify that a convention or a
 channel claim is correct; that needs named human review.
 
+## Review sign-off
+
+Every reviewable record carries `review_status` (`draft` | `reviewed` |
+`superseded` | `retired`) and `review`. To sign a record off, set
+`review_status: "reviewed"` and fill `review` with `reviewer`, `review_date`
+(ISO), and `scope`. A reviewed record may not still cite `unverified` unless
+`review.accepts_unverified` is true. The validator prints the current counts.
+
 ## Adopter-local overlay
 
 Copy `config/venture_overlay.example.yml` to `/venture_overlay.yml` (gitignored).
