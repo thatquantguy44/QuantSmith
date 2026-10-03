@@ -60,6 +60,7 @@ syntax, spec traceability, and backtest integrity; it runs leakage advisory.
   under `agents/`) and must also have `README.md`, `instructions.md`, `tasks.md`
   (enforced by pre-commit, pre-push, and CI). Related agents may be grouped in a
   category folder (e.g. `agents/data_ingestion/`). Keep responsibilities narrow;
+  regenerate `agents/agent_registry.yaml` with `python3 scripts/build_agent_registry.py`,
   add a `Spec-Driven Role` section to `instructions.md` and a row to
   `agents/README.md`.
 - **Commits:** Conventional Commits (`type(scope): description`) — enforced by the

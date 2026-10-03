@@ -597,3 +597,6 @@ Template: `templates/prompts/factory_run_card.md`.
 - Give each agent a narrow, inspectable responsibility.
 - Add a `Spec-Driven Role` section to its `instructions.md`.
 - Add a row to the relevant table above.
+- Regenerate the machine-readable registry: `python3 scripts/build_agent_registry.py`
+  (it reads each agent's `README.md` and `SKILL.md`; the test suite and the
+  `agent-catalog` gate fail when `agents/agent_registry.yaml` is stale or missing an agent).

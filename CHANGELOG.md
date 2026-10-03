@@ -21,6 +21,12 @@ patterns locally rather than expecting them to update in place.
 ## [Unreleased]
 
 ### Added
+- `agents/agent_registry.yaml` is now generated from the agents (all 200, was 6) by
+  `scripts/build_agent_registry.py`: category, purpose, inputs, outputs, skill path, and
+  decision-path class per agent. The six original entries keep their machine identifiers
+  under `interface`; their `skills_path` values pointed at a nonexistent `skills_library/`
+  and are replaced by real `skill_path`s (eight agents have a `SKILL.md`). A pytest
+  (`tests/test_agent_registry.py`) and the `agent-catalog` gate fail when the registry is stale.
 - `uv.lock` pins the full dependency set (all extras, Python 3.10+); CI now runs
   `uv lock --check` and installs with `uv sync --frozen --all-extras`. Refresh steps
   are in `docs/gate_runbook.md`.
