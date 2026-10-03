@@ -40,10 +40,13 @@ def simulate_competing_risks(n: int, seed: int, rates: Mapping[str, float], form
                 cause = c
                 break
         cause = cause or next(iter(hz))
-        ended = formed + timedelta(days=max(1, math.ceil(t)))
         event = cause
-        if ended > obs:
+        if t > (obs - formed).days:                      # beyond the observation window: censored (also avoids huge dates)
             ended, event = obs, CENSORED
+        else:
+            ended = formed + timedelta(days=max(1, math.ceil(t)))
+            if ended > obs:
+                ended, event = obs, CENSORED
         subjects.append({"id": f"syn-co-{i:05d}", "formation_date": formed.isoformat(), "end_date": ended.isoformat(),
                          "event": event, "features_vector": (x,), "features": {"x": x},
                          "feature_known_at": {"x": formed.isoformat()}, "synthetic": True})
