@@ -87,9 +87,9 @@
       "status": "open"
     },
     {
-      "id": "gap.predictive_models_unbuilt",
-      "title": "Round-progression survival, technology emergence, network link, funding anomaly, and sector nowcast models are cataloged but not built",
-      "severity": "medium",
+      "id": "gap.predictive_models_no_real_validation",
+      "title": "Reference baselines exist for the predictive models (spec 0095) but none has been validated on real, point-in-time data; none may inform a decision",
+      "severity": "high",
       "owner_spec": "0095",
       "status": "open"
     },

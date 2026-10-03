@@ -18,6 +18,8 @@ import re
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Sequence
 
+from quantsmith.venture_models.validation import deployability
+
 PACK_DIR = Path("knowledge/venture_intelligence")
 FILES = ("taxonomy", "conventions", "channels", "models", "workflows",
          "coverage", "gaps", "glossary", "golden_cases")
@@ -431,6 +433,15 @@ def validate_pack(pack: Mapping[str, Any], root: Path = Path(".")) -> List[str]:
             if w["decision_path_class"] != need:
                 errors.append(f"workflows: {w['id']} class {w['decision_path_class']} must be {need} "
                               "because it includes a stricter-class agent")
+
+    # model catalog governance (spec 0095): a model is usable for decisions only if deployability computes it
+    for mdl in models:
+        if "validation_status" not in mdl or "usable_for_decisions" not in mdl:
+            errors.append(f"models: {mdl['id']} lacks validation_status or usable_for_decisions")
+            continue
+        ok, reasons = deployability(mdl)
+        if mdl["usable_for_decisions"] is True and not ok:
+            errors.append(f"models: {mdl['id']} is marked usable_for_decisions but is not deployable: {'; '.join(reasons)}")
 
     # gaps (REQ-012)
     for g in pack["gaps"]["gaps"]:

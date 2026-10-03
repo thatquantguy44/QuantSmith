@@ -456,7 +456,7 @@
     },
     {
       "spec": "0095",
-      "scope": "Predictive models: round-progression survival, technology emergence, network link, funding anomaly, sector nowcast",
+      "scope": "Predictive model reference baselines with point-in-time validation harness and a computed deployability gate: round-progression survival, technology emergence, network link, funding anomaly, sector nowcast",
       "depends_on": [
         "0088",
         "0091",
