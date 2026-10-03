@@ -1,0 +1,34 @@
+source_id: "trade_csl"
+name: "Consolidated Screening List (trade.gov)"
+type: api
+owner: "quant-research"
+description: >
+  US government consolidated list of restricted, denied, and sanctioned parties from several agencies. Venture and intelligence source (spec 0088); endpoints, terms, and
+  coverage are unverified until confirmed against current documentation.
+
+domain: ["foreign_influence_screening"]
+access_level: public
+
+quality:
+  completeness: medium
+  timeliness: "list updated when agencies amend; no guaranteed history"
+  known_issues:
+    - "name matching only: a match is an indicator, not a finding"
+    - "list membership changes over time; keep dated snapshots"
+    - "transliterated names produce false positives and misses"
+  last_assessed: "2026-10-02"
+
+point_in_time:
+  supports_asof: false
+  known_at_policy: "snapshot"
+  revision_policy: "record source file or endpoint, public timestamp when available, and retrieval timestamp; retain dated snapshots where the source keeps no history"
+
+connection:
+  method: rest_api
+  endpoint_or_host: "https://api.trade.gov"
+  credential_ref: "not_required_public_access"
+
+documentation_uri: "https://www.trade.gov/consolidated-screening-list"
+status: evaluating
+
+data_contract_refs: ["specs/0088-venture-sources-pit-ingestion/"]

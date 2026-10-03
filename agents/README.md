@@ -452,6 +452,7 @@ region (Southeast Asia built first); `multilingual_document_nlp` is cross-cuttin
 
 | Agent | Handles | Feeds mainly |
 | --- | --- | --- |
+| `venture_intelligence/entity_resolution/` | Company identity decisions across sources and scripts (match, candidate, needs registry ID); never merges on a name alone | `data_quality`, `data_governance`, regional agents |
 | `venture_intelligence/multilingual_document_nlp/` | Source-anchored extraction from Mandarin, Bahasa, Vietnamese, Thai, Filipino and English start-up documents; never gives legal translation | `deep_learning/nlp_llm`, `knowledge/knowledge_ingestion`, regional agents |
 | `venture_intelligence/southeast_asia/regional_lead/` | Market-by-market Southeast Asia view and routing; never recommends investments | `research_analyst`, `briefer` |
 | `venture_intelligence/southeast_asia/entity_structure_analyst/` | Holding/operating structure and ownership indicators; never designates or attributes | `enterprise_risk/aml_financial_crime`, counsel |

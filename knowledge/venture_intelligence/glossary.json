@@ -298,6 +298,51 @@
       "citation": "unverified",
       "review_status": "draft",
       "review": null
+    },
+    {
+      "id": "term.known_at_policy",
+      "term": "Known-At Policy",
+      "definition": "The per-source rule saying which timestamp counts as when the adopter could first have known a record: filed, published, event, snapshot, or retrieved.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.late_retrieval",
+      "term": "Late Retrieval",
+      "definition": "A flag on a record retrieved long after its public date, which may be a backfill or revision and must not enter a backtest as if known earlier.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.cohort_formation_date",
+      "term": "Cohort Formation Date",
+      "definition": "The date a cohort is defined from companies already known by then, independent of later outcomes; it is what prevents survivorship bias.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.registry_identifier",
+      "term": "Registry Identifier",
+      "definition": "A company's number in an official register within one jurisdiction; with the jurisdiction, the only name-independent basis for merging two records.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.entity_resolution_candidate",
+      "term": "Entity Resolution Candidate",
+      "definition": "A pair of records whose names suggest the same company but which lacks a registry identifier; never merged until evidence is added.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
     }
   ]
 }

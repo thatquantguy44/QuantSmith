@@ -395,3 +395,23 @@ The first agent created for a world region; routes work and states per-market co
 ### Professional Role
 
 A public, organization-level role tied to a company; the only way a natural person appears in this domain.
+
+### Known-At Policy
+
+The per-source rule saying which timestamp counts as when the adopter could first have known a record: filed, published, event, snapshot, or retrieved.
+
+### Late Retrieval
+
+A flag on a record retrieved long after its public date, which may be a backfill or revision and must not enter a backtest as if known earlier.
+
+### Cohort Formation Date
+
+The date a cohort is defined from companies already known by then, independent of later outcomes; it is what prevents survivorship bias.
+
+### Registry Identifier
+
+A company's number in an official register within one jurisdiction; with the jurisdiction, the only name-independent basis for merging two records.
+
+### Entity Resolution Candidate
+
+A pair of records whose names suggest the same company but which lacks a registry identifier; never merged until evidence is added.

@@ -396,5 +396,70 @@
     "deanonymization",
     "unreviewed_leaked_material"
   ],
-  "lawful_collection_rule": "Public, licensed, or caller-supplied sources only (instructions/venture_intelligence.md)."
+  "lawful_collection_rule": "Public, licensed, or caller-supplied sources only (instructions/venture_intelligence.md).",
+  "known_at_policies": {
+    "late_retrieval_days": 30,
+    "policies": [
+      {
+        "id": "filed",
+        "known_at": "filed_time",
+        "applies_to": "registries and regulators that timestamp receipt",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "published",
+        "known_at": "announced_time",
+        "applies_to": "sources with a reliable publication or grant date",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "event",
+        "known_at": "event_time",
+        "applies_to": "timestamped event streams",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "snapshot",
+        "known_at": "retrieved_time (first snapshot containing the record)",
+        "applies_to": "sources that keep no history; retain your own dated snapshots",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "retrieved",
+        "known_at": "retrieved_time",
+        "applies_to": "sources with unreliable or missing timestamps",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      }
+    ],
+    "rule": "A record is flagged late_retrieval when retrieved_time exceeds its public time by more than late_retrieval_days; it may be a backfill or revision and must not enter a backtest as if known earlier than retrieval unless the source supports as-of vintages."
+  },
+  "entity_resolution": {
+    "decisions": [
+      "match",
+      "candidate",
+      "candidate_cross_script",
+      "needs_registry_id",
+      "no_match"
+    ],
+    "rules": [
+      "match only on equal registry identifier within one jurisdiction, or equal LEI",
+      "normalized-name equality in one script and one jurisdiction is a candidate, never a merge",
+      "names in different scripts are never merged without a registry identifier",
+      "differing registry identifiers in one jurisdiction are no_match",
+      "every decision lists its reasons"
+    ],
+    "citation": "unverified",
+    "review_status": "draft",
+    "review": null
+  }
 }
