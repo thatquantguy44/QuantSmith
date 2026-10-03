@@ -452,6 +452,7 @@ region (Southeast Asia built first); `multilingual_document_nlp` is cross-cuttin
 
 | Agent | Handles | Feeds mainly |
 | --- | --- | --- |
+| `venture_intelligence/venture_orchestrator/` | Routes a venture request to a chain of agents with review gates, decision owner, decision-path class, and clearance, or refuses what the suite must not do and names the human who owns it; never decides, recommends, or releases | every `venture_intelligence/` agent, `workflow_orchestrator` |
 | `venture_intelligence/intelligence_brief_writer/` | BLUF brief from cited, graded passages with separate evidence, assumptions, judgements, and gaps; never releases without a named reviewer or states an uncited claim | `briefer`, regional leads, reviewer |
 | `venture_intelligence/investment_memo_writer/` | Committee memo from diligence, tradecraft, and fund outputs with the decision owner named; never recommends, approves, or rejects an investment | investment committee |
 | `venture_intelligence/fund_performance_analyst/` | Fund multiples, XIRR with every root, J-curve, KS-PME, and vintage-matched peer rank as of a date; never sets or certifies a valuation | `valuation_marks_reviewer`, `portfolio_reserve_analyst`, investment committee |

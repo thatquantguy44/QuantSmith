@@ -51,6 +51,7 @@ against a named person or entity. The decision belongs to the accountable human
 | `collection_gap_tracker` | Initiate, task, or recommend collection from non-public or prohibited sources |
 | `ownership_screen` | Designate, attribute, accuse, or recommend screening or enforcement action |
 | `dual_use_indicator` | Rule on export-control classification, licence need, or end-use legality |
+| `venture_orchestrator` | Decide, recommend, or release anything, override a refusal, or route around a decision-path class or a clearance requirement |
 | `intelligence_brief_writer` | Release or publish a brief without a named human reviewer, state an uncited claim, or cite above the brief's classification |
 | `investment_memo_writer` | Recommend, approve, or reject an investment, or release a memo without a named human reviewer |
 | `fund_performance_analyst` | Set, certify, or adjust a valuation; rank funds for commitment; recommend an investment |
@@ -73,11 +74,19 @@ against a named person or entity. The decision belongs to the accountable human
 
 Deterministic helpers back the rules above: `quantsmith.pipelines.venture_pack`
 (pack validator, normalization, fund metrics), `venture_ingestion` (`known_at`,
-as-of views, cohorts, entity resolution), and `venture_knowledge` (private store, memory candidates, retrieval contract) and `venture_products` (brief and memo validation), `venture_fund_analytics` (multiples, XIRR, J-curve, PME, peer rank, mark-consistency flags, seeded fund and reserve simulation), and `quantsmith.venture_models` (point-in-time validation harness and reference baselines for the predictive families; none usable for decisions without real-data evidence and a named reviewer), and `venture_tradecraft` (grades,
+as-of views, cohorts, entity resolution), and `venture_routing` (request routing and refusals), `venture_knowledge` (private store, memory candidates, retrieval contract) and `venture_products` (brief and memo validation), `venture_fund_analytics` (multiples, XIRR, J-curve, PME, peer rank, mark-consistency flags, seeded fund and reserve simulation), and `quantsmith.venture_models` (point-in-time validation harness and reference baselines for the predictive families; none usable for decisions without real-data evidence and a named reviewer), and `venture_tradecraft` (grades,
 corroboration, hypotheses matrix, effective ownership, conclusion-language lint).
 `quantsmith.asian_nlp` supplies the deterministic baseline for Asian-language text (identification, segmentation, span-preserving extraction); model output is compared against it and never replaces it. They report structure and arithmetic; they never grade, conclude, classify, or
 designate. Validate the pack with
 `PYTHONPATH=src python3 -m quantsmith.pipelines.venture_pack`.
+
+## Request routing (spec 0096)
+
+`venture_orchestrator` and `quantsmith.pipelines.venture_routing` turn a request into a plan: ordered agents, review
+gates, decision owner, decision-path class (the strictest among the steps), and required clearance. Refusals are
+decided first and name the human who owns the decision; a legitimate part of a mixed request is still planned.
+Routing is keyword matching, so an ambiguous request asks, and a region with no agent is a stated gap. A plan is not
+authorization to act. Rules: `knowledge/venture_intelligence/routing.json`.
 
 ## Knowledge integration (spec 0092)
 

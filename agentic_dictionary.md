@@ -527,3 +527,11 @@ The opening statement of a brief that gives the main judgement in a few sentence
 ### Release Gate
 
 The rule that a brief or memo is releasable only when it validates and a named human reviewer is recorded; the writing agent never sets the reviewer.
+
+### Routing Plan
+
+The orchestrator's output for a request: status, task kind, ordered agent steps, the strictest decision-path class, required clearance, review gates, and decision owner; not authorization to act.
+
+### Refusal With Owner
+
+A refusal that names the human who owns the decision the suite will not make, and the allowed alternative work.

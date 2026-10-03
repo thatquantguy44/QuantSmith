@@ -24,6 +24,12 @@ by world region plus cross-cutting capabilities. Foundation spec:
 | `deal_sourcing/` | Longlist from signals against caller-stated criteria | analytic_support | Rank by merit; recommend |
 | `company_diligence/` | Evidence/assumption/judgement memo from supplied evidence | analytic_support | Approve, reject, certify |
 
+## Orchestration (cross-cutting)
+
+| Agent | Handles | Class | Never |
+| --- | --- | --- | --- |
+| `venture_orchestrator/` | Routes a request to a chain of agents with gates, owner, class, and clearance; refuses what the suite must not do | analytic_support | Decide, recommend, or release; override a refusal |
+
 ## Product writers (cross-cutting)
 
 | Agent | Handles | Class | Never |
