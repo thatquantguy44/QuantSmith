@@ -379,6 +379,51 @@
       "citation": "unverified",
       "review_status": "draft",
       "review": null
+    },
+    {
+      "id": "term.script_variant",
+      "term": "Script Variant",
+      "definition": "A second written form of the same name in another script (e.g. Cyrillic and Latin); never merged without a registry identifier.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.patent_family",
+      "term": "Patent Family",
+      "definition": "The set of patent filings in different offices that claim the same invention; landscapes count families, not raw filings, so one invention is counted once.",
+      "owner_doc": "knowledge/venture_intelligence/channels.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.single_channel_finding",
+      "term": "Single-Channel Finding",
+      "definition": "A finding supported by only one signal channel; corroboration needs independent channels, and news repeating a press release is not independent.",
+      "owner_doc": "knowledge/venture_intelligence/channels.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.syndication_collapse",
+      "term": "Syndication Collapse",
+      "definition": "Merging republished copies of one news item into a single original report before counting, so repeats are not taken as independent corroboration.",
+      "owner_doc": "knowledge/venture_intelligence/channels.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.screening_criteria",
+      "term": "Screening Criteria",
+      "definition": "The explicit, caller-stated rules a longlist is filtered and ordered by; ordering reflects the criteria, never overall merit.",
+      "owner_doc": "knowledge/venture_intelligence/coverage.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
     }
   ]
 }

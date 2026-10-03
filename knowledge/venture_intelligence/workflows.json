@@ -9,9 +9,10 @@
       "decision_support_only": false,
       "human_review": [],
       "agents": [
-        "deal_sourcing (planned)",
-        "company_diligence (planned)",
-        "multilingual_document_nlp"
+        "deal_sourcing",
+        "company_diligence",
+        "multilingual_document_nlp",
+        "entity_resolution"
       ],
       "inputs": [
         "Company list or thesis",
@@ -30,13 +31,16 @@
     {
       "id": "workflow.signal_to_thesis",
       "name": "Signal to thesis",
-      "decision_path_class": "analytic_support",
-      "decision_support_only": false,
-      "human_review": [],
+      "decision_path_class": "person_adjacent",
+      "decision_support_only": true,
+      "human_review": [
+        "Designated analyst reviewer"
+      ],
       "agents": [
-        "patent_ip_analyst (planned)",
-        "hiring_signal_analyst (planned)",
-        "narrative_news_analyst (planned)",
+        "patent_ip_analyst",
+        "hiring_signal_analyst",
+        "narrative_news_analyst",
+        "technology_landscape_analyst",
         "source_reliability_grader (planned)"
       ],
       "inputs": [
@@ -47,7 +51,8 @@
       ],
       "review_gates": [
         "Corroboration rule",
-        "Deception-risk check"
+        "Deception-risk check",
+        "Organization-level analysis only; no individual profiling"
       ],
       "review_status": "draft",
       "review": null
@@ -59,8 +64,12 @@
       "decision_support_only": false,
       "human_review": [],
       "agents": [
-        "technology_landscape_analyst (planned)",
-        "southeast_asia/regional_lead"
+        "technology_landscape_analyst",
+        "patent_ip_analyst",
+        "southeast_asia/regional_lead",
+        "greater_china_east_asia/regional_lead",
+        "south_asia/regional_lead",
+        "central_asia/regional_lead"
       ],
       "inputs": [
         "Technology domain",

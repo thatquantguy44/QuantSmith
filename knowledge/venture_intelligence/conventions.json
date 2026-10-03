@@ -394,6 +394,21 @@
         "citation": "unverified",
         "review_status": "draft",
         "review": null
+      },
+      {
+        "id": "norm.locale_space_thousands",
+        "locales": [
+          "ru",
+          "kk",
+          "uz",
+          "ky",
+          "tg"
+        ],
+        "thousands": " ",
+        "decimal": ",",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
       }
     ],
     "ambiguity_rule": "If a unit, era, or separator cannot be resolved from context, flag it; never guess.",
@@ -452,6 +467,36 @@
         "suffix": "LLC",
         "language": "en",
         "meaning": "limited liability company"
+      },
+      {
+        "suffix": "ООО",
+        "language": "ru",
+        "meaning": "limited liability company"
+      },
+      {
+        "suffix": "ТОО",
+        "language": "kk/ru",
+        "meaning": "limited liability partnership (Kazakhstan)"
+      },
+      {
+        "suffix": "АО",
+        "language": "ru",
+        "meaning": "joint-stock company"
+      },
+      {
+        "suffix": "MChJ",
+        "language": "uz",
+        "meaning": "limited liability company (Uzbek, Latin script)"
+      },
+      {
+        "suffix": "LLP",
+        "language": "en",
+        "meaning": "limited liability partnership"
+      },
+      {
+        "suffix": "JSC",
+        "language": "en",
+        "meaning": "joint-stock company"
       }
     ],
     "entity_merge_rule": "Never merge entities across scripts or transliterations without a registry identifier.",
@@ -497,7 +542,8 @@
         "review": null
       }
     ],
-    "fiscal_year_rule": "State the fiscal year-end for every annual figure; never assume a calendar year."
+    "fiscal_year_rule": "State the fiscal year-end for every annual figure; never assume a calendar year.",
+    "script_variant_rule": "Cyrillic and Latin forms of one name (and different transliteration standards or years) are never merged without a registry identifier."
   },
   "prohibited_source_classes": [
     "non_public_collection",
