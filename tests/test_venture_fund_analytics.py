@@ -334,7 +334,7 @@ def test_ac011_agents_built_with_boundaries_and_indexed():
     def nxt(path: str) -> str:
         m = re.search(r"Next unreserved spec number: `(\d+)`", (ROOT / path).read_text(encoding="utf-8"))
         return m.group(1)
-    assert nxt("specs/README.md") == nxt("docs/handoff.md") == "0096"
+    assert nxt("specs/README.md") == nxt("docs/handoff.md") and int(nxt("specs/README.md")) >= 96   # the indexes agree; the value advances as specs land
 
 
 # ---------------------------------------------------------------- AC-012

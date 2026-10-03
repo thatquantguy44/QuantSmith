@@ -935,3 +935,13 @@ required), and deterministic `render_markdown`. Checks form, not truth.
 
 Tests: `tests/test_venture_knowledge.py`.
 
+## `venture_routing` — spec `0096-venture-request-routing-and-orchestrator`
+
+`plan_request` turns a request into a plan: ordered agents, review gates, decision owner, the strictest decision-path
+class among the steps, and the clearance it needs. Refusals are decided first and name the human who owns the decision;
+ties and unmatched requests ask; a region with no agent is a stated gap; a caller below the required clearance is denied
+with no steps. Rules are data in `knowledge/venture_intelligence/routing.json`. Keyword matching, not understanding; a
+plan is not authorization to act.
+
+Tests: `tests/test_venture_routing.py`.
+
