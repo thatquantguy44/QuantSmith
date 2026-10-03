@@ -309,3 +309,74 @@ def test_cli_missing_tool_exits_two(tmp_path, capsys, monkeypatch):
     monkeypatch.setenv("PATH", "")
     assert cli.main(["run", "--tool", "ctest", "--root", str(tmp_path)]) == 2
     assert json.loads(capsys.readouterr().out)["error"] == "tool_missing"
+
+
+# ---- found by validating against a real project (BugsInPy cookiecutter), see specs/0097/validation.md ----
+
+def test_untyped_function_reports_nothing_probed_not_clean():
+    def untyped(value):
+        return value
+
+    res = probe_function(untyped)
+    assert res["status"] == "nothing_probed" and res["cases"] == 0 and "NOTHING WAS PROBED" in res["note"]
+    assert probe_function(untyped, param_types={"value": str})["cases"] > 0
+
+
+def test_probe_infers_type_from_simple_default():
+    def f(n=3):
+        return n
+    res = probe_function(f)
+    assert res["status"] == "probed" and res["hint_source"]["n"] == "inferred from default"
+
+
+def test_probe_isolates_relative_file_side_effects(tmp_path, monkeypatch):
+    import os
+    monkeypatch.chdir(tmp_path)
+
+    def make_dir(path: str):
+        try:
+            os.makedirs(path)
+        except OSError:
+            return False
+        return True
+
+    res = probe_function(make_dir)
+    assert res["isolated_cwd"] is True and list(tmp_path.iterdir()) == []
+    assert os.getcwd() == str(tmp_path.resolve()) or os.getcwd() == str(tmp_path)
+
+
+def test_cli_edges_exit_two_when_nothing_probed(tmp_path, capsys):
+    write(tmp_path / "legacy_mod.py", "def f(value):\n    return value\n")
+    assert cli.main(["edges", "--root", str(tmp_path), "--target", "legacy_mod:f"]) == 2
+    assert cli.main(["edges", "--root", str(tmp_path), "--target", "legacy_mod:f", "--hint", "value=str"]) == 0
+    capsys.readouterr()
+    assert cli.main(["edges", "--root", str(tmp_path), "--target", "legacy_mod:f", "--hint", "value=widget"]) == 2
+
+
+def test_run_passes_env_so_environment_dependent_bugs_reproduce(tmp_path, capsys):
+    write(tmp_path / "test_env.py", "import os\ndef test_locale_flag():\n    assert os.environ.get('QTE_FLAG') != 'on'\n")
+    assert cli.main(["run", "--tool", "pytest", "--root", str(tmp_path)]) == 0
+    assert cli.main(["run", "--tool", "pytest", "--root", str(tmp_path), "--env", "QTE_FLAG=on"]) == 1
+    capsys.readouterr()
+    assert cli.main(["run", "--tool", "pytest", "--root", str(tmp_path), "--env", "BADPAIR"]) == 2
+
+
+def test_run_uses_the_projects_interpreter_flag(tmp_path, capsys):
+    import sys
+    write(tmp_path / "test_ok.py", "def test_ok():\n    assert True\n")
+    assert cli.main(["run", "--tool", "pytest", "--root", str(tmp_path), "--python", sys.executable]) == 0
+
+
+def test_same_named_tests_in_different_modules_keep_distinct_ids_and_record_all_seeds(tmp_path):
+    write(tmp_path / "pkg" / "__init__.py", "")
+    write(tmp_path / "pkg" / "test_one.py", "import os\ndef test_same():\n    os.mkdir('shared')\n")
+    write(tmp_path / "pkg" / "test_two.py", "import os\ndef test_same():\n    os.mkdir('shared')\n")
+    res = check_pytest(tmp_path, runs=2, shuffles=3, hash_seeds=("0",))
+    assert len({t for t in res["classification"]}) == 2
+
+
+def test_order_dependence_reports_every_failing_seed(tmp_path):
+    write(tmp_path / "test_o.py", "S = []\ndef test_a():\n    S.append(1)\ndef test_b():\n    assert S == [1]\n")
+    res = check_pytest(tmp_path, runs=2, shuffles=8, hash_seeds=("0",))
+    hit = next(o for o in res["order_dependent"] if o["test"].endswith("test_b"))
+    assert hit["seed"] == hit["seeds"][0] and hit["failed_in_shuffles"] == len(hit["seeds"]) >= 1

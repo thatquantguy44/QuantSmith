@@ -17,15 +17,18 @@ from .report import ToolMissing
 from .runners import run_command
 
 
-def coverage_available() -> bool:
-    import importlib.util
-    return importlib.util.find_spec("coverage") is not None
+def coverage_available(python: Optional[str] = None) -> bool:
+    """Is ``coverage`` importable by ``python`` (the project's interpreter; default: this one)?"""
+    if python is None or python == sys.executable:
+        import importlib.util
+        return importlib.util.find_spec("coverage") is not None
+    return run_command([python, "-c", "import coverage"], Path("."), 30.0).returncode == 0
 
 
 def run_pytest_with_coverage(cwd: str | Path, source: Sequence[str], args: Sequence[str] = (), timeout_s: float = 900.0,
                              python: Optional[str] = None, env_extra: Optional[dict] = None) -> Dict[str, Any]:
     """Run pytest under ``coverage`` (branch coverage) and return per-file executed and missing lines."""
-    if not coverage_available():
+    if not coverage_available(python):
         raise ToolMissing("the coverage package is not installed (it is in the `dev` extra: pip install -e '.[dev]')")
     py = python or sys.executable
     cwd = Path(cwd)

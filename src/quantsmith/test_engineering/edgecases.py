@@ -211,17 +211,44 @@ def _finite(x: Any) -> bool:
 
 def probe_function(fn: Callable[..., Any], allowed_exceptions: Sequence[type] = (), baseline: Optional[Mapping[str, Any]] = None,
                    extra_edges: Optional[Mapping[str, Sequence[EdgeValue]]] = None, timeout_s: float = 2.0,
-                   max_cases: int = 400) -> Dict[str, Any]:
+                   max_cases: int = 400, param_types: Optional[Mapping[str, Any]] = None, isolate_cwd: bool = True) -> Dict[str, Any]:
     """Call ``fn`` with one parameter at a time at each edge value. Returns outcomes and findings.
 
     ``allowed_exceptions`` are the exceptions the function is *documented* to raise on bad input. An
     exception on a value valid for the declared type that is not allowed is a finding; so is any
     crash-like exception (ZeroDivisionError, IndexError, ...), a call that times out, a non-finite
     result from finite inputs, and an argument that the call mutated.
+
+    Unannotated parameters take their type from ``param_types`` (name -> type), else from a simple default
+    (``int``, ``float``, ``str``, ``bytes``, ``bool``); otherwise they are not probed and the result says so
+    (``status: nothing_probed`` when no parameter could be).
+
+    With ``isolate_cwd`` (default) the calls run inside a throwaway working directory, so a function that
+    creates or deletes *relative* paths does so there. This is not a sandbox: absolute paths, the network,
+    and other processes are unaffected, so only probe code you trust to be safe to call with odd inputs.
     """
+    if isolate_cwd:
+        import os
+        import tempfile
+        old = os.getcwd()
+        with tempfile.TemporaryDirectory(prefix="qte-probe-") as tmp:
+            os.chdir(tmp)
+            try:
+                result = probe_function(fn, allowed_exceptions, baseline, extra_edges, timeout_s, max_cases, param_types, isolate_cwd=False)
+            finally:
+                os.chdir(old)
+        result["isolated_cwd"] = True
+        return result
     sig = inspect.signature(fn)
     hints = typing.get_type_hints(fn) if hasattr(fn, "__annotations__") else {}
     params = [p for p in sig.parameters.values() if p.kind in (p.POSITIONAL_OR_KEYWORD, p.KEYWORD_ONLY)]
+    hints = dict(hints)
+    hint_source: Dict[str, str] = {name: "annotation" for name in hints}
+    for p in params:
+        if param_types and p.name in param_types:
+            hints[p.name], hint_source[p.name] = param_types[p.name], "supplied"
+        elif p.name not in hints and p.default is not inspect.Parameter.empty and type(p.default) in (int, float, str, bytes, bool):
+            hints[p.name], hint_source[p.name] = type(p.default), "inferred from default"
     base: Dict[str, Any] = {}
     for p in params:
         if baseline and p.name in baseline:
@@ -268,10 +295,15 @@ def probe_function(fn: Callable[..., Any], allowed_exceptions: Sequence[type] = 
                 o.flags.append("mutated_its_input")
             outcomes.append(o)
     findings = [o for o in outcomes if o.flags]
-    return {"function": getattr(fn, "__qualname__", repr(fn)), "baseline": {k: repr(v)[:80] for k, v in base.items()},
+    nothing = not outcomes
+    return {"function": getattr(fn, "__qualname__", repr(fn)), "status": "nothing_probed" if nothing else "probed",
+            "baseline": {k: repr(v)[:80] for k, v in base.items()}, "hint_source": hint_source,
             "cases": len(outcomes), "outcomes": [o.__dict__ for o in outcomes], "findings": [o.__dict__ for o in findings],
             "no_catalog_for": no_catalog,
-            "note": "edge cases find crashes and contract violations, not wrong answers; an empty findings list is not proof of correctness"}
+            "note": ("NOTHING WAS PROBED: no parameter has a type annotation, a simple default, or a supplied type; pass --hint name=type. "
+                     "An empty findings list here means no cases ran." if nothing else
+                     "edge cases find crashes and contract violations, not wrong answers; an empty findings list is not proof of correctness"
+                     + ("; parameters without a type were skipped: " + ", ".join(no_catalog) if no_catalog else ""))}
 
 
 def to_literal(value: Any) -> str:
