@@ -1,0 +1,85 @@
+{
+  "schema_version": "0093.1",
+  "pack_id": "rates_fixed_income",
+  "name": "Rates & Government Bonds — visual stories",
+  "analytics_pack_ids": [
+    "rates_fixed_income"
+  ],
+  "reviewer_agents": [
+    "agents/analytics/data_storytelling",
+    "agents/analytics/data_visualization",
+    "agents/asset_classes/fixed_income_rates",
+    "agents/risk"
+  ],
+  "review": {
+    "status": "draft",
+    "reviewer": null,
+    "reviewed_on": null
+  },
+  "recipes": [
+    {
+      "recipe_id": "curve_levels",
+      "intent": "curve",
+      "decision": "Where are observed yields across the declared maturity buckets?",
+      "audiences": [
+        "executive",
+        "analyst"
+      ],
+      "sections": [
+        {
+          "section_id": "yields",
+          "metric": "yield",
+          "dimensions": [
+            "tenor"
+          ],
+          "view": "breakdown",
+          "chart_rule": "table",
+          "fallback_reason": "Maturity ordering and curve interpolation are not inferred; use a labelled tenor table.",
+          "interpretation": "Are quote, day-count, and maturity conventions consistent across the observations?",
+          "caveats": [
+            "No yield-change calculation is performed; observed values retain their declared unit."
+          ]
+        }
+      ],
+      "action": "Confirm maturity and quotation conventions before interpreting curve shape."
+    },
+    {
+      "recipe_id": "rate_exposure",
+      "intent": "exposure",
+      "decision": "Where are rate sensitivity and notional exposures located?",
+      "audiences": [
+        "executive",
+        "analyst"
+      ],
+      "sections": [
+        {
+          "section_id": "sensitivity",
+          "metric": "dv01",
+          "dimensions": [
+            "currency"
+          ],
+          "view": "breakdown",
+          "chart_rule": "shape",
+          "fallback_reason": "",
+          "interpretation": "Which currency exposures warrant review under the stated sensitivity convention?",
+          "caveats": [
+            "Currency groups are not netted or converted into a common currency."
+          ]
+        },
+        {
+          "section_id": "notional",
+          "metric": "notional",
+          "dimensions": [
+            "currency"
+          ],
+          "view": "breakdown",
+          "chart_rule": "shape",
+          "fallback_reason": "",
+          "interpretation": "How do position sizes relate to separately governed sensitivity measures?",
+          "caveats": []
+        }
+      ],
+      "action": "Review the sensitivity convention and currency basis for the largest observed exposures."
+    }
+  ]
+}

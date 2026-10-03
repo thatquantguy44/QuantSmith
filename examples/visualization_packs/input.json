@@ -1,0 +1,195 @@
+{
+  "synthetic": true,
+  "examples": [
+    {
+      "pack_id": "finance_performance",
+      "recipe_id": "segment_performance",
+      "as_of": 12,
+      "source": "Synthetic finance fixture; fixed monthly observations",
+      "definitions": [
+        {
+          "name": "revenue",
+          "owner": "example-finance",
+          "grain": "month",
+          "dimensions": [
+            "segment"
+          ],
+          "source": "revenue",
+          "agg": "sum"
+        },
+        {
+          "name": "noninterest_expense",
+          "owner": "example-finance",
+          "grain": "month",
+          "dimensions": [
+            "segment"
+          ],
+          "source": "noninterest_expense",
+          "agg": "sum"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "revenue",
+          "metric": "revenue",
+          "dimensions": [
+            "segment"
+          ],
+          "view": "attribution",
+          "start": 12,
+          "end": 12
+        },
+        {
+          "id": "expense",
+          "metric": "noninterest_expense",
+          "dimensions": [
+            "segment"
+          ],
+          "view": "breakdown",
+          "start": 12,
+          "end": 12
+        }
+      ],
+      "rows": [
+        {
+          "period": 12,
+          "dims": {
+            "segment": "Retail"
+          },
+          "measures": {
+            "revenue": 240,
+            "noninterest_expense": 150
+          }
+        },
+        {
+          "period": 12,
+          "dims": {
+            "segment": "Markets"
+          },
+          "measures": {
+            "revenue": 180,
+            "noninterest_expense": 110
+          }
+        },
+        {
+          "period": 12,
+          "dims": {
+            "segment": "Corporate"
+          },
+          "measures": {
+            "revenue": 120,
+            "noninterest_expense": 85
+          }
+        }
+      ]
+    },
+    {
+      "pack_id": "credit_risk",
+      "recipe_id": "exposure_profile",
+      "as_of": 12,
+      "source": "Synthetic credit fixture; fixed exposure snapshot",
+      "definitions": [
+        {
+          "name": "ead",
+          "owner": "example-credit",
+          "grain": "month",
+          "dimensions": [
+            "portfolio"
+          ],
+          "source": "ead",
+          "agg": "sum"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "exposure",
+          "metric": "ead",
+          "dimensions": [
+            "portfolio"
+          ],
+          "view": "breakdown",
+          "start": 12,
+          "end": 12
+        }
+      ],
+      "rows": [
+        {
+          "period": 12,
+          "dims": {
+            "portfolio": "Corporate"
+          },
+          "measures": {
+            "ead": 1200000
+          }
+        },
+        {
+          "period": 12,
+          "dims": {
+            "portfolio": "Retail"
+          },
+          "measures": {
+            "ead": 800000
+          }
+        },
+        {
+          "period": 12,
+          "dims": {
+            "portfolio": "Specialty"
+          },
+          "measures": {
+            "ead": 350000
+          }
+        }
+      ]
+    },
+    {
+      "pack_id": "economics_macro",
+      "recipe_id": "policy_path",
+      "as_of": 12,
+      "source": "Synthetic macro fixture; fixed release-vintage context for demonstration",
+      "definitions": [
+        {
+          "name": "policy_rate",
+          "owner": "example-macro",
+          "grain": "month",
+          "dimensions": [],
+          "source": "policy_rate",
+          "agg": "mean"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "policy",
+          "metric": "policy_rate",
+          "dimensions": [],
+          "view": "trend",
+          "start": 10,
+          "end": 12
+        }
+      ],
+      "rows": [
+        {
+          "period": 10,
+          "dims": {},
+          "measures": {
+            "policy_rate": 4.5
+          }
+        },
+        {
+          "period": 11,
+          "dims": {},
+          "measures": {
+            "policy_rate": 4.25
+          }
+        },
+        {
+          "period": 12,
+          "dims": {},
+          "measures": {
+            "policy_rate": 4.0
+          }
+        }
+      ]
+    }
+  ]
+}
