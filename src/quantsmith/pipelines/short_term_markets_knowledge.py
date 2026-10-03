@@ -13,7 +13,7 @@ from datetime import date
 from pathlib import Path
 import json
 import re
-from typing import Any, Dict, Iterable, List, Mapping, Sequence
+from typing import Any, Dict, List, Mapping, Sequence
 
 
 PACK_DIR = Path("knowledge/short_term_markets")

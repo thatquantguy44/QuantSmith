@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import pytest
 
-from quantsmith.agentic_code_tools.powerbi import PowerBIValidationError
 from quantsmith.pipelines.dashboard_spec import (
     DashboardSpec,
     DashboardSpecError,

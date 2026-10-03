@@ -9,7 +9,6 @@ from __future__ import annotations
 import pytest
 
 from quantsmith.pipelines.financing_cost_analysis import (
-    CapacityFinding,
     FinancedPosition,
     FinancingLeg,
     capacity_limit,
