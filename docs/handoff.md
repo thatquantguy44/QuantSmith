@@ -1610,8 +1610,9 @@ manual-task persistence question stays deferred until a real consumer needs it.
         `tests/test_market_research.py:800` (`item`), and
         `tests/test_nl_analytics.py:763` (`envelope2`) look safe to remove.
     - Also still open from the repository health check: the `repro` gate's lockfile
-      finding is closed by `uv.lock` (see `docs/gate_runbook.md`; its "no run
-      manifest" finding remains); every `knowledge/venture_intelligence/` record is
+      finding is closed by `uv.lock` and its run-manifest finding by
+      `specs/0083-venture-intelligence-foundation/run_card.md` (see
+      `docs/gate_runbook.md`); every `knowledge/venture_intelligence/` record is
       `draft` and most cite `unverified`; `agents/agent_registry.yaml` lists only 6 skill
       agents in total, so it does not include the venture agents (nor most others);
       decide whether it should be complete or retired.

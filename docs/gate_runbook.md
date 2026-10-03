@@ -142,7 +142,8 @@ uv lock --check                    # fails if uv.lock is stale (CI runs this)
 
 Commit `uv.lock` together with the `pyproject.toml` change that caused it. Re-lock
 with `--upgrade` on a regular cadence (monthly is a reasonable start) and let the
-test suite decide whether the new pins are acceptable. The gate's remaining
-finding, "No run manifest found", needs a filled-in run card rather than a
-lockfile; see `templates/docs/run_card.md`.
+test suite decide whether the new pins are acceptable.
 
+The gate's other check, a run manifest, is satisfied by a filled-in run card
+under `specs/*/` (for example `specs/0083-venture-intelligence-foundation/run_card.md`);
+use `templates/docs/run_card.md` and record a real run, never a placeholder.
