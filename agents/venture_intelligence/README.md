@@ -24,6 +24,14 @@ by world region plus cross-cutting capabilities. Foundation spec:
 | `deal_sourcing/` | Longlist from signals against caller-stated criteria | analytic_support | Rank by merit; recommend |
 | `company_diligence/` | Evidence/assumption/judgement memo from supplied evidence | analytic_support | Approve, reject, certify |
 
+## Fund and portfolio analytics agents (cross-cutting)
+
+| Agent | Handles | Class | Never |
+| --- | --- | --- | --- |
+| `fund_performance_analyst/` | DPI/RVPI/TVPI, XIRR with roots, J-curve, KS-PME, vintage-matched peer rank, all as of a date | analytic_support | Set or certify a valuation; rank funds |
+| `valuation_marks_reviewer/` | Mark-consistency flags with numbers against policy thresholds | analytic_support | Approve, reject, set, or propose a mark |
+| `portfolio_reserve_analyst/` | Seeded fund-outcome and reserve-policy scenarios with assumptions and intervals | analytic_support | Decide follow-ons, set reserve policy, forecast returns |
+
 ## Tradecraft and screening-support agents (cross-cutting)
 
 | Agent | Handles | Class | Never |

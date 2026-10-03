@@ -13,9 +13,9 @@ signal and model **reproducible, leakage-safe, and traceable to a spec**.
 [![CI](https://github.com/joshualutkemuller/QuantSmith/actions/workflows/ci.yml/badge.svg)](https://github.com/joshualutkemuller/QuantSmith/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](pyproject.toml)
 [![Approach: Spec-Driven](https://img.shields.io/badge/Approach-Spec--Driven-ff6f00)](instructions/spec_driven_development.md)
-[![Agents: 200](https://img.shields.io/badge/Agents-200-6f42c1)](agents/README.md)
+[![Agents: 203](https://img.shields.io/badge/Agents-203-6f42c1)](agents/README.md)
 [![Quality Gates: 35](https://img.shields.io/badge/Quality%20Gates-35-2ea44f)](hooks/README.md)
-[![Specs: 78](https://img.shields.io/badge/Specs-78-0969da)](specs/README.md)
+[![Specs: 79](https://img.shields.io/badge/Specs-79-0969da)](specs/README.md)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](.github/GIT_GUIDELINES.md)
 
 <br/>
@@ -65,7 +65,7 @@ signal and model **reproducible, leakage-safe, and traceable to a spec**.
 | 🧠 Plan research from a hypothesis | Spec-driven planning agents + traceable requirements |
 | 🔎 Catch leakage & time-alignment bugs | Point-in-time standards + `leakage`/`backtest` gates |
 | 📝 Document features, models, backtests | Templates, cards, and reproducible run artifacts |
-| 🤖 Reuse research workflows | 200 narrow, inspectable agent roles across the stack |
+| 🤖 Reuse research workflows | 203 narrow, inspectable agent roles across the stack |
 | 🚦 Stop mistakes before commit/push | 35 quality gates, advisory by default, CI-enforceable |
 | 🗣️ Share a common vocabulary | An [agentic dictionary](agentic_dictionary.md) for the team |
 
@@ -314,7 +314,7 @@ each. Uses the catalog as its routing table.
 
 **Optimization, machine learning & deep learning** (`agents/optimization/`, `agents/machine_learning/`, `agents/deep_learning/`) — orchestrator-led families that frame constrained decisions, supervised and online learning, and neural architectures, training systems, and serving; catalogued in [`agents/README.md`](agents/README.md).
 
-**Venture & non-traditional intelligence** (`agents/venture_intelligence/`) — 21 contract-only agents for technology scouting, portfolio consulting, and foreign-influence screening support, under the shared [`instructions/venture_intelligence.md`](instructions/venture_intelligence.md) standard (inform, never decide) and the `knowledge/venture_intelligence/` pack: a multilingual document agent (Mandarin, Japanese, Korean, Thai, Vietnamese, Bahasa, Russian-script and South Asian business text), regional leads for Southeast Asia, Greater China & East Asia, South Asia, and Central Asia (with Southeast Asia and Greater China structure analysts), an `entity_resolution` agent, signal analysts (patents, hiring, narrative/news, technology landscape), sourcing and diligence agents, and tradecraft and screening-support agents (source grading, calibrated confidence language, competing hypotheses, collection gaps, ownership screening, dual-use indicators). Specs `0083`–`0090`, `0094` (the `asian_nlp` package makes the multilingual agent testable).
+**Venture & non-traditional intelligence** (`agents/venture_intelligence/`) — 24 contract-only agents for technology scouting, portfolio consulting, and foreign-influence screening support, under the shared [`instructions/venture_intelligence.md`](instructions/venture_intelligence.md) standard (inform, never decide) and the `knowledge/venture_intelligence/` pack: a multilingual document agent (Mandarin, Japanese, Korean, Thai, Vietnamese, Bahasa, Russian-script and South Asian business text), regional leads for Southeast Asia, Greater China & East Asia, South Asia, and Central Asia (with Southeast Asia and Greater China structure analysts), an `entity_resolution` agent, signal analysts (patents, hiring, narrative/news, technology landscape), sourcing and diligence agents, and fund and portfolio analytics agents (performance, mark review, reserve scenarios), tradecraft and screening-support agents (source grading, calibrated confidence language, competing hypotheses, collection gaps, ownership screening, dual-use indicators). Specs `0083`–`0091`, `0094` (the `asian_nlp` package makes the multilingual agent testable).
 
 </details>
 
@@ -525,6 +525,7 @@ the [spec index](specs/README.md).
 | [`0088`](specs/0088-venture-sources-pit-ingestion/) | Venture sources and point-in-time ingestion — eleven public source entries with `known_at` policies, as-of views, outcome-independent cohorts, deterministic entity resolution that never merges on a name alone | `venture_ingestion.py` |
 | [`0089`](specs/0089-venture-signal-and-sourcing-agents/) | Venture signal analysts (patent/IP, hiring, narrative/news, technology landscape) and sourcing/diligence agents | `agents/venture_intelligence/` (contract-only) |
 | [`0090`](specs/0090-venture-tradecraft-and-screening-agents/) | Venture tradecraft and screening support — grades, origin-aware corroboration, competing-hypotheses matrix, effective ownership, conclusion-language lint | `venture_tradecraft.py` |
+| [`0091`](specs/0091-venture-fund-and-portfolio-analytics/) | Venture fund and portfolio analytics — multiples, XIRR with every root, J-curve, KS-PME, vintage-matched peer rank, mark-consistency flags, and seeded fund-outcome, bootstrap, and reserve-policy simulation with assumption ledgers; three contract agents | `venture_fund_analytics.py` |
 | [`0094`](specs/0094-asian-language-nlp-foundation/) | Asian-language NLP foundation — dependency-free language/script identification, a segmentation baseline with a declared segmenter slot, rule-based amount/currency/date/era-year/fiscal-period extraction with verbatim spans and offsets (Mandarin, Japanese, Korean, Thai, Vietnamese, Indonesian/Malay, Filipino, Russian, Kazakh, Uzbek, English), per-language evaluation that refuses pooled scores, and a baseline-vs-model comparison that never overwrites | `asian_nlp/` package (`src/quantsmith/asian_nlp/`) |
 | [`0055`](specs/0055-workflow-scheduling-operations/) | Workflow scheduling operations — registry validation, cron dry-run evidence, idempotent dispatch, JSONL ledger, manual reminders, daily reports, alert handoff, memory candidates | `workflow_scheduling.py` |
 | [`0060`](specs/0060-scheduler-monitoring/) | Scheduler monitoring — executable report and alert-preview CLI plus caller-injected alert delivery over the workflow-scheduling runtime | `workflow_scheduling.py` *(extended)*, `workflow_scheduling_cli.py` |

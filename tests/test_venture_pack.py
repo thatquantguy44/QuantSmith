@@ -171,7 +171,7 @@ def test_ac014_overlay_refuses_prohibited_sources(pack):
 def test_ac015_roadmap_reserved_in_specs_readme(pack):
     readme = (ROOT / "specs/README.md").read_text(encoding="utf-8")
     assert "0083-venture-intelligence-foundation" in readme and "0084" in readme
-    assert [r["spec"] for r in pack["coverage"]["roadmap"]] == [f"{n:04d}" for n in range(84, 93)] + ["0094"]
+    assert [r["spec"] for r in pack["coverage"]["roadmap"]] == [f"{n:04d}" for n in range(84, 93)] + ["0094", "0095"]
 
 
 def test_ac016_workflows_name_agents_gates_class(pack):

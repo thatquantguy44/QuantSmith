@@ -483,3 +483,27 @@ A name-comparison hit against a restricted-party or sanctions list snapshot; an 
 ### Dual-Use Indicator
 
 A resemblance between a technology description and a caller-supplied control-list entry, turned into a question for counsel; not a classification.
+
+### XIRR
+
+Annualised internal rate of return on dated cash flows (Actual/365), contributions negative and distributions positive, with the latest NAV a terminal inflow; reports every root because flows that change sign more than once may have several.
+
+### Peer Percentile Rank
+
+Position of a fund's metric among peers of the same vintage as (count below + half the ties) / n; refused below ten peers.
+
+### Mark Review Flag
+
+A question about a valuation mark, with the numbers behind it, raised by a consistency check; the valuation committee decides the mark.
+
+### Follow-On Reserve
+
+Capital held back to invest again in existing portfolio companies; simulations of it depend on assumed selection skill and dilution.
+
+### Equal-Outcome Null
+
+The comparison in which every company returns the cohort mean, used to test whether a power-law story adds anything beyond the average.
+
+### Gross Fund Multiple
+
+Proceeds over invested capital before fees, carry, timing, and partial-loss detail; not an LP return.
