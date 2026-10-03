@@ -12,7 +12,9 @@
         "deal_sourcing",
         "company_diligence",
         "multilingual_document_nlp",
-        "entity_resolution"
+        "entity_resolution",
+        "collection_gap_tracker",
+        "confidence_language_reviewer"
       ],
       "inputs": [
         "Company list or thesis",
@@ -41,7 +43,9 @@
         "hiring_signal_analyst",
         "narrative_news_analyst",
         "technology_landscape_analyst",
-        "source_reliability_grader (planned)"
+        "source_reliability_grader",
+        "competing_hypotheses_analyst",
+        "confidence_language_reviewer"
       ],
       "inputs": [
         "Channel signals"
@@ -118,8 +122,9 @@
       ],
       "agents": [
         "southeast_asia/entity_structure_analyst",
-        "ownership_screen (planned)",
-        "dual_use_indicator (planned)"
+        "greater_china_east_asia/entity_structure_analyst",
+        "ownership_screen",
+        "dual_use_indicator"
       ],
       "inputs": [
         "Registry extracts",

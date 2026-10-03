@@ -452,6 +452,12 @@ region (Southeast Asia built first); `multilingual_document_nlp` is cross-cuttin
 
 | Agent | Handles | Feeds mainly |
 | --- | --- | --- |
+| `venture_intelligence/source_reliability_grader/` | Proposed source/information grades with stated bases and origin counting; never overrides a human grade or grades on reputation | `confidence_language_reviewer`, `competing_hypotheses_analyst` |
+| `venture_intelligence/confidence_language_reviewer/` | Likelihood wording vs probability bands and vague-term flags; never changes a judgement | `company_diligence`, `research_analyst` |
+| `venture_intelligence/competing_hypotheses_analyst/` | Competing-hypotheses matrix including a deception/artifact hypothesis; never selects the conclusion | `company_diligence`, `technology_landscape_analyst` |
+| `venture_intelligence/collection_gap_tracker/` | Information-requirement register with lawful candidate channels; never tasks or recommends non-public collection | `company_diligence`, `deal_sourcing` |
+| `venture_intelligence/ownership_screen/` | Effective ownership, list matches as indicators, unresolved layers (`sovereign_adjacent`); never designates, attributes, or accuses | counsel, `enterprise_risk/aml_financial_crime` |
+| `venture_intelligence/dual_use_indicator/` | Control-list resemblance as questions for counsel (`sovereign_adjacent`); never classifies or rules on licensing | counsel, `technology_landscape_analyst` |
 | `venture_intelligence/patent_ip_analyst/` | Patent-family landscapes across offices and languages, dated by publication; never assesses legal validity or values a patent | `venture_intelligence/technology_landscape_analyst`, `research_analyst` |
 | `venture_intelligence/hiring_signal_analyst/` | Organization-level hiring and workforce signals (`person_adjacent`); never profiles individuals or asserts headcount from postings | `venture_intelligence/technology_landscape_analyst`, `data_quality` |
 | `venture_intelligence/narrative_news_analyst/` | Multilingual news timelines with syndication collapse and amplification indicators; never presents narrative as fact or attributes a campaign | `venture_intelligence/technology_landscape_analyst`, `research_analyst` |

@@ -24,6 +24,17 @@ by world region plus cross-cutting capabilities. Foundation spec:
 | `deal_sourcing/` | Longlist from signals against caller-stated criteria | analytic_support | Rank by merit; recommend |
 | `company_diligence/` | Evidence/assumption/judgement memo from supplied evidence | analytic_support | Approve, reject, certify |
 
+## Tradecraft and screening-support agents (cross-cutting)
+
+| Agent | Handles | Class | Never |
+| --- | --- | --- | --- |
+| `source_reliability_grader/` | Proposed source and information grades with stated bases; origin and corroboration counting | analytic_support | Override a human grade; grade on reputation |
+| `confidence_language_reviewer/` | Likelihood wording against probability bands; vague-term flags | analytic_support | Change a judgement |
+| `competing_hypotheses_analyst/` | Competing-hypotheses matrix with a deception/artifact hypothesis; diagnostic evidence; sensitivity | analytic_support | Select the conclusion |
+| `collection_gap_tracker/` | Information-requirement register with lawful candidate channels | analytic_support | Task or recommend non-public collection |
+| `ownership_screen/` | Effective ownership through chains, list matches as indicators, unresolved layers | sovereign_adjacent | Designate, attribute, accuse |
+| `dual_use_indicator/` | Control-list resemblance as questions for counsel | sovereign_adjacent | Classify, license, or rule on legality |
+
 ## Regions
 
 | Region | Status | Scope |

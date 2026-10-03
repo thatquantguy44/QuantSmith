@@ -202,8 +202,9 @@
       "workflow": "Source and information grading",
       "never": "Override a human grade",
       "creating_spec": "0090",
-      "status": "planned",
-      "decision_path_class": "analytic_support"
+      "status": "built",
+      "decision_path_class": "analytic_support",
+      "path": "agents/venture_intelligence/source_reliability_grader"
     },
     {
       "id": "confidence_language_reviewer",
@@ -211,8 +212,9 @@
       "workflow": "Calibrated confidence language review",
       "never": "Change a judgement",
       "creating_spec": "0090",
-      "status": "planned",
-      "decision_path_class": "analytic_support"
+      "status": "built",
+      "decision_path_class": "analytic_support",
+      "path": "agents/venture_intelligence/confidence_language_reviewer"
     },
     {
       "id": "competing_hypotheses_analyst",
@@ -220,8 +222,9 @@
       "workflow": "Competing-hypotheses and red-team analysis",
       "never": "Select a conclusion for the analyst",
       "creating_spec": "0090",
-      "status": "planned",
-      "decision_path_class": "analytic_support"
+      "status": "built",
+      "decision_path_class": "analytic_support",
+      "path": "agents/venture_intelligence/competing_hypotheses_analyst"
     },
     {
       "id": "collection_gap_tracker",
@@ -229,8 +232,9 @@
       "workflow": "Evidence-gap and collection-requirement tracking",
       "never": "Initiate collection from non-public sources",
       "creating_spec": "0090",
-      "status": "planned",
-      "decision_path_class": "analytic_support"
+      "status": "built",
+      "decision_path_class": "analytic_support",
+      "path": "agents/venture_intelligence/collection_gap_tracker"
     },
     {
       "id": "ownership_screen",
@@ -238,8 +242,9 @@
       "workflow": "Ownership-chain and foreign-capital indicators",
       "never": "Designate, attribute, or recommend action",
       "creating_spec": "0090",
-      "status": "planned",
-      "decision_path_class": "sovereign_adjacent"
+      "status": "built",
+      "decision_path_class": "sovereign_adjacent",
+      "path": "agents/venture_intelligence/ownership_screen"
     },
     {
       "id": "dual_use_indicator",
@@ -247,8 +252,9 @@
       "workflow": "Dual-use and export-control indicators",
       "never": "Rule on export-control classification",
       "creating_spec": "0090",
-      "status": "planned",
-      "decision_path_class": "sovereign_adjacent"
+      "status": "built",
+      "decision_path_class": "sovereign_adjacent",
+      "path": "agents/venture_intelligence/dual_use_indicator"
     },
     {
       "id": "fund_performance_analyst",
