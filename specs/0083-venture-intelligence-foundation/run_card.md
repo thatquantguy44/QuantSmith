@@ -23,7 +23,7 @@ data in this run; it validates committed knowledge records and synthetic golden 
 
 ## Code Version
 
-- Commit: `4a271f4756a46cac1c8539a1a57c6dde48fa746d`
+- Commit: `02fea832f97c748f91d6cfa19a2e4e1630118756` (the `0096` commit after rebasing onto `main` at `06588e4`; tested before the rebase at `4a271f4` with identical content)
 - Branch / tag: `claude/venture-intelligence-sea-0083`
 - Dirty working tree at run time? no. This card is committed after the run; it does
   not change any validated file.
