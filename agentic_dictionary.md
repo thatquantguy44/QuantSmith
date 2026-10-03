@@ -507,3 +507,23 @@ The comparison in which every company returns the cohort mean, used to test whet
 ### Gross Fund Multiple
 
 Proceeds over invested capital before fees, carry, timing, and partial-loss detail; not an LP return.
+
+### Knowledge Local Store
+
+The gitignored knowledge_local/<domain>/ folder that pairs with a committed pack and holds real, private material; it declares its own access level in store.yml.
+
+### Clearance Before Ranking
+
+The retrieval rule that items above the caller's clearance, not yet known, or superseded are dropped before any scoring, so a restricted document cannot change what a lower-clearance caller sees.
+
+### Citation Identifier
+
+A passage reference of the form document:start-end that resolves to an exact span, content hash, known-at date, grade, and access level.
+
+### Bottom Line Up Front
+
+The opening statement of a brief that gives the main judgement in a few sentences before the supporting detail; capped at 600 characters here.
+
+### Release Gate
+
+The rule that a brief or memo is releasable only when it validates and a named human reviewer is recorded; the writing agent never sets the reviewer.

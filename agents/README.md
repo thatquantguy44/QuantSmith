@@ -452,6 +452,8 @@ region (Southeast Asia built first); `multilingual_document_nlp` is cross-cuttin
 
 | Agent | Handles | Feeds mainly |
 | --- | --- | --- |
+| `venture_intelligence/intelligence_brief_writer/` | BLUF brief from cited, graded passages with separate evidence, assumptions, judgements, and gaps; never releases without a named reviewer or states an uncited claim | `briefer`, regional leads, reviewer |
+| `venture_intelligence/investment_memo_writer/` | Committee memo from diligence, tradecraft, and fund outputs with the decision owner named; never recommends, approves, or rejects an investment | investment committee |
 | `venture_intelligence/fund_performance_analyst/` | Fund multiples, XIRR with every root, J-curve, KS-PME, and vintage-matched peer rank as of a date; never sets or certifies a valuation | `valuation_marks_reviewer`, `portfolio_reserve_analyst`, investment committee |
 | `venture_intelligence/valuation_marks_reviewer/` | Mark-consistency flags with numbers against policy thresholds; never approves, sets, or proposes a mark | `fund_performance_analyst`, valuation committee |
 | `venture_intelligence/portfolio_reserve_analyst/` | Seeded fund-outcome and reserve-policy scenarios with assumptions and intervals; never decides follow-ons or forecasts returns | `fund_performance_analyst`, investment committee |

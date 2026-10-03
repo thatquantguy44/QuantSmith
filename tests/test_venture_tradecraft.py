@@ -107,8 +107,9 @@ def test_ac006_collection_register_helpers(conv):
     for prohibited in conv["prohibited_source_classes"]:
         with pytest.raises(ValueError):
             candidate_channel_check(prohibited, conv)
-    reg = [{"id": "R1", "decision": "invest/no-invest"}, {"id": "R2", "decision": " "}, {"id": "R3"}]
-    assert orphan_requirements(reg) == ["R2", "R3"]
+    reg = [{"id": "R1", "decision": "invest/no-invest"}, {"id": "R2", "decision": " "}, {"id": "R3"},
+           {"id": "R4", "decision": None}]
+    assert orphan_requirements(reg) == ["R2", "R3", "R4"]                  # None is not a decision
     assert requirement_age_days("2026-09-01", "2026-10-02") == 31
 
 

@@ -51,6 +51,8 @@ against a named person or entity. The decision belongs to the accountable human
 | `collection_gap_tracker` | Initiate, task, or recommend collection from non-public or prohibited sources |
 | `ownership_screen` | Designate, attribute, accuse, or recommend screening or enforcement action |
 | `dual_use_indicator` | Rule on export-control classification, licence need, or end-use legality |
+| `intelligence_brief_writer` | Release or publish a brief without a named human reviewer, state an uncited claim, or cite above the brief's classification |
+| `investment_memo_writer` | Recommend, approve, or reject an investment, or release a memo without a named human reviewer |
 | `fund_performance_analyst` | Set, certify, or adjust a valuation; rank funds for commitment; recommend an investment |
 | `valuation_marks_reviewer` | Approve, reject, set, or propose a replacement for a mark |
 | `portfolio_reserve_analyst` | Decide follow-on investments, set reserve policy, or forecast a fund's returns |
@@ -71,8 +73,26 @@ against a named person or entity. The decision belongs to the accountable human
 
 Deterministic helpers back the rules above: `quantsmith.pipelines.venture_pack`
 (pack validator, normalization, fund metrics), `venture_ingestion` (`known_at`,
-as-of views, cohorts, entity resolution), and `venture_fund_analytics` (multiples, XIRR, J-curve, PME, peer rank, mark-consistency flags, seeded fund and reserve simulation), and `venture_tradecraft` (grades,
+as-of views, cohorts, entity resolution), and `venture_knowledge` (private store, memory candidates, retrieval contract) and `venture_products` (brief and memo validation), `venture_fund_analytics` (multiples, XIRR, J-curve, PME, peer rank, mark-consistency flags, seeded fund and reserve simulation), and `venture_tradecraft` (grades,
 corroboration, hypotheses matrix, effective ownership, conclusion-language lint).
 `quantsmith.asian_nlp` supplies the deterministic baseline for Asian-language text (identification, segmentation, span-preserving extraction); model output is compared against it and never replaces it. They report structure and arithmetic; they never grade, conclude, classify, or
 designate. Validate the pack with
 `PYTHONPATH=src python3 -m quantsmith.pipelines.venture_pack`.
+
+## Knowledge integration (spec 0092)
+
+- **Private store.** Real source notes, screening decisions, cohorts, and vendor material live in the
+  gitignored `knowledge_local/<domain>/` folder (here `knowledge_local/venture_intelligence/`), paired
+  with the committed, synthetic pack of the same name. The store declares its own access level in
+  `store.yml` (default `restricted`). A gitignored folder stops commits, not copies; the access level
+  and filesystem permissions still apply. See `templates/knowledge_local/README.md`.
+- **Memory.** Lessons enter the existing workflow-memory write path as candidates (source quirks,
+  channel lessons, screening decisions), staged only into the private store's inbox and promoted by a
+  named human. Screening decisions are always `restricted`.
+- **Retrieval.** Order of operations: require the caller's clearance; drop what is above it, not yet
+  known, or superseded; rank on the eligible passages only; return cited spans or `not_found`; never
+  mention what was dropped. `retrieval_contract_violations` checks any retriever, including the future
+  `0054` server, against this.
+- **Products.** A brief or memo is validated before a reviewer sees it (`validate_product`) and is
+  releasable only when it validates and a named human reviewer is recorded. `None`, empty, or non-string
+  values never count as a name. The validator checks form, not truth.

@@ -82,7 +82,11 @@ KEY_RE='-----BEGIN [A-Z ]*PRIVATE KEY-----'
 EMAIL_RE='[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}'
 SSN_RE='[0-9]{3}-[0-9]{2}-[0-9]{4}'
 
-for f in $(find memory -type f \( -name '*.md' -o -name '*.yaml' -o -name '*.yml' -o -name '*.txt' \) 2>/dev/null); do
+# The gitignored local stores (spec 0092) are scanned too: they are never committed, so this is
+# the only place a pasted credential or an email address in them would be caught.
+scan_roots="memory"
+[ -d knowledge_local ] && scan_roots="$scan_roots knowledge_local"
+for f in $(find $scan_roots -type f \( -name '*.md' -o -name '*.yaml' -o -name '*.yml' -o -name '*.txt' \) 2>/dev/null); do
   grep -Eq "$CONN_RE" "$f" 2>/dev/null && qf_warn "$f: possible connection string with credentials in memory"
   grep -Eiq "$CRED_RE" "$f" 2>/dev/null && qf_warn "$f: possible credential value in memory"
   grep -Eq "$KEY_RE" "$f" 2>/dev/null && qf_warn "$f: private key in memory"

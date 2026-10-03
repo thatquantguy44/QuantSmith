@@ -21,6 +21,13 @@ patterns locally rather than expecting them to update in place.
 ## [Unreleased]
 
 ### Added
+- Venture knowledge integration (spec `0092`): the gitignored `knowledge_local/<domain>/` private
+  store (templates in `templates/knowledge_local/`; `docs-link` skips it and `memory` scans it),
+  `venture_knowledge.py` (store validation, memory candidates staged only inside the store, a
+  clearance-first retrieval reference with a contract checker for the future `0054` server),
+  `venture_products.py` (brief and memo validation, release gate, deterministic rendering), and the
+  `intelligence_brief_writer` and `investment_memo_writer` agents. Fixed: `None` was read as a name in
+  the pack's review sign-off, the orphan-requirement check, and the product checks.
 - Venture fund and portfolio analytics (spec `0091`): `venture_fund_analytics.py` (multiples as of a
   date, XIRR that reports every root, J-curve profile and series, Kaplan-Schoar PME, vintage-matched
   peer percentile, mark-consistency flags, seeded fund-outcome, bootstrap, and reserve-policy

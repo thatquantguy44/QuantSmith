@@ -14,7 +14,8 @@
         "multilingual_document_nlp",
         "entity_resolution",
         "collection_gap_tracker",
-        "confidence_language_reviewer"
+        "confidence_language_reviewer",
+        "investment_memo_writer"
       ],
       "inputs": [
         "Company list or thesis",
@@ -45,7 +46,8 @@
         "technology_landscape_analyst",
         "source_reliability_grader",
         "competing_hypotheses_analyst",
-        "confidence_language_reviewer"
+        "confidence_language_reviewer",
+        "intelligence_brief_writer"
       ],
       "inputs": [
         "Channel signals"

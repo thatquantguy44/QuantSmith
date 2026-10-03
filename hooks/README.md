@@ -122,7 +122,8 @@ hooks/stages/run-stage.sh spec
   file via `.secretscanignore`, or a line with a trailing `qf:allow-secret`
   marker. Enforced in CI.
 - **`docs-link-check.sh`** verifies relative Markdown links and image paths
-  resolve to existing files. External links and pure anchors are skipped.
+  resolve to existing files. External links and pure anchors are skipped, and the
+  gitignored `knowledge_local/` stores are not scanned.
 - **`agent-catalog-check.sh`** verifies every public agent (a directory with
   `prompt.md`) is listed in `agents/README.md` and in the generated
   `agents/agent_registry.yaml`.

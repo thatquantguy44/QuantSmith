@@ -292,8 +292,9 @@
       "workflow": "BLUF-style intelligence brief drafting",
       "never": "Publish without human review",
       "creating_spec": "0092",
-      "status": "planned",
-      "decision_path_class": "analytic_support"
+      "status": "built",
+      "decision_path_class": "analytic_support",
+      "path": "agents/venture_intelligence/intelligence_brief_writer"
     },
     {
       "id": "investment_memo_writer",
@@ -301,8 +302,9 @@
       "workflow": "Investment memo drafting from approved evidence",
       "never": "Recommend an investment",
       "creating_spec": "0092",
-      "status": "planned",
-      "decision_path_class": "analytic_support"
+      "status": "built",
+      "decision_path_class": "analytic_support",
+      "path": "agents/venture_intelligence/investment_memo_writer"
     },
     {
       "id": "greater_china_east_asia_entity_structure_analyst",
@@ -433,7 +435,7 @@
     },
     {
       "spec": "0092",
-      "scope": "Retrieval wiring and product writers",
+      "scope": "Local knowledge store, memory proposals, retrieval contract, and brief and memo writers (live semantic search stays with 0054)",
       "depends_on": [
         "0083"
       ],
