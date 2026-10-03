@@ -1545,8 +1545,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
     only, no runtime, matching `0022`/`0033`'s precedent; `agent-catalog`
     gate and the `0081` validator both pass.
 
-32. **Venture & non-traditional intelligence (specs `0083` foundation and `0084`
-    first build, both Draft).** New direction for venture capital, technology
+32. **Venture & non-traditional intelligence (specs `0083`–`0090` and `0094`, all Draft).** New direction for venture capital, technology
     scouting, portfolio consulting, and foreign-influence screening. `0083` is
     an umbrella foundation (taxonomy, venture data-time and survivorship
     contracts, source-grade and confidence tradecraft, channel catalog,
@@ -1582,7 +1581,9 @@ manual-task persistence question stays deferred until a real consumer needs it.
     rule-based amount/date/era extraction with spans, per-language evaluation,
     and a baseline-vs-LLM comparison harness.
     Proof of concept: no legal collection limits set yet; they must be set
-    before operational use. Next: the `0083` knowledge pack and validator.
+    before operational use. The `0083` knowledge pack and validator are built
+    (per-record review sign-off; all records still `draft`). Next: build `0094`,
+    then `0091` (fund analytics) and the deferred regions in `0087`.
 
 ## Open Questions For The Owner
 

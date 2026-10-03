@@ -21,6 +21,16 @@ patterns locally rather than expecting them to update in place.
 ## [Unreleased]
 
 ### Added
+- Venture & non-traditional intelligence (specs `0083`–`0090`, `0094`): the
+  `knowledge/venture_intelligence/` pack (taxonomy, conventions, channels, models,
+  workflows, coverage, gaps, glossary, golden cases, per-record review sign-off),
+  `instructions/venture_intelligence.md`, 21 contract-only agents under
+  `agents/venture_intelligence/` (multilingual document NLP, entity resolution,
+  Southeast Asia, Greater China & East Asia, South Asia, and Central Asia regional
+  agents, signal and sourcing agents, tradecraft and screening-support agents),
+  eleven public source entries with `known_at` policies, and the stdlib helpers
+  `venture_pack.py`, `venture_ingestion.py`, `venture_tradecraft.py` with tests.
+  Spec `0094` (Asian-language NLP foundation) is written, not yet built.
 - Reference runtimes with tests for specs `0001`, `0006`–`0019`
   (`src/quantsmith/pipelines/`, `src/quantsmith/adapters/`): momentum signal,
   return forecasting, portfolio construction, execution scheduling, the optimization
