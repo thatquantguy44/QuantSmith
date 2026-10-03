@@ -2,7 +2,7 @@
 # Docs gate - Agent catalog sync check.
 #
 # Verifies every public agent (a directory containing prompt.md) is listed in the
-# agent catalog, agents/README.md. Keeps the catalog from drifting as agents are
+# agent catalog, agents/README.md, and in the generated agents/agent_registry.yaml. Keeps the catalog from drifting as agents are
 # added. Advisory by default; set QF_STAGE_ENFORCE=1 to block.
 
 set -e
@@ -26,6 +26,10 @@ for agent in $(find agents -type f -name prompt.md -exec dirname {} \; | sort -u
   # The catalog references agents by their path under agents/ with a trailing slash.
   if ! grep -qF "$rel/" "$catalog" 2>/dev/null; then
     qf_warn "Agent not listed in $catalog: $rel/"
+  fi
+  # The machine-readable registry is generated; a missing entry means it is stale.
+  if [ -f agents/agent_registry.yaml ] && ! grep -qF "  - name: \"$rel\"" agents/agent_registry.yaml 2>/dev/null; then
+    qf_warn "Agent not in agents/agent_registry.yaml: $rel (run: python3 scripts/build_agent_registry.py)"
   fi
 done
 

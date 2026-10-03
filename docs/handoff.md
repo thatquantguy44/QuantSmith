@@ -295,7 +295,7 @@ designs**: create and
 approve one only when the foundation it consumes — `0063` or `0072` — has frozen
 that contract and the prior dependency named above is satisfied. Do not add
 agents merely to fill the map; prefer a canonical knowledge artifact or tested
-runtime that an existing agent can use. **Next unreserved spec number: `0094`** (`0083`–`0092` are the venture-intelligence foundation and its reserved children, item 32).
+runtime that an existing agent can use. **Next unreserved spec number: `0095`** (`0083`–`0092` are the venture-intelligence foundation and its reserved children, item 32; `0093` is the visualization packs spec; `0094` is the Asian-language NLP foundation).
 Reserving a number here does not create the directory; copy `templates/spec/`
 only when that slice becomes active.
 
@@ -1615,9 +1615,10 @@ manual-task persistence question stays deferred until a real consumer needs it.
       finding is closed by `uv.lock` and its run-manifest finding by
       `specs/0083-venture-intelligence-foundation/run_card.md` (see
       `docs/gate_runbook.md`); every `knowledge/venture_intelligence/` record is
-      `draft` and most cite `unverified`; `agents/agent_registry.yaml` lists only 6 skill
-      agents in total, so it does not include the venture agents (nor most others);
-      decide whether it should be complete or retired.
+      `draft` and most cite `unverified`; `agents/agent_registry.yaml` was incomplete (6 of
+      200 agents, with broken `skills_library/` paths); it is now generated from the
+      agents by `scripts/build_agent_registry.py` and guarded by a test and the
+      `agent-catalog` gate.
 
 33. **Domain visualization packs (spec `0093`, approved; implementation in
     progress on `visualization-packs`).** Extends `0081` with seven domain packs
