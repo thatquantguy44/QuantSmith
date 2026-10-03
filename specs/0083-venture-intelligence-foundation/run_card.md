@@ -1,6 +1,6 @@
 # Run Card: Venture intelligence pack validation
 
-- **Run ID:** 0083-pack-validation-2026-10-03-r5 (supersedes r4, recorded at `8f356e1`, r3 at `ca508df`, r2 at `dab341c`, and the first run at `9477e9f`)
+- **Run ID:** 0083-pack-validation-2026-10-03-r6 (supersedes r5, recorded at `0ba173c`, r4 at `8f356e1`, r3 at `ca508df`, r2 at `dab341c`, and the first run at `9477e9f`)
 - **Spec:** 0083-venture-intelligence-foundation
 - **Author:** Joshua Lutkemuller, CFA (accountable owner); executed in a Claude Code session
 - **Date:** 2026-10-03
@@ -16,14 +16,14 @@ The standard-library validator for the `knowledge/venture_intelligence/` pack
 (`quantsmith.pipelines.venture_pack`), which checks referential integrity,
 decision-path class rules, citation discipline, review sign-off, workflow-class
 consistency, and recomputes every golden case; then the eight venture, Asian-language, and fund-analytics
-test modules and the full repository test suite. This fifth run follows the `0095`
-change, which added model-governance fields to the catalog (synthetic-only, not usable for decisions),
-a validator rule using the computed deployability gate, a retitled gap, and a roadmap scope. There is no model, no training, and no external
+test modules and the full repository test suite. This sixth run follows the `0096`
+change, which added `routing.json` (request-routing rules), a validator block checking every routing
+reference, the `venture_orchestrator` agent, and glossary and roadmap entries. There is no model, no training, and no external
 data in this run; it validates committed knowledge records and synthetic golden cases.
 
 ## Code Version
 
-- Commit: `0ba173c227862c2874d38a485d968ee657c25842`
+- Commit: `4a271f4756a46cac1c8539a1a57c6dde48fa746d`
 - Branch / tag: `claude/venture-intelligence-sea-0083`
 - Dirty working tree at run time? no. This card is committed after the run; it does
   not change any validated file.
@@ -39,10 +39,11 @@ data in this run; it validates committed knowledge records and synthetic golden 
   | --- | --- |
   | `channels.json` | `196fc2889a67` |
   | `conventions.json` | `b481ff974f8f` |
-  | `coverage.json` | `97e3b1970831` |
+  | `coverage.json` | `5f99ec3563c2` |
   | `gaps.json` | `3b6b8e1796d1` |
-  | `glossary.json` | `7e5bc6476aea` |
+  | `glossary.json` | `cf4033077fdc` |
   | `golden_cases.json` | `32e6d1f35aeb` |
+  | `routing.json` | `ee0e0ee2b019` |
   | `models.json` | `1c6ed93a0168` |
   | `taxonomy.json` | `47bea5b30d2f` |
   | `workflows.json` | `a1677faa793f` |
@@ -78,12 +79,12 @@ data in this run; it validates committed knowledge records and synthetic golden 
 | Metric | Value | Notes |
 | --- | --- | --- |
 | Validator errors | 0 | `venture pack: 0 error(s)` |
-| Records reviewed / draft | 0 / 210 | No record has named human review yet |
-| Records citing `unverified` | 183 of 210 | Recorded honestly; not a failure |
+| Records reviewed / draft | 0 / 239 | No record has named human review yet |
+| Records citing `unverified` | 212 of 239 | Recorded honestly; not a failure |
 | Golden cases recomputed | 24 | All match expected values |
-| Venture-family test modules | 369 passed | ten modules, including 33 in `tests/test_venture_models.py` |
-| Full repository suite | 1162 passed | Python 3.11.17 (the 3.13.9 run of the earlier card also passed) |
-| Validator output digest, two runs | `8feb9d24ac95` = `8feb9d24ac95` | Byte-identical output |
+| Venture-family test modules | 408 passed | eleven modules, including 39 in `tests/test_venture_routing.py` |
+| Full repository suite | 1201 passed | Python 3.11.17 (the 3.13.9 run of the earlier card also passed) |
+| Validator output digest, two runs | `fcc4fa0aa0af` = `fcc4fa0aa0af` | Byte-identical output |
 
 - Output artifact location: none written; results are printed to the terminal.
 
@@ -97,7 +98,7 @@ PYTHONPATH=src .venv/bin/python -m quantsmith.pipelines.venture_pack
 PYTHONPATH=src .venv/bin/python -m pytest \
   tests/test_venture_pack.py tests/test_venture_ingestion.py tests/test_venture_regions.py \
   tests/test_venture_central_asia.py tests/test_venture_signals.py tests/test_venture_tradecraft.py \
-  tests/test_asian_nlp.py tests/test_venture_fund_analytics.py tests/test_venture_knowledge.py tests/test_venture_models.py -q
+  tests/test_asian_nlp.py tests/test_venture_fund_analytics.py tests/test_venture_knowledge.py tests/test_venture_models.py tests/test_venture_routing.py -q
 PYTHONPATH=src .venv/bin/python -m pytest -q
 ```
 
