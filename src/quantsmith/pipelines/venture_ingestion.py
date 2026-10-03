@@ -106,14 +106,16 @@ def _nfkc(text: str) -> str:
 # Legal-form markers are removed for *comparison only*; callers keep the
 # original name and its suffix, because the legal form is itself information.
 LEGAL_FORM_PREFIXES = tuple(_nfkc(x) for x in (
-    "pt", "cv", "บริษัท", "công ty cổ phần", "công ty tnhh", "ctcp"))
+    "pt", "cv", "บริษัท", "công ty cổ phần", "công ty tnhh", "ctcp",
+    "ооо", "тоо", "ао", "зао", "оао", "mchj"))
 LEGAL_FORM_SUFFIXES = tuple(_nfkc(x) for x in (
     "股份有限公司", "有限公司", "pte ltd", "sdn bhd", "tbk", "จำกัด (มหาชน)", "จำกัด",
-    "inc", "llc", "ltd", "limited", "corp", "co ltd", "gmbh"))
+    "inc", "llc", "ltd", "limited", "corp", "co ltd", "gmbh", "llp", "jsc",
+    "ооо", "тоо", "ао", "mchj"))
 
 
 def script_of(text: str) -> str:
-    """Dominant script of a name: han, thai, hangul, kana, latin, or other."""
+    """Dominant script of a name: han, thai, hangul, kana, cyrillic, latin, or other."""
     counts: Dict[str, int] = {}
     for ch in text:
         if not ch.isalpha():
@@ -127,6 +129,8 @@ def script_of(text: str) -> str:
             key = "hangul"
         elif name.startswith(("HIRAGANA", "KATAKANA")):
             key = "kana"
+        elif name.startswith("CYRILLIC"):
+            key = "cyrillic"
         elif name.startswith("LATIN"):
             key = "latin"
         else:
@@ -137,7 +141,7 @@ def script_of(text: str) -> str:
 
 def normalize_name(name: str) -> str:
     """Case-fold, drop punctuation, and remove legal-form markers for comparison."""
-    t = re.sub(r"[\.,;:()\"'`]", " ", _nfkc(name))
+    t = re.sub(r"[\.,;:()\"'`«»„“”]", " ", _nfkc(name))
     t = re.sub(r"\s+", " ", t).strip()
     suffixes = sorted(LEGAL_FORM_SUFFIXES, key=len, reverse=True)
     prefixes = sorted(LEGAL_FORM_PREFIXES, key=len, reverse=True)

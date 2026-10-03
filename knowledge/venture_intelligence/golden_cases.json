@@ -217,6 +217,24 @@
       "expect": {
         "gregorian": 2018
       }
+    },
+    {
+      "id": "golden.ru_locale",
+      "kind": "localized_number",
+      "text": "1 250 000,5",
+      "locale": "ru",
+      "expect": {
+        "value": 1250000.5
+      }
+    },
+    {
+      "id": "golden.ru_locale_nbsp",
+      "kind": "localized_number",
+      "text": "2 000 000",
+      "locale": "kk",
+      "expect": {
+        "value": 2000000
+      }
     }
   ]
 }

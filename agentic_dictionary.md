@@ -431,3 +431,23 @@ A year counted from an imperial or republican era (Reiwa, Heisei, Showa, Minguo)
 ### Onshore / Offshore Renminbi
 
 CNY is the onshore and CNH the offshore renminbi; they can differ in rate and are not silently combined.
+
+### Script Variant
+
+A second written form of the same name in another script (e.g. Cyrillic and Latin); never merged without a registry identifier.
+
+### Patent Family
+
+The set of patent filings in different offices that claim the same invention; landscapes count families, not raw filings, so one invention is counted once.
+
+### Single-Channel Finding
+
+A finding supported by only one signal channel; corroboration needs independent channels, and news repeating a press release is not independent.
+
+### Syndication Collapse
+
+Merging republished copies of one news item into a single original report before counting, so repeats are not taken as independent corroboration.
+
+### Screening Criteria
+
+The explicit, caller-stated rules a longlist is filtered and ordered by; ordering reflects the criteria, never overall merit.

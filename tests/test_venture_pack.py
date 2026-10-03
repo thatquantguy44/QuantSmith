@@ -218,7 +218,7 @@ def test_ac021_regions_leads_and_contract_files(pack):
         for f in ("README.md", "instructions.md", "tasks.md", "prompt.md"):
             assert (ROOT / agent["path"] / f).is_file()
     regional = {a["id"] for a in pack["coverage"]["agents"] if a["group"] == "regional"}
-    assert len([r for r in regional if r.endswith("_lead")]) == 10
+    assert len([r for r in regional if r.endswith("_lead")]) == 11
 
 
 def test_ac022_review_signoff_rules(pack):

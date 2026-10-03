@@ -10,7 +10,7 @@
 > direction included. See item 1 of *What's Next* and items 29–30.
 
 The SDK has a working v1: a **spec-driven engineering framework** over the six
-software-development stages, **187 agents** in `agents/`,
+software-development stages, **194 agents** in `agents/`,
 **35 quality gates**, **38 instruction standards**, and CI that
 enforces the deterministic gates. It remains primarily a scaffold to be copied
 into quant repos, with `src/quantsmith/pipelines/`, `src/quantsmith/orchestration/`,
@@ -35,7 +35,7 @@ it via stable IDs (`REQ`/`NFR`/`AC`/`RISK`/`T`).
 - `specs/NNNN-slug/{spec,plan,tasks}.md` from `templates/spec/`; worked example at
   `specs/0001-daily-momentum-signal/`.
 
-**Agents (187, verified by the `agent-catalog` gate — treat `agents/README.md`
+**Agents (194, verified by the `agent-catalog` gate — treat `agents/README.md`
 as the live count, not the number here)** — all on the four-file contract
 (`README`/`prompt`/`instructions`/`tasks`) with a `Spec-Driven Role`:
 
@@ -718,7 +718,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
     to populate `sources/` as real sources come into use.
 
 14. **P1 Generalization & Team Onboarding — making QuantSmith self-serve across
-    domains.** QuantSmith is now a comprehensive framework (187 agents, 69 specs,
+    domains.** QuantSmith is now a comprehensive framework (194 agents, 69 specs,
     33 gates, 35 standards); the next phase is reducing discovery friction and
     enabling team-intuitive adoption without deep codebase reading.
     - **P0 Phase 1a: Role profiles** (`roles/{portfolio_manager,risk_manager,quant_researcher,data_engineer,compliance_officer}.md`):
@@ -1567,6 +1567,13 @@ manual-task persistence question stays deferred until a real consumer needs it.
     `0085` (Draft, built) adds the Greater China & East Asia lead and
     entity-structure analyst and the South Asia lead, with Traditional Chinese,
     Korean, lakh/crore, and Japanese-era normalization.
+    `0086` (Draft, built) adds the Central Asia lead with Cyrillic/Latin
+    script-variant handling and Russian-locale numbers; focus is Asia first, so
+    `0087` now carries the deferred non-Asian regions.
+    `0089` (Draft, built) adds six cross-cutting agents — `patent_ip_analyst`,
+    `hiring_signal_analyst` (person_adjacent), `narrative_news_analyst`,
+    `technology_landscape_analyst`, `deal_sourcing`, `company_diligence` — and
+    a workflow-class consistency rule.
     Proof of concept: no legal collection limits set yet; they must be set
     before operational use. Next: the `0083` knowledge pack and validator.
 
@@ -1585,7 +1592,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
 
 ## Risks
 
-- Breadth: 187 agents is useful only if each stays narrow and inspectable.
+- Breadth: 194 agents is useful only if each stays narrow and inspectable.
 - Heuristic gates (`leakage`, `backtest`, `secret-scan` fallback) can false-positive
   or miss; keep them advisory unless a repo's layout makes them reliable.
 - Docs can drift from the code; the `docs-link`, `agent-catalog`, and `spec-index` gates help, but

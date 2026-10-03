@@ -452,10 +452,17 @@ region (Southeast Asia built first); `multilingual_document_nlp` is cross-cuttin
 
 | Agent | Handles | Feeds mainly |
 | --- | --- | --- |
+| `venture_intelligence/patent_ip_analyst/` | Patent-family landscapes across offices and languages, dated by publication; never assesses legal validity or values a patent | `venture_intelligence/technology_landscape_analyst`, `research_analyst` |
+| `venture_intelligence/hiring_signal_analyst/` | Organization-level hiring and workforce signals (`person_adjacent`); never profiles individuals or asserts headcount from postings | `venture_intelligence/technology_landscape_analyst`, `data_quality` |
+| `venture_intelligence/narrative_news_analyst/` | Multilingual news timelines with syndication collapse and amplification indicators; never presents narrative as fact or attributes a campaign | `venture_intelligence/technology_landscape_analyst`, `research_analyst` |
+| `venture_intelligence/technology_landscape_analyst/` | Multi-channel technology landscape with corroboration status; never predicts success or assigns readiness | `venture_intelligence/deal_sourcing`, `briefer` |
+| `venture_intelligence/deal_sourcing/` | Longlist from signals against caller-stated criteria; never ranks by merit or recommends | `venture_intelligence/company_diligence`, regional leads |
+| `venture_intelligence/company_diligence/` | Diligence memo from supplied evidence (evidence, assumptions, judgement); never approves, rejects, or certifies | `research_analyst`, investment committee |
 | `venture_intelligence/entity_resolution/` | Company identity decisions across sources and scripts (match, candidate, needs registry ID); never merges on a name alone | `data_quality`, `data_governance`, regional agents |
 | `venture_intelligence/multilingual_document_nlp/` | Source-anchored extraction from Mandarin, Bahasa, Vietnamese, Thai, Filipino and English start-up documents; never gives legal translation | `deep_learning/nlp_llm`, `knowledge/knowledge_ingestion`, regional agents |
 | `venture_intelligence/greater_china_east_asia/regional_lead/` | Market-by-market Greater China and East Asia view, native-language coverage, onshore/offshore currency; never recommends or rules on permissibility | `research_analyst`, `briefer` |
 | `venture_intelligence/greater_china_east_asia/entity_structure_analyst/` | Offshore-onshore structure, equity versus contractual control; never designates, attributes, or concludes control by a government or party | `enterprise_risk/aml_financial_crime`, counsel |
+| `venture_intelligence/central_asia/regional_lead/` | Market-by-market Central Asia view, Cyrillic/Latin script variants, Russian-locale numbers; never recommends or rules on permissibility, sanctions, or export-control status | `research_analyst`, `briefer` |
 | `venture_intelligence/south_asia/regional_lead/` | Market-by-market South Asia view, lakh/crore and fiscal-year normalization; never recommends or rules on permissibility | `research_analyst`, `briefer` |
 | `venture_intelligence/southeast_asia/regional_lead/` | Market-by-market Southeast Asia view and routing; never recommends investments | `research_analyst`, `briefer` |
 | `venture_intelligence/southeast_asia/entity_structure_analyst/` | Holding/operating structure and ownership indicators; never designates or attributes | `enterprise_risk/aml_financial_crime`, counsel |

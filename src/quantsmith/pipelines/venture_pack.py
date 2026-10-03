@@ -156,7 +156,13 @@ def roc_to_gregorian(year: int) -> int:
 def localized_number(text: str, locale: str, conventions: Mapping[str, Any]) -> float:
     for rule in conventions["normalization"]["number_locales"]:
         if locale in rule["locales"]:
-            t = text.replace(rule["thousands"], "").replace(rule["decimal"], ".")
+            thousands = rule["thousands"]
+            t = text.strip()
+            if thousands == " ":
+                t = re.sub(r"[\s\u00a0\u202f]", "", t)
+            else:
+                t = t.replace(thousands, "")
+            t = t.replace(rule["decimal"], ".")
             value = float(t)
             return int(value) if value == int(value) else value
     raise ValueError(f"no number-locale rule for {locale!r}; flag as ambiguous")
@@ -398,6 +404,23 @@ def validate_pack(pack: Mapping[str, Any], root: Path = Path(".")) -> List[str]:
                 continue
             if not (root / "agents/venture_intelligence" / ag / "prompt.md").is_file():
                 errors.append(f"workflows: {w['id']} names agent {ag} that does not exist")
+
+    # workflow class must cover the strictest class among its agents
+    by_key: Dict[str, str] = {}
+    for a in agents:
+        cls = a.get("decision_path_class", "analytic_support")
+        by_key[a["id"]] = cls
+        if a.get("path"):
+            by_key[a["path"].replace("agents/venture_intelligence/", "")] = cls
+    for w in wfs:
+        classes = {by_key.get(ag.replace(" (planned)", "").strip()) for ag in w["agents"]}
+        classes.discard(None)
+        non_analytic = classes - {"analytic_support"}
+        if non_analytic:
+            need = "sovereign_adjacent" if "sovereign_adjacent" in non_analytic else "person_adjacent"
+            if w["decision_path_class"] != need:
+                errors.append(f"workflows: {w['id']} class {w['decision_path_class']} must be {need} "
+                              "because it includes a stricter-class agent")
 
     # gaps (REQ-012)
     for g in pack["gaps"]["gaps"]:
