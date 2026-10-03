@@ -262,22 +262,136 @@ A backtest that nets the cost of borrowing and funding — borrow fee, short reb
 
 ## Venture & Intelligence
 
+<!-- generated from knowledge/venture_intelligence/glossary.json -->
+
 ### Decision-Path Class
 
-A label on every venture/intelligence workflow: `analytic_support`, `person_adjacent`, or `sovereign_adjacent`. The latter two are decision-support only with named human review. See `instructions/venture_intelligence.md`.
+A label on every venture/intelligence workflow: analytic_support, person_adjacent, or sovereign_adjacent. The latter two are decision-support only with named human review.
 
-### Source Reliability / Information Credibility
+### Inform, Never Decide
 
-A two-axis grade for a source (how reliable the provider has been) and a piece of information (how credible it is given corroboration), kept separate so a good source's weak claim is not over-trusted.
+The shared rule: agents structure and report; the accountable human invests, designates, or acts.
 
-### Survivorship / Backfill Bias
+### Source Reliability
 
-In venture data, databases overrepresent companies that survived or were later added with historical dates, inflating apparent hit rates. Every fact needs a `known_at` date.
+The letter grade (A to F) for how reliable a source has been, graded separately from the information.
+
+### Information Credibility
+
+The digit grade (1 to 6) for how credible a piece of information is given corroboration.
+
+### Calibrated Confidence Language
+
+Likelihood words (e.g. likely, very likely) tied to probability bands so wording is consistent between analysts.
+
+### Evidence / Assumption / Judgement
+
+The required separation in an analytic product: what was observed, what was assumed, and what is concluded.
 
 ### Derived Evidence
 
-A translation or extraction produced by a model. Labelled, never substituted for the source-language span, and human-reviewed before informing a decision (specs `0070`/`0071`).
+A translation or extraction produced by a model; labelled, never substituted for the source-language span, and human-reviewed before informing a decision.
+
+### Known-At
+
+The date the adopter could first have known a fact; the only time a model or backtest may use it.
+
+### Survivorship Bias
+
+Overstated success rates from a cohort that omits failed or removed companies.
+
+### Backfill Bias
+
+Records added after the fact with historical dates, which were not knowable then.
+
+### Reporting Lag
+
+Delay between an event and its appearance in a database, making recent periods look quieter.
+
+### Stealth Company
+
+A company with no public funding or hiring signal; invisible to databases, so absence is not inactivity.
 
 ### Holdco / Opco
 
-Holding company (often Singapore, Cayman, BVI, or Delaware) above local operating companies. Domicile of the holdco is not the market of operation.
+Holding company (often Singapore, Cayman, BVI, or Delaware) above local operating companies; holdco domicile is not the market of operation.
+
+### Post-Money Valuation
+
+Pre-money valuation plus new money raised in the round.
+
+### Option Pool Treatment
+
+Whether an option-pool top-up sits inside pre-money or post-money; valuations are not comparable unless stated.
+
+### Dilution
+
+Reduction in an existing holder's ownership caused by issuing new shares.
+
+### DPI
+
+Distributions to paid-in capital: cumulative distributions divided by paid-in capital.
+
+### RVPI
+
+Residual value to paid-in capital: net asset value divided by paid-in capital.
+
+### TVPI
+
+Total value to paid-in capital: DPI plus RVPI.
+
+### MOIC
+
+Multiple on invested capital at deal level: realized plus unrealized value over invested cost.
+
+### IRR
+
+The annual rate that sets the net present value of dated cash flows, including terminal NAV, to zero.
+
+### PME
+
+Public market equivalent; Kaplan-Schoar PME compares private-fund cash flows with an index investment.
+
+### J-Curve
+
+The early-life dip in fund returns from fees and unrealized marks; early metrics are not comparable with mature funds.
+
+### Signal
+
+An observation from a non-traditional channel about a company, technology, or market, with a source, known-at date, and grade.
+
+### Signal Channel
+
+A family of non-traditional data (patents, publications, open source, hiring, grants and procurement, filings, trade, web telemetry, news, satellite) with its own lead time, bias, and deception risk.
+
+### Deception Risk
+
+How easily a channel can be manipulated (fake stars, ghost postings, seeded stories) and so mislead an analyst.
+
+### Source-Span Preservation
+
+Keeping the verbatim original-language text for every extracted field; translation is a separate labelled field.
+
+### Legal-Form Suffix
+
+The part of a company name denoting legal form (e.g. 有限公司, Pte. Ltd., Sdn. Bhd., PT, CTCP); kept and classified, not stripped.
+
+### Buddhist Era
+
+Thai calendar; Gregorian year equals the Buddhist-era year minus 543.
+
+### Minguo / ROC Year
+
+Taiwan calendar; Gregorian year equals the Minguo year plus 1911.
+
+### Wan / Yi
+
+Chinese numeral units 万 (10,000) and 亿 (100,000,000) used in figures.
+
+### Regional Lead
+
+The first agent created for a world region; routes work and states per-market coverage. Specialists are added only when a coverage row justifies them.
+
+### Professional Role
+
+A public, organization-level role tied to a company; the only way a natural person appears in this domain.

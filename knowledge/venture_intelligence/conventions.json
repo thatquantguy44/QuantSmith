@@ -1,0 +1,354 @@
+{
+  "schema_version": "0083.1",
+  "status": "draft_structural_contract",
+  "fact_record": {
+    "required_fields": [
+      "entity_id",
+      "value",
+      "unit",
+      "source_id",
+      "source_grade",
+      "event_time",
+      "announced_time",
+      "filed_time",
+      "ingested_time",
+      "known_at",
+      "language",
+      "derived",
+      "confidence"
+    ],
+    "rule": "A fact without known_at is invalid. known_at is when the adopter could first have known the fact, not when it happened.",
+    "citation": "instructions/point_in_time.md"
+  },
+  "data_time": {
+    "fields": {
+      "event_time": "When the underlying event occurred (e.g. round closed).",
+      "announced_time": "When it was publicly announced.",
+      "filed_time": "When a regulator or registry received the filing.",
+      "ingested_time": "When a vendor or the adopter loaded it.",
+      "known_at": "When the adopter could first have known it; the only time a backtest or model may use."
+    },
+    "contracts": [
+      {
+        "id": "contract.survivorship",
+        "statement": "A cohort drawn from a database that omits failed or removed companies overstates success rates; the cohort must be defined at an early date from a list not conditioned on outcome.",
+        "required_control": "Define the cohort at formation date; report the denominator; compare with a corrected rate.",
+        "citation": "unverified"
+      },
+      {
+        "id": "contract.backfill",
+        "statement": "A vendor may add historical records after the fact with historical dates; those records were not knowable then.",
+        "required_control": "Use the vendor's first-seen or ingested time as known_at; if unavailable, snapshot the vendor and treat history as backfilled.",
+        "citation": "unverified"
+      },
+      {
+        "id": "contract.reporting_lag",
+        "statement": "Recent rounds appear in databases with a lag, so the latest periods look quieter than they were.",
+        "required_control": "State the lag; do not compare incomplete recent periods with complete earlier ones.",
+        "citation": "unverified"
+      },
+      {
+        "id": "contract.stealth_omission",
+        "statement": "Companies that have not announced funding or hiring are invisible; absence of data is not absence of activity.",
+        "required_control": "Report coverage, never imply a complete universe.",
+        "citation": "unverified"
+      }
+    ]
+  },
+  "valuation": [
+    {
+      "id": "conv.post_money",
+      "name": "Post-money valuation",
+      "formula": "post_money = pre_money + new_money",
+      "unit": "currency",
+      "measured_on": "round close",
+      "citation": "NVCA Model Legal Documents (public)"
+    },
+    {
+      "id": "conv.new_investor_ownership",
+      "name": "New-money ownership",
+      "formula": "new_ownership = new_money / post_money",
+      "unit": "fraction",
+      "measured_on": "round close, fully diluted",
+      "citation": "unverified"
+    },
+    {
+      "id": "conv.dilution",
+      "name": "Existing-holder dilution",
+      "formula": "ownership_after = ownership_before * pre_money / post_money (no option-pool change)",
+      "unit": "fraction",
+      "measured_on": "round close, fully diluted",
+      "citation": "unverified"
+    },
+    {
+      "id": "conv.option_pool",
+      "name": "Option pool treatment",
+      "rule": "State whether a pool top-up is inside pre-money (dilutes existing holders only) or post-money; valuations are not comparable otherwise.",
+      "citation": "unverified"
+    }
+  ],
+  "fund_metrics": [
+    {
+      "id": "conv.dpi",
+      "name": "DPI",
+      "formula": "DPI = cumulative_distributions / paid_in_capital",
+      "unit": "multiple",
+      "measured_on": "report date",
+      "citation": "ILPA Reporting Template (public)"
+    },
+    {
+      "id": "conv.rvpi",
+      "name": "RVPI",
+      "formula": "RVPI = residual_nav / paid_in_capital",
+      "unit": "multiple",
+      "measured_on": "report date",
+      "citation": "ILPA Reporting Template (public)"
+    },
+    {
+      "id": "conv.tvpi",
+      "name": "TVPI",
+      "formula": "TVPI = DPI + RVPI",
+      "unit": "multiple",
+      "measured_on": "report date",
+      "citation": "ILPA Reporting Template (public)"
+    },
+    {
+      "id": "conv.moic",
+      "name": "MOIC (deal level)",
+      "formula": "MOIC = (realized_proceeds + unrealized_value) / invested_cost",
+      "unit": "multiple",
+      "measured_on": "report date",
+      "citation": "unverified"
+    },
+    {
+      "id": "conv.irr",
+      "name": "IRR",
+      "formula": "rate r such that sum(cashflow_i / (1+r)^(t_i)) = 0, with terminal NAV as the final inflow and t in years from first cash flow",
+      "unit": "fraction per year",
+      "measured_on": "report date",
+      "citation": "unverified"
+    },
+    {
+      "id": "conv.ks_pme",
+      "name": "Kaplan-Schoar PME",
+      "formula": "KS_PME = FV(distributions + NAV, index) / FV(contributions, index)",
+      "unit": "multiple",
+      "measured_on": "report date",
+      "citation": "Kaplan and Schoar (2005), Journal of Finance"
+    },
+    {
+      "id": "conv.j_curve",
+      "name": "J-curve",
+      "rule": "Early-life TVPI and IRR are depressed by fees and unrealized marks; early-life metrics are not comparable with mature funds.",
+      "citation": "unverified"
+    }
+  ],
+  "stage_naming": {
+    "rule": "Stage names (pre-seed, seed, Series A...) are not comparable across regions or vendors; compare by amount, instrument, and company age, and state the vendor's own labels.",
+    "citation": "unverified"
+  },
+  "source_grade": {
+    "reliability_scale": {
+      "A": "Completely reliable",
+      "B": "Usually reliable",
+      "C": "Fairly reliable",
+      "D": "Not usually reliable",
+      "E": "Unreliable",
+      "F": "Reliability cannot be judged"
+    },
+    "credibility_scale": {
+      "1": "Confirmed by other sources",
+      "2": "Probably true",
+      "3": "Possibly true",
+      "4": "Doubtfully true",
+      "5": "Improbable",
+      "6": "Truth cannot be judged"
+    },
+    "rule": "Grade the source and the information separately, as letter then digit (e.g. B2).",
+    "citation": "Admiralty (NATO) source/information grading; exact STANAG reference unverified"
+  },
+  "confidence_language": {
+    "bands": [
+      {
+        "label": "almost no chance",
+        "low": 0.01,
+        "high": 0.05
+      },
+      {
+        "label": "very unlikely",
+        "low": 0.05,
+        "high": 0.2
+      },
+      {
+        "label": "unlikely",
+        "low": 0.2,
+        "high": 0.45
+      },
+      {
+        "label": "roughly even chance",
+        "low": 0.45,
+        "high": 0.55
+      },
+      {
+        "label": "likely",
+        "low": 0.55,
+        "high": 0.8
+      },
+      {
+        "label": "very likely",
+        "low": 0.8,
+        "high": 0.95
+      },
+      {
+        "label": "almost certain",
+        "low": 0.95,
+        "high": 0.99
+      }
+    ],
+    "rule": "Use the label whose band contains the stated probability; judgement confidence (low/moderate/high) is stated separately from likelihood.",
+    "citation": "ODNI ICD 203 (Analytic Standards)"
+  },
+  "analytic_product": {
+    "required_sections": [
+      "Evidence",
+      "Assumptions",
+      "Judgement",
+      "Open Gaps"
+    ],
+    "citation": "ODNI ICD 203 (Analytic Standards)"
+  },
+  "normalization": {
+    "numeral_units": [
+      {
+        "id": "norm.wan",
+        "symbol": "万",
+        "multiplier": 10000,
+        "citation": "unverified"
+      },
+      {
+        "id": "norm.yi",
+        "symbol": "亿",
+        "multiplier": 100000000,
+        "citation": "unverified"
+      },
+      {
+        "id": "norm.lakh",
+        "symbol": "lakh",
+        "multiplier": 100000,
+        "citation": "unverified"
+      },
+      {
+        "id": "norm.crore",
+        "symbol": "crore",
+        "multiplier": 10000000,
+        "citation": "unverified"
+      }
+    ],
+    "calendar_offsets": [
+      {
+        "id": "norm.buddhist_era",
+        "name": "Buddhist Era (Thailand)",
+        "gregorian_year_equals": "year - 543",
+        "offset": -543,
+        "citation": "unverified"
+      },
+      {
+        "id": "norm.roc",
+        "name": "Minguo / ROC (Taiwan)",
+        "gregorian_year_equals": "year + 1911",
+        "offset": 1911,
+        "citation": "unverified"
+      }
+    ],
+    "number_locales": [
+      {
+        "id": "norm.locale_period_thousands",
+        "locales": [
+          "id",
+          "vi"
+        ],
+        "thousands": ".",
+        "decimal": ",",
+        "citation": "unverified"
+      },
+      {
+        "id": "norm.locale_comma_thousands",
+        "locales": [
+          "en",
+          "zh",
+          "th"
+        ],
+        "thousands": ",",
+        "decimal": ".",
+        "citation": "unverified"
+      }
+    ],
+    "ambiguity_rule": "If a unit, era, or separator cannot be resolved from context, flag it; never guess.",
+    "legal_form_suffixes": [
+      {
+        "suffix": "有限公司",
+        "language": "zh",
+        "meaning": "limited company"
+      },
+      {
+        "suffix": "股份有限公司",
+        "language": "zh",
+        "meaning": "joint-stock limited company"
+      },
+      {
+        "suffix": "Pte. Ltd.",
+        "language": "en",
+        "meaning": "Singapore private limited"
+      },
+      {
+        "suffix": "Sdn. Bhd.",
+        "language": "ms",
+        "meaning": "Malaysian private limited"
+      },
+      {
+        "suffix": "PT",
+        "language": "id",
+        "meaning": "Indonesian limited liability company (prefix)"
+      },
+      {
+        "suffix": "Tbk",
+        "language": "id",
+        "meaning": "Indonesian listed company"
+      },
+      {
+        "suffix": "Công ty cổ phần",
+        "language": "vi",
+        "meaning": "joint-stock company (CTCP)"
+      },
+      {
+        "suffix": "Công ty TNHH",
+        "language": "vi",
+        "meaning": "limited liability company"
+      },
+      {
+        "suffix": "บริษัท จำกัด",
+        "language": "th",
+        "meaning": "company limited"
+      },
+      {
+        "suffix": "Inc.",
+        "language": "en",
+        "meaning": "incorporated"
+      },
+      {
+        "suffix": "LLC",
+        "language": "en",
+        "meaning": "limited liability company"
+      }
+    ],
+    "entity_merge_rule": "Never merge entities across scripts or transliterations without a registry identifier.",
+    "citation": "unverified"
+  },
+  "prohibited_source_classes": [
+    "non_public_collection",
+    "access_control_circumvention",
+    "deanonymization",
+    "unreviewed_leaked_material"
+  ],
+  "lawful_collection_rule": "Public, licensed, or caller-supplied sources only (instructions/venture_intelligence.md)."
+}

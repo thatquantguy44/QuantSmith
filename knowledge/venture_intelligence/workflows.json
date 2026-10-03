@@ -1,0 +1,122 @@
+{
+  "schema_version": "0083.1",
+  "status": "draft_structural_contract",
+  "workflows": [
+    {
+      "id": "workflow.deal_to_memo",
+      "name": "Deal sourcing to diligence memo",
+      "decision_path_class": "analytic_support",
+      "decision_support_only": false,
+      "human_review": [],
+      "agents": [
+        "deal_sourcing (planned)",
+        "company_diligence (planned)",
+        "multilingual_document_nlp"
+      ],
+      "inputs": [
+        "Company list or thesis",
+        "Source documents"
+      ],
+      "outputs": [
+        "Diligence memo with evidence, assumptions, judgement"
+      ],
+      "review_gates": [
+        "Source grading",
+        "Human reviewer sign-off"
+      ]
+    },
+    {
+      "id": "workflow.signal_to_thesis",
+      "name": "Signal to thesis",
+      "decision_path_class": "analytic_support",
+      "decision_support_only": false,
+      "human_review": [],
+      "agents": [
+        "patent_ip_analyst (planned)",
+        "hiring_signal_analyst (planned)",
+        "narrative_news_analyst (planned)",
+        "source_reliability_grader (planned)"
+      ],
+      "inputs": [
+        "Channel signals"
+      ],
+      "outputs": [
+        "Thesis with corroboration across independent channels"
+      ],
+      "review_gates": [
+        "Corroboration rule",
+        "Deception-risk check"
+      ]
+    },
+    {
+      "id": "workflow.technology_landscape",
+      "name": "Technology landscape scan",
+      "decision_path_class": "analytic_support",
+      "decision_support_only": false,
+      "human_review": [],
+      "agents": [
+        "technology_landscape_analyst (planned)",
+        "southeast_asia/regional_lead"
+      ],
+      "inputs": [
+        "Technology domain",
+        "Region"
+      ],
+      "outputs": [
+        "Landscape with coverage statement"
+      ],
+      "review_gates": [
+        "Coverage disclosure"
+      ]
+    },
+    {
+      "id": "workflow.portfolio_fund_review",
+      "name": "Portfolio and fund review",
+      "decision_path_class": "analytic_support",
+      "decision_support_only": false,
+      "human_review": [],
+      "agents": [
+        "fund_performance_analyst (planned)",
+        "valuation_marks_reviewer (planned)",
+        "southeast_asia/funding_ecosystem_analyst"
+      ],
+      "inputs": [
+        "Fund cash flows and marks"
+      ],
+      "outputs": [
+        "Fund review with TVPI/DPI/RVPI and caveats"
+      ],
+      "review_gates": [
+        "Convention check",
+        "Independent review of marks"
+      ]
+    },
+    {
+      "id": "workflow.counter_diligence",
+      "name": "Counter-diligence screening",
+      "decision_path_class": "sovereign_adjacent",
+      "decision_support_only": true,
+      "human_review": [
+        "Designated reviewing officer"
+      ],
+      "agents": [
+        "southeast_asia/entity_structure_analyst",
+        "ownership_screen (planned)",
+        "dual_use_indicator (planned)"
+      ],
+      "inputs": [
+        "Registry extracts",
+        "Restricted-party list matches"
+      ],
+      "outputs": [
+        "Indicator report with confidence and unresolved ownership"
+      ],
+      "review_gates": [
+        "Named human review",
+        "No designation or attribution",
+        "Counsel on jurisdictional rules"
+      ]
+    }
+  ],
+  "person_adjacent_rule": "Public professional-role facts only; minimize retained personal data; never infer sensitive attributes."
+}

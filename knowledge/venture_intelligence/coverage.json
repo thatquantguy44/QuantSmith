@@ -1,0 +1,375 @@
+{
+  "schema_version": "0083.1",
+  "status": "draft_structural_contract",
+  "agents": [
+    {
+      "id": "multilingual_document_nlp",
+      "group": "cross_cutting",
+      "workflow": "Source-anchored extraction and normalization from multilingual start-up documents",
+      "never": "Give legal translation or interpretation",
+      "creating_spec": "0084",
+      "status": "built",
+      "path": "agents/venture_intelligence/multilingual_document_nlp"
+    },
+    {
+      "id": "southeast_asia_regional_lead",
+      "group": "regional",
+      "workflow": "Market-by-market Southeast Asia view and routing",
+      "never": "Recommend or rank investments",
+      "creating_spec": "0084",
+      "status": "built",
+      "path": "agents/venture_intelligence/southeast_asia/regional_lead"
+    },
+    {
+      "id": "southeast_asia_entity_structure_analyst",
+      "group": "regional",
+      "workflow": "Southeast Asia holding and operating structure mapping",
+      "never": "Designate, attribute, or accuse",
+      "creating_spec": "0084",
+      "status": "built",
+      "path": "agents/venture_intelligence/southeast_asia/entity_structure_analyst"
+    },
+    {
+      "id": "southeast_asia_funding_ecosystem_analyst",
+      "group": "regional",
+      "workflow": "Southeast Asia comparable rounds, investors, and exit routes",
+      "never": "Recommend, size, or value an investment",
+      "creating_spec": "0084",
+      "status": "built",
+      "path": "agents/venture_intelligence/southeast_asia/funding_ecosystem_analyst"
+    },
+    {
+      "id": "greater_china_east_asia_lead",
+      "group": "regional",
+      "workflow": "Greater China and East Asia market view and routing",
+      "never": "Recommend investments",
+      "creating_spec": "0085",
+      "status": "planned"
+    },
+    {
+      "id": "south_asia_lead",
+      "group": "regional",
+      "workflow": "South Asia market view and routing",
+      "never": "Recommend investments",
+      "creating_spec": "0085",
+      "status": "planned"
+    },
+    {
+      "id": "mena_lead",
+      "group": "regional",
+      "workflow": "Middle East and North Africa market view and routing",
+      "never": "Recommend investments",
+      "creating_spec": "0086",
+      "status": "planned"
+    },
+    {
+      "id": "europe_lead",
+      "group": "regional",
+      "workflow": "Europe market view and routing",
+      "never": "Recommend investments",
+      "creating_spec": "0086",
+      "status": "planned"
+    },
+    {
+      "id": "central_asia_caucasus_lead",
+      "group": "regional",
+      "workflow": "Central Asia and Caucasus market view and routing",
+      "never": "Recommend investments",
+      "creating_spec": "0086",
+      "status": "planned"
+    },
+    {
+      "id": "sub_saharan_africa_lead",
+      "group": "regional",
+      "workflow": "Sub-Saharan Africa market view and routing",
+      "never": "Recommend investments",
+      "creating_spec": "0087",
+      "status": "planned"
+    },
+    {
+      "id": "latin_america_lead",
+      "group": "regional",
+      "workflow": "Latin America and Caribbean market view and routing",
+      "never": "Recommend investments",
+      "creating_spec": "0087",
+      "status": "planned"
+    },
+    {
+      "id": "north_america_lead",
+      "group": "regional",
+      "workflow": "North America market view and routing",
+      "never": "Recommend investments",
+      "creating_spec": "0087",
+      "status": "planned"
+    },
+    {
+      "id": "oceania_lead",
+      "group": "regional",
+      "workflow": "Oceania market view and routing",
+      "never": "Recommend investments",
+      "creating_spec": "0087",
+      "status": "planned"
+    },
+    {
+      "id": "entity_resolution_agent",
+      "group": "data",
+      "workflow": "Cross-source company identity resolution",
+      "never": "Merge entities without a registry identifier",
+      "creating_spec": "0088",
+      "status": "planned"
+    },
+    {
+      "id": "deal_sourcing",
+      "group": "scouting",
+      "workflow": "Candidate company discovery from channels",
+      "never": "Rank companies for investment",
+      "creating_spec": "0089",
+      "status": "planned"
+    },
+    {
+      "id": "company_diligence",
+      "group": "scouting",
+      "workflow": "Structured company diligence memo assembly",
+      "never": "Approve an investment",
+      "creating_spec": "0089",
+      "status": "planned"
+    },
+    {
+      "id": "patent_ip_analyst",
+      "group": "signals",
+      "workflow": "Patent and IP landscape signals",
+      "never": "Assess legal validity of a patent",
+      "creating_spec": "0089",
+      "status": "planned"
+    },
+    {
+      "id": "hiring_signal_analyst",
+      "group": "signals",
+      "workflow": "Hiring and workforce signals",
+      "never": "Profile individuals",
+      "creating_spec": "0089",
+      "status": "planned"
+    },
+    {
+      "id": "narrative_news_analyst",
+      "group": "signals",
+      "workflow": "Multilingual news and narrative signals",
+      "never": "Present narrative as fact",
+      "creating_spec": "0089",
+      "status": "planned"
+    },
+    {
+      "id": "technology_landscape_analyst",
+      "group": "scouting",
+      "workflow": "Technology-domain landscape and readiness",
+      "never": "Predict commercial success",
+      "creating_spec": "0089",
+      "status": "planned"
+    },
+    {
+      "id": "source_reliability_grader",
+      "group": "tradecraft",
+      "workflow": "Source and information grading",
+      "never": "Override a human grade",
+      "creating_spec": "0090",
+      "status": "planned"
+    },
+    {
+      "id": "confidence_language_reviewer",
+      "group": "tradecraft",
+      "workflow": "Calibrated confidence language review",
+      "never": "Change a judgement",
+      "creating_spec": "0090",
+      "status": "planned"
+    },
+    {
+      "id": "competing_hypotheses_analyst",
+      "group": "tradecraft",
+      "workflow": "Competing-hypotheses and red-team analysis",
+      "never": "Select a conclusion for the analyst",
+      "creating_spec": "0090",
+      "status": "planned"
+    },
+    {
+      "id": "collection_gap_tracker",
+      "group": "tradecraft",
+      "workflow": "Evidence-gap and collection-requirement tracking",
+      "never": "Initiate collection from non-public sources",
+      "creating_spec": "0090",
+      "status": "planned"
+    },
+    {
+      "id": "ownership_screen",
+      "group": "screening",
+      "workflow": "Ownership-chain and foreign-capital indicators",
+      "never": "Designate, attribute, or recommend action",
+      "creating_spec": "0090",
+      "status": "planned"
+    },
+    {
+      "id": "dual_use_indicator",
+      "group": "screening",
+      "workflow": "Dual-use and export-control indicators",
+      "never": "Rule on export-control classification",
+      "creating_spec": "0090",
+      "status": "planned"
+    },
+    {
+      "id": "fund_performance_analyst",
+      "group": "portfolio",
+      "workflow": "Fund metrics, J-curve, and benchmark comparison",
+      "never": "Set or certify a valuation",
+      "creating_spec": "0091",
+      "status": "planned"
+    },
+    {
+      "id": "valuation_marks_reviewer",
+      "group": "portfolio",
+      "workflow": "Review of private-company marks for consistency",
+      "never": "Approve a mark",
+      "creating_spec": "0091",
+      "status": "planned"
+    },
+    {
+      "id": "portfolio_reserve_analyst",
+      "group": "portfolio",
+      "workflow": "Reserve and follow-on policy simulation",
+      "never": "Decide follow-on investments",
+      "creating_spec": "0091",
+      "status": "planned"
+    },
+    {
+      "id": "intelligence_brief_writer",
+      "group": "products",
+      "workflow": "BLUF-style intelligence brief drafting",
+      "never": "Publish without human review",
+      "creating_spec": "0092",
+      "status": "planned"
+    },
+    {
+      "id": "investment_memo_writer",
+      "group": "products",
+      "workflow": "Investment memo drafting from approved evidence",
+      "never": "Recommend an investment",
+      "creating_spec": "0092",
+      "status": "planned"
+    }
+  ],
+  "roadmap": [
+    {
+      "spec": "0084",
+      "scope": "Multilingual document NLP and Southeast Asia agents",
+      "depends_on": [
+        "0083",
+        "0071"
+      ],
+      "closes": [
+        "multilingual_document_nlp",
+        "southeast_asia_regional_lead",
+        "southeast_asia_entity_structure_analyst",
+        "southeast_asia_funding_ecosystem_analyst"
+      ]
+    },
+    {
+      "spec": "0085",
+      "scope": "Regional wave 2: Greater China and East Asia; South Asia",
+      "depends_on": [
+        "0084"
+      ],
+      "closes": [
+        "greater_china_east_asia_lead",
+        "south_asia_lead"
+      ]
+    },
+    {
+      "spec": "0086",
+      "scope": "Regional wave 3: MENA, Europe, Central Asia and Caucasus",
+      "depends_on": [
+        "0084"
+      ],
+      "closes": [
+        "mena_lead",
+        "europe_lead",
+        "central_asia_caucasus_lead"
+      ]
+    },
+    {
+      "spec": "0087",
+      "scope": "Regional wave 4: Africa, Latin America, North America, Oceania",
+      "depends_on": [
+        "0084"
+      ],
+      "closes": [
+        "sub_saharan_africa_lead",
+        "latin_america_lead",
+        "north_america_lead",
+        "oceania_lead"
+      ]
+    },
+    {
+      "spec": "0088",
+      "scope": "Source adapters, point-in-time ingestion, entity resolution",
+      "depends_on": [
+        "0083",
+        "0025"
+      ],
+      "closes": [
+        "entity_resolution_agent"
+      ]
+    },
+    {
+      "spec": "0089",
+      "scope": "Sourcing, diligence, and signal analysts",
+      "depends_on": [
+        "0088"
+      ],
+      "closes": [
+        "deal_sourcing",
+        "company_diligence",
+        "patent_ip_analyst",
+        "hiring_signal_analyst",
+        "narrative_news_analyst",
+        "technology_landscape_analyst"
+      ]
+    },
+    {
+      "spec": "0090",
+      "scope": "Tradecraft and sovereign-adjacent screening support",
+      "depends_on": [
+        "0083"
+      ],
+      "closes": [
+        "source_reliability_grader",
+        "confidence_language_reviewer",
+        "competing_hypotheses_analyst",
+        "collection_gap_tracker",
+        "ownership_screen",
+        "dual_use_indicator"
+      ]
+    },
+    {
+      "spec": "0091",
+      "scope": "Fund analytics and predictive models",
+      "depends_on": [
+        "0088",
+        "0026"
+      ],
+      "closes": [
+        "fund_performance_analyst",
+        "valuation_marks_reviewer",
+        "portfolio_reserve_analyst"
+      ]
+    },
+    {
+      "spec": "0092",
+      "scope": "Retrieval wiring and product writers",
+      "depends_on": [
+        "0083"
+      ],
+      "closes": [
+        "intelligence_brief_writer",
+        "investment_memo_writer"
+      ]
+    }
+  ]
+}
