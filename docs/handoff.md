@@ -295,7 +295,7 @@ designs**: create and
 approve one only when the foundation it consumes — `0063` or `0072` — has frozen
 that contract and the prior dependency named above is satisfied. Do not add
 agents merely to fill the map; prefer a canonical knowledge artifact or tested
-runtime that an existing agent can use. **Next unreserved spec number: `0093`** (`0083`–`0092` are the venture-intelligence foundation and its reserved children, item 32).
+runtime that an existing agent can use. **Next unreserved spec number: `0094`** (`0083`–`0092` are the venture-intelligence foundation and its reserved children, item 32).
 Reserving a number here does not create the directory; copy `templates/spec/`
 only when that slice becomes active.
 
@@ -1563,6 +1563,19 @@ manual-task persistence question stays deferred until a real consumer needs it.
     funding_ecosystem_analyst}`) and `instructions/venture_intelligence.md`.
     Proof of concept: no legal collection limits set yet; they must be set
     before operational use. Next: the `0083` knowledge pack and validator.
+
+33. **Domain visualization packs (spec `0093`, approved; implementation in
+    progress on `visualization-packs`).** Extends `0081` with seven domain packs
+    and fourteen visual-story recipes. The opt-in runtime collects authorized
+    evidence through existing query primitives with domain checks, binds claims
+    to their exact result and scope, and emits executive/analyst stories as
+    HTML/SVG, JSON, Markdown, and a dashboard handoff with companion metadata.
+    A fixed example exercises finance, credit, macro, and a refused PD sum.
+    Current acceptance tests pass; full regression and browser review remain
+    pending at the checkpoint commit. See
+    [`0093 tasks`](../specs/0093-visualization-packs/tasks.md) for live status and
+    [`integration guide`](../knowledge/visualization_packs/README.md) for usage.
+    Existing domain packs remain draft; `0080` T-021/T-022 remain separate.
 
 ## Open Questions For The Owner
 

@@ -1,0 +1,95 @@
+{
+  "schema_version": "0093.1",
+  "pack_id": "aml_financial_crime",
+  "name": "AML & Financial Crime Compliance — visual stories",
+  "analytics_pack_ids": [
+    "aml_financial_crime"
+  ],
+  "reviewer_agents": [
+    "agents/alerts/alert_policy",
+    "agents/analytics/data_storytelling",
+    "agents/analytics/data_visualization",
+    "agents/enterprise_risk/aml_financial_crime"
+  ],
+  "review": {
+    "status": "draft",
+    "reviewer": null,
+    "reviewed_on": null
+  },
+  "recipes": [
+    {
+      "recipe_id": "review_workload",
+      "intent": "workload",
+      "decision": "Where is the outstanding review workload located?",
+      "audiences": [
+        "executive",
+        "analyst"
+      ],
+      "sections": [
+        {
+          "section_id": "backlog",
+          "metric": "alert_backlog",
+          "dimensions": [
+            "queue"
+          ],
+          "view": "breakdown",
+          "chart_rule": "shape",
+          "fallback_reason": "",
+          "interpretation": "Which queues need an operational capacity review?",
+          "caveats": []
+        },
+        {
+          "section_id": "overdue",
+          "metric": "kyc_overdue",
+          "dimensions": [
+            "queue"
+          ],
+          "view": "breakdown",
+          "chart_rule": "shape",
+          "fallback_reason": "",
+          "interpretation": "Are overdue reviews concentrated in queues with known processing constraints?",
+          "caveats": [
+            "Workload counts do not establish criminality or the quality of an investigation."
+          ]
+        }
+      ],
+      "action": "Review queue capacity and case-handling context with the authorized control owner."
+    },
+    {
+      "recipe_id": "monitoring_activity",
+      "intent": "activity",
+      "decision": "How are monitoring volumes and filing counts distributed?",
+      "audiences": [
+        "executive",
+        "analyst"
+      ],
+      "sections": [
+        {
+          "section_id": "alerts",
+          "metric": "alerts_generated",
+          "dimensions": [],
+          "view": "trend",
+          "chart_rule": "shape",
+          "fallback_reason": "",
+          "interpretation": "Could rule tuning or monitoring coverage explain the observed volumes?",
+          "caveats": []
+        },
+        {
+          "section_id": "filings",
+          "metric": "sars_filed",
+          "dimensions": [
+            "scenario"
+          ],
+          "view": "breakdown",
+          "chart_rule": "table",
+          "fallback_reason": "A governed matched-cohort funnel is unavailable; show filing counts by scenario in a table.",
+          "interpretation": "Are scenario definitions and reporting periods comparable?",
+          "caveats": [
+            "Alert, case, and filing counts are not matched cohorts or a conversion funnel."
+          ]
+        }
+      ],
+      "action": "Investigate scenario tuning and process changes before inferring changes in underlying risk."
+    }
+  ]
+}

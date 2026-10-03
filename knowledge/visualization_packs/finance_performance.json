@@ -1,0 +1,81 @@
+{
+  "schema_version": "0093.1",
+  "pack_id": "finance_performance",
+  "name": "Finance & Performance Management — visual stories",
+  "analytics_pack_ids": [
+    "finance_performance"
+  ],
+  "reviewer_agents": [
+    "agents/analytics/data_storytelling",
+    "agents/analytics/data_visualization",
+    "agents/analytics/metrics_semantic_layer",
+    "agents/reporting-agent"
+  ],
+  "review": {
+    "status": "draft",
+    "reviewer": null,
+    "reviewed_on": null
+  },
+  "recipes": [
+    {
+      "recipe_id": "segment_performance",
+      "intent": "performance",
+      "decision": "Which segments account for observed revenue and operating expense?",
+      "audiences": [
+        "executive",
+        "analyst"
+      ],
+      "sections": [
+        {
+          "section_id": "revenue",
+          "metric": "revenue",
+          "dimensions": [
+            "segment"
+          ],
+          "view": "attribution",
+          "chart_rule": "shape",
+          "fallback_reason": "",
+          "interpretation": "Which segment amounts merit further investigation alongside their business context?",
+          "caveats": []
+        },
+        {
+          "section_id": "expense",
+          "metric": "noninterest_expense",
+          "dimensions": [
+            "segment"
+          ],
+          "view": "breakdown",
+          "chart_rule": "shape",
+          "fallback_reason": "",
+          "interpretation": "Are expense movements explained by separately evidenced activity or allocation changes?",
+          "caveats": []
+        }
+      ],
+      "action": "Investigate the segment amounts using operating evidence before assigning causes."
+    },
+    {
+      "recipe_id": "revenue_comparison",
+      "intent": "comparison",
+      "decision": "How does observed revenue compare with the declared baseline?",
+      "audiences": [
+        "executive",
+        "analyst"
+      ],
+      "sections": [
+        {
+          "section_id": "revenue",
+          "metric": "revenue",
+          "dimensions": [],
+          "view": "comparison",
+          "chart_rule": "shape",
+          "fallback_reason": "",
+          "interpretation": "Are current and baseline accounting bases and populations comparable?",
+          "caveats": [
+            "The baseline is explicitly supplied; no budget, target, or materiality threshold is invented."
+          ]
+        }
+      ],
+      "action": "Review the declared baseline and investigate the observed difference before choosing an action."
+    }
+  ]
+}
