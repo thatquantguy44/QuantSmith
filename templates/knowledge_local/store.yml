@@ -1,0 +1,6 @@
+# Copy to knowledge_local/<domain>/store.yml. Placeholders only -- never put secrets here.
+domain: venture_intelligence          # must match the folder name and the committed pack it pairs with
+access_level: restricted              # public | internal | restricted; restricted is the safe default
+owner: "your-pseudonymous-handle"     # a handle, never a name or email (python -m quantsmith.pipelines.workflow_memory_cli whoami)
+classes: "source notes, screening decisions, cohorts, vendor notes"   # what this store is allowed to hold
+retention_days: 365                   # set from counsel guidance

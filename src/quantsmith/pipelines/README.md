@@ -914,3 +914,24 @@ Scenario tools, not forecasts; validated on synthetic flows only.
 
 Tests: `tests/test_venture_fund_analytics.py`.
 
+## `venture_knowledge` — spec `0092-venture-knowledge-integration-and-product-writers`
+
+Store-manifest validation for the gitignored `knowledge_local/<domain>/` stores; memory candidates
+(source quirks from a source entry's `known_issues`, channel lessons, always-restricted screening
+decisions) staged only inside the private store through the `0049` write path, never promoted; and a
+lexical reference retriever with the contract live search must follow: require clearance, drop
+ineligible items before any scoring, rank on eligible passages only, cite spans or return an identical
+`not_found`. `retrieval_contract_violations` checks any retriever's output. Reference for the reserved
+`0054`; not a semantic search.
+
+Tests: `tests/test_venture_knowledge.py`.
+
+## `venture_products` — spec `0092-venture-knowledge-integration-and-product-writers`
+
+`validate_product` for intelligence briefs and investment memos (cited and classified evidence,
+separate sections, calibrated judgements, corroboration for high confidence, no unreviewed derived
+support, no conclusion language, no memo recommendations), `releasable` (a named human reviewer is
+required), and deterministic `render_markdown`. Checks form, not truth.
+
+Tests: `tests/test_venture_knowledge.py`.
+
