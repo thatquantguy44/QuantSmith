@@ -12,7 +12,9 @@
       "failure_modes": "Transliteration collisions; shared names; merging subsidiaries into parents.",
       "decision_path_class": "analytic_support",
       "status": "catalog_only",
-      "citation": "unverified"
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
     },
     {
       "id": "model.round_progression",
@@ -24,7 +26,9 @@
       "failure_modes": "Survivorship and reporting lag; censoring of quiet companies treated as failures.",
       "decision_path_class": "analytic_support",
       "status": "catalog_only",
-      "citation": "unverified"
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
     },
     {
       "id": "model.technology_emergence",
@@ -36,7 +40,9 @@
       "failure_modes": "Hype terms; reclassification; publication lag.",
       "decision_path_class": "analytic_support",
       "status": "catalog_only",
-      "citation": "unverified"
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
     },
     {
       "id": "model.network_link",
@@ -48,7 +54,9 @@
       "failure_modes": "Hub bias; privacy drift toward individuals; no person-level profiling.",
       "decision_path_class": "analytic_support",
       "status": "catalog_only",
-      "citation": "unverified"
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
     },
     {
       "id": "model.funding_anomaly",
@@ -60,7 +68,9 @@
       "failure_modes": "Reporting lag looks like a drop; seasonality; indicator is not a finding.",
       "decision_path_class": "analytic_support",
       "status": "catalog_only",
-      "citation": "unverified"
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
     },
     {
       "id": "model.sector_nowcast",
@@ -72,7 +82,9 @@
       "failure_modes": "Revisions; structural breaks; incomplete recent data.",
       "decision_path_class": "analytic_support",
       "status": "catalog_only",
-      "citation": "unverified"
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
     },
     {
       "id": "model.fund_simulation",
@@ -84,7 +96,9 @@
       "failure_modes": "Small samples; tail-dominated results; false precision.",
       "decision_path_class": "analytic_support",
       "status": "catalog_only",
-      "citation": "unverified"
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
     }
   ]
 }

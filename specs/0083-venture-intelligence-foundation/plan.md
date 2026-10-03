@@ -90,6 +90,7 @@ Every fact record: `entity_id`, `value`, `unit`, `source_id`, `source_grade`,
 | REQ-017 | `workflows.json`, `docs/workflows.md` | T-010 |
 | REQ-018 | multilingual section of standard; golden cases | T-001, T-011 |
 | REQ-019 | `agents/venture_intelligence/` roster | T-008 |
+| REQ-020 | `review_status`/`review` fields and `validate_review` | T-016 |
 | NFR-001 | validator and golden cases | T-012 |
 | NFR-002 | synthetic disclosure per `0025` | T-015 |
 | NFR-003 | gates | T-015 |

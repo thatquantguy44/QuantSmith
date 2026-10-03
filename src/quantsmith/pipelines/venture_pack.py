@@ -40,6 +40,11 @@ FACT_FIELDS = ("entity_id", "value", "unit", "source_id", "source_grade", "event
                "announced_time", "filed_time", "ingested_time", "known_at", "language",
                "derived", "confidence")
 MIN_CHILD_SPEC = 84
+REVIEW_STATUSES = {"draft", "reviewed", "superseded", "retired"}
+# Pack sections whose list records carry review_status / review (REQ-020).
+REVIEWABLE = (("taxonomy", "entity_types"), ("taxonomy", "relationship_types"),
+              ("channels", "channels"), ("models", "models"),
+              ("workflows", "workflows"), ("glossary", "terms"))
 
 
 class VenturePackError(ValueError):
@@ -153,6 +158,56 @@ def validate_overlay(overlay: Mapping[str, Any], conventions: Mapping[str, Any])
         if re.search(r"(secret|password|token|api_key)", key, re.I) and overlay[key]:
             errors.append(f"overlay holds a secret-like value in {key!r}; use a credential reference")
     return errors
+
+
+# ---------------------------------------------------------------- review
+def reviewable_records(pack: Mapping[str, Any]) -> List[Mapping[str, Any]]:
+    out: List[Mapping[str, Any]] = []
+    for name, key in REVIEWABLE:
+        out.extend(pack[name][key])
+    conv = pack["conventions"]
+    for key in ("valuation", "fund_metrics"):
+        out.extend(conv[key])
+    out.extend(conv["data_time"]["contracts"])
+    norm = conv["normalization"]
+    for key in ("numeral_units", "calendar_offsets", "number_locales"):
+        out.extend(norm[key])
+    return out
+
+
+def validate_review(rec: Mapping[str, Any]) -> List[str]:
+    """A record is `reviewed` only with a named reviewer, a date, and a scope."""
+    rid, status = rec.get("id", "?"), rec.get("review_status")
+    if status not in REVIEW_STATUSES:
+        return [f"review: {rid} has invalid review_status {status!r}"]
+    review = rec.get("review")
+    if status == "draft":
+        return [f"review: {rid} is draft but carries a review record"] if review else []
+    if not isinstance(review, Mapping):
+        return [f"review: {rid} is {status} without a review record"]
+    errors = [f"review: {rid} review lacks {f}" for f in ("reviewer", "review_date", "scope")
+              if not str(review.get(f, "")).strip()]
+    try:
+        date.fromisoformat(str(review.get("review_date", "")))
+    except ValueError:
+        errors.append(f"review: {rid} review_date is not an ISO date")
+    if status == "reviewed" and str(rec.get("citation", "")).strip().lower() == "unverified" \
+            and not review.get("accepts_unverified"):
+        errors.append(f"review: {rid} is reviewed but still cites 'unverified' "
+                      "(cite a source or set review.accepts_unverified)")
+    return errors
+
+
+def review_summary(pack: Mapping[str, Any]) -> Dict[str, int]:
+    counts = {s: 0 for s in sorted(REVIEW_STATUSES)}
+    unverified = 0
+    for rec in reviewable_records(pack):
+        counts[rec.get("review_status", "draft")] = counts.get(rec.get("review_status", "draft"), 0) + 1
+        if str(rec.get("citation", "")).strip().lower() == "unverified":
+            unverified += 1
+    counts["total"] = sum(counts.values())
+    counts["unverified_citations"] = unverified
+    return counts
 
 
 # ---------------------------------------------------------------- golden cases
@@ -334,6 +389,10 @@ def validate_pack(pack: Mapping[str, Any], root: Path = Path(".")) -> List[str]:
         if not (root / t["owner_doc"]).is_file():
             errors.append(f"glossary: {t['term']} owner_doc {t['owner_doc']} does not exist")
 
+    # review sign-off (REQ-020)
+    for rec in reviewable_records(pack):
+        errors += validate_review(rec)
+
     # golden cases (REQ-012, AC-018)
     if pack["golden_cases"].get("synthetic") is not True:
         errors.append("golden_cases: must be flagged synthetic")
@@ -348,9 +407,11 @@ def validate_or_raise(pack: Mapping[str, Any], root: Path = Path(".")) -> None:
 
 
 def main() -> int:  # pragma: no cover - thin CLI
-    errors = validate_pack(load_pack())
+    pack = load_pack()
+    errors = validate_pack(pack)
     for e in errors:
         print("ERROR:", e)
+    print("review:", ", ".join(f"{k}={v}" for k, v in review_summary(pack).items()))
     print(f"venture pack: {len(errors)} error(s)")
     return 1 if errors else 0
 

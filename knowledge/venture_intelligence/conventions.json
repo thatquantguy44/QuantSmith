@@ -33,25 +33,33 @@
         "id": "contract.survivorship",
         "statement": "A cohort drawn from a database that omits failed or removed companies overstates success rates; the cohort must be defined at an early date from a list not conditioned on outcome.",
         "required_control": "Define the cohort at formation date; report the denominator; compare with a corrected rate.",
-        "citation": "unverified"
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
       },
       {
         "id": "contract.backfill",
         "statement": "A vendor may add historical records after the fact with historical dates; those records were not knowable then.",
         "required_control": "Use the vendor's first-seen or ingested time as known_at; if unavailable, snapshot the vendor and treat history as backfilled.",
-        "citation": "unverified"
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
       },
       {
         "id": "contract.reporting_lag",
         "statement": "Recent rounds appear in databases with a lag, so the latest periods look quieter than they were.",
         "required_control": "State the lag; do not compare incomplete recent periods with complete earlier ones.",
-        "citation": "unverified"
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
       },
       {
         "id": "contract.stealth_omission",
         "statement": "Companies that have not announced funding or hiring are invisible; absence of data is not absence of activity.",
         "required_control": "Report coverage, never imply a complete universe.",
-        "citation": "unverified"
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
       }
     ]
   },
@@ -62,7 +70,9 @@
       "formula": "post_money = pre_money + new_money",
       "unit": "currency",
       "measured_on": "round close",
-      "citation": "NVCA Model Legal Documents (public)"
+      "citation": "NVCA Model Legal Documents (public)",
+      "review_status": "draft",
+      "review": null
     },
     {
       "id": "conv.new_investor_ownership",
@@ -70,7 +80,9 @@
       "formula": "new_ownership = new_money / post_money",
       "unit": "fraction",
       "measured_on": "round close, fully diluted",
-      "citation": "unverified"
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
     },
     {
       "id": "conv.dilution",
@@ -78,13 +90,17 @@
       "formula": "ownership_after = ownership_before * pre_money / post_money (no option-pool change)",
       "unit": "fraction",
       "measured_on": "round close, fully diluted",
-      "citation": "unverified"
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
     },
     {
       "id": "conv.option_pool",
       "name": "Option pool treatment",
       "rule": "State whether a pool top-up is inside pre-money (dilutes existing holders only) or post-money; valuations are not comparable otherwise.",
-      "citation": "unverified"
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
     }
   ],
   "fund_metrics": [
@@ -94,7 +110,9 @@
       "formula": "DPI = cumulative_distributions / paid_in_capital",
       "unit": "multiple",
       "measured_on": "report date",
-      "citation": "ILPA Reporting Template (public)"
+      "citation": "ILPA Reporting Template (public)",
+      "review_status": "draft",
+      "review": null
     },
     {
       "id": "conv.rvpi",
@@ -102,7 +120,9 @@
       "formula": "RVPI = residual_nav / paid_in_capital",
       "unit": "multiple",
       "measured_on": "report date",
-      "citation": "ILPA Reporting Template (public)"
+      "citation": "ILPA Reporting Template (public)",
+      "review_status": "draft",
+      "review": null
     },
     {
       "id": "conv.tvpi",
@@ -110,7 +130,9 @@
       "formula": "TVPI = DPI + RVPI",
       "unit": "multiple",
       "measured_on": "report date",
-      "citation": "ILPA Reporting Template (public)"
+      "citation": "ILPA Reporting Template (public)",
+      "review_status": "draft",
+      "review": null
     },
     {
       "id": "conv.moic",
@@ -118,7 +140,9 @@
       "formula": "MOIC = (realized_proceeds + unrealized_value) / invested_cost",
       "unit": "multiple",
       "measured_on": "report date",
-      "citation": "unverified"
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
     },
     {
       "id": "conv.irr",
@@ -126,7 +150,9 @@
       "formula": "rate r such that sum(cashflow_i / (1+r)^(t_i)) = 0, with terminal NAV as the final inflow and t in years from first cash flow",
       "unit": "fraction per year",
       "measured_on": "report date",
-      "citation": "unverified"
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
     },
     {
       "id": "conv.ks_pme",
@@ -134,13 +160,17 @@
       "formula": "KS_PME = FV(distributions + NAV, index) / FV(contributions, index)",
       "unit": "multiple",
       "measured_on": "report date",
-      "citation": "Kaplan and Schoar (2005), Journal of Finance"
+      "citation": "Kaplan and Schoar (2005), Journal of Finance",
+      "review_status": "draft",
+      "review": null
     },
     {
       "id": "conv.j_curve",
       "name": "J-curve",
       "rule": "Early-life TVPI and IRR are depressed by fees and unrealized marks; early-life metrics are not comparable with mature funds.",
-      "citation": "unverified"
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
     }
   ],
   "stage_naming": {
@@ -223,25 +253,33 @@
         "id": "norm.wan",
         "symbol": "万",
         "multiplier": 10000,
-        "citation": "unverified"
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
       },
       {
         "id": "norm.yi",
         "symbol": "亿",
         "multiplier": 100000000,
-        "citation": "unverified"
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
       },
       {
         "id": "norm.lakh",
         "symbol": "lakh",
         "multiplier": 100000,
-        "citation": "unverified"
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
       },
       {
         "id": "norm.crore",
         "symbol": "crore",
         "multiplier": 10000000,
-        "citation": "unverified"
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
       }
     ],
     "calendar_offsets": [
@@ -250,14 +288,18 @@
         "name": "Buddhist Era (Thailand)",
         "gregorian_year_equals": "year - 543",
         "offset": -543,
-        "citation": "unverified"
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
       },
       {
         "id": "norm.roc",
         "name": "Minguo / ROC (Taiwan)",
         "gregorian_year_equals": "year + 1911",
         "offset": 1911,
-        "citation": "unverified"
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
       }
     ],
     "number_locales": [
@@ -269,7 +311,9 @@
         ],
         "thousands": ".",
         "decimal": ",",
-        "citation": "unverified"
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
       },
       {
         "id": "norm.locale_comma_thousands",
@@ -280,7 +324,9 @@
         ],
         "thousands": ",",
         "decimal": ".",
-        "citation": "unverified"
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
       }
     ],
     "ambiguity_rule": "If a unit, era, or separator cannot be resolved from context, flag it; never guess.",
