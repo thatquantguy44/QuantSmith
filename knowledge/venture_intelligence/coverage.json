@@ -432,6 +432,16 @@
         "intelligence_brief_writer",
         "investment_memo_writer"
       ]
+    },
+    {
+      "spec": "0094",
+      "scope": "Asian-language NLP foundation (identification, segmentation, extraction, evaluation, model comparison)",
+      "depends_on": [
+        "0083",
+        "0071",
+        "0084"
+      ],
+      "closes": []
     }
   ]
 }
