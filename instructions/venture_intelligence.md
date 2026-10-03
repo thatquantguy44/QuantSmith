@@ -70,6 +70,6 @@ Deterministic helpers back the rules above: `quantsmith.pipelines.venture_pack`
 (pack validator, normalization, fund metrics), `venture_ingestion` (`known_at`,
 as-of views, cohorts, entity resolution), and `venture_tradecraft` (grades,
 corroboration, hypotheses matrix, effective ownership, conclusion-language lint).
-They report structure and arithmetic; they never grade, conclude, classify, or
+`quantsmith.asian_nlp` supplies the deterministic baseline for Asian-language text (identification, segmentation, span-preserving extraction); model output is compared against it and never replaces it. They report structure and arithmetic; they never grade, conclude, classify, or
 designate. Validate the pack with
 `PYTHONPATH=src python3 -m quantsmith.pipelines.venture_pack`.

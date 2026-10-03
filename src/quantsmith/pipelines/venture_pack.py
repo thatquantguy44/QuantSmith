@@ -200,8 +200,8 @@ def reviewable_records(pack: Mapping[str, Any]) -> List[Mapping[str, Any]]:
         out.extend(conv[key])
     out.extend(conv["data_time"]["contracts"])
     norm = conv["normalization"]
-    for key in ("numeral_units", "calendar_offsets", "number_locales"):
-        out.extend(norm[key])
+    for key in ("numeral_units", "calendar_offsets", "number_locales", "currency_markers"):
+        out.extend(norm.get(key, []))
     return out
 
 

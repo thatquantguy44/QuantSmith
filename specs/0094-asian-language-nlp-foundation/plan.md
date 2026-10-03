@@ -5,7 +5,7 @@
 - **Author:** Joshua Lutkemuller, CFA
 - **Last updated:** 2026-10-02
 
-> HOW. Requires the Draft spec. Nothing is built yet; `tasks.md` tracks status.
+> HOW. Requires the Draft spec. Built; `tasks.md` tracks status.
 
 ## Approach
 
@@ -43,7 +43,9 @@ knowledge/venture_intelligence/gaps.json                (re-owned + new gaps)
 
 ## Languages and Minimum Fixtures
 
-Initial in-scope: `zh-Hans`, `zh-Hant`, `ja`, `ko`, `th`, `vi`, `id`/`ms`, `fil`, `ru`, `kk`/`uz` (Cyrillic and Latin), `en` (including lakh and crore). Starting minimum: 12 labelled cases per language per extraction type, adjustable by decision recorded in this plan.
+In scope: `zh-Hans`, `zh-Hant`, `ja`, `ko`, `th`, `vi`, `id/ms` (not separated), `fil`, `ru`, `kk`, `uz`, `en` (including lakh and crore). **Decision recorded at build time:** the minimum is 6 labelled cases per applicable language and extraction type (not the 12 first proposed), because cases are hand-written from template parameters and 6 per cell is enough to expose a defect while remaining reviewable; the guard `min_n` defaults to the same 6 and refuses a pooled score below it. Applicability: amounts and dates in all 12 languages; era years in `ja`, `zh-Hant` (Minguo), `th` (Buddhist era); fiscal periods in `zh-Hans`, `zh-Hant`, `ja`, `ko`, `th`, `en`.
+
+**Other build-time decisions:** the extractor's unit and currency data was added to `conventions.json` (not hard-coded); Chinese currency words (人民币, 新台幣, ...) are accepted before the number; informational flags (such as fiscal year-end not stated) go in `notes`, not `ambiguous`; the package ships `fixtures/*.json` via `[tool.setuptools.package-data]`; conventions are read from the repository checkout, so installed use needs a checkout or an explicit `conventions=` argument.
 
 ## Constitution Check
 

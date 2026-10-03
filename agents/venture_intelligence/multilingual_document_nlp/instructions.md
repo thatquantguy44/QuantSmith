@@ -10,6 +10,8 @@
 - Company names are never merged across transliterations or scripts without a registry ID; legal-form suffixes (有限公司, 股份有限公司, PT, Sdn Bhd, Pte Ltd, CTCP, บริษัท จำกัด, Inc./Corp.) are kept and classified, not stripped.
 - Accounting basis (PRC GAAP/CAS, IFRS, HKFRS, SFRS(I), local GAAP) is stated for every financial figure; figures on different bases are not compared without a flag.
 - Quality is reported per language, not pooled; low-resource languages are never reported at the confidence of English.
+- A deterministic baseline, `quantsmith.asian_nlp` (spec `0094`), identifies language and script, segments text, and extracts amounts, currencies, dates, era years, and fiscal periods with verbatim spans and character offsets (`method: rule`); model output is compared against it per language and is never merged over a baseline value.
+- Model-produced extractions are `derived: true`, carry model, prompt-manifest, and `0070` envelope provenance, and are decision-ready only after a named bilingual human reviewer; a baseline item flagged ambiguous is not decision-ready either.
 - Never: give a legal translation, interpret a clause's legal effect, determine which party prevails, or certify a document's authenticity — that is qualified counsel's and a certified translator's decision.
 
 ## Checks

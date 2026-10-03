@@ -1576,14 +1576,16 @@ manual-task persistence question stays deferred until a real consumer needs it.
     `0090` (Draft, built) adds six tradecraft and screening-support agents and
     `venture_tradecraft.py` helpers (grades, corroboration, hypotheses matrix,
     effective ownership, conclusion-language lint).
-    `0094` (Draft, spec only; `0093` is taken by another agent) specifies the
-    Asian-language NLP foundation: language/script ID, segmentation baseline,
-    rule-based amount/date/era extraction with spans, per-language evaluation,
-    and a baseline-vs-LLM comparison harness.
+    `0094` (Draft, built; `0093` is taken by another agent) is the
+    Asian-language NLP foundation, `src/quantsmith/asian_nlp/`: language/script ID,
+    segmentation baseline, rule-based amount/currency/date/era/fiscal extraction
+    with spans, per-language evaluation, and a baseline-vs-LLM comparison harness.
+    It is a checkable baseline only: scores apply to 240 synthetic cases; Kazakh,
+    Uzbek, and Filipino month names need native-speaker review.
     Proof of concept: no legal collection limits set yet; they must be set
     before operational use. The `0083` knowledge pack and validator are built
-    (per-record review sign-off; all records still `draft`). Next: build `0094`,
-    then `0091` (fund analytics) and the deferred regions in `0087`.
+    (per-record review sign-off; all records still `draft`). Next: `0091` (fund analytics), the deferred regions in `0087`, and
+    native-speaker review of the `0094` lexicons.
 
 33. **Deferred lint review (24 ruff findings, left unfixed on purpose).** A repo-wide
     `ruff check --fix` pass (2026-10-03, commit `7b7fbcd`) applied only the safe
