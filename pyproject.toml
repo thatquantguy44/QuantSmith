@@ -23,6 +23,7 @@ data = [
 dev = [
   "pytest>=8.0",
   "openpyxl>=3.1",
+  "coverage>=7.4",
 ]
 
 [project.scripts]
@@ -35,6 +36,7 @@ quantsmith-sec-lending = "quantsmith.quant.agentic_quant.cli.sec_lending:main"
 quantsmith-rebalancer = "quantsmith.quant.agentic_quant.cli.rebalancer:main"
 quantsmith-sp500 = "quantsmith.quant.agentic_quant.cli.sp500:main"
 quantsmith-nl-analytics = "quantsmith.nl_analytics.cli:main"
+quantsmith-test-engineering = "quantsmith.test_engineering.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
