@@ -1,0 +1,85 @@
+{
+  "schema_version": "0093.1",
+  "pack_id": "operations_settlement",
+  "name": "Operations & Settlement — visual stories",
+  "analytics_pack_ids": [
+    "operations_settlement"
+  ],
+  "reviewer_agents": [
+    "agents/analytics/data_storytelling",
+    "agents/analytics/data_visualization",
+    "agents/data_quality",
+    "agents/monitoring/pipeline_monitoring"
+  ],
+  "review": {
+    "status": "draft",
+    "reviewer": null,
+    "reviewed_on": null
+  },
+  "recipes": [
+    {
+      "recipe_id": "settlement_failures",
+      "intent": "failures",
+      "decision": "Where are observed settlement failures concentrated?",
+      "audiences": [
+        "executive",
+        "analyst"
+      ],
+      "sections": [
+        {
+          "section_id": "fails",
+          "metric": "settlement_fails",
+          "dimensions": [
+            "market"
+          ],
+          "view": "breakdown",
+          "chart_rule": "shape",
+          "fallback_reason": "",
+          "interpretation": "Which markets warrant operational investigation given their settlement volumes?",
+          "caveats": [
+            "Without denominators, failure counts are not failure rates."
+          ]
+        }
+      ],
+      "action": "Investigate the observed markets using settlement volumes and operational incident evidence."
+    },
+    {
+      "recipe_id": "unresolved_breaks",
+      "intent": "breaks",
+      "decision": "Which processes carry unresolved breaks and older items?",
+      "audiences": [
+        "executive",
+        "analyst"
+      ],
+      "sections": [
+        {
+          "section_id": "breaks",
+          "metric": "open_breaks",
+          "dimensions": [
+            "process"
+          ],
+          "view": "breakdown",
+          "chart_rule": "shape",
+          "fallback_reason": "",
+          "interpretation": "Which processes need a review of their outstanding reconciliations?",
+          "caveats": []
+        },
+        {
+          "section_id": "age",
+          "metric": "break_age",
+          "dimensions": [
+            "process"
+          ],
+          "view": "breakdown",
+          "chart_rule": "table",
+          "fallback_reason": "Age-bucket evidence is unavailable; show the registered age measure by process instead of inventing aging buckets.",
+          "interpretation": "Does the governed age measure identify processes needing case-level review?",
+          "caveats": [
+            "A mean age does not reveal a full age distribution."
+          ]
+        }
+      ],
+      "action": "Review outstanding reconciliations and inspect case-level aging where authorized."
+    }
+  ]
+}

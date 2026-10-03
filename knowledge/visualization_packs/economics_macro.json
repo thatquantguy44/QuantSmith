@@ -1,0 +1,83 @@
+{
+  "schema_version": "0093.1",
+  "pack_id": "economics_macro",
+  "name": "Economics & Macro — visual stories",
+  "analytics_pack_ids": [
+    "economics_macro"
+  ],
+  "reviewer_agents": [
+    "agents/analytics/data_storytelling",
+    "agents/analytics/data_visualization",
+    "agents/economists/macro_indicator_analyst",
+    "agents/economists/monetary_policy_analyst"
+  ],
+  "review": {
+    "status": "draft",
+    "reviewer": null,
+    "reviewed_on": null
+  },
+  "recipes": [
+    {
+      "recipe_id": "policy_path",
+      "intent": "policy",
+      "decision": "How has the observed policy rate developed as of the decision date?",
+      "audiences": [
+        "executive",
+        "analyst"
+      ],
+      "sections": [
+        {
+          "section_id": "policy",
+          "metric": "policy_rate",
+          "dimensions": [],
+          "view": "trend",
+          "chart_rule": "shape",
+          "fallback_reason": "",
+          "interpretation": "Which policy communications or releases are needed to interpret the observed path?",
+          "caveats": [
+            "Rate observations do not establish the causes of subsequent economic outcomes."
+          ]
+        }
+      ],
+      "action": "Review dated policy communications and the release-vintage context."
+    },
+    {
+      "recipe_id": "country_conditions",
+      "intent": "conditions",
+      "decision": "How do observed unemployment and growth measures compare across countries?",
+      "audiences": [
+        "executive",
+        "analyst"
+      ],
+      "sections": [
+        {
+          "section_id": "unemployment",
+          "metric": "unemployment_rate",
+          "dimensions": [
+            "country"
+          ],
+          "view": "breakdown",
+          "chart_rule": "shape",
+          "fallback_reason": "",
+          "interpretation": "Are labor-market definitions and release vintages comparable across countries?",
+          "caveats": []
+        },
+        {
+          "section_id": "growth",
+          "metric": "yoy_change",
+          "dimensions": [
+            "country"
+          ],
+          "view": "breakdown",
+          "chart_rule": "shape",
+          "fallback_reason": "",
+          "interpretation": "Do the growth observations use the same indicator and seasonal-adjustment basis?",
+          "caveats": [
+            "Cross-country co-movement is descriptive and does not establish causation."
+          ]
+        }
+      ],
+      "action": "Confirm definitions and release vintages before drawing cross-country conclusions."
+    }
+  ]
+}
