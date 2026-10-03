@@ -259,3 +259,227 @@ A tradable signal expressed as an explicit formula over market inputs, composed 
 ## Financing-Aware Backtest
 
 A backtest that nets the cost of borrowing and funding — borrow fee, short rebate, repo/funding, margin — from returns. Short and long-short backtests that ignore financing overstate their edge; checked by the `backtest` gate's financing theme.
+
+## Venture & Intelligence
+
+<!-- generated from knowledge/venture_intelligence/glossary.json -->
+
+### Decision-Path Class
+
+A label on every venture/intelligence workflow: analytic_support, person_adjacent, or sovereign_adjacent. The latter two are decision-support only with named human review.
+
+### Inform, Never Decide
+
+The shared rule: agents structure and report; the accountable human invests, designates, or acts.
+
+### Source Reliability
+
+The letter grade (A to F) for how reliable a source has been, graded separately from the information.
+
+### Information Credibility
+
+The digit grade (1 to 6) for how credible a piece of information is given corroboration.
+
+### Calibrated Confidence Language
+
+Likelihood words (e.g. likely, very likely) tied to probability bands so wording is consistent between analysts.
+
+### Evidence / Assumption / Judgement
+
+The required separation in an analytic product: what was observed, what was assumed, and what is concluded.
+
+### Derived Evidence
+
+A translation or extraction produced by a model; labelled, never substituted for the source-language span, and human-reviewed before informing a decision.
+
+### Known-At
+
+The date the adopter could first have known a fact; the only time a model or backtest may use it.
+
+### Survivorship Bias
+
+Overstated success rates from a cohort that omits failed or removed companies.
+
+### Backfill Bias
+
+Records added after the fact with historical dates, which were not knowable then.
+
+### Reporting Lag
+
+Delay between an event and its appearance in a database, making recent periods look quieter.
+
+### Stealth Company
+
+A company with no public funding or hiring signal; invisible to databases, so absence is not inactivity.
+
+### Holdco / Opco
+
+Holding company (often Singapore, Cayman, BVI, or Delaware) above local operating companies; holdco domicile is not the market of operation.
+
+### Post-Money Valuation
+
+Pre-money valuation plus new money raised in the round.
+
+### Option Pool Treatment
+
+Whether an option-pool top-up sits inside pre-money or post-money; valuations are not comparable unless stated.
+
+### Dilution
+
+Reduction in an existing holder's ownership caused by issuing new shares.
+
+### DPI
+
+Distributions to paid-in capital: cumulative distributions divided by paid-in capital.
+
+### RVPI
+
+Residual value to paid-in capital: net asset value divided by paid-in capital.
+
+### TVPI
+
+Total value to paid-in capital: DPI plus RVPI.
+
+### MOIC
+
+Multiple on invested capital at deal level: realized plus unrealized value over invested cost.
+
+### IRR
+
+The annual rate that sets the net present value of dated cash flows, including terminal NAV, to zero.
+
+### PME
+
+Public market equivalent; Kaplan-Schoar PME compares private-fund cash flows with an index investment.
+
+### J-Curve
+
+The early-life dip in fund returns from fees and unrealized marks; early metrics are not comparable with mature funds.
+
+### Signal
+
+An observation from a non-traditional channel about a company, technology, or market, with a source, known-at date, and grade.
+
+### Signal Channel
+
+A family of non-traditional data (patents, publications, open source, hiring, grants and procurement, filings, trade, web telemetry, news, satellite) with its own lead time, bias, and deception risk.
+
+### Deception Risk
+
+How easily a channel can be manipulated (fake stars, ghost postings, seeded stories) and so mislead an analyst.
+
+### Source-Span Preservation
+
+Keeping the verbatim original-language text for every extracted field; translation is a separate labelled field.
+
+### Legal-Form Suffix
+
+The part of a company name denoting legal form (e.g. 有限公司, Pte. Ltd., Sdn. Bhd., PT, CTCP); kept and classified, not stripped.
+
+### Buddhist Era
+
+Thai calendar; Gregorian year equals the Buddhist-era year minus 543.
+
+### Minguo / ROC Year
+
+Taiwan calendar; Gregorian year equals the Minguo year plus 1911.
+
+### Wan / Yi
+
+Chinese numeral units 万 (10,000) and 亿 (100,000,000) used in figures.
+
+### Regional Lead
+
+The first agent created for a world region; routes work and states per-market coverage. Specialists are added only when a coverage row justifies them.
+
+### Professional Role
+
+A public, organization-level role tied to a company; the only way a natural person appears in this domain.
+
+### Known-At Policy
+
+The per-source rule saying which timestamp counts as when the adopter could first have known a record: filed, published, event, snapshot, or retrieved.
+
+### Late Retrieval
+
+A flag on a record retrieved long after its public date, which may be a backfill or revision and must not enter a backtest as if known earlier.
+
+### Cohort Formation Date
+
+The date a cohort is defined from companies already known by then, independent of later outcomes; it is what prevents survivorship bias.
+
+### Registry Identifier
+
+A company's number in an official register within one jurisdiction; with the jurisdiction, the only name-independent basis for merging two records.
+
+### Entity Resolution Candidate
+
+A pair of records whose names suggest the same company but which lacks a registry identifier; never merged until evidence is added.
+
+### VIE Structure
+
+Variable interest entity: a contractual-control arrangement, rather than direct equity, by which an offshore holding company may consolidate an onshore operating entity. Equity and contract links are shown separately.
+
+### Fiscal Year-End Convention
+
+The month a market's companies typically close their financial year (e.g. March 31 in India and Japan); stated for every annual figure, never assumed to be a calendar year.
+
+### Era Year
+
+A year counted from an imperial or republican era (Reiwa, Heisei, Showa, Minguo) and converted to Gregorian by a stated offset.
+
+### Onshore / Offshore Renminbi
+
+CNY is the onshore and CNH the offshore renminbi; they can differ in rate and are not silently combined.
+
+### Script Variant
+
+A second written form of the same name in another script (e.g. Cyrillic and Latin); never merged without a registry identifier.
+
+### Patent Family
+
+The set of patent filings in different offices that claim the same invention; landscapes count families, not raw filings, so one invention is counted once.
+
+### Single-Channel Finding
+
+A finding supported by only one signal channel; corroboration needs independent channels, and news repeating a press release is not independent.
+
+### Syndication Collapse
+
+Merging republished copies of one news item into a single original report before counting, so repeats are not taken as independent corroboration.
+
+### Screening Criteria
+
+The explicit, caller-stated rules a longlist is filtered and ordered by; ordering reflects the criteria, never overall merit.
+
+### Analysis of Competing Hypotheses
+
+A structured method that rates each piece of evidence against every hypothesis and ranks hypotheses by fewest inconsistencies; the result informs the analyst and is not itself a conclusion.
+
+### Diagnostic Evidence
+
+Evidence rated differently across hypotheses; evidence consistent with all of them is non-diagnostic and supports none.
+
+### Corroboration Status
+
+Whether a claim is a single source, an echo of one origin, supported by several origins in one channel, or corroborated across independent channels.
+
+### Origin Identifier
+
+The identifier of where a piece of information first came from; republished and syndicated copies share one origin and count once.
+
+### Information Requirement
+
+A recorded question about missing evidence, linked to the decision it informs and to lawful candidate channels, awaiting human approval.
+
+### Effective Ownership
+
+A holder's share of a company through all equity chains: the product of percentages along each path, summed across paths; contractual links are never multiplied.
+
+### List Match
+
+A name-comparison hit against a restricted-party or sanctions list snapshot; an indicator with a false-positive risk, never a finding.
+
+### Dual-Use Indicator
+
+A resemblance between a technology description and a caller-supplied control-list entry, turned into a question for counsel; not a classification.

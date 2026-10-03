@@ -29,7 +29,7 @@ Two properties are deliberate and worth stating plainly:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from .data_pipeline import DataContract, Pipeline, Step, StepFn
 

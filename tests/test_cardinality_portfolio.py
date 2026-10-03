@@ -6,7 +6,6 @@ Each test is named for the acceptance criterion it covers (see
 
 from __future__ import annotations
 
-import math
 
 import pytest
 

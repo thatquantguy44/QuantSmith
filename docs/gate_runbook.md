@@ -121,3 +121,29 @@ patterns have gone stale relative to your prose — fix the pattern, not the doc
 
 The gate's own header comment says what it checks and why, and is usually more
 specific than this file. Then `docs/ownership.md`.
+
+## Dependency lockfile (`repro` gate)
+
+`uv.lock` pins every dependency, including the optional `dev`, `data`, and
+`quant` extras, with hashes, for Python 3.10 and later. `pyproject.toml` keeps
+the loose ranges (this is a library others install); the lockfile is for
+development and CI, and CI installs from it with `uv sync --frozen --all-extras`
+after `uv lock --check` confirms it is current.
+
+```sh
+pip install uv                     # once
+uv sync --frozen --all-extras      # create .venv from the lock (gitignored)
+uv run --frozen python -m pytest   # run tests in that environment
+
+uv lock                            # refresh after editing dependencies in pyproject.toml
+uv lock --upgrade                  # deliberately move every pin forward, then run the tests
+uv lock --check                    # fails if uv.lock is stale (CI runs this)
+```
+
+Commit `uv.lock` together with the `pyproject.toml` change that caused it. Re-lock
+with `--upgrade` on a regular cadence (monthly is a reasonable start) and let the
+test suite decide whether the new pins are acceptable.
+
+The gate's other check, a run manifest, is satisfied by a filled-in run card
+under `specs/*/` (for example `specs/0083-venture-intelligence-foundation/run_card.md`);
+use `templates/docs/run_card.md` and record a real run, never a placeholder.

@@ -1,0 +1,34 @@
+source_id: "usaspending"
+name: "USAspending.gov (federal awards)"
+type: api
+owner: "quant-research"
+description: >
+  US federal contract, grant, and loan awards with recipient and place-of-performance data. Venture and intelligence source (spec 0088); endpoints, terms, and
+  coverage are unverified until confirmed against current documentation.
+
+domain: ["grants_procurement", "technology_scouting"]
+access_level: public
+
+quality:
+  completeness: medium
+  timeliness: "award data is reported with agency lag; modifications restate values"
+  known_issues:
+    - "modifications restate award values"
+    - "prime recipient may hide the performer"
+    - "recipient names need entity resolution"
+  last_assessed: "2026-10-02"
+
+point_in_time:
+  supports_asof: true
+  known_at_policy: "published"
+  revision_policy: "record source file or endpoint, public timestamp when available, and retrieval timestamp; retain dated snapshots where the source keeps no history"
+
+connection:
+  method: rest_api
+  endpoint_or_host: "https://api.usaspending.gov"
+  credential_ref: "not_required_public_access"
+
+documentation_uri: "https://api.usaspending.gov/"
+status: evaluating
+
+data_contract_refs: ["specs/0088-venture-sources-pit-ingestion/"]

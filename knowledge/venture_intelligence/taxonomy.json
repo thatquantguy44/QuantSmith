@@ -1,0 +1,217 @@
+{
+  "schema_version": "0083.1",
+  "status": "draft_structural_contract",
+  "entity_types": [
+    {
+      "id": "entity.company",
+      "name": "Company",
+      "definition": "A legal entity that operates or intends to operate a business; the unit of venture analysis. Domicile of a holding company is not the market of operation.",
+      "is_person_derived": false,
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "entity.round",
+      "name": "Financing round",
+      "definition": "A dated financing event in which a company issues securities or debt, with an announced, closed, and filed date that may differ.",
+      "is_person_derived": false,
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "entity.instrument",
+      "name": "Instrument",
+      "definition": "The security or debt issued in a round: preferred or common equity, convertible note, SAFE-type instrument, warrant, or venture debt.",
+      "is_person_derived": false,
+      "citation": "NVCA Model Legal Documents (public)",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "entity.investor",
+      "name": "Investor",
+      "definition": "An organization that provides capital: venture fund, corporate investor, government-linked investor, angel syndicate.",
+      "is_person_derived": false,
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "entity.fund",
+      "name": "Fund",
+      "definition": "A pooled investment vehicle with a general partner, limited partners, a vintage year, and cash flows.",
+      "is_person_derived": false,
+      "citation": "ILPA Reporting Template (public)",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "entity.limited_partner",
+      "name": "Limited partner",
+      "definition": "An organization that commits capital to a fund. Individuals are out of scope.",
+      "is_person_derived": false,
+      "citation": "ILPA Reporting Template (public)",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "entity.technology_domain",
+      "name": "Technology domain",
+      "definition": "A node in a technology classification tree used to tag companies, patents, papers, and programs.",
+      "is_person_derived": false,
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "entity.government_program",
+      "name": "Government program",
+      "definition": "A public funding or procurement program that awards grants, contracts, or equity.",
+      "is_person_derived": false,
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "entity.signal",
+      "name": "Signal",
+      "definition": "An observation from a non-traditional channel about a company, technology, or market, with a source, a known_at date, and a grade.",
+      "is_person_derived": false,
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "entity.source",
+      "name": "Source",
+      "definition": "The origin of a signal or fact, with reliability grade, licence, and collection method.",
+      "is_person_derived": false,
+      "citation": "ODNI ICD 203 (Analytic Standards)",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "entity.analytic_product",
+      "name": "Analytic product",
+      "definition": "A written analytic output (brief, memo, landscape) separating evidence, assumptions, and judgement.",
+      "is_person_derived": false,
+      "citation": "ODNI ICD 203 (Analytic Standards)",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "entity.professional_role",
+      "name": "Professional role",
+      "definition": "A public, organization-level role (officer, director, listed holder of record) tied to a company. The only way a natural person appears in this domain; no profile, no sensitive attributes.",
+      "is_person_derived": true,
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    }
+  ],
+  "relationship_types": [
+    {
+      "id": "rel.company_raised_round",
+      "from": "entity.company",
+      "to": "entity.round",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "rel.round_issued_instrument",
+      "from": "entity.round",
+      "to": "entity.instrument",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "rel.investor_in_round",
+      "from": "entity.investor",
+      "to": "entity.round",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "rel.fund_invested_in_company",
+      "from": "entity.fund",
+      "to": "entity.company",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "rel.limited_partner_committed_to_fund",
+      "from": "entity.limited_partner",
+      "to": "entity.fund",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "rel.company_in_technology_domain",
+      "from": "entity.company",
+      "to": "entity.technology_domain",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "rel.program_funded_company",
+      "from": "entity.government_program",
+      "to": "entity.company",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "rel.signal_observes_company",
+      "from": "entity.signal",
+      "to": "entity.company",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "rel.signal_from_source",
+      "from": "entity.signal",
+      "to": "entity.source",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "rel.product_cites_signal",
+      "from": "entity.analytic_product",
+      "to": "entity.signal",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "rel.role_held_at_company",
+      "from": "entity.professional_role",
+      "to": "entity.company",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "rel.company_owns_company",
+      "from": "entity.company",
+      "to": "entity.company",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    }
+  ],
+  "ownership_link_required_fields": [
+    "percentage",
+    "as_of",
+    "source_id"
+  ]
+}

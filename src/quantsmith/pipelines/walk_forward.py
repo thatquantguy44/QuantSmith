@@ -245,11 +245,11 @@ def render_walk_forward_report(
     o.append("## Simulation Contract")
     o.append("")
     o.append(
-        f"- **Out-of-sample construction:** folds come from `make_folds` (spec `0006`) "
-        f"— purged and embargoed, each test block contiguous and later in time than "
-        f"its training set. `fit_predict` is called once per fold on training periods "
-        f"only, and the resulting weights are evaluated on that fold's held-out test "
-        f"periods."
+        "- **Out-of-sample construction:** folds come from `make_folds` (spec `0006`) "
+        "— purged and embargoed, each test block contiguous and later in time than "
+        "its training set. `fit_predict` is called once per fold on training periods "
+        "only, and the resulting weights are evaluated on that fold's held-out test "
+        "periods."
     )
     o.append(f"- **Rebalance lag:** {cfg.rebalance_lag} period(s), preserved within each fold.")
     o.append(f"- **Periods per year:** {cfg.periods_per_year}")

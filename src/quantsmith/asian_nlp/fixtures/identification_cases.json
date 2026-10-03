@@ -1,0 +1,301 @@
+{
+ "synthetic": true,
+ "disclosure": "Synthetic template sentences for testing (spec 0025); no real document.",
+ "cases": [
+  {
+   "language": "zh-Hans",
+   "text": "公司于去年完成了一轮融资,投资方包括多家机构和基金",
+   "expect_status": "ok",
+   "expect_language": "zh-Hans",
+   "synthetic": true
+  },
+  {
+   "language": "zh-Hans",
+   "text": "本轮融资将用于技术研发和市场拓展,公司资产规模持续增长",
+   "expect_status": "ok",
+   "expect_language": "zh-Hans",
+   "synthetic": true
+  },
+  {
+   "language": "zh-Hans",
+   "text": "该公司已经与多家银行签订了贷款协议和投资合同",
+   "expect_status": "ok",
+   "expect_language": "zh-Hans",
+   "synthetic": true
+  },
+  {
+   "language": "zh-Hant",
+   "text": "公司於去年完成了一輪融資，投資方包括多家機構和基金",
+   "expect_status": "ok",
+   "expect_language": "zh-Hant",
+   "synthetic": true
+  },
+  {
+   "language": "zh-Hant",
+   "text": "本輪融資將用於技術研發和市場拓展，公司資產規模持續增長",
+   "expect_status": "ok",
+   "expect_language": "zh-Hant",
+   "synthetic": true
+  },
+  {
+   "language": "zh-Hant",
+   "text": "該公司已經與多家銀行簽訂了貸款協議和投資合約",
+   "expect_status": "ok",
+   "expect_language": "zh-Hant",
+   "synthetic": true
+  },
+  {
+   "language": "ja",
+   "text": "当社は昨年に資金調達を実施し、複数の機関投資家が参加しました",
+   "expect_status": "ok",
+   "expect_language": "ja",
+   "synthetic": true
+  },
+  {
+   "language": "ja",
+   "text": "今回の調達資金は研究開発と市場拡大に使用する予定です",
+   "expect_status": "ok",
+   "expect_language": "ja",
+   "synthetic": true
+  },
+  {
+   "language": "ja",
+   "text": "同社は複数の銀行と融資契約を締結しました",
+   "expect_status": "ok",
+   "expect_language": "ja",
+   "synthetic": true
+  },
+  {
+   "language": "ko",
+   "text": "회사는 작년에 투자를 유치했으며 여러 기관이 참여했습니다",
+   "expect_status": "ok",
+   "expect_language": "ko",
+   "synthetic": true
+  },
+  {
+   "language": "ko",
+   "text": "이번 투자금은 연구 개발과 시장 확대에 사용될 예정입니다",
+   "expect_status": "ok",
+   "expect_language": "ko",
+   "synthetic": true
+  },
+  {
+   "language": "ko",
+   "text": "이 회사는 여러 은행과 대출 계약을 체결했습니다",
+   "expect_status": "ok",
+   "expect_language": "ko",
+   "synthetic": true
+  },
+  {
+   "language": "th",
+   "text": "บริษัทได้รับเงินลงทุนจากนักลงทุนหลายรายในปีที่ผ่านมา",
+   "expect_status": "ok",
+   "expect_language": "th",
+   "synthetic": true
+  },
+  {
+   "language": "th",
+   "text": "เงินทุนรอบนี้จะนำไปใช้ในการวิจัยและขยายตลาด",
+   "expect_status": "ok",
+   "expect_language": "th",
+   "synthetic": true
+  },
+  {
+   "language": "th",
+   "text": "บริษัทได้ลงนามในสัญญากู้ยืมเงินกับธนาคารหลายแห่ง",
+   "expect_status": "ok",
+   "expect_language": "th",
+   "synthetic": true
+  },
+  {
+   "language": "vi",
+   "text": "Công ty đã hoàn thành vòng gọi vốn trong năm ngoái với nhiều nhà đầu tư",
+   "expect_status": "ok",
+   "expect_language": "vi",
+   "synthetic": true
+  },
+  {
+   "language": "vi",
+   "text": "Nguồn vốn này sẽ được sử dụng cho nghiên cứu và mở rộng thị trường",
+   "expect_status": "ok",
+   "expect_language": "vi",
+   "synthetic": true
+  },
+  {
+   "language": "vi",
+   "text": "Công ty đã ký kết hợp đồng vay với nhiều ngân hàng",
+   "expect_status": "ok",
+   "expect_language": "vi",
+   "synthetic": true
+  },
+  {
+   "language": "id/ms",
+   "text": "Perseroan telah menerima pendanaan dari investor untuk ekspansi usaha yang akan dilakukan",
+   "expect_status": "ok",
+   "expect_language": "id/ms",
+   "synthetic": true
+  },
+  {
+   "language": "id/ms",
+   "text": "Dana ini akan digunakan untuk penelitian dan pengembangan serta pemasaran produk",
+   "expect_status": "ok",
+   "expect_language": "id/ms",
+   "synthetic": true
+  },
+  {
+   "language": "id/ms",
+   "text": "Syarikat telah menandatangani perjanjian pinjaman dengan beberapa bank untuk projek ini",
+   "expect_status": "ok",
+   "expect_language": "id/ms",
+   "synthetic": true
+  },
+  {
+   "language": "fil",
+   "text": "Ang kumpanya ay nakatanggap ng pondo mula sa mga mamumuhunan para sa mga proyekto",
+   "expect_status": "ok",
+   "expect_language": "fil",
+   "synthetic": true
+  },
+  {
+   "language": "fil",
+   "text": "Ang pondo ay gagamitin para sa pananaliksik at pagpapalawak ng merkado",
+   "expect_status": "ok",
+   "expect_language": "fil",
+   "synthetic": true
+  },
+  {
+   "language": "fil",
+   "text": "Ang kumpanya ay lumagda sa kasunduan sa mga bangko noong nakaraang taon",
+   "expect_status": "ok",
+   "expect_language": "fil",
+   "synthetic": true
+  },
+  {
+   "language": "ru",
+   "text": "Компания привлекла инвестиции от нескольких фондов в этом году для развития бизнеса",
+   "expect_status": "ok",
+   "expect_language": "ru",
+   "synthetic": true
+  },
+  {
+   "language": "ru",
+   "text": "Эти средства будут направлены на исследования и расширение рынка в стране",
+   "expect_status": "ok",
+   "expect_language": "ru",
+   "synthetic": true
+  },
+  {
+   "language": "ru",
+   "text": "Компания подписала кредитное соглашение с банками на следующий год",
+   "expect_status": "ok",
+   "expect_language": "ru",
+   "synthetic": true
+  },
+  {
+   "language": "kk",
+   "text": "Компания инвестицияны қаңтар айында тартты және өсті",
+   "expect_status": "ok",
+   "expect_language": "kk",
+   "synthetic": true
+  },
+  {
+   "language": "kk",
+   "text": "Қор қаржыны зерттеу мен нарықты кеңейтуге жұмсайды ұлттық",
+   "expect_status": "ok",
+   "expect_language": "kk",
+   "synthetic": true
+  },
+  {
+   "language": "kk",
+   "text": "Серіктестік банктермен несие шартына қол қойды және қаржы алды",
+   "expect_status": "ok",
+   "expect_language": "kk",
+   "synthetic": true
+  },
+  {
+   "language": "en",
+   "text": "The company raised funding from several investors in the past year for expansion",
+   "expect_status": "ok",
+   "expect_language": "en",
+   "synthetic": true
+  },
+  {
+   "language": "en",
+   "text": "These funds will be used for research and for the expansion of the market",
+   "expect_status": "ok",
+   "expect_language": "en",
+   "synthetic": true
+  },
+  {
+   "language": "en",
+   "text": "The company has signed a loan agreement with a number of banks for this project",
+   "expect_status": "ok",
+   "expect_language": "en",
+   "synthetic": true
+  },
+  {
+   "language": "short",
+   "text": "短",
+   "expect_status": "undetermined",
+   "expect_language": null,
+   "expect_reason": "text_shorter_than_8_letters",
+   "synthetic": true
+  },
+  {
+   "language": "short",
+   "text": "Acme",
+   "expect_status": "undetermined",
+   "expect_language": null,
+   "expect_reason": "text_shorter_than_8_letters",
+   "synthetic": true
+  },
+  {
+   "language": "short",
+   "text": "회사는",
+   "expect_status": "undetermined",
+   "expect_language": null,
+   "expect_reason": "text_shorter_than_8_letters",
+   "synthetic": true
+  },
+  {
+   "language": "mixed",
+   "text": "投资公司 raised 融资 funds 公司融资 from 机构投资 investors",
+   "expect_status": "undetermined",
+   "expect_language": null,
+   "expect_reason": "mixed_scripts",
+   "synthetic": true
+  },
+  {
+   "language": "mixed",
+   "text": "Компания raised 融资 funds company 投资 Компания 公司",
+   "expect_status": "undetermined",
+   "expect_language": null,
+   "expect_reason": "mixed_scripts",
+   "synthetic": true
+  },
+  {
+   "language": "latin_uzbek",
+   "text": "Kompaniya o'tgan yilda investorlardan mablag' jalb qildi va rivojlandi",
+   "expect_status": "undetermined",
+   "expect_language": null,
+   "expect_reason": "no_function_word_evidence",
+   "synthetic": true
+  },
+  {
+   "language": "devanagari",
+   "text": "कंपनी ने पिछले साल निवेशकों से धन जुटाया और विस्तार किया",
+   "expect_status": "undetermined",
+   "expect_language": null,
+   "expect_reason": "language_id_not_supported_for_this_script",
+   "synthetic": true
+  },
+  {
+   "language": "latin_other",
+   "text": "La empresa recaudó fondos de varios inversores durante el año pasado",
+   "expect_status": "undetermined",
+   "expect_language": null,
+   "expect_reason": "no_function_word_evidence",
+   "synthetic": true
+  }
+ ]
+}

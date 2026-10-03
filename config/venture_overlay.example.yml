@@ -1,0 +1,11 @@
+# Adopter-local overlay for sensitive venture / intelligence deployment (spec 0083, REQ-015).
+# Copy to /venture_overlay.yml (gitignored) and fill in. This template holds
+# placeholders only -- never secrets; name a credential by reference.
+
+environment: "unclassified"            # the handling environment you actually run in
+access_tiers: ["public", "licensed", "restricted"]   # reuse the 0052-0054 tier names
+retention_days: 365                    # set from counsel guidance
+enabled_source_classes: ["public_registry", "licensed_database", "open_scholarly", "open_government"]
+prohibited_source_classes_ack: true    # you have read conventions.json prohibited_source_classes
+reference_cohort_path: ""              # local path to your verified bake-off company list (not committed)
+vendor_credentials_ref: ""             # env var NAME holding a vendor key, never the key

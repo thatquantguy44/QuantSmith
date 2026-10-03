@@ -714,7 +714,6 @@ def check_decay(records: Sequence[Record], freshness_days: int) -> List[Finding]
     today so the same store produces different findings on different dates,
     which is expected: decay is a live-operations concern, not an audit trail.
     """
-    import hashlib as _hashlib  # local import to avoid shadowing top-level name
     cutoff = datetime.date.today() - datetime.timedelta(days=freshness_days)
     return [
         Finding(

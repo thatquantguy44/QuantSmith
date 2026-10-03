@@ -21,6 +21,22 @@ patterns locally rather than expecting them to update in place.
 ## [Unreleased]
 
 ### Added
+- `uv.lock` pins the full dependency set (all extras, Python 3.10+); CI now runs
+  `uv lock --check` and installs with `uv sync --frozen --all-extras`. Refresh steps
+  are in `docs/gate_runbook.md`.
+- Venture & non-traditional intelligence (specs `0083`–`0090`, `0094`): the
+  `knowledge/venture_intelligence/` pack (taxonomy, conventions, channels, models,
+  workflows, coverage, gaps, glossary, golden cases, per-record review sign-off),
+  `instructions/venture_intelligence.md`, 21 contract-only agents under
+  `agents/venture_intelligence/` (multilingual document NLP, entity resolution,
+  Southeast Asia, Greater China & East Asia, South Asia, and Central Asia regional
+  agents, signal and sourcing agents, tradecraft and screening-support agents),
+  eleven public source entries with `known_at` policies, and the stdlib helpers
+  `venture_pack.py`, `venture_ingestion.py`, `venture_tradecraft.py` with tests.
+  `quantsmith.asian_nlp` (spec `0094`): dependency-free language/script identification,
+  segmentation baseline, rule-based amount/currency/date/era-year/fiscal-period extraction
+  with verbatim spans for 12 languages, per-language evaluation, and baseline-vs-model
+  comparison, with 240 synthetic fixture cases and 220 tests.
 - Reference runtimes with tests for specs `0001`, `0006`–`0019`
   (`src/quantsmith/pipelines/`, `src/quantsmith/adapters/`): momentum signal,
   return forecasting, portfolio construction, execution scheduling, the optimization

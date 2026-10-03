@@ -13,7 +13,6 @@ import pytest
 
 from quantsmith.pipelines.quant_factory import (
     ConvergenceGate,
-    FactoryDecision,
     FactoryError,
     FactoryRunner,
     FactorySpec,

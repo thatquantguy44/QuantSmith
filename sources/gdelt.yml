@@ -1,0 +1,34 @@
+source_id: "gdelt"
+name: "GDELT (global news events and tone)"
+type: api
+owner: "quant-research"
+description: >
+  Global news event and tone data across many languages for narrative signals. Venture and intelligence source (spec 0088); endpoints, terms, and
+  coverage are unverified until confirmed against current documentation.
+
+domain: ["narrative_news"]
+access_level: public
+
+quality:
+  completeness: low
+  timeliness: "updates every 15 minutes; machine-coded"
+  known_issues:
+    - "machine-coded events are noisy"
+    - "press-release amplification"
+    - "republished stories look like new events"
+  last_assessed: "2026-10-02"
+
+point_in_time:
+  supports_asof: true
+  known_at_policy: "published"
+  revision_policy: "record source file or endpoint, public timestamp when available, and retrieval timestamp; retain dated snapshots where the source keeps no history"
+
+connection:
+  method: rest_api
+  endpoint_or_host: "https://api.gdeltproject.org/api/v2/"
+  credential_ref: "not_required_public_access"
+
+documentation_uri: "https://www.gdeltproject.org/data.html"
+status: evaluating
+
+data_contract_refs: ["specs/0088-venture-sources-pit-ingestion/"]

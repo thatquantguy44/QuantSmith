@@ -14,7 +14,7 @@ scikit-learn is the primary ML dependency; numpy/scipy handle numerics.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Callable, Dict, List, Optional, Sequence
 
 import numpy as np
 

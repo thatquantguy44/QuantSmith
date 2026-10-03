@@ -1,0 +1,1417 @@
+{
+  "schema_version": "0083.1",
+  "status": "draft_structural_contract",
+  "fact_record": {
+    "required_fields": [
+      "entity_id",
+      "value",
+      "unit",
+      "source_id",
+      "source_grade",
+      "event_time",
+      "announced_time",
+      "filed_time",
+      "ingested_time",
+      "known_at",
+      "language",
+      "derived",
+      "confidence"
+    ],
+    "rule": "A fact without known_at is invalid. known_at is when the adopter could first have known the fact, not when it happened.",
+    "citation": "instructions/point_in_time.md"
+  },
+  "data_time": {
+    "fields": {
+      "event_time": "When the underlying event occurred (e.g. round closed).",
+      "announced_time": "When it was publicly announced.",
+      "filed_time": "When a regulator or registry received the filing.",
+      "ingested_time": "When a vendor or the adopter loaded it.",
+      "known_at": "When the adopter could first have known it; the only time a backtest or model may use."
+    },
+    "contracts": [
+      {
+        "id": "contract.survivorship",
+        "statement": "A cohort drawn from a database that omits failed or removed companies overstates success rates; the cohort must be defined at an early date from a list not conditioned on outcome.",
+        "required_control": "Define the cohort at formation date; report the denominator; compare with a corrected rate.",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "contract.backfill",
+        "statement": "A vendor may add historical records after the fact with historical dates; those records were not knowable then.",
+        "required_control": "Use the vendor's first-seen or ingested time as known_at; if unavailable, snapshot the vendor and treat history as backfilled.",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "contract.reporting_lag",
+        "statement": "Recent rounds appear in databases with a lag, so the latest periods look quieter than they were.",
+        "required_control": "State the lag; do not compare incomplete recent periods with complete earlier ones.",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "contract.stealth_omission",
+        "statement": "Companies that have not announced funding or hiring are invisible; absence of data is not absence of activity.",
+        "required_control": "Report coverage, never imply a complete universe.",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      }
+    ]
+  },
+  "valuation": [
+    {
+      "id": "conv.post_money",
+      "name": "Post-money valuation",
+      "formula": "post_money = pre_money + new_money",
+      "unit": "currency",
+      "measured_on": "round close",
+      "citation": "NVCA Model Legal Documents (public)",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "conv.new_investor_ownership",
+      "name": "New-money ownership",
+      "formula": "new_ownership = new_money / post_money",
+      "unit": "fraction",
+      "measured_on": "round close, fully diluted",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "conv.dilution",
+      "name": "Existing-holder dilution",
+      "formula": "ownership_after = ownership_before * pre_money / post_money (no option-pool change)",
+      "unit": "fraction",
+      "measured_on": "round close, fully diluted",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "conv.option_pool",
+      "name": "Option pool treatment",
+      "rule": "State whether a pool top-up is inside pre-money (dilutes existing holders only) or post-money; valuations are not comparable otherwise.",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    }
+  ],
+  "fund_metrics": [
+    {
+      "id": "conv.dpi",
+      "name": "DPI",
+      "formula": "DPI = cumulative_distributions / paid_in_capital",
+      "unit": "multiple",
+      "measured_on": "report date",
+      "citation": "ILPA Reporting Template (public)",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "conv.rvpi",
+      "name": "RVPI",
+      "formula": "RVPI = residual_nav / paid_in_capital",
+      "unit": "multiple",
+      "measured_on": "report date",
+      "citation": "ILPA Reporting Template (public)",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "conv.tvpi",
+      "name": "TVPI",
+      "formula": "TVPI = DPI + RVPI",
+      "unit": "multiple",
+      "measured_on": "report date",
+      "citation": "ILPA Reporting Template (public)",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "conv.moic",
+      "name": "MOIC (deal level)",
+      "formula": "MOIC = (realized_proceeds + unrealized_value) / invested_cost",
+      "unit": "multiple",
+      "measured_on": "report date",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "conv.irr",
+      "name": "IRR",
+      "formula": "rate r such that sum(cashflow_i / (1+r)^(t_i)) = 0, with terminal NAV as the final inflow and t in years from first cash flow",
+      "unit": "fraction per year",
+      "measured_on": "report date",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "conv.ks_pme",
+      "name": "Kaplan-Schoar PME",
+      "formula": "KS_PME = FV(distributions + NAV, index) / FV(contributions, index)",
+      "unit": "multiple",
+      "measured_on": "report date",
+      "citation": "Kaplan and Schoar (2005), Journal of Finance",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "conv.j_curve",
+      "name": "J-curve",
+      "rule": "Early-life TVPI and IRR are depressed by fees and unrealized marks; early-life metrics are not comparable with mature funds.",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    }
+  ],
+  "stage_naming": {
+    "rule": "Stage names (pre-seed, seed, Series A...) are not comparable across regions or vendors; compare by amount, instrument, and company age, and state the vendor's own labels.",
+    "citation": "unverified"
+  },
+  "source_grade": {
+    "reliability_scale": {
+      "A": "Completely reliable",
+      "B": "Usually reliable",
+      "C": "Fairly reliable",
+      "D": "Not usually reliable",
+      "E": "Unreliable",
+      "F": "Reliability cannot be judged"
+    },
+    "credibility_scale": {
+      "1": "Confirmed by other sources",
+      "2": "Probably true",
+      "3": "Possibly true",
+      "4": "Doubtfully true",
+      "5": "Improbable",
+      "6": "Truth cannot be judged"
+    },
+    "rule": "Grade the source and the information separately, as letter then digit (e.g. B2).",
+    "citation": "Admiralty (NATO) source/information grading; exact STANAG reference unverified"
+  },
+  "confidence_language": {
+    "bands": [
+      {
+        "label": "almost no chance",
+        "low": 0.01,
+        "high": 0.05
+      },
+      {
+        "label": "very unlikely",
+        "low": 0.05,
+        "high": 0.2
+      },
+      {
+        "label": "unlikely",
+        "low": 0.2,
+        "high": 0.45
+      },
+      {
+        "label": "roughly even chance",
+        "low": 0.45,
+        "high": 0.55
+      },
+      {
+        "label": "likely",
+        "low": 0.55,
+        "high": 0.8
+      },
+      {
+        "label": "very likely",
+        "low": 0.8,
+        "high": 0.95
+      },
+      {
+        "label": "almost certain",
+        "low": 0.95,
+        "high": 0.99
+      }
+    ],
+    "rule": "Use the label whose band contains the stated probability; judgement confidence (low/moderate/high) is stated separately from likelihood.",
+    "citation": "ODNI ICD 203 (Analytic Standards)"
+  },
+  "analytic_product": {
+    "required_sections": [
+      "Evidence",
+      "Assumptions",
+      "Judgement",
+      "Open Gaps"
+    ],
+    "citation": "ODNI ICD 203 (Analytic Standards)"
+  },
+  "normalization": {
+    "numeral_units": [
+      {
+        "id": "norm.wan",
+        "symbol": "万",
+        "multiplier": 10000,
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.yi",
+        "symbol": "亿",
+        "multiplier": 100000000,
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.lakh",
+        "symbol": "lakh",
+        "multiplier": 100000,
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.crore",
+        "symbol": "crore",
+        "multiplier": 10000000,
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.wan_trad",
+        "symbol": "萬",
+        "multiplier": 10000,
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.yi_trad",
+        "symbol": "億",
+        "multiplier": 100000000,
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.ko_man",
+        "symbol": "만",
+        "multiplier": 10000,
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.ko_eok",
+        "symbol": "억",
+        "multiplier": 100000000,
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.ko_jo",
+        "symbol": "조",
+        "multiplier": 1000000000000,
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.th_lan",
+        "symbol": "ล้าน",
+        "multiplier": 1000000,
+        "languages": [
+          "th"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.th_saen",
+        "symbol": "แสน",
+        "multiplier": 100000,
+        "languages": [
+          "th"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.th_muen",
+        "symbol": "หมื่น",
+        "multiplier": 10000,
+        "languages": [
+          "th"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.th_phan",
+        "symbol": "พัน",
+        "multiplier": 1000,
+        "languages": [
+          "th"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.vi_nghin",
+        "symbol": "nghìn",
+        "multiplier": 1000,
+        "languages": [
+          "vi"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.vi_ngan",
+        "symbol": "ngàn",
+        "multiplier": 1000,
+        "languages": [
+          "vi"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.vi_trieu",
+        "symbol": "triệu",
+        "multiplier": 1000000,
+        "languages": [
+          "vi"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.vi_ty",
+        "symbol": "tỷ",
+        "multiplier": 1000000000,
+        "languages": [
+          "vi"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.vi_ti",
+        "symbol": "tỉ",
+        "multiplier": 1000000000,
+        "languages": [
+          "vi"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.id_ribu",
+        "symbol": "ribu",
+        "multiplier": 1000,
+        "languages": [
+          "id/ms"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.id_juta",
+        "symbol": "juta",
+        "multiplier": 1000000,
+        "languages": [
+          "id/ms"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.id_miliar",
+        "symbol": "miliar",
+        "multiplier": 1000000000,
+        "languages": [
+          "id/ms"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.id_milyar",
+        "symbol": "milyar",
+        "multiplier": 1000000000,
+        "languages": [
+          "id/ms"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.id_triliun",
+        "symbol": "triliun",
+        "multiplier": 1000000000000,
+        "languages": [
+          "id/ms"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.ru_tys",
+        "symbol": "тыс",
+        "multiplier": 1000,
+        "languages": [
+          "ru",
+          "kk"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.ru_mln",
+        "symbol": "млн",
+        "multiplier": 1000000,
+        "languages": [
+          "ru",
+          "kk"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.ru_mlrd",
+        "symbol": "млрд",
+        "multiplier": 1000000000,
+        "languages": [
+          "ru",
+          "kk"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.ru_trln",
+        "symbol": "трлн",
+        "multiplier": 1000000000000,
+        "languages": [
+          "ru",
+          "kk"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.ru_million",
+        "symbol": "миллион",
+        "multiplier": 1000000,
+        "languages": [
+          "ru"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.ru_millionov",
+        "symbol": "миллионов",
+        "multiplier": 1000000,
+        "languages": [
+          "ru"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.ru_milliona",
+        "symbol": "миллиона",
+        "multiplier": 1000000,
+        "languages": [
+          "ru"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.ru_milliard",
+        "symbol": "миллиард",
+        "multiplier": 1000000000,
+        "languages": [
+          "ru"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.ru_milliardov",
+        "symbol": "миллиардов",
+        "multiplier": 1000000000,
+        "languages": [
+          "ru"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.ru_milliarda",
+        "symbol": "миллиарда",
+        "multiplier": 1000000000,
+        "languages": [
+          "ru"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.uz_ming",
+        "symbol": "ming",
+        "multiplier": 1000,
+        "languages": [
+          "uz"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.uz_mln",
+        "symbol": "mln",
+        "multiplier": 1000000,
+        "languages": [
+          "uz"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.uz_mlrd",
+        "symbol": "mlrd",
+        "multiplier": 1000000000,
+        "languages": [
+          "uz"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.fil_libo",
+        "symbol": "libo",
+        "multiplier": 1000,
+        "languages": [
+          "fil"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.fil_milyon",
+        "symbol": "milyon",
+        "multiplier": 1000000,
+        "languages": [
+          "fil"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.fil_bilyon",
+        "symbol": "bilyon",
+        "multiplier": 1000000000,
+        "languages": [
+          "fil"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.en_thousand",
+        "symbol": "thousand",
+        "multiplier": 1000,
+        "languages": [
+          "en"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.en_million",
+        "symbol": "million",
+        "multiplier": 1000000,
+        "languages": [
+          "en"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.en_billion",
+        "symbol": "billion",
+        "multiplier": 1000000000,
+        "languages": [
+          "en"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.en_trillion",
+        "symbol": "trillion",
+        "multiplier": 1000000000000,
+        "languages": [
+          "en"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.en_mn",
+        "symbol": "mn",
+        "multiplier": 1000000,
+        "languages": [
+          "en"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.en_bn",
+        "symbol": "bn",
+        "multiplier": 1000000000,
+        "languages": [
+          "en"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.ru_tysyach",
+        "symbol": "тысяч",
+        "multiplier": 1000,
+        "languages": [
+          "ru"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.ru_tysyachi",
+        "symbol": "тысячи",
+        "multiplier": 1000,
+        "languages": [
+          "ru"
+        ],
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      }
+    ],
+    "calendar_offsets": [
+      {
+        "id": "norm.buddhist_era",
+        "name": "Buddhist Era (Thailand)",
+        "gregorian_year_equals": "year - 543",
+        "offset": -543,
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.roc",
+        "name": "Minguo / ROC (Taiwan)",
+        "gregorian_year_equals": "year + 1911",
+        "offset": 1911,
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.reiwa",
+        "name": "Reiwa (Japan, year 1 = 2019)",
+        "gregorian_year_equals": "year + 2018",
+        "offset": 2018,
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.heisei",
+        "name": "Heisei (Japan, year 1 = 1989)",
+        "gregorian_year_equals": "year + 1988",
+        "offset": 1988,
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.showa",
+        "name": "Showa (Japan, year 1 = 1926)",
+        "gregorian_year_equals": "year + 1925",
+        "offset": 1925,
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      }
+    ],
+    "number_locales": [
+      {
+        "id": "norm.locale_period_thousands",
+        "locales": [
+          "id",
+          "vi"
+        ],
+        "thousands": ".",
+        "decimal": ",",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.locale_comma_thousands",
+        "locales": [
+          "en",
+          "zh",
+          "th"
+        ],
+        "thousands": ",",
+        "decimal": ".",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.locale_space_thousands",
+        "locales": [
+          "ru",
+          "kk",
+          "uz",
+          "ky",
+          "tg"
+        ],
+        "thousands": " ",
+        "decimal": ",",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      }
+    ],
+    "ambiguity_rule": "If a unit, era, or separator cannot be resolved from context, flag it; never guess.",
+    "legal_form_suffixes": [
+      {
+        "suffix": "有限公司",
+        "language": "zh",
+        "meaning": "limited company"
+      },
+      {
+        "suffix": "股份有限公司",
+        "language": "zh",
+        "meaning": "joint-stock limited company"
+      },
+      {
+        "suffix": "Pte. Ltd.",
+        "language": "en",
+        "meaning": "Singapore private limited"
+      },
+      {
+        "suffix": "Sdn. Bhd.",
+        "language": "ms",
+        "meaning": "Malaysian private limited"
+      },
+      {
+        "suffix": "PT",
+        "language": "id",
+        "meaning": "Indonesian limited liability company (prefix)"
+      },
+      {
+        "suffix": "Tbk",
+        "language": "id",
+        "meaning": "Indonesian listed company"
+      },
+      {
+        "suffix": "Công ty cổ phần",
+        "language": "vi",
+        "meaning": "joint-stock company (CTCP)"
+      },
+      {
+        "suffix": "Công ty TNHH",
+        "language": "vi",
+        "meaning": "limited liability company"
+      },
+      {
+        "suffix": "บริษัท จำกัด",
+        "language": "th",
+        "meaning": "company limited"
+      },
+      {
+        "suffix": "Inc.",
+        "language": "en",
+        "meaning": "incorporated"
+      },
+      {
+        "suffix": "LLC",
+        "language": "en",
+        "meaning": "limited liability company"
+      },
+      {
+        "suffix": "ООО",
+        "language": "ru",
+        "meaning": "limited liability company"
+      },
+      {
+        "suffix": "ТОО",
+        "language": "kk/ru",
+        "meaning": "limited liability partnership (Kazakhstan)"
+      },
+      {
+        "suffix": "АО",
+        "language": "ru",
+        "meaning": "joint-stock company"
+      },
+      {
+        "suffix": "MChJ",
+        "language": "uz",
+        "meaning": "limited liability company (Uzbek, Latin script)"
+      },
+      {
+        "suffix": "LLP",
+        "language": "en",
+        "meaning": "limited liability partnership"
+      },
+      {
+        "suffix": "JSC",
+        "language": "en",
+        "meaning": "joint-stock company"
+      }
+    ],
+    "entity_merge_rule": "Never merge entities across scripts or transliterations without a registry identifier.",
+    "citation": "unverified",
+    "ambiguous_symbols": [
+      {
+        "symbol": "兆",
+        "rule": "Means 10^12 in modern Japanese and Mainland usage but 10^6 in some older or regional usage; flag, never guess.",
+        "citation": "unverified"
+      },
+      {
+        "symbol": "bilion",
+        "rule": "Malay bilion is 10^9 in some usage and 10^12 in others; flag, never guess.",
+        "citation": "unverified"
+      }
+    ],
+    "fiscal_year_conventions": [
+      {
+        "id": "fy.india",
+        "market": "India",
+        "typical_year_end": "March 31 (common; verify per company)",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "fy.japan",
+        "market": "Japan",
+        "typical_year_end": "March 31 (common; verify per company)",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "fy.mainland_china",
+        "market": "Mainland China",
+        "typical_year_end": "December 31 (common; verify per company)",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "fy.hong_kong",
+        "market": "Hong Kong",
+        "typical_year_end": "varies; verify per company",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      }
+    ],
+    "fiscal_year_rule": "State the fiscal year-end for every annual figure; never assume a calendar year.",
+    "script_variant_rule": "Cyrillic and Latin forms of one name (and different transliteration standards or years) are never merged without a registry identifier.",
+    "currency_markers": [
+      {
+        "id": "cur.cny",
+        "code": "CNY",
+        "prefix_markers": [
+          "RMB",
+          "CNY",
+          "CN¥"
+        ],
+        "suffix_markers": [
+          "人民币",
+          "人民幣",
+          "RMB",
+          "CNY",
+          "yuan"
+        ],
+        "note": "",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "cur.usd",
+        "code": "USD",
+        "prefix_markers": [
+          "US$",
+          "USD"
+        ],
+        "suffix_markers": [
+          "美元",
+          "美金",
+          "USD",
+          "美圓",
+          "US dollars",
+          "dollars US",
+          "долларов США"
+        ],
+        "note": "",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "cur.hkd",
+        "code": "HKD",
+        "prefix_markers": [
+          "HK$",
+          "HKD"
+        ],
+        "suffix_markers": [
+          "港元",
+          "港币",
+          "港幣",
+          "HKD"
+        ],
+        "note": "",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "cur.twd",
+        "code": "TWD",
+        "prefix_markers": [
+          "NT$",
+          "TWD"
+        ],
+        "suffix_markers": [
+          "新台币",
+          "新臺幣",
+          "台币",
+          "台幣",
+          "TWD",
+          "新台幣"
+        ],
+        "note": "",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "cur.jpy",
+        "code": "JPY",
+        "prefix_markers": [
+          "JPY"
+        ],
+        "suffix_markers": [
+          "日元",
+          "日圓",
+          "円",
+          "JPY",
+          "yen"
+        ],
+        "note": "",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "cur.krw",
+        "code": "KRW",
+        "prefix_markers": [
+          "₩",
+          "KRW"
+        ],
+        "suffix_markers": [
+          "韩元",
+          "韓元",
+          "원",
+          "KRW",
+          "won"
+        ],
+        "note": "",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "cur.thb",
+        "code": "THB",
+        "prefix_markers": [
+          "฿",
+          "THB"
+        ],
+        "suffix_markers": [
+          "บาท",
+          "泰铢",
+          "泰銖",
+          "THB",
+          "baht"
+        ],
+        "note": "",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "cur.idr",
+        "code": "IDR",
+        "prefix_markers": [
+          "Rp",
+          "IDR"
+        ],
+        "suffix_markers": [
+          "rupiah",
+          "IDR"
+        ],
+        "note": "",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "cur.vnd",
+        "code": "VND",
+        "prefix_markers": [
+          "₫",
+          "VND"
+        ],
+        "suffix_markers": [
+          "đồng",
+          "đ",
+          "VND",
+          "dong"
+        ],
+        "note": "",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "cur.myr",
+        "code": "MYR",
+        "prefix_markers": [
+          "RM",
+          "MYR"
+        ],
+        "suffix_markers": [
+          "ringgit",
+          "MYR"
+        ],
+        "note": "",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "cur.sgd",
+        "code": "SGD",
+        "prefix_markers": [
+          "S$",
+          "SGD"
+        ],
+        "suffix_markers": [
+          "SGD",
+          "Singapore dollars"
+        ],
+        "note": "",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "cur.php",
+        "code": "PHP",
+        "prefix_markers": [
+          "₱",
+          "PHP"
+        ],
+        "suffix_markers": [
+          "piso",
+          "PHP",
+          "pesos",
+          "peso"
+        ],
+        "note": "",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "cur.inr",
+        "code": "INR",
+        "prefix_markers": [
+          "₹",
+          "INR"
+        ],
+        "suffix_markers": [
+          "rupees",
+          "rupee",
+          "INR"
+        ],
+        "note": "",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "cur.kzt",
+        "code": "KZT",
+        "prefix_markers": [
+          "₸",
+          "KZT"
+        ],
+        "suffix_markers": [
+          "тенге",
+          "теңге",
+          "KZT",
+          "tenge"
+        ],
+        "note": "",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "cur.uzs",
+        "code": "UZS",
+        "prefix_markers": [
+          "UZS"
+        ],
+        "suffix_markers": [
+          "сум",
+          "so'm",
+          "so‘m",
+          "soʻm",
+          "UZS"
+        ],
+        "note": "",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "cur.rub",
+        "code": "RUB",
+        "prefix_markers": [
+          "₽",
+          "RUB"
+        ],
+        "suffix_markers": [
+          "рублей",
+          "рубля",
+          "рубль",
+          "руб",
+          "RUB"
+        ],
+        "note": "",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "cur.eur",
+        "code": "EUR",
+        "prefix_markers": [
+          "€",
+          "EUR"
+        ],
+        "suffix_markers": [
+          "欧元",
+          "歐元",
+          "EUR",
+          "euros",
+          "euro"
+        ],
+        "note": "",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "cur.gbp",
+        "code": "GBP",
+        "prefix_markers": [
+          "£",
+          "GBP"
+        ],
+        "suffix_markers": [
+          "英镑",
+          "英鎊",
+          "GBP"
+        ],
+        "note": "",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      }
+    ],
+    "currency_ambiguous": [
+      {
+        "marker": "$",
+        "resolution": {},
+        "note": "dollar sign could be USD, HKD, SGD, AUD, others; flag unless a prefix names the currency",
+        "citation": "unverified"
+      },
+      {
+        "marker": "¥",
+        "resolution": {
+          "zh": "CNY",
+          "ja": "JPY"
+        },
+        "note": "yen/yuan sign; resolved only by stated language",
+        "citation": "unverified"
+      },
+      {
+        "marker": "元",
+        "resolution": {},
+        "note": "generic dollar/yuan unit in Chinese text; flag unless a prefix or word names the currency",
+        "citation": "unverified"
+      },
+      {
+        "marker": "块",
+        "resolution": {},
+        "note": "colloquial dollar/yuan; flag",
+        "citation": "unverified"
+      },
+      {
+        "marker": "Rs",
+        "resolution": {},
+        "note": "rupee abbreviation used in several countries; flag",
+        "citation": "unverified"
+      },
+      {
+        "marker": "dollars",
+        "resolution": {},
+        "note": "generic English word; flag",
+        "citation": "unverified"
+      }
+    ]
+  },
+  "prohibited_source_classes": [
+    "non_public_collection",
+    "access_control_circumvention",
+    "deanonymization",
+    "unreviewed_leaked_material"
+  ],
+  "lawful_collection_rule": "Public, licensed, or caller-supplied sources only (instructions/venture_intelligence.md).",
+  "known_at_policies": {
+    "late_retrieval_days": 30,
+    "policies": [
+      {
+        "id": "filed",
+        "known_at": "filed_time",
+        "applies_to": "registries and regulators that timestamp receipt",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "published",
+        "known_at": "announced_time",
+        "applies_to": "sources with a reliable publication or grant date",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "event",
+        "known_at": "event_time",
+        "applies_to": "timestamped event streams",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "snapshot",
+        "known_at": "retrieved_time (first snapshot containing the record)",
+        "applies_to": "sources that keep no history; retain your own dated snapshots",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "retrieved",
+        "known_at": "retrieved_time",
+        "applies_to": "sources with unreliable or missing timestamps",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      }
+    ],
+    "rule": "A record is flagged late_retrieval when retrieved_time exceeds its public time by more than late_retrieval_days; it may be a backfill or revision and must not enter a backtest as if known earlier than retrieval unless the source supports as-of vintages."
+  },
+  "entity_resolution": {
+    "decisions": [
+      "match",
+      "candidate",
+      "candidate_cross_script",
+      "needs_registry_id",
+      "no_match"
+    ],
+    "rules": [
+      "match only on equal registry identifier within one jurisdiction, or equal LEI",
+      "normalized-name equality in one script and one jurisdiction is a candidate, never a merge",
+      "names in different scripts are never merged without a registry identifier",
+      "differing registry identifiers in one jurisdiction are no_match",
+      "every decision lists its reasons"
+    ],
+    "citation": "unverified",
+    "review_status": "draft",
+    "review": null
+  }
+}

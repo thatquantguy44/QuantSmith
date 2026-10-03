@@ -1,0 +1,501 @@
+{
+  "schema_version": "0083.1",
+  "status": "draft_structural_contract",
+  "terms": [
+    {
+      "id": "term.decision_path_class",
+      "term": "Decision-Path Class",
+      "definition": "A label on every venture/intelligence workflow: analytic_support, person_adjacent, or sovereign_adjacent. The latter two are decision-support only with named human review.",
+      "owner_doc": "instructions/venture_intelligence.md",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.inform_never_decide",
+      "term": "Inform, Never Decide",
+      "definition": "The shared rule: agents structure and report; the accountable human invests, designates, or acts.",
+      "owner_doc": "instructions/venture_intelligence.md",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.source_reliability",
+      "term": "Source Reliability",
+      "definition": "The letter grade (A to F) for how reliable a source has been, graded separately from the information.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "Admiralty (NATO) source/information grading",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.information_credibility",
+      "term": "Information Credibility",
+      "definition": "The digit grade (1 to 6) for how credible a piece of information is given corroboration.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "Admiralty (NATO) source/information grading",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.calibrated_confidence_language",
+      "term": "Calibrated Confidence Language",
+      "definition": "Likelihood words (e.g. likely, very likely) tied to probability bands so wording is consistent between analysts.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "ODNI ICD 203 (Analytic Standards)",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.evidence_assumption_judgement",
+      "term": "Evidence / Assumption / Judgement",
+      "definition": "The required separation in an analytic product: what was observed, what was assumed, and what is concluded.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "ODNI ICD 203 (Analytic Standards)",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.derived_evidence",
+      "term": "Derived Evidence",
+      "definition": "A translation or extraction produced by a model; labelled, never substituted for the source-language span, and human-reviewed before informing a decision.",
+      "owner_doc": "instructions/venture_intelligence.md",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.known_at",
+      "term": "Known-At",
+      "definition": "The date the adopter could first have known a fact; the only time a model or backtest may use it.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "instructions/point_in_time.md",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.survivorship_bias",
+      "term": "Survivorship Bias",
+      "definition": "Overstated success rates from a cohort that omits failed or removed companies.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.backfill_bias",
+      "term": "Backfill Bias",
+      "definition": "Records added after the fact with historical dates, which were not knowable then.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.reporting_lag",
+      "term": "Reporting Lag",
+      "definition": "Delay between an event and its appearance in a database, making recent periods look quieter.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.stealth_company",
+      "term": "Stealth Company",
+      "definition": "A company with no public funding or hiring signal; invisible to databases, so absence is not inactivity.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.holdco_opco",
+      "term": "Holdco / Opco",
+      "definition": "Holding company (often Singapore, Cayman, BVI, or Delaware) above local operating companies; holdco domicile is not the market of operation.",
+      "owner_doc": "knowledge/venture_intelligence/taxonomy.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.post_money_valuation",
+      "term": "Post-Money Valuation",
+      "definition": "Pre-money valuation plus new money raised in the round.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "NVCA Model Legal Documents (public)",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.option_pool_treatment",
+      "term": "Option Pool Treatment",
+      "definition": "Whether an option-pool top-up sits inside pre-money or post-money; valuations are not comparable unless stated.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.dilution",
+      "term": "Dilution",
+      "definition": "Reduction in an existing holder's ownership caused by issuing new shares.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.dpi",
+      "term": "DPI",
+      "definition": "Distributions to paid-in capital: cumulative distributions divided by paid-in capital.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "ILPA Reporting Template (public)",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.rvpi",
+      "term": "RVPI",
+      "definition": "Residual value to paid-in capital: net asset value divided by paid-in capital.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "ILPA Reporting Template (public)",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.tvpi",
+      "term": "TVPI",
+      "definition": "Total value to paid-in capital: DPI plus RVPI.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "ILPA Reporting Template (public)",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.moic",
+      "term": "MOIC",
+      "definition": "Multiple on invested capital at deal level: realized plus unrealized value over invested cost.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.irr",
+      "term": "IRR",
+      "definition": "The annual rate that sets the net present value of dated cash flows, including terminal NAV, to zero.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.pme",
+      "term": "PME",
+      "definition": "Public market equivalent; Kaplan-Schoar PME compares private-fund cash flows with an index investment.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "Kaplan and Schoar (2005), Journal of Finance",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.j_curve",
+      "term": "J-Curve",
+      "definition": "The early-life dip in fund returns from fees and unrealized marks; early metrics are not comparable with mature funds.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.signal",
+      "term": "Signal",
+      "definition": "An observation from a non-traditional channel about a company, technology, or market, with a source, known-at date, and grade.",
+      "owner_doc": "knowledge/venture_intelligence/taxonomy.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.signal_channel",
+      "term": "Signal Channel",
+      "definition": "A family of non-traditional data (patents, publications, open source, hiring, grants and procurement, filings, trade, web telemetry, news, satellite) with its own lead time, bias, and deception risk.",
+      "owner_doc": "knowledge/venture_intelligence/channels.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.deception_risk",
+      "term": "Deception Risk",
+      "definition": "How easily a channel can be manipulated (fake stars, ghost postings, seeded stories) and so mislead an analyst.",
+      "owner_doc": "knowledge/venture_intelligence/channels.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.source_span_preservation",
+      "term": "Source-Span Preservation",
+      "definition": "Keeping the verbatim original-language text for every extracted field; translation is a separate labelled field.",
+      "owner_doc": "instructions/venture_intelligence.md",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.legal_form_suffix",
+      "term": "Legal-Form Suffix",
+      "definition": "The part of a company name denoting legal form (e.g. 有限公司, Pte. Ltd., Sdn. Bhd., PT, CTCP); kept and classified, not stripped.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.buddhist_era",
+      "term": "Buddhist Era",
+      "definition": "Thai calendar; Gregorian year equals the Buddhist-era year minus 543.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.minguo_roc_year",
+      "term": "Minguo / ROC Year",
+      "definition": "Taiwan calendar; Gregorian year equals the Minguo year plus 1911.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.wan_yi",
+      "term": "Wan / Yi",
+      "definition": "Chinese numeral units 万 (10,000) and 亿 (100,000,000) used in figures.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.regional_lead",
+      "term": "Regional Lead",
+      "definition": "The first agent created for a world region; routes work and states per-market coverage. Specialists are added only when a coverage row justifies them.",
+      "owner_doc": "instructions/venture_intelligence.md",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.professional_role",
+      "term": "Professional Role",
+      "definition": "A public, organization-level role tied to a company; the only way a natural person appears in this domain.",
+      "owner_doc": "knowledge/venture_intelligence/taxonomy.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.known_at_policy",
+      "term": "Known-At Policy",
+      "definition": "The per-source rule saying which timestamp counts as when the adopter could first have known a record: filed, published, event, snapshot, or retrieved.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.late_retrieval",
+      "term": "Late Retrieval",
+      "definition": "A flag on a record retrieved long after its public date, which may be a backfill or revision and must not enter a backtest as if known earlier.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.cohort_formation_date",
+      "term": "Cohort Formation Date",
+      "definition": "The date a cohort is defined from companies already known by then, independent of later outcomes; it is what prevents survivorship bias.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.registry_identifier",
+      "term": "Registry Identifier",
+      "definition": "A company's number in an official register within one jurisdiction; with the jurisdiction, the only name-independent basis for merging two records.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.entity_resolution_candidate",
+      "term": "Entity Resolution Candidate",
+      "definition": "A pair of records whose names suggest the same company but which lacks a registry identifier; never merged until evidence is added.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.vie_structure",
+      "term": "VIE Structure",
+      "definition": "Variable interest entity: a contractual-control arrangement, rather than direct equity, by which an offshore holding company may consolidate an onshore operating entity. Equity and contract links are shown separately.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.fiscal_year_end_convention",
+      "term": "Fiscal Year-End Convention",
+      "definition": "The month a market's companies typically close their financial year (e.g. March 31 in India and Japan); stated for every annual figure, never assumed to be a calendar year.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.era_year",
+      "term": "Era Year",
+      "definition": "A year counted from an imperial or republican era (Reiwa, Heisei, Showa, Minguo) and converted to Gregorian by a stated offset.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.onshore_offshore_renminbi",
+      "term": "Onshore / Offshore Renminbi",
+      "definition": "CNY is the onshore and CNH the offshore renminbi; they can differ in rate and are not silently combined.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.script_variant",
+      "term": "Script Variant",
+      "definition": "A second written form of the same name in another script (e.g. Cyrillic and Latin); never merged without a registry identifier.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.patent_family",
+      "term": "Patent Family",
+      "definition": "The set of patent filings in different offices that claim the same invention; landscapes count families, not raw filings, so one invention is counted once.",
+      "owner_doc": "knowledge/venture_intelligence/channels.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.single_channel_finding",
+      "term": "Single-Channel Finding",
+      "definition": "A finding supported by only one signal channel; corroboration needs independent channels, and news repeating a press release is not independent.",
+      "owner_doc": "knowledge/venture_intelligence/channels.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.syndication_collapse",
+      "term": "Syndication Collapse",
+      "definition": "Merging republished copies of one news item into a single original report before counting, so repeats are not taken as independent corroboration.",
+      "owner_doc": "knowledge/venture_intelligence/channels.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.screening_criteria",
+      "term": "Screening Criteria",
+      "definition": "The explicit, caller-stated rules a longlist is filtered and ordered by; ordering reflects the criteria, never overall merit.",
+      "owner_doc": "knowledge/venture_intelligence/coverage.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.analysis_of_competing_hypotheses",
+      "term": "Analysis of Competing Hypotheses",
+      "definition": "A structured method that rates each piece of evidence against every hypothesis and ranks hypotheses by fewest inconsistencies; the result informs the analyst and is not itself a conclusion.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.diagnostic_evidence",
+      "term": "Diagnostic Evidence",
+      "definition": "Evidence rated differently across hypotheses; evidence consistent with all of them is non-diagnostic and supports none.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.corroboration_status",
+      "term": "Corroboration Status",
+      "definition": "Whether a claim is a single source, an echo of one origin, supported by several origins in one channel, or corroborated across independent channels.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.origin_identifier",
+      "term": "Origin Identifier",
+      "definition": "The identifier of where a piece of information first came from; republished and syndicated copies share one origin and count once.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.information_requirement",
+      "term": "Information Requirement",
+      "definition": "A recorded question about missing evidence, linked to the decision it informs and to lawful candidate channels, awaiting human approval.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.effective_ownership",
+      "term": "Effective Ownership",
+      "definition": "A holder's share of a company through all equity chains: the product of percentages along each path, summed across paths; contractual links are never multiplied.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.list_match",
+      "term": "List Match",
+      "definition": "A name-comparison hit against a restricted-party or sanctions list snapshot; an indicator with a false-positive risk, never a finding.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.dual_use_indicator",
+      "term": "Dual-Use Indicator",
+      "definition": "A resemblance between a technology description and a caller-supplied control-list entry, turned into a question for counsel; not a classification.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    }
+  ]
+}
