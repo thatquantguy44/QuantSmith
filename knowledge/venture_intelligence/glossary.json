@@ -343,6 +343,42 @@
       "citation": "unverified",
       "review_status": "draft",
       "review": null
+    },
+    {
+      "id": "term.vie_structure",
+      "term": "VIE Structure",
+      "definition": "Variable interest entity: a contractual-control arrangement, rather than direct equity, by which an offshore holding company may consolidate an onshore operating entity. Equity and contract links are shown separately.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.fiscal_year_end_convention",
+      "term": "Fiscal Year-End Convention",
+      "definition": "The month a market's companies typically close their financial year (e.g. March 31 in India and Japan); stated for every annual figure, never assumed to be a calendar year.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.era_year",
+      "term": "Era Year",
+      "definition": "A year counted from an imperial or republican era (Reiwa, Heisei, Showa, Minguo) and converted to Gregorian by a stated offset.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.onshore_offshore_renminbi",
+      "term": "Onshore / Offshore Renminbi",
+      "definition": "CNY is the onshore and CNH the offshore renminbi; they can differ in rate and are not silently combined.",
+      "owner_doc": "knowledge/venture_intelligence/conventions.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
     }
   ]
 }

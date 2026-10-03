@@ -159,6 +159,64 @@
       "expect": {
         "valid": false
       }
+    },
+    {
+      "id": "golden.lakh",
+      "kind": "cn_number",
+      "text": "5.2 lakh",
+      "expect": {
+        "value": 520000
+      }
+    },
+    {
+      "id": "golden.crore",
+      "kind": "cn_number",
+      "text": "12 crore",
+      "expect": {
+        "value": 120000000
+      }
+    },
+    {
+      "id": "golden.trad_yi",
+      "kind": "cn_number",
+      "text": "2.5億",
+      "expect": {
+        "value": 250000000
+      }
+    },
+    {
+      "id": "golden.ko_jo",
+      "kind": "cn_number",
+      "text": "1.2조",
+      "expect": {
+        "value": 1200000000000
+      }
+    },
+    {
+      "id": "golden.ko_eok",
+      "kind": "cn_number",
+      "text": "350억",
+      "expect": {
+        "value": 35000000000
+      }
+    },
+    {
+      "id": "golden.era_reiwa",
+      "kind": "era_year",
+      "era": "norm.reiwa",
+      "year": 6,
+      "expect": {
+        "gregorian": 2024
+      }
+    },
+    {
+      "id": "golden.era_heisei",
+      "kind": "era_year",
+      "era": "norm.heisei",
+      "year": 30,
+      "expect": {
+        "gregorian": 2018
+      }
     }
   ]
 }

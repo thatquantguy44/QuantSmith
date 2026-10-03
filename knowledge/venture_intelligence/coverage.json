@@ -44,7 +44,8 @@
       "workflow": "Greater China and East Asia market view and routing",
       "never": "Recommend investments",
       "creating_spec": "0085",
-      "status": "planned"
+      "status": "built",
+      "path": "agents/venture_intelligence/greater_china_east_asia/regional_lead"
     },
     {
       "id": "south_asia_lead",
@@ -52,7 +53,8 @@
       "workflow": "South Asia market view and routing",
       "never": "Recommend investments",
       "creating_spec": "0085",
-      "status": "planned"
+      "status": "built",
+      "path": "agents/venture_intelligence/south_asia/regional_lead"
     },
     {
       "id": "mena_lead",
@@ -254,6 +256,15 @@
       "never": "Recommend an investment",
       "creating_spec": "0092",
       "status": "planned"
+    },
+    {
+      "id": "greater_china_east_asia_entity_structure_analyst",
+      "group": "regional",
+      "workflow": "Greater China offshore-onshore structure and contractual-control mapping",
+      "never": "Designate, attribute, or conclude control by any government or party",
+      "creating_spec": "0085",
+      "status": "built",
+      "path": "agents/venture_intelligence/greater_china_east_asia/entity_structure_analyst"
     }
   ],
   "roadmap": [
@@ -279,7 +290,8 @@
       ],
       "closes": [
         "greater_china_east_asia_lead",
-        "south_asia_lead"
+        "south_asia_lead",
+        "greater_china_east_asia_entity_structure_analyst"
       ]
     },
     {

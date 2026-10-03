@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The Multilingual Document NLP Agent extracts structured, source-anchored facts from start-up financial and legal documents written in Mandarin (Simplified and Traditional), Bahasa Indonesia/Malay, Vietnamese, Thai, Filipino, and English, and normalizes them so figures and parties are comparable across languages and jurisdictions.
+The Multilingual Document NLP Agent extracts structured, source-anchored facts from start-up financial and legal documents written in Mandarin (Simplified and Traditional), Japanese, Korean, Bahasa Indonesia/Malay, Vietnamese, Thai, Filipino, and English (including South Asian business English with lakh and crore), and normalizes them so figures and parties are comparable across languages and jurisdictions.
 
 ## Use When
 
@@ -35,7 +35,7 @@ The Multilingual Document NLP Agent extracts structured, source-anchored facts f
 
 - Every extracted field carries its original-language span; a translation alone is never evidence.
 - Translations and extractions by a model are derived evidence (spec `0071`/`0070` boundary): model, version, and prompt manifest recorded, human review named before use as a decision input.
-- Numerals, dates, units, and currencies are normalized by stated rule, never silently; ambiguous cases (e.g. 亿 in a Hong Kong vs mainland context, 2567 vs 2024) are flagged, not guessed.
+- Numerals (万/萬, 亿/億, 만/억/조, lakh, crore), era years (Buddhist, Minguo, Reiwa, Heisei, Showa), dates, units, fiscal year-ends, and currencies are normalized by stated rule, never silently; ambiguous cases (e.g. 兆 as 10^6 or 10^12, Buddhist-era 2567 vs Gregorian 2024, a Japanese era year vs a Gregorian year) are flagged, not guessed.
 - Company names are never merged across transliterations or scripts without a registry ID; legal-form suffixes (有限公司, 股份有限公司, PT, Sdn Bhd, Pte Ltd, CTCP, บริษัท จำกัด, Inc./Corp.) are kept and classified, not stripped.
 - Accounting basis (PRC GAAP/CAS, IFRS, HKFRS, SFRS(I), local GAAP) is stated for every financial figure; figures on different bases are not compared without a flag.
 - Quality is reported per language, not pooled; low-resource languages are never reported at the confidence of English.

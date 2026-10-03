@@ -110,15 +110,39 @@ def source_grade_valid(grade: str, conventions: Mapping[str, Any]) -> bool:
             and grade[1] in sg["credibility_scale"])
 
 
+_UNIT_SYMBOLS = {"万": 10**4, "萬": 10**4, "亿": 10**8, "億": 10**8,
+                 "만": 10**4, "억": 10**8, "조": 10**12}
+_UNIT_WORDS = {"lakh": 10**5, "crore": 10**7}
+
+
 def cn_number(text: str) -> float:
-    """Parse a Chinese-style figure with 万/亿 units, e.g. '3.5亿', '1,200万'."""
-    units = {"万": 10_000, "亿": 100_000_000}
+    """Parse a figure with an East or South Asian unit: 3.5亿, 2.5億, 350억, 1.2조, 5.2 lakh.
+
+    Raises ``ValueError`` for an unknown or ambiguous unit (for example 兆),
+    because a guessed multiplier is worse than a flagged one.
+    """
     t = text.strip().replace(",", "").replace("，", "")
-    mult = 1
-    if t and t[-1] in units:
-        mult, t = units[t[-1]], t[:-1]
-    value = float(t) * mult
+    m = re.fullmatch(r"([0-9]+(?:\.[0-9]+)?)\s*([^0-9\s.]+)?", t)
+    if not m:
+        raise ValueError(f"cannot parse figure {text!r}; flag as ambiguous")
+    number, unit = float(m.group(1)), m.group(2)
+    if unit is None:
+        mult = 1
+    elif unit in _UNIT_SYMBOLS:
+        mult = _UNIT_SYMBOLS[unit]
+    elif unit.lower() in _UNIT_WORDS:
+        mult = _UNIT_WORDS[unit.lower()]
+    else:
+        raise ValueError(f"unknown or ambiguous unit {unit!r} in {text!r}; flag, never guess")
+    value = round(number * mult, 6)
     return int(value) if value == int(value) else value
+
+
+def era_to_gregorian(era_id: str, year: int, conventions: Mapping[str, Any]) -> int:
+    for rule in conventions["normalization"]["calendar_offsets"]:
+        if rule["id"] == era_id:
+            return year + rule["offset"]
+    raise ValueError(f"unknown era {era_id!r}")
 
 
 def buddhist_to_gregorian(year: int) -> int:
@@ -232,6 +256,8 @@ def run_golden_cases(pack: Mapping[str, Any]) -> List[str]:
                 got = {"valid": source_grade_valid(case["grade"], conv)}
             elif k == "cn_number":
                 got = {"value": cn_number(case["text"])}
+            elif k == "era_year":
+                got = {"gregorian": era_to_gregorian(case["era"], case["year"], conv)}
             elif k == "buddhist_year":
                 got = {"gregorian": buddhist_to_gregorian(case["year"])}
             elif k == "roc_year":

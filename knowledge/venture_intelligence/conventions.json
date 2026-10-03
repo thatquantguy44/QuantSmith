@@ -280,6 +280,46 @@
         "citation": "unverified",
         "review_status": "draft",
         "review": null
+      },
+      {
+        "id": "norm.wan_trad",
+        "symbol": "萬",
+        "multiplier": 10000,
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.yi_trad",
+        "symbol": "億",
+        "multiplier": 100000000,
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.ko_man",
+        "symbol": "만",
+        "multiplier": 10000,
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.ko_eok",
+        "symbol": "억",
+        "multiplier": 100000000,
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.ko_jo",
+        "symbol": "조",
+        "multiplier": 1000000000000,
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
       }
     ],
     "calendar_offsets": [
@@ -297,6 +337,33 @@
         "name": "Minguo / ROC (Taiwan)",
         "gregorian_year_equals": "year + 1911",
         "offset": 1911,
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.reiwa",
+        "name": "Reiwa (Japan, year 1 = 2019)",
+        "gregorian_year_equals": "year + 2018",
+        "offset": 2018,
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.heisei",
+        "name": "Heisei (Japan, year 1 = 1989)",
+        "gregorian_year_equals": "year + 1988",
+        "offset": 1988,
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "norm.showa",
+        "name": "Showa (Japan, year 1 = 1926)",
+        "gregorian_year_equals": "year + 1925",
+        "offset": 1925,
         "citation": "unverified",
         "review_status": "draft",
         "review": null
@@ -388,7 +455,49 @@
       }
     ],
     "entity_merge_rule": "Never merge entities across scripts or transliterations without a registry identifier.",
-    "citation": "unverified"
+    "citation": "unverified",
+    "ambiguous_symbols": [
+      {
+        "symbol": "兆",
+        "rule": "Means 10^12 in modern Japanese and Mainland usage but 10^6 in some older or regional usage; flag, never guess.",
+        "citation": "unverified"
+      }
+    ],
+    "fiscal_year_conventions": [
+      {
+        "id": "fy.india",
+        "market": "India",
+        "typical_year_end": "March 31 (common; verify per company)",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "fy.japan",
+        "market": "Japan",
+        "typical_year_end": "March 31 (common; verify per company)",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "fy.mainland_china",
+        "market": "Mainland China",
+        "typical_year_end": "December 31 (common; verify per company)",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      },
+      {
+        "id": "fy.hong_kong",
+        "market": "Hong Kong",
+        "typical_year_end": "varies; verify per company",
+        "citation": "unverified",
+        "review_status": "draft",
+        "review": null
+      }
+    ],
+    "fiscal_year_rule": "State the fiscal year-end for every annual figure; never assume a calendar year."
   },
   "prohibited_source_classes": [
     "non_public_collection",
