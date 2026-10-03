@@ -1,0 +1,3359 @@
+{
+ "synthetic": true,
+ "disclosure": "Every text is a synthetic template sentence built for testing (spec 0025); no real document, company, or person. Expected values are written from the template parameters, not produced by the extractor.",
+ "min_cases_per_cell": 6,
+ "applicability": {
+  "amount": [
+   "en",
+   "fil",
+   "id/ms",
+   "ja",
+   "kk",
+   "ko",
+   "ru",
+   "th",
+   "uz",
+   "vi",
+   "zh-Hans",
+   "zh-Hant"
+  ],
+  "date": [
+   "en",
+   "fil",
+   "id/ms",
+   "ja",
+   "kk",
+   "ko",
+   "ru",
+   "th",
+   "uz",
+   "vi",
+   "zh-Hans",
+   "zh-Hant"
+  ],
+  "era_year": [
+   "ja",
+   "th",
+   "zh-Hant"
+  ],
+  "fiscal_period": [
+   "en",
+   "ja",
+   "ko",
+   "th",
+   "zh-Hans",
+   "zh-Hant"
+  ]
+ },
+ "cases": [
+  {
+   "id": "syn-zh-Hans-amount-001",
+   "language": "zh-Hans",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "公司获得人民币2亿元的投资",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "人民币2亿元",
+     "value": 200000000,
+     "currency": "CNY",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-zh-Hans-amount-002",
+   "language": "zh-Hans",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "本轮募资1,200万美元",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "1,200万美元",
+     "value": 12000000,
+     "currency": "USD",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-zh-Hans-amount-003",
+   "language": "zh-Hans",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "本轮融资5000万元",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "5000万元",
+     "value": 50000000,
+     "currency": null,
+     "ambiguous": true
+    }
+   ]
+  },
+  {
+   "id": "syn-zh-Hans-amount-004",
+   "language": "zh-Hans",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "累计融资3亿5000万元",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "3亿5000万元",
+     "value": 350000000,
+     "currency": null,
+     "ambiguous": true
+    }
+   ]
+  },
+  {
+   "id": "syn-zh-Hans-amount-005",
+   "language": "zh-Hans",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "资产规模约3兆",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "3兆",
+     "value": null,
+     "currency": null,
+     "ambiguous": true
+    }
+   ]
+  },
+  {
+   "id": "syn-zh-Hans-amount-006",
+   "language": "zh-Hans",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "投后估值港元8000万",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "港元8000万",
+     "value": 80000000,
+     "currency": "HKD",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-zh-Hant-amount-007",
+   "language": "zh-Hant",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "公司取得新臺幣2.5億元之投資",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "新臺幣2.5億元",
+     "value": 250000000,
+     "currency": "TWD",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-zh-Hant-amount-008",
+   "language": "zh-Hant",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "估值美元1.5億",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "美元1.5億",
+     "value": 150000000,
+     "currency": "USD",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-zh-Hant-amount-009",
+   "language": "zh-Hant",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "本輪融資港幣8,000萬",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "港幣8,000萬",
+     "value": 80000000,
+     "currency": "HKD",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-zh-Hant-amount-010",
+   "language": "zh-Hant",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "資本額1.2億元",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "1.2億元",
+     "value": 120000000,
+     "currency": null,
+     "ambiguous": true
+    }
+   ]
+  },
+  {
+   "id": "syn-zh-Hant-amount-011",
+   "language": "zh-Hant",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "累計募資3億5000萬元",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "3億5000萬元",
+     "value": 350000000,
+     "currency": null,
+     "ambiguous": true
+    }
+   ]
+  },
+  {
+   "id": "syn-zh-Hant-amount-012",
+   "language": "zh-Hant",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "規模約5兆",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "5兆",
+     "value": null,
+     "currency": null,
+     "ambiguous": true
+    }
+   ]
+  },
+  {
+   "id": "syn-ja-amount-013",
+   "language": "ja",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "当社は5億円を調達した",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "5億円",
+     "value": 500000000,
+     "currency": "JPY",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ja-amount-014",
+   "language": "ja",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "調達額は3.2億円",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "3.2億円",
+     "value": 320000000,
+     "currency": "JPY",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ja-amount-015",
+   "language": "ja",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "資本金は1,000万円",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "1,000万円",
+     "value": 10000000,
+     "currency": "JPY",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ja-amount-016",
+   "language": "ja",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "売上高は12億円",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "12億円",
+     "value": 1200000000,
+     "currency": "JPY",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ja-amount-017",
+   "language": "ja",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "総額5兆円",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "5兆円",
+     "value": null,
+     "currency": "JPY",
+     "ambiguous": true
+    }
+   ]
+  },
+  {
+   "id": "syn-ja-amount-018",
+   "language": "ja",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "投資額は¥3億",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "¥3億",
+     "value": 300000000,
+     "currency": "JPY",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ko-amount-019",
+   "language": "ko",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "회사는 350억원를 유치했다",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "350억원",
+     "value": 35000000000,
+     "currency": "KRW",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ko-amount-020",
+   "language": "ko",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "투자금은 ₩5억",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "₩5억",
+     "value": 500000000,
+     "currency": "KRW",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ko-amount-021",
+   "language": "ko",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "시가총액 1.2조원",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "1.2조원",
+     "value": 1200000000000,
+     "currency": "KRW",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ko-amount-022",
+   "language": "ko",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "자본금 200만원",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "200만원",
+     "value": 2000000,
+     "currency": "KRW",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ko-amount-023",
+   "language": "ko",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "투자 유치액은 3억 5천만원",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "3억 5천만원",
+     "value": 350000000,
+     "currency": "KRW",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ko-amount-024",
+   "language": "ko",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "목표 금액 KRW 50억",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "KRW 50억",
+     "value": 5000000000,
+     "currency": "KRW",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ko-amount-025",
+   "language": "ko",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "투자 유치액은 3억 5백원",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "3억",
+     "value": null,
+     "currency": null,
+     "ambiguous": true
+    }
+   ]
+  },
+  {
+   "id": "syn-th-amount-026",
+   "language": "th",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "บริษัทระดมทุน 5 ล้านบาท",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "5 ล้านบาท",
+     "value": 5000000,
+     "currency": "THB",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-th-amount-027",
+   "language": "th",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "มูลค่า ฿2.5 ล้าน",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "฿2.5 ล้าน",
+     "value": 2500000,
+     "currency": "THB",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-th-amount-028",
+   "language": "th",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "ทุนจดทะเบียน 100,000 บาท",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "100,000 บาท",
+     "value": 100000,
+     "currency": "THB",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-th-amount-029",
+   "language": "th",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "เงินลงทุน 3 แสนบาท",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "3 แสนบาท",
+     "value": 300000,
+     "currency": "THB",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-th-amount-030",
+   "language": "th",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "ระดมทุน THB 1,200,000",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "THB 1,200,000",
+     "value": 1200000,
+     "currency": "THB",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-th-amount-031",
+   "language": "th",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "บริษัทได้รับ ๕ ล้านบาท",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "๕ ล้านบาท",
+     "value": 5000000,
+     "currency": "THB",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-vi-amount-032",
+   "language": "vi",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "Công ty huy động 2.000.000 đồng",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "2.000.000 đồng",
+     "value": 2000000,
+     "currency": "VND",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-vi-amount-033",
+   "language": "vi",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "Vốn đầu tư 5 tỷ đồng",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "5 tỷ đồng",
+     "value": 5000000000,
+     "currency": "VND",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-vi-amount-034",
+   "language": "vi",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "Vốn điều lệ ₫3.500.000",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "₫3.500.000",
+     "value": 3500000,
+     "currency": "VND",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-vi-amount-035",
+   "language": "vi",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "Doanh thu 12 triệu VND",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "12 triệu VND",
+     "value": 12000000,
+     "currency": "VND",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-vi-amount-036",
+   "language": "vi",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "Định giá 3,5 tỷ đồng",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "3,5 tỷ đồng",
+     "value": 3500000000,
+     "currency": "VND",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-vi-amount-037",
+   "language": "vi",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "Khoản vay 200 nghìn đồng",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "200 nghìn đồng",
+     "value": 200000,
+     "currency": "VND",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-id-ms-amount-038",
+   "language": "id/ms",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "Perseroan memperoleh pendanaan Rp 5,5 miliar",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "Rp 5,5 miliar",
+     "value": 5500000000,
+     "currency": "IDR",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-id-ms-amount-039",
+   "language": "id/ms",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "Modal dasar Rp 1.250.000",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "Rp 1.250.000",
+     "value": 1250000,
+     "currency": "IDR",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-id-ms-amount-040",
+   "language": "id/ms",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "Syarikat menerima pelaburan RM 2.5 juta",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "RM 2.5 juta",
+     "value": 2500000,
+     "currency": "MYR",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-id-ms-amount-041",
+   "language": "id/ms",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "Pendanaan sebesar 10 juta rupiah",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "10 juta rupiah",
+     "value": 10000000,
+     "currency": "IDR",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-id-ms-amount-042",
+   "language": "id/ms",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "Valuasi 3 triliun rupiah",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "3 triliun rupiah",
+     "value": 3000000000000,
+     "currency": "IDR",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-id-ms-amount-043",
+   "language": "id/ms",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "Nilai aset 5 bilion",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "5 bilion",
+     "value": null,
+     "currency": null,
+     "ambiguous": true
+    }
+   ]
+  },
+  {
+   "id": "syn-fil-amount-044",
+   "language": "fil",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "Nakakuha ang kumpanya ng ₱5 milyon",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "₱5 milyon",
+     "value": 5000000,
+     "currency": "PHP",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-fil-amount-045",
+   "language": "fil",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "Utang na PHP 2.5 bilyon",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "PHP 2.5 bilyon",
+     "value": 2500000000,
+     "currency": "PHP",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-fil-amount-046",
+   "language": "fil",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "Puhunan na 100 libo piso",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "100 libo piso",
+     "value": 100000,
+     "currency": "PHP",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-fil-amount-047",
+   "language": "fil",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "Pondo ay ₱1,500,000",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "₱1,500,000",
+     "value": 1500000,
+     "currency": "PHP",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-fil-amount-048",
+   "language": "fil",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "Halaga ay 5 milyon pesos",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "5 milyon pesos",
+     "value": 5000000,
+     "currency": "PHP",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-fil-amount-049",
+   "language": "fil",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "Kita ay ₱2.5 milyon",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "₱2.5 milyon",
+     "value": 2500000,
+     "currency": "PHP",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ru-amount-050",
+   "language": "ru",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "Компания привлекла 1 250 000,5 руб",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "1 250 000,5 руб",
+     "value": 1250000.5,
+     "currency": "RUB",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ru-amount-051",
+   "language": "ru",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "Объем инвестиций 5 млн руб",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "5 млн руб",
+     "value": 5000000,
+     "currency": "RUB",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ru-amount-052",
+   "language": "ru",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "Капитализация 2,5 млрд рублей",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "2,5 млрд рублей",
+     "value": 2500000000,
+     "currency": "RUB",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ru-amount-053",
+   "language": "ru",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "Выручка ₽300 тыс",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "₽300 тыс",
+     "value": 300000,
+     "currency": "RUB",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ru-amount-054",
+   "language": "ru",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "Сумма сделки 10 миллионов рублей",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "10 миллионов рублей",
+     "value": 10000000,
+     "currency": "RUB",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ru-amount-055",
+   "language": "ru",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "Долг составил 3 трлн руб",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "3 трлн руб",
+     "value": 3000000000000,
+     "currency": "RUB",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-kk-amount-056",
+   "language": "kk",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "Компания 5 млн теңге тартты",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "5 млн теңге",
+     "value": 5000000,
+     "currency": "KZT",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-kk-amount-057",
+   "language": "kk",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "Қор көлемі ₸1 500 000",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "₸1 500 000",
+     "value": 1500000,
+     "currency": "KZT",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-kk-amount-058",
+   "language": "kk",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "Капитал 2,5 млрд тенге",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "2,5 млрд тенге",
+     "value": 2500000000,
+     "currency": "KZT",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-kk-amount-059",
+   "language": "kk",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "Салым 100 тыс тенге",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "100 тыс тенге",
+     "value": 100000,
+     "currency": "KZT",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-kk-amount-060",
+   "language": "kk",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "Инвестиция KZT 50 млн",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "KZT 50 млн",
+     "value": 50000000,
+     "currency": "KZT",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-kk-amount-061",
+   "language": "kk",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "Баға 10 млрд теңге",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "10 млрд теңге",
+     "value": 10000000000,
+     "currency": "KZT",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-uz-amount-062",
+   "language": "uz",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "Kompaniya 5 mln so'm jalb qildi",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "5 mln so'm",
+     "value": 5000000,
+     "currency": "UZS",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-uz-amount-063",
+   "language": "uz",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "Investitsiya 2 mlrd so'm",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "2 mlrd so'm",
+     "value": 2000000000,
+     "currency": "UZS",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-uz-amount-064",
+   "language": "uz",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "Kapital UZS 1 500 000",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "UZS 1 500 000",
+     "value": 1500000,
+     "currency": "UZS",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-uz-amount-065",
+   "language": "uz",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "Qarz 100 ming so'm",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "100 ming so'm",
+     "value": 100000,
+     "currency": "UZS",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-uz-amount-066",
+   "language": "uz",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "Daromad 12 mlrd so'm",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "12 mlrd so'm",
+     "value": 12000000000,
+     "currency": "UZS",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-uz-amount-067",
+   "language": "uz",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "Aktivlar 3 mln UZS",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "3 mln UZS",
+     "value": 3000000,
+     "currency": "UZS",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-en-amount-068",
+   "language": "en",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "The company raised $5 million",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "$5 million",
+     "value": 5000000,
+     "currency": null,
+     "ambiguous": true
+    }
+   ]
+  },
+  {
+   "id": "syn-en-amount-069",
+   "language": "en",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "Valued at US$2.5 billion",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "US$2.5 billion",
+     "value": 2500000000,
+     "currency": "USD",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-en-amount-070",
+   "language": "en",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "Seed round of ₹5.2 lakh",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "₹5.2 lakh",
+     "value": 520000,
+     "currency": "INR",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-en-amount-071",
+   "language": "en",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "Debt of Rs 12 crore",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "Rs 12 crore",
+     "value": 120000000,
+     "currency": null,
+     "ambiguous": true
+    }
+   ]
+  },
+  {
+   "id": "syn-en-amount-072",
+   "language": "en",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "Revenue was £300 thousand",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "£300 thousand",
+     "value": 300000,
+     "currency": "GBP",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-en-amount-073",
+   "language": "en",
+   "kind": "amount",
+   "synthetic": true,
+   "text": "Raised EUR 1.5 bn",
+   "expected": [
+    {
+     "type": "amount",
+     "span": "EUR 1.5 bn",
+     "value": 1500000000,
+     "currency": "EUR",
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-zh-Hans-date-074",
+   "language": "zh-Hans",
+   "kind": "date",
+   "synthetic": true,
+   "text": "公司于2024年3月31日完成融资",
+   "expected": [
+    {
+     "type": "date",
+     "span": "2024年3月31日",
+     "value": "2024-03-31",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-zh-Hans-date-075",
+   "language": "zh-Hans",
+   "kind": "date",
+   "synthetic": true,
+   "text": "截至2023年12月",
+   "expected": [
+    {
+     "type": "date",
+     "span": "2023年12月",
+     "value": "2023-12",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-zh-Hans-date-076",
+   "language": "zh-Hans",
+   "kind": "date",
+   "synthetic": true,
+   "text": "成立于2024年",
+   "expected": [
+    {
+     "type": "date",
+     "span": "2024年",
+     "value": "2024",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-zh-Hans-date-077",
+   "language": "zh-Hans",
+   "kind": "date",
+   "synthetic": true,
+   "text": "签约日期为2024年3月5号",
+   "expected": [
+    {
+     "type": "date",
+     "span": "2024年3月5号",
+     "value": "2024-03-05",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-zh-Hans-date-078",
+   "language": "zh-Hans",
+   "kind": "date",
+   "synthetic": true,
+   "text": "文件日期2024年2月30日",
+   "expected": [
+    {
+     "type": "date",
+     "span": "2024年2月30日",
+     "value": null,
+     "currency": null,
+     "ambiguous": true
+    }
+   ]
+  },
+  {
+   "id": "syn-zh-Hans-date-079",
+   "language": "zh-Hans",
+   "kind": "date",
+   "synthetic": true,
+   "text": "交割于2022年7月1日",
+   "expected": [
+    {
+     "type": "date",
+     "span": "2022年7月1日",
+     "value": "2022-07-01",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-zh-Hant-date-080",
+   "language": "zh-Hant",
+   "kind": "date",
+   "synthetic": true,
+   "text": "公司於2024年3月31日完成融資",
+   "expected": [
+    {
+     "type": "date",
+     "span": "2024年3月31日",
+     "value": "2024-03-31",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-zh-Hant-date-081",
+   "language": "zh-Hant",
+   "kind": "date",
+   "synthetic": true,
+   "text": "截至2023年12月",
+   "expected": [
+    {
+     "type": "date",
+     "span": "2023年12月",
+     "value": "2023-12",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-zh-Hant-date-082",
+   "language": "zh-Hant",
+   "kind": "date",
+   "synthetic": true,
+   "text": "成立於2024年",
+   "expected": [
+    {
+     "type": "date",
+     "span": "2024年",
+     "value": "2024",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-zh-Hant-date-083",
+   "language": "zh-Hant",
+   "kind": "date",
+   "synthetic": true,
+   "text": "簽約日期為2024年3月5日",
+   "expected": [
+    {
+     "type": "date",
+     "span": "2024年3月5日",
+     "value": "2024-03-05",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-zh-Hant-date-084",
+   "language": "zh-Hant",
+   "kind": "date",
+   "synthetic": true,
+   "text": "文件日期2021年2月29日",
+   "expected": [
+    {
+     "type": "date",
+     "span": "2021年2月29日",
+     "value": null,
+     "currency": null,
+     "ambiguous": true
+    }
+   ]
+  },
+  {
+   "id": "syn-zh-Hant-date-085",
+   "language": "zh-Hant",
+   "kind": "date",
+   "synthetic": true,
+   "text": "生效於2020年2月29日",
+   "expected": [
+    {
+     "type": "date",
+     "span": "2020年2月29日",
+     "value": "2020-02-29",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ja-date-086",
+   "language": "ja",
+   "kind": "date",
+   "synthetic": true,
+   "text": "当社は2024年3月31日に設立",
+   "expected": [
+    {
+     "type": "date",
+     "span": "2024年3月31日",
+     "value": "2024-03-31",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ja-date-087",
+   "language": "ja",
+   "kind": "date",
+   "synthetic": true,
+   "text": "決算は2023年12月",
+   "expected": [
+    {
+     "type": "date",
+     "span": "2023年12月",
+     "value": "2023-12",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ja-date-088",
+   "language": "ja",
+   "kind": "date",
+   "synthetic": true,
+   "text": "設立は2024年",
+   "expected": [
+    {
+     "type": "date",
+     "span": "2024年",
+     "value": "2024",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ja-date-089",
+   "language": "ja",
+   "kind": "date",
+   "synthetic": true,
+   "text": "契約日は令和6年3月31日",
+   "expected": [
+    {
+     "type": "date",
+     "span": "令和6年3月31日",
+     "value": "2024-03-31",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ja-date-090",
+   "language": "ja",
+   "kind": "date",
+   "synthetic": true,
+   "text": "登記日は平成30年4月1日",
+   "expected": [
+    {
+     "type": "date",
+     "span": "平成30年4月1日",
+     "value": "2018-04-01",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ja-date-091",
+   "language": "ja",
+   "kind": "date",
+   "synthetic": true,
+   "text": "閏日は2020年2月29日",
+   "expected": [
+    {
+     "type": "date",
+     "span": "2020年2月29日",
+     "value": "2020-02-29",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ko-date-092",
+   "language": "ko",
+   "kind": "date",
+   "synthetic": true,
+   "text": "회사는 2024년 3월 31일에 설립되었다",
+   "expected": [
+    {
+     "type": "date",
+     "span": "2024년 3월 31일",
+     "value": "2024-03-31",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ko-date-093",
+   "language": "ko",
+   "kind": "date",
+   "synthetic": true,
+   "text": "결산은 2023년 12월",
+   "expected": [
+    {
+     "type": "date",
+     "span": "2023년 12월",
+     "value": "2023-12",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ko-date-094",
+   "language": "ko",
+   "kind": "date",
+   "synthetic": true,
+   "text": "설립은 2024년",
+   "expected": [
+    {
+     "type": "date",
+     "span": "2024년",
+     "value": "2024",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ko-date-095",
+   "language": "ko",
+   "kind": "date",
+   "synthetic": true,
+   "text": "문서일자 2024년 2월 30일",
+   "expected": [
+    {
+     "type": "date",
+     "span": "2024년 2월 30일",
+     "value": null,
+     "currency": null,
+     "ambiguous": true
+    }
+   ]
+  },
+  {
+   "id": "syn-ko-date-096",
+   "language": "ko",
+   "kind": "date",
+   "synthetic": true,
+   "text": "계약일 2020년 2월 29일",
+   "expected": [
+    {
+     "type": "date",
+     "span": "2020년 2월 29일",
+     "value": "2020-02-29",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ko-date-097",
+   "language": "ko",
+   "kind": "date",
+   "synthetic": true,
+   "text": "종료일 2022년 7월 1일",
+   "expected": [
+    {
+     "type": "date",
+     "span": "2022년 7월 1일",
+     "value": "2022-07-01",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-th-date-098",
+   "language": "th",
+   "kind": "date",
+   "synthetic": true,
+   "text": "ก่อตั้งเมื่อ 5 มีนาคม 2567",
+   "expected": [
+    {
+     "type": "date",
+     "span": "5 มีนาคม 2567",
+     "value": "2024-03-05",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-th-date-099",
+   "language": "th",
+   "kind": "date",
+   "synthetic": true,
+   "text": "ปิดงบ 31 ธันวาคม 2566",
+   "expected": [
+    {
+     "type": "date",
+     "span": "31 ธันวาคม 2566",
+     "value": "2023-12-31",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-th-date-100",
+   "language": "th",
+   "kind": "date",
+   "synthetic": true,
+   "text": "รายงาน มกราคม 2567",
+   "expected": [
+    {
+     "type": "date",
+     "span": "มกราคม 2567",
+     "value": "2024-01",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-th-date-101",
+   "language": "th",
+   "kind": "date",
+   "synthetic": true,
+   "text": "ลงนาม 1 เมษายน 2563",
+   "expected": [
+    {
+     "type": "date",
+     "span": "1 เมษายน 2563",
+     "value": "2020-04-01",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-th-date-102",
+   "language": "th",
+   "kind": "date",
+   "synthetic": true,
+   "text": "เอกสาร 30 กุมภาพันธ์ 2567",
+   "expected": [
+    {
+     "type": "date",
+     "span": "30 กุมภาพันธ์ 2567",
+     "value": null,
+     "currency": null,
+     "ambiguous": true
+    }
+   ]
+  },
+  {
+   "id": "syn-th-date-103",
+   "language": "th",
+   "kind": "date",
+   "synthetic": true,
+   "text": "จดทะเบียน 12 สิงหาคม 2567",
+   "expected": [
+    {
+     "type": "date",
+     "span": "12 สิงหาคม 2567",
+     "value": "2024-08-12",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-vi-date-104",
+   "language": "vi",
+   "kind": "date",
+   "synthetic": true,
+   "text": "Thành lập ngày 5 tháng 3 năm 2024",
+   "expected": [
+    {
+     "type": "date",
+     "span": "ngày 5 tháng 3 năm 2024",
+     "value": "2024-03-05",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-vi-date-105",
+   "language": "vi",
+   "kind": "date",
+   "synthetic": true,
+   "text": "Đóng sổ 15 tháng 12 năm 2023",
+   "expected": [
+    {
+     "type": "date",
+     "span": "15 tháng 12 năm 2023",
+     "value": "2023-12-15",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-vi-date-106",
+   "language": "vi",
+   "kind": "date",
+   "synthetic": true,
+   "text": "Báo cáo tháng 3 năm 2024",
+   "expected": [
+    {
+     "type": "date",
+     "span": "tháng 3 năm 2024",
+     "value": "2024-03",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-vi-date-107",
+   "language": "vi",
+   "kind": "date",
+   "synthetic": true,
+   "text": "Ký kết 31 tháng 12 năm 2022",
+   "expected": [
+    {
+     "type": "date",
+     "span": "31 tháng 12 năm 2022",
+     "value": "2022-12-31",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-vi-date-108",
+   "language": "vi",
+   "kind": "date",
+   "synthetic": true,
+   "text": "Tài liệu 30 tháng 2 năm 2024",
+   "expected": [
+    {
+     "type": "date",
+     "span": "30 tháng 2 năm 2024",
+     "value": null,
+     "currency": null,
+     "ambiguous": true
+    }
+   ]
+  },
+  {
+   "id": "syn-vi-date-109",
+   "language": "vi",
+   "kind": "date",
+   "synthetic": true,
+   "text": "Hiệu lực 1 tháng 1 năm 2021",
+   "expected": [
+    {
+     "type": "date",
+     "span": "1 tháng 1 năm 2021",
+     "value": "2021-01-01",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-id-ms-date-110",
+   "language": "id/ms",
+   "kind": "date",
+   "synthetic": true,
+   "text": "Didirikan pada 12 Maret 2024",
+   "expected": [
+    {
+     "type": "date",
+     "span": "12 Maret 2024",
+     "value": "2024-03-12",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-id-ms-date-111",
+   "language": "id/ms",
+   "kind": "date",
+   "synthetic": true,
+   "text": "Ditandatangani 5 Mac 2023",
+   "expected": [
+    {
+     "type": "date",
+     "span": "5 Mac 2023",
+     "value": "2023-03-05",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-id-ms-date-112",
+   "language": "id/ms",
+   "kind": "date",
+   "synthetic": true,
+   "text": "Berlaku 1 Januari 2022",
+   "expected": [
+    {
+     "type": "date",
+     "span": "1 Januari 2022",
+     "value": "2022-01-01",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-id-ms-date-113",
+   "language": "id/ms",
+   "kind": "date",
+   "synthetic": true,
+   "text": "Laporan Agustus 2023",
+   "expected": [
+    {
+     "type": "date",
+     "span": "Agustus 2023",
+     "value": "2023-08",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-id-ms-date-114",
+   "language": "id/ms",
+   "kind": "date",
+   "synthetic": true,
+   "text": "Ditutup 31 Oktober 2021",
+   "expected": [
+    {
+     "type": "date",
+     "span": "31 Oktober 2021",
+     "value": "2021-10-31",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-id-ms-date-115",
+   "language": "id/ms",
+   "kind": "date",
+   "synthetic": true,
+   "text": "Dokumen 30 Februari 2023",
+   "expected": [
+    {
+     "type": "date",
+     "span": "30 Februari 2023",
+     "value": null,
+     "currency": null,
+     "ambiguous": true
+    }
+   ]
+  },
+  {
+   "id": "syn-fil-date-116",
+   "language": "fil",
+   "kind": "date",
+   "synthetic": true,
+   "text": "Itinatag noong 5 Marso 2024",
+   "expected": [
+    {
+     "type": "date",
+     "span": "5 Marso 2024",
+     "value": "2024-03-05",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-fil-date-117",
+   "language": "fil",
+   "kind": "date",
+   "synthetic": true,
+   "text": "Ulat Enero 2023",
+   "expected": [
+    {
+     "type": "date",
+     "span": "Enero 2023",
+     "value": "2023-01",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-fil-date-118",
+   "language": "fil",
+   "kind": "date",
+   "synthetic": true,
+   "text": "Nilagdaan 10 ng Hunyo 2022",
+   "expected": [
+    {
+     "type": "date",
+     "span": "10 ng Hunyo 2022",
+     "value": "2022-06-10",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-fil-date-119",
+   "language": "fil",
+   "kind": "date",
+   "synthetic": true,
+   "text": "Petsa Agosto 15, 2021",
+   "expected": [
+    {
+     "type": "date",
+     "span": "Agosto 15, 2021",
+     "value": "2021-08-15",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-fil-date-120",
+   "language": "fil",
+   "kind": "date",
+   "synthetic": true,
+   "text": "Sarado 31 Disyembre 2020",
+   "expected": [
+    {
+     "type": "date",
+     "span": "31 Disyembre 2020",
+     "value": "2020-12-31",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-fil-date-121",
+   "language": "fil",
+   "kind": "date",
+   "synthetic": true,
+   "text": "Dokumento 30 Pebrero 2024",
+   "expected": [
+    {
+     "type": "date",
+     "span": "30 Pebrero 2024",
+     "value": null,
+     "currency": null,
+     "ambiguous": true
+    }
+   ]
+  },
+  {
+   "id": "syn-ru-date-122",
+   "language": "ru",
+   "kind": "date",
+   "synthetic": true,
+   "text": "Компания основана 5 марта 2024",
+   "expected": [
+    {
+     "type": "date",
+     "span": "5 марта 2024",
+     "value": "2024-03-05",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ru-date-123",
+   "language": "ru",
+   "kind": "date",
+   "synthetic": true,
+   "text": "Закрыто 31 декабря 2023",
+   "expected": [
+    {
+     "type": "date",
+     "span": "31 декабря 2023",
+     "value": "2023-12-31",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ru-date-124",
+   "language": "ru",
+   "kind": "date",
+   "synthetic": true,
+   "text": "Вступило в силу 1 января 2022",
+   "expected": [
+    {
+     "type": "date",
+     "span": "1 января 2022",
+     "value": "2022-01-01",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ru-date-125",
+   "language": "ru",
+   "kind": "date",
+   "synthetic": true,
+   "text": "Дата 12.03.2024",
+   "expected": [
+    {
+     "type": "date",
+     "span": "12.03.2024",
+     "value": "2024-03-12",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ru-date-126",
+   "language": "ru",
+   "kind": "date",
+   "synthetic": true,
+   "text": "Документ 30 февраля 2024",
+   "expected": [
+    {
+     "type": "date",
+     "span": "30 февраля 2024",
+     "value": null,
+     "currency": null,
+     "ambiguous": true
+    }
+   ]
+  },
+  {
+   "id": "syn-ru-date-127",
+   "language": "ru",
+   "kind": "date",
+   "synthetic": true,
+   "text": "Подписано 9 мая 2021",
+   "expected": [
+    {
+     "type": "date",
+     "span": "9 мая 2021",
+     "value": "2021-05-09",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-kk-date-128",
+   "language": "kk",
+   "kind": "date",
+   "synthetic": true,
+   "text": "Құрылған күні 5 наурыз 2024",
+   "expected": [
+    {
+     "type": "date",
+     "span": "5 наурыз 2024",
+     "value": "2024-03-05",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-kk-date-129",
+   "language": "kk",
+   "kind": "date",
+   "synthetic": true,
+   "text": "Қол қойылды 1 қаңтар 2023",
+   "expected": [
+    {
+     "type": "date",
+     "span": "1 қаңтар 2023",
+     "value": "2023-01-01",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-kk-date-130",
+   "language": "kk",
+   "kind": "date",
+   "synthetic": true,
+   "text": "Жабылды 15 қыркүйек 2022",
+   "expected": [
+    {
+     "type": "date",
+     "span": "15 қыркүйек 2022",
+     "value": "2022-09-15",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-kk-date-131",
+   "language": "kk",
+   "kind": "date",
+   "synthetic": true,
+   "text": "Аяқталды 31 желтоқсан 2021",
+   "expected": [
+    {
+     "type": "date",
+     "span": "31 желтоқсан 2021",
+     "value": "2021-12-31",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-kk-date-132",
+   "language": "kk",
+   "kind": "date",
+   "synthetic": true,
+   "text": "Күні 12.03.2024",
+   "expected": [
+    {
+     "type": "date",
+     "span": "12.03.2024",
+     "value": "2024-03-12",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-kk-date-133",
+   "language": "kk",
+   "kind": "date",
+   "synthetic": true,
+   "text": "Құжат 30 ақпан 2024",
+   "expected": [
+    {
+     "type": "date",
+     "span": "30 ақпан 2024",
+     "value": null,
+     "currency": null,
+     "ambiguous": true
+    }
+   ]
+  },
+  {
+   "id": "syn-uz-date-134",
+   "language": "uz",
+   "kind": "date",
+   "synthetic": true,
+   "text": "Tashkil etilgan 5 mart 2024",
+   "expected": [
+    {
+     "type": "date",
+     "span": "5 mart 2024",
+     "value": "2024-03-05",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-uz-date-135",
+   "language": "uz",
+   "kind": "date",
+   "synthetic": true,
+   "text": "Imzolangan 2024 yil 5 yanvar",
+   "expected": [
+    {
+     "type": "date",
+     "span": "2024 yil 5 yanvar",
+     "value": "2024-01-05",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-uz-date-136",
+   "language": "uz",
+   "kind": "date",
+   "synthetic": true,
+   "text": "Kuchga kirdi 1 may 2023",
+   "expected": [
+    {
+     "type": "date",
+     "span": "1 may 2023",
+     "value": "2023-05-01",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-uz-date-137",
+   "language": "uz",
+   "kind": "date",
+   "synthetic": true,
+   "text": "Yopildi 31 dekabr 2022",
+   "expected": [
+    {
+     "type": "date",
+     "span": "31 dekabr 2022",
+     "value": "2022-12-31",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-uz-date-138",
+   "language": "uz",
+   "kind": "date",
+   "synthetic": true,
+   "text": "Sana 12.03.2024",
+   "expected": [
+    {
+     "type": "date",
+     "span": "12.03.2024",
+     "value": "2024-03-12",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-uz-date-139",
+   "language": "uz",
+   "kind": "date",
+   "synthetic": true,
+   "text": "Hujjat 30 fevral 2024",
+   "expected": [
+    {
+     "type": "date",
+     "span": "30 fevral 2024",
+     "value": null,
+     "currency": null,
+     "ambiguous": true
+    }
+   ]
+  },
+  {
+   "id": "syn-en-date-140",
+   "language": "en",
+   "kind": "date",
+   "synthetic": true,
+   "text": "Incorporated on March 31, 2024",
+   "expected": [
+    {
+     "type": "date",
+     "span": "March 31, 2024",
+     "value": "2024-03-31",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-en-date-141",
+   "language": "en",
+   "kind": "date",
+   "synthetic": true,
+   "text": "Closed on 31 March 2024",
+   "expected": [
+    {
+     "type": "date",
+     "span": "31 March 2024",
+     "value": "2024-03-31",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-en-date-142",
+   "language": "en",
+   "kind": "date",
+   "synthetic": true,
+   "text": "As of December 2023",
+   "expected": [
+    {
+     "type": "date",
+     "span": "December 2023",
+     "value": "2023-12",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-en-date-143",
+   "language": "en",
+   "kind": "date",
+   "synthetic": true,
+   "text": "Signed 2024-03-31",
+   "expected": [
+    {
+     "type": "date",
+     "span": "2024-03-31",
+     "value": "2024-03-31",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-en-date-144",
+   "language": "en",
+   "kind": "date",
+   "synthetic": true,
+   "text": "Dated 25/12/2024",
+   "expected": [
+    {
+     "type": "date",
+     "span": "25/12/2024",
+     "value": "2024-12-25",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-en-date-145",
+   "language": "en",
+   "kind": "date",
+   "synthetic": true,
+   "text": "Dated 10/12/2024",
+   "expected": [
+    {
+     "type": "date",
+     "span": "10/12/2024",
+     "value": null,
+     "currency": null,
+     "ambiguous": true
+    }
+   ]
+  },
+  {
+   "id": "syn-ja-era_year-146",
+   "language": "ja",
+   "kind": "era_year",
+   "synthetic": true,
+   "text": "設立は令和6年",
+   "expected": [
+    {
+     "type": "era_year",
+     "span": "令和6年",
+     "value": "2024",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ja-era_year-147",
+   "language": "ja",
+   "kind": "era_year",
+   "synthetic": true,
+   "text": "登記は平成30年",
+   "expected": [
+    {
+     "type": "era_year",
+     "span": "平成30年",
+     "value": "2018",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ja-era_year-148",
+   "language": "ja",
+   "kind": "era_year",
+   "synthetic": true,
+   "text": "制定は昭和64年",
+   "expected": [
+    {
+     "type": "era_year",
+     "span": "昭和64年",
+     "value": "1989",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ja-era_year-149",
+   "language": "ja",
+   "kind": "era_year",
+   "synthetic": true,
+   "text": "開始は令和元年",
+   "expected": [
+    {
+     "type": "era_year",
+     "span": "令和元年",
+     "value": "2019",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ja-era_year-150",
+   "language": "ja",
+   "kind": "era_year",
+   "synthetic": true,
+   "text": "決算は令和5年",
+   "expected": [
+    {
+     "type": "era_year",
+     "span": "令和5年",
+     "value": "2023",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ja-era_year-151",
+   "language": "ja",
+   "kind": "era_year",
+   "synthetic": true,
+   "text": "改正は平成31年",
+   "expected": [
+    {
+     "type": "era_year",
+     "span": "平成31年",
+     "value": "2019",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-zh-Hant-era_year-152",
+   "language": "zh-Hant",
+   "kind": "era_year",
+   "synthetic": true,
+   "text": "公司成立於民國113年",
+   "expected": [
+    {
+     "type": "era_year",
+     "span": "民國113年",
+     "value": "2024",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-zh-Hant-era_year-153",
+   "language": "zh-Hant",
+   "kind": "era_year",
+   "synthetic": true,
+   "text": "登記於民國100年",
+   "expected": [
+    {
+     "type": "era_year",
+     "span": "民國100年",
+     "value": "2011",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-zh-Hant-era_year-154",
+   "language": "zh-Hant",
+   "kind": "era_year",
+   "synthetic": true,
+   "text": "設立於民國99年",
+   "expected": [
+    {
+     "type": "era_year",
+     "span": "民國99年",
+     "value": "2010",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-zh-Hant-era_year-155",
+   "language": "zh-Hant",
+   "kind": "era_year",
+   "synthetic": true,
+   "text": "修正於民國112年",
+   "expected": [
+    {
+     "type": "era_year",
+     "span": "民國112年",
+     "value": "2023",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-zh-Hant-era_year-156",
+   "language": "zh-Hant",
+   "kind": "era_year",
+   "synthetic": true,
+   "text": "核准於民國110年",
+   "expected": [
+    {
+     "type": "era_year",
+     "span": "民國110年",
+     "value": "2021",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-zh-Hant-era_year-157",
+   "language": "zh-Hant",
+   "kind": "era_year",
+   "synthetic": true,
+   "text": "創立於民國1年",
+   "expected": [
+    {
+     "type": "era_year",
+     "span": "民國1年",
+     "value": "1912",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-th-era_year-158",
+   "language": "th",
+   "kind": "era_year",
+   "synthetic": true,
+   "text": "ก่อตั้งใน พ.ศ. 2567",
+   "expected": [
+    {
+     "type": "era_year",
+     "span": "พ.ศ. 2567",
+     "value": "2024",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-th-era_year-159",
+   "language": "th",
+   "kind": "era_year",
+   "synthetic": true,
+   "text": "จดทะเบียนใน พ.ศ. 2550",
+   "expected": [
+    {
+     "type": "era_year",
+     "span": "พ.ศ. 2550",
+     "value": "2007",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-th-era_year-160",
+   "language": "th",
+   "kind": "era_year",
+   "synthetic": true,
+   "text": "ในปี ปี 2567",
+   "expected": [
+    {
+     "type": "era_year",
+     "span": "ปี 2567",
+     "value": "2024",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-th-era_year-161",
+   "language": "th",
+   "kind": "era_year",
+   "synthetic": true,
+   "text": "ในปี ปี 2560",
+   "expected": [
+    {
+     "type": "era_year",
+     "span": "ปี 2560",
+     "value": "2017",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-th-era_year-162",
+   "language": "th",
+   "kind": "era_year",
+   "synthetic": true,
+   "text": "ก่อตั้ง พ.ศ. 2500",
+   "expected": [
+    {
+     "type": "era_year",
+     "span": "พ.ศ. 2500",
+     "value": "1957",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-th-era_year-163",
+   "language": "th",
+   "kind": "era_year",
+   "synthetic": true,
+   "text": "ในปี ปี 2024",
+   "expected": [
+    {
+     "type": "era_year",
+     "span": "ปี 2024",
+     "value": "2024",
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-zh-Hans-fiscal_period-164",
+   "language": "zh-Hans",
+   "kind": "fiscal_period",
+   "synthetic": true,
+   "text": "2024财年业绩",
+   "expected": [
+    {
+     "type": "fiscal_period",
+     "span": "2024财年",
+     "value": {
+      "fiscal_year": 2024,
+      "year_end_month": null
+     },
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-zh-Hans-fiscal_period-165",
+   "language": "zh-Hans",
+   "kind": "fiscal_period",
+   "synthetic": true,
+   "text": "2023会计年度报告",
+   "expected": [
+    {
+     "type": "fiscal_period",
+     "span": "2023会计年度",
+     "value": {
+      "fiscal_year": 2023,
+      "year_end_month": null
+     },
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-zh-Hans-fiscal_period-166",
+   "language": "zh-Hans",
+   "kind": "fiscal_period",
+   "synthetic": true,
+   "text": "2024年度目标",
+   "expected": [
+    {
+     "type": "fiscal_period",
+     "span": "2024年度",
+     "value": {
+      "fiscal_year": 2024,
+      "year_end_month": null
+     },
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-zh-Hans-fiscal_period-167",
+   "language": "zh-Hans",
+   "kind": "fiscal_period",
+   "synthetic": true,
+   "text": "2024年第三季度收入",
+   "expected": [
+    {
+     "type": "fiscal_period",
+     "span": "2024年第三季度",
+     "value": {
+      "year": 2024,
+      "quarter": 3,
+      "basis": "unspecified"
+     },
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-zh-Hans-fiscal_period-168",
+   "language": "zh-Hans",
+   "kind": "fiscal_period",
+   "synthetic": true,
+   "text": "2024年第1季度利润",
+   "expected": [
+    {
+     "type": "fiscal_period",
+     "span": "2024年第1季度",
+     "value": {
+      "year": 2024,
+      "quarter": 1,
+      "basis": "unspecified"
+     },
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-zh-Hans-fiscal_period-169",
+   "language": "zh-Hans",
+   "kind": "fiscal_period",
+   "synthetic": true,
+   "text": "2022年第四季度亏损",
+   "expected": [
+    {
+     "type": "fiscal_period",
+     "span": "2022年第四季度",
+     "value": {
+      "year": 2022,
+      "quarter": 4,
+      "basis": "unspecified"
+     },
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-zh-Hant-fiscal_period-170",
+   "language": "zh-Hant",
+   "kind": "fiscal_period",
+   "synthetic": true,
+   "text": "2024財年業績",
+   "expected": [
+    {
+     "type": "fiscal_period",
+     "span": "2024財年",
+     "value": {
+      "fiscal_year": 2024,
+      "year_end_month": null
+     },
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-zh-Hant-fiscal_period-171",
+   "language": "zh-Hant",
+   "kind": "fiscal_period",
+   "synthetic": true,
+   "text": "2023會計年度報告",
+   "expected": [
+    {
+     "type": "fiscal_period",
+     "span": "2023會計年度",
+     "value": {
+      "fiscal_year": 2023,
+      "year_end_month": null
+     },
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-zh-Hant-fiscal_period-172",
+   "language": "zh-Hant",
+   "kind": "fiscal_period",
+   "synthetic": true,
+   "text": "2024財政年度目標",
+   "expected": [
+    {
+     "type": "fiscal_period",
+     "span": "2024財政年度",
+     "value": {
+      "fiscal_year": 2024,
+      "year_end_month": null
+     },
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-zh-Hant-fiscal_period-173",
+   "language": "zh-Hant",
+   "kind": "fiscal_period",
+   "synthetic": true,
+   "text": "2024年第二季度收入",
+   "expected": [
+    {
+     "type": "fiscal_period",
+     "span": "2024年第二季度",
+     "value": {
+      "year": 2024,
+      "quarter": 2,
+      "basis": "unspecified"
+     },
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-zh-Hant-fiscal_period-174",
+   "language": "zh-Hant",
+   "kind": "fiscal_period",
+   "synthetic": true,
+   "text": "2024年度利潤",
+   "expected": [
+    {
+     "type": "fiscal_period",
+     "span": "2024年度",
+     "value": {
+      "fiscal_year": 2024,
+      "year_end_month": null
+     },
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-zh-Hant-fiscal_period-175",
+   "language": "zh-Hant",
+   "kind": "fiscal_period",
+   "synthetic": true,
+   "text": "2021年第三季度虧損",
+   "expected": [
+    {
+     "type": "fiscal_period",
+     "span": "2021年第三季度",
+     "value": {
+      "year": 2021,
+      "quarter": 3,
+      "basis": "unspecified"
+     },
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ja-fiscal_period-176",
+   "language": "ja",
+   "kind": "fiscal_period",
+   "synthetic": true,
+   "text": "2024年3月期の業績",
+   "expected": [
+    {
+     "type": "fiscal_period",
+     "span": "2024年3月期",
+     "value": {
+      "fiscal_year": 2024,
+      "year_end_month": 3
+     },
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ja-fiscal_period-177",
+   "language": "ja",
+   "kind": "fiscal_period",
+   "synthetic": true,
+   "text": "令和6年3月期の決算",
+   "expected": [
+    {
+     "type": "fiscal_period",
+     "span": "令和6年3月期",
+     "value": {
+      "fiscal_year": 2024,
+      "year_end_month": 3
+     },
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ja-fiscal_period-178",
+   "language": "ja",
+   "kind": "fiscal_period",
+   "synthetic": true,
+   "text": "2023年9月期の売上",
+   "expected": [
+    {
+     "type": "fiscal_period",
+     "span": "2023年9月期",
+     "value": {
+      "fiscal_year": 2023,
+      "year_end_month": 9
+     },
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ja-fiscal_period-179",
+   "language": "ja",
+   "kind": "fiscal_period",
+   "synthetic": true,
+   "text": "2024年度第3四半期の利益",
+   "expected": [
+    {
+     "type": "fiscal_period",
+     "span": "2024年度第3四半期",
+     "value": {
+      "fiscal_year": 2024,
+      "quarter": 3,
+      "year_end_month": null
+     },
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ja-fiscal_period-180",
+   "language": "ja",
+   "kind": "fiscal_period",
+   "synthetic": true,
+   "text": "平成30年3月期の損益",
+   "expected": [
+    {
+     "type": "fiscal_period",
+     "span": "平成30年3月期",
+     "value": {
+      "fiscal_year": 2018,
+      "year_end_month": 3
+     },
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ja-fiscal_period-181",
+   "language": "ja",
+   "kind": "fiscal_period",
+   "synthetic": true,
+   "text": "2024年度の目標",
+   "expected": [
+    {
+     "type": "fiscal_period",
+     "span": "2024年度",
+     "value": {
+      "fiscal_year": 2024,
+      "year_end_month": null
+     },
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ko-fiscal_period-182",
+   "language": "ko",
+   "kind": "fiscal_period",
+   "synthetic": true,
+   "text": "2024년 3분기 실적",
+   "expected": [
+    {
+     "type": "fiscal_period",
+     "span": "2024년 3분기",
+     "value": {
+      "year": 2024,
+      "quarter": 3,
+      "basis": "unspecified"
+     },
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ko-fiscal_period-183",
+   "language": "ko",
+   "kind": "fiscal_period",
+   "synthetic": true,
+   "text": "2023년 회계연도 보고",
+   "expected": [
+    {
+     "type": "fiscal_period",
+     "span": "2023년 회계연도",
+     "value": {
+      "fiscal_year": 2023,
+      "year_end_month": null
+     },
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ko-fiscal_period-184",
+   "language": "ko",
+   "kind": "fiscal_period",
+   "synthetic": true,
+   "text": "2022년 1분기 매출",
+   "expected": [
+    {
+     "type": "fiscal_period",
+     "span": "2022년 1분기",
+     "value": {
+      "year": 2022,
+      "quarter": 1,
+      "basis": "unspecified"
+     },
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ko-fiscal_period-185",
+   "language": "ko",
+   "kind": "fiscal_period",
+   "synthetic": true,
+   "text": "2024년 사업연도 이익",
+   "expected": [
+    {
+     "type": "fiscal_period",
+     "span": "2024년 사업연도",
+     "value": {
+      "fiscal_year": 2024,
+      "year_end_month": null
+     },
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ko-fiscal_period-186",
+   "language": "ko",
+   "kind": "fiscal_period",
+   "synthetic": true,
+   "text": "2021년 4분기 손실",
+   "expected": [
+    {
+     "type": "fiscal_period",
+     "span": "2021년 4분기",
+     "value": {
+      "year": 2021,
+      "quarter": 4,
+      "basis": "unspecified"
+     },
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-ko-fiscal_period-187",
+   "language": "ko",
+   "kind": "fiscal_period",
+   "synthetic": true,
+   "text": "2020년 2분기 목표",
+   "expected": [
+    {
+     "type": "fiscal_period",
+     "span": "2020년 2분기",
+     "value": {
+      "year": 2020,
+      "quarter": 2,
+      "basis": "unspecified"
+     },
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-th-fiscal_period-188",
+   "language": "th",
+   "kind": "fiscal_period",
+   "synthetic": true,
+   "text": "ปีงบประมาณ 2567 ผลประกอบการ",
+   "expected": [
+    {
+     "type": "fiscal_period",
+     "span": "ปีงบประมาณ 2567",
+     "value": {
+      "fiscal_year": 2024,
+      "year_end_month": null
+     },
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-th-fiscal_period-189",
+   "language": "th",
+   "kind": "fiscal_period",
+   "synthetic": true,
+   "text": "ปีงบประมาณ 2566 รายงาน",
+   "expected": [
+    {
+     "type": "fiscal_period",
+     "span": "ปีงบประมาณ 2566",
+     "value": {
+      "fiscal_year": 2023,
+      "year_end_month": null
+     },
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-th-fiscal_period-190",
+   "language": "th",
+   "kind": "fiscal_period",
+   "synthetic": true,
+   "text": "ปีงบประมาณ 2570 เป้าหมาย",
+   "expected": [
+    {
+     "type": "fiscal_period",
+     "span": "ปีงบประมาณ 2570",
+     "value": {
+      "fiscal_year": 2027,
+      "year_end_month": null
+     },
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-th-fiscal_period-191",
+   "language": "th",
+   "kind": "fiscal_period",
+   "synthetic": true,
+   "text": "ปีงบประมาณ 2560 รายได้",
+   "expected": [
+    {
+     "type": "fiscal_period",
+     "span": "ปีงบประมาณ 2560",
+     "value": {
+      "fiscal_year": 2017,
+      "year_end_month": null
+     },
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-th-fiscal_period-192",
+   "language": "th",
+   "kind": "fiscal_period",
+   "synthetic": true,
+   "text": "ปีงบประมาณ 2565 กำไร",
+   "expected": [
+    {
+     "type": "fiscal_period",
+     "span": "ปีงบประมาณ 2565",
+     "value": {
+      "fiscal_year": 2022,
+      "year_end_month": null
+     },
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-th-fiscal_period-193",
+   "language": "th",
+   "kind": "fiscal_period",
+   "synthetic": true,
+   "text": "ปีงบประมาณ 2024 ขาดทุน",
+   "expected": [
+    {
+     "type": "fiscal_period",
+     "span": "ปีงบประมาณ 2024",
+     "value": {
+      "fiscal_year": 2024,
+      "year_end_month": null
+     },
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-en-fiscal_period-194",
+   "language": "en",
+   "kind": "fiscal_period",
+   "synthetic": true,
+   "text": "Results for FY2024",
+   "expected": [
+    {
+     "type": "fiscal_period",
+     "span": "FY2024",
+     "value": {
+      "fiscal_year": 2024,
+      "year_end_month": null
+     },
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-en-fiscal_period-195",
+   "language": "en",
+   "kind": "fiscal_period",
+   "synthetic": true,
+   "text": "Report for FY2023-24",
+   "expected": [
+    {
+     "type": "fiscal_period",
+     "span": "FY2023-24",
+     "value": {
+      "fiscal_year_label": "2023-2024",
+      "start_year": 2023,
+      "end_year": 2024,
+      "year_end_month": null
+     },
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-en-fiscal_period-196",
+   "language": "en",
+   "kind": "fiscal_period",
+   "synthetic": true,
+   "text": "Revenue in Q3 2024",
+   "expected": [
+    {
+     "type": "fiscal_period",
+     "span": "Q3 2024",
+     "value": {
+      "year": 2024,
+      "quarter": 3,
+      "basis": "unspecified"
+     },
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-en-fiscal_period-197",
+   "language": "en",
+   "kind": "fiscal_period",
+   "synthetic": true,
+   "text": "Guidance for Q1 FY2025",
+   "expected": [
+    {
+     "type": "fiscal_period",
+     "span": "Q1 FY2025",
+     "value": {
+      "year": 2025,
+      "quarter": 1,
+      "basis": "unspecified"
+     },
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-en-fiscal_period-198",
+   "language": "en",
+   "kind": "fiscal_period",
+   "synthetic": true,
+   "text": "Audited for the fiscal year ended March 31, 2024",
+   "expected": [
+    {
+     "type": "fiscal_period",
+     "span": "fiscal year ended March 31, 2024",
+     "value": {
+      "fiscal_year": 2024,
+      "year_end_month": 3,
+      "year_end_day": 31
+     },
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  },
+  {
+   "id": "syn-en-fiscal_period-199",
+   "language": "en",
+   "kind": "fiscal_period",
+   "synthetic": true,
+   "text": "Plan for FY 2022/23",
+   "expected": [
+    {
+     "type": "fiscal_period",
+     "span": "FY 2022/23",
+     "value": {
+      "fiscal_year_label": "2022-2023",
+      "start_year": 2022,
+      "end_year": 2023,
+      "year_end_month": null
+     },
+     "currency": null,
+     "ambiguous": false
+    }
+   ]
+  }
+ ]
+}

@@ -54,7 +54,7 @@ multilingual document agent that every later region reuses.
 | AC-001 | Given the multilingual agent, when read, then it requires original-language spans, labels translations as derived evidence, and names normalization rules for 万/亿, Buddhist-era years, and legal-entity suffixes. | REQ-001 |
 | AC-002 | Given `southeast_asia/`, when listed, then three agents each have four files and a never-boundary. | REQ-002 |
 | AC-003 | Given each README, when read, then a decision-path class is stated and the entity agent is `sovereign_adjacent`. | REQ-003 |
-| AC-004 | Given the group README, when read, then nine other regions are reserved with scope and spec number. | REQ-004 |
+| AC-004 | Given the group README, when read, then every other region is either built or reserved with scope and spec number. | REQ-004 |
 | AC-005 | Given `agents/README.md`, when read, then the four agents are listed. | REQ-005 |
 | AC-006 | Given the standard and dictionary, when read, then both exist and agree. | REQ-006 |
 | AC-007 | Given the repo, when gates run, then they pass. | NFR-001, NFR-002 |

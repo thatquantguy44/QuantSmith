@@ -40,6 +40,11 @@ FACT_FIELDS = ("entity_id", "value", "unit", "source_id", "source_grade", "event
                "announced_time", "filed_time", "ingested_time", "known_at", "language",
                "derived", "confidence")
 MIN_CHILD_SPEC = 84
+REVIEW_STATUSES = {"draft", "reviewed", "superseded", "retired"}
+# Pack sections whose list records carry review_status / review (REQ-020).
+REVIEWABLE = (("taxonomy", "entity_types"), ("taxonomy", "relationship_types"),
+              ("channels", "channels"), ("models", "models"),
+              ("workflows", "workflows"), ("glossary", "terms"))
 
 
 class VenturePackError(ValueError):
@@ -105,15 +110,39 @@ def source_grade_valid(grade: str, conventions: Mapping[str, Any]) -> bool:
             and grade[1] in sg["credibility_scale"])
 
 
+_UNIT_SYMBOLS = {"万": 10**4, "萬": 10**4, "亿": 10**8, "億": 10**8,
+                 "만": 10**4, "억": 10**8, "조": 10**12}
+_UNIT_WORDS = {"lakh": 10**5, "crore": 10**7}
+
+
 def cn_number(text: str) -> float:
-    """Parse a Chinese-style figure with 万/亿 units, e.g. '3.5亿', '1,200万'."""
-    units = {"万": 10_000, "亿": 100_000_000}
+    """Parse a figure with an East or South Asian unit: 3.5亿, 2.5億, 350억, 1.2조, 5.2 lakh.
+
+    Raises ``ValueError`` for an unknown or ambiguous unit (for example 兆),
+    because a guessed multiplier is worse than a flagged one.
+    """
     t = text.strip().replace(",", "").replace("，", "")
-    mult = 1
-    if t and t[-1] in units:
-        mult, t = units[t[-1]], t[:-1]
-    value = float(t) * mult
+    m = re.fullmatch(r"([0-9]+(?:\.[0-9]+)?)\s*([^0-9\s.]+)?", t)
+    if not m:
+        raise ValueError(f"cannot parse figure {text!r}; flag as ambiguous")
+    number, unit = float(m.group(1)), m.group(2)
+    if unit is None:
+        mult = 1
+    elif unit in _UNIT_SYMBOLS:
+        mult = _UNIT_SYMBOLS[unit]
+    elif unit.lower() in _UNIT_WORDS:
+        mult = _UNIT_WORDS[unit.lower()]
+    else:
+        raise ValueError(f"unknown or ambiguous unit {unit!r} in {text!r}; flag, never guess")
+    value = round(number * mult, 6)
     return int(value) if value == int(value) else value
+
+
+def era_to_gregorian(era_id: str, year: int, conventions: Mapping[str, Any]) -> int:
+    for rule in conventions["normalization"]["calendar_offsets"]:
+        if rule["id"] == era_id:
+            return year + rule["offset"]
+    raise ValueError(f"unknown era {era_id!r}")
 
 
 def buddhist_to_gregorian(year: int) -> int:
@@ -127,7 +156,13 @@ def roc_to_gregorian(year: int) -> int:
 def localized_number(text: str, locale: str, conventions: Mapping[str, Any]) -> float:
     for rule in conventions["normalization"]["number_locales"]:
         if locale in rule["locales"]:
-            t = text.replace(rule["thousands"], "").replace(rule["decimal"], ".")
+            thousands = rule["thousands"]
+            t = text.strip()
+            if thousands == " ":
+                t = re.sub(r"[\s\u00a0\u202f]", "", t)
+            else:
+                t = t.replace(thousands, "")
+            t = t.replace(rule["decimal"], ".")
             value = float(t)
             return int(value) if value == int(value) else value
     raise ValueError(f"no number-locale rule for {locale!r}; flag as ambiguous")
@@ -155,6 +190,56 @@ def validate_overlay(overlay: Mapping[str, Any], conventions: Mapping[str, Any])
     return errors
 
 
+# ---------------------------------------------------------------- review
+def reviewable_records(pack: Mapping[str, Any]) -> List[Mapping[str, Any]]:
+    out: List[Mapping[str, Any]] = []
+    for name, key in REVIEWABLE:
+        out.extend(pack[name][key])
+    conv = pack["conventions"]
+    for key in ("valuation", "fund_metrics"):
+        out.extend(conv[key])
+    out.extend(conv["data_time"]["contracts"])
+    norm = conv["normalization"]
+    for key in ("numeral_units", "calendar_offsets", "number_locales", "currency_markers"):
+        out.extend(norm.get(key, []))
+    return out
+
+
+def validate_review(rec: Mapping[str, Any]) -> List[str]:
+    """A record is `reviewed` only with a named reviewer, a date, and a scope."""
+    rid, status = rec.get("id", "?"), rec.get("review_status")
+    if status not in REVIEW_STATUSES:
+        return [f"review: {rid} has invalid review_status {status!r}"]
+    review = rec.get("review")
+    if status == "draft":
+        return [f"review: {rid} is draft but carries a review record"] if review else []
+    if not isinstance(review, Mapping):
+        return [f"review: {rid} is {status} without a review record"]
+    errors = [f"review: {rid} review lacks {f}" for f in ("reviewer", "review_date", "scope")
+              if not str(review.get(f, "")).strip()]
+    try:
+        date.fromisoformat(str(review.get("review_date", "")))
+    except ValueError:
+        errors.append(f"review: {rid} review_date is not an ISO date")
+    if status == "reviewed" and str(rec.get("citation", "")).strip().lower() == "unverified" \
+            and not review.get("accepts_unverified"):
+        errors.append(f"review: {rid} is reviewed but still cites 'unverified' "
+                      "(cite a source or set review.accepts_unverified)")
+    return errors
+
+
+def review_summary(pack: Mapping[str, Any]) -> Dict[str, int]:
+    counts = {s: 0 for s in sorted(REVIEW_STATUSES)}
+    unverified = 0
+    for rec in reviewable_records(pack):
+        counts[rec.get("review_status", "draft")] = counts.get(rec.get("review_status", "draft"), 0) + 1
+        if str(rec.get("citation", "")).strip().lower() == "unverified":
+            unverified += 1
+    counts["total"] = sum(counts.values())
+    counts["unverified_citations"] = unverified
+    return counts
+
+
 # ---------------------------------------------------------------- golden cases
 def run_golden_cases(pack: Mapping[str, Any]) -> List[str]:
     conv, errors = pack["conventions"], []
@@ -177,6 +262,8 @@ def run_golden_cases(pack: Mapping[str, Any]) -> List[str]:
                 got = {"valid": source_grade_valid(case["grade"], conv)}
             elif k == "cn_number":
                 got = {"value": cn_number(case["text"])}
+            elif k == "era_year":
+                got = {"gregorian": era_to_gregorian(case["era"], case["year"], conv)}
             elif k == "buddhist_year":
                 got = {"gregorian": buddhist_to_gregorian(case["year"])}
             elif k == "roc_year":
@@ -318,6 +405,23 @@ def validate_pack(pack: Mapping[str, Any], root: Path = Path(".")) -> List[str]:
             if not (root / "agents/venture_intelligence" / ag / "prompt.md").is_file():
                 errors.append(f"workflows: {w['id']} names agent {ag} that does not exist")
 
+    # workflow class must cover the strictest class among its agents
+    by_key: Dict[str, str] = {}
+    for a in agents:
+        cls = a.get("decision_path_class", "analytic_support")
+        by_key[a["id"]] = cls
+        if a.get("path"):
+            by_key[a["path"].replace("agents/venture_intelligence/", "")] = cls
+    for w in wfs:
+        classes = {by_key.get(ag.replace(" (planned)", "").strip()) for ag in w["agents"]}
+        classes.discard(None)
+        non_analytic = classes - {"analytic_support"}
+        if non_analytic:
+            need = "sovereign_adjacent" if "sovereign_adjacent" in non_analytic else "person_adjacent"
+            if w["decision_path_class"] != need:
+                errors.append(f"workflows: {w['id']} class {w['decision_path_class']} must be {need} "
+                              "because it includes a stricter-class agent")
+
     # gaps (REQ-012)
     for g in pack["gaps"]["gaps"]:
         if g["severity"] not in ("low", "medium", "high"):
@@ -334,6 +438,10 @@ def validate_pack(pack: Mapping[str, Any], root: Path = Path(".")) -> List[str]:
         if not (root / t["owner_doc"]).is_file():
             errors.append(f"glossary: {t['term']} owner_doc {t['owner_doc']} does not exist")
 
+    # review sign-off (REQ-020)
+    for rec in reviewable_records(pack):
+        errors += validate_review(rec)
+
     # golden cases (REQ-012, AC-018)
     if pack["golden_cases"].get("synthetic") is not True:
         errors.append("golden_cases: must be flagged synthetic")
@@ -348,9 +456,11 @@ def validate_or_raise(pack: Mapping[str, Any], root: Path = Path(".")) -> None:
 
 
 def main() -> int:  # pragma: no cover - thin CLI
-    errors = validate_pack(load_pack())
+    pack = load_pack()
+    errors = validate_pack(pack)
     for e in errors:
         print("ERROR:", e)
+    print("review:", ", ".join(f"{k}={v}" for k, v in review_summary(pack).items()))
     print(f"venture pack: {len(errors)} error(s)")
     return 1 if errors else 0
 

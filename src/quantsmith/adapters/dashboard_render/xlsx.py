@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import os
-from typing import List, Optional
+from typing import List
 
 from ...pipelines.excel_profile import ExcelWorkbookPayload
 from .result import FileRecord, RenderResult

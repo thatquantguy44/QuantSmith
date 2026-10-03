@@ -1,0 +1,34 @@
+source_id: "uk_companies_house"
+name: "UK Companies House (register and PSC data)"
+type: api
+owner: "quant-research"
+description: >
+  UK company register, filing history, officers, and persons with significant control. Venture and intelligence source (spec 0088); endpoints, terms, and
+  coverage are unverified until confirmed against current documentation.
+
+domain: ["regulatory_filings", "ownership", "foreign_influence_screening"]
+access_level: public
+
+quality:
+  completeness: high
+  timeliness: "filings appear shortly after submission; PSC data is self-declared"
+  known_issues:
+    - "UK only"
+    - "PSC data is declared by the company and may be stale or wrong"
+    - "officer data concerns individuals: use as public registry role only"
+  last_assessed: "2026-10-02"
+
+point_in_time:
+  supports_asof: true
+  known_at_policy: "filed"
+  revision_policy: "record source file or endpoint, public timestamp when available, and retrieval timestamp; retain dated snapshots where the source keeps no history"
+
+connection:
+  method: rest_api
+  endpoint_or_host: "https://api.company-information.service.gov.uk"
+  credential_ref: "not_required_public_access"
+
+documentation_uri: "https://developer.company-information.service.gov.uk/"
+status: evaluating
+
+data_contract_refs: ["specs/0088-venture-sources-pit-ingestion/"]

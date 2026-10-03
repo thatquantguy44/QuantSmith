@@ -36,7 +36,7 @@ against a named person or entity. The decision belongs to the accountable human
 ## Multilingual documents
 
 - Keep the verbatim source-language span for every extracted field; translation is a labelled, separate field.
-- Normalize numerals, units, dates, currencies, and accounting bases by stated rule (e.g. 万 = 10^4, 亿 = 10^8; Thai Buddhist year - 543; ROC year + 1911); flag ambiguity instead of guessing.
+- Normalize numerals, units, dates, currencies, fiscal years, and accounting bases by stated rule (e.g. 万 = 10^4, 亿 = 10^8, 억 = 10^8, lakh = 10^5, crore = 10^7; Thai Buddhist year - 543; ROC year + 1911; Reiwa year + 2018); flag ambiguity such as 兆 instead of guessing.
 - Never merge entities across scripts or transliterations without a registry ID; keep legal-form suffixes.
 - Report quality per language; a bilingual human reviewer is required for low-resource or high-stakes extractions.
 
@@ -45,6 +45,31 @@ against a named person or entity. The decision belongs to the accountable human
 | Agent | Never |
 | --- | --- |
 | `multilingual_document_nlp` | Give a legal translation, interpret legal effect, or certify authenticity |
+| `source_reliability_grader` | Override a human analyst's grade, or grade on reputation alone |
+| `confidence_language_reviewer` | Change a judgement's direction or strength |
+| `competing_hypotheses_analyst` | Select or state the conclusion for the analyst |
+| `collection_gap_tracker` | Initiate, task, or recommend collection from non-public or prohibited sources |
+| `ownership_screen` | Designate, attribute, accuse, or recommend screening or enforcement action |
+| `dual_use_indicator` | Rule on export-control classification, licence need, or end-use legality |
+| `patent_ip_analyst` | Assess legal validity, infringement, or freedom to operate, or value a patent |
+| `hiring_signal_analyst` | Identify, profile, track, or rank individuals, or infer sensitive attributes |
+| `narrative_news_analyst` | Present narrative as fact, or attribute an influence campaign to any actor |
+| `technology_landscape_analyst` | Predict commercial success, assign readiness itself, or rank by merit |
+| `deal_sourcing` | Rank companies by overall merit, recommend an investment, or source individuals |
+| `company_diligence` | Approve, reject, or recommend; certify claims or documents as accurate |
+| `entity_resolution` | Merge records on a name alone or collapse a parent and subsidiary |
+| `greater_china_east_asia/regional_lead`, `south_asia/regional_lead`, `central_asia/regional_lead` | Recommend or rank investments, or rule on permissibility of a transfer or structure |
+| `greater_china_east_asia/entity_structure_analyst` | Designate, attribute, accuse, or conclude control by any government or party |
 | `southeast_asia/regional_lead` | Recommend or rank investments, or rule on regulatory permissibility |
 | `southeast_asia/entity_structure_analyst` | Designate, attribute, or accuse; conclude a structure is unlawful |
 | `southeast_asia/funding_ecosystem_analyst` | Recommend, size, or value an investment |
+
+## Runtime helpers and validation
+
+Deterministic helpers back the rules above: `quantsmith.pipelines.venture_pack`
+(pack validator, normalization, fund metrics), `venture_ingestion` (`known_at`,
+as-of views, cohorts, entity resolution), and `venture_tradecraft` (grades,
+corroboration, hypotheses matrix, effective ownership, conclusion-language lint).
+`quantsmith.asian_nlp` supplies the deterministic baseline for Asian-language text (identification, segmentation, span-preserving extraction); model output is compared against it and never replaces it. They report structure and arithmetic; they never grade, conclude, classify, or
+designate. Validate the pack with
+`PYTHONPATH=src python3 -m quantsmith.pipelines.venture_pack`.

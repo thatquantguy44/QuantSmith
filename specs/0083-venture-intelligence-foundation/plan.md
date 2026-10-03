@@ -38,17 +38,18 @@ config/venture_overlay.example.yml        (adopter-local overlay template; real 
 
 ## Child-spec roadmap
 
-| Spec | Scope | Depends on |
+| Spec | Scope | Status |
 | --- | --- | --- |
-| 0084 | Multilingual document NLP agent + Southeast Asia regional agents | 0083, 0071 |
-| 0085 | Regional wave 2: Greater China & East Asia; South Asia | 0084 |
-| 0086 | Regional wave 3: MENA; Europe; Central Asia & Caucasus | 0084 |
-| 0087 | Regional wave 4: Sub-Saharan Africa; Latin America; North America; Oceania | 0084 |
-| 0088 | Source adapters and point-in-time ingestion, entity resolution | 0083, 0025 |
-| 0089 | Deal sourcing, diligence, and non-traditional signal analysts | 0088 |
-| 0090 | Intelligence tradecraft agents and sovereign-adjacent screening support | 0083 |
-| 0091 | Fund/portfolio analytics and predictive models (survival, emergence, graph, nowcast) | 0088, 0026 |
-| 0092 | Retrieval wiring (`0052`–`0054`) and dictionary completion | 0083 |
+| 0084 | Multilingual document NLP agent + Southeast Asia agents | Built (Draft) |
+| 0085 | Greater China & East Asia, South Asia regional agents | Built (Draft) |
+| 0086 | Central Asia regional agent (Asia-first; non-Asian regions deferred to `0087`) | Built (Draft) |
+| 0087 | Deferred regions: MENA, Europe, Caucasus, Africa, Latin America, North America, Oceania | Reserved |
+| 0088 | Source adapters/entries, point-in-time ingestion, entity resolution | Built (Draft); live adapters not built |
+| 0089 | Signal analysts and sourcing/diligence agents | Built (Draft) |
+| 0090 | Tradecraft and screening-support agents | Built (Draft) |
+| 0091 | Fund/portfolio analytics and predictive models | Reserved |
+| 0092 | Retrieval wiring (`0052`–`0054`) and product writers | Reserved |
+| 0094 | Asian-language NLP foundation (`0093` is taken by another agent) | Built (Draft) |
 
 ## Interfaces & Data Contracts
 
@@ -90,6 +91,7 @@ Every fact record: `entity_id`, `value`, `unit`, `source_id`, `source_grade`,
 | REQ-017 | `workflows.json`, `docs/workflows.md` | T-010 |
 | REQ-018 | multilingual section of standard; golden cases | T-001, T-011 |
 | REQ-019 | `agents/venture_intelligence/` roster | T-008 |
+| REQ-020 | `review_status`/`review` fields and `validate_review` | T-016 |
 | NFR-001 | validator and golden cases | T-012 |
 | NFR-002 | synthetic disclosure per `0025` | T-015 |
 | NFR-003 | gates | T-015 |

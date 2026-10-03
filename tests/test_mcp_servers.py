@@ -36,8 +36,6 @@ from quantsmith.adapters.mcp_servers.knowledge_resources import (
 )
 from quantsmith.adapters.mcp_servers.market_research_resources import (
     dispatch_market_research,
-    list_market_research_resources,
-    read_market_research_resource,
 )
 from quantsmith.adapters.mcp_servers.memory_resources import dispatch_memory
 from quantsmith.pipelines.market_research import InMemoryResearchCatalog, MarketResearchItem
@@ -590,7 +588,7 @@ def test_mem_list_public_sees_only_public_AC_003() -> None:
 
 def test_mem_read_returns_citation_for_allowed_record_AC_004() -> None:
     rec = _make_record("mem-r001", scope="macro_regime", access_level="internal")
-    uri = f"knowledge://memory/macro_regime/mem-r001"
+    uri = "knowledge://memory/macro_regime/mem-r001"
     resp = dispatch_memory(
         _mem_req("resources/read", {"caller_clearance": INTERNAL, "uri": uri}),
         records=[rec],
@@ -616,7 +614,7 @@ def test_mem_wrong_authority_returns_not_found_AC_005() -> None:
 
 def test_mem_restricted_record_denied_to_internal_AC_006() -> None:
     rec = _make_record("res-r001", access_level="restricted")
-    uri = f"knowledge://memory/equity_signal/res-r001"
+    uri = "knowledge://memory/equity_signal/res-r001"
     resp = dispatch_memory(
         _mem_req("resources/read", {"caller_clearance": INTERNAL, "uri": uri}),
         records=[rec],

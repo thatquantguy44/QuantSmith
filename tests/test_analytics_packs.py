@@ -192,8 +192,13 @@ def test_ac011_cli_and_readme_sync(packs, tmp_path):
 def test_ac012_uncovered_tags_are_info_only(packs):
     """AC-012: only text/document source tags stay uncovered, reported as info."""
     uncovered = set(ap.uncovered_source_domains(packs, ROOT))
+    # Venture and intelligence source tags (spec 0088) belong to the separate
+    # venture domain (spec 0083), not to a financial-services analytics pack.
+    venture_tags = {"entity_resolution", "foreign_influence_screening", "grants_procurement",
+                    "narrative_news", "open_source", "ownership", "patents", "publications",
+                    "regulatory_filings", "technology_scouting", "testing"}
     assert uncovered <= {"market_commentary", "nlp_llm", "quant_text_intelligence", "text_intelligence",
-                         "supervisory_guidance", "regulatory_context"}
+                         "supervisory_guidance", "regulatory_context"} | venture_tags
     for f in ap.validate_catalog(packs, ROOT):
         if "selects no pack" in f.message:
             assert f.severity == "info"

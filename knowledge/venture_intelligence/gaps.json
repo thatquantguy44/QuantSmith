@@ -25,9 +25,9 @@
     },
     {
       "id": "gap.low_resource_languages",
-      "title": "No evaluation sets for Khmer, Burmese, Lao",
+      "title": "No evaluation sets for Asian languages; Khmer, Burmese, Lao also lack any coverage",
       "severity": "medium",
-      "owner_spec": "0084",
+      "owner_spec": "0094",
       "status": "open"
     },
     {
@@ -63,6 +63,27 @@
       "title": "Many records carry citation unverified",
       "severity": "medium",
       "owner_spec": "0092",
+      "status": "open"
+    },
+    {
+      "id": "gap.language_id_short_text",
+      "title": "Language identification accuracy on short or mixed text is unmeasured",
+      "severity": "medium",
+      "owner_spec": "0094",
+      "status": "open"
+    },
+    {
+      "id": "gap.segmentation_no_dictionary",
+      "title": "Chinese, Japanese, and Thai segmentation is a character n-gram baseline without a dictionary",
+      "severity": "medium",
+      "owner_spec": "0094",
+      "status": "open"
+    },
+    {
+      "id": "gap.kk_uz_fil_month_lexicons",
+      "title": "Kazakh, Uzbek, and Filipino month-name lexicons are unverified and need native-speaker review",
+      "severity": "medium",
+      "owner_spec": "0094",
       "status": "open"
     }
   ]
