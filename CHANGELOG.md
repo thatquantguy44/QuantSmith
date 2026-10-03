@@ -21,6 +21,11 @@ patterns locally rather than expecting them to update in place.
 ## [Unreleased]
 
 ### Added
+- Test engineering runtime (spec `0097`): `quantsmith.test_engineering` and the `quantsmith-test-engineering`
+  command (`detect`, `run`, `edges`, `cpp`, `mutate`, `flaky`) for Python and C++. Zero tests never reads as a pass;
+  C++ cases run one per process under AddressSanitizer and UndefinedBehaviorSanitizer; mutation testing reports
+  uncovered mutants apart from survivors; flakiness checks name the seed that reproduces an order dependence.
+  `coverage` is added to the `dev` extra. Items 6–9 are scoped in the spec plan.
 - Venture request routing (spec `0096`): `venture_routing.py` and reviewable rules in `routing.json` turn a
   request into an ordered agent chain with review gates, decision owner, the strictest decision-path class, and
   the clearance it needs; forbidden requests (recommend an investment, designate or attribute, profile a person,

@@ -53,3 +53,13 @@ party's service.
 - Crashes minimized and classified before being reported, not dumped raw.
 - Honest reporting: a fuzz run finding nothing is reported as "no crash
   found in the run performed," not "the function is safe."
+
+## Runtime
+
+Spec `0097` (`src/quantsmith/test_engineering/`) gives this agent a real runtime:
+
+- `quantsmith-test-engineering cpp --header lib.hpp --signature "int add(int a, int b)"` compiles a boundary harness with
+  ASan and UBSan and runs each case in its own process; `run --tool ctest|gtest` and `flaky --tool gtest` cover CTest and
+  GoogleTest. Libfuzzer targets are not built by the runtime yet (see `0097/plan.md`, item 8).
+
+The runtime's reports are evidence for a human; they do not prove correctness.
