@@ -12,6 +12,7 @@ nothing here is reviewed by a named person yet, and many records carry
 | `channels.json` | Ten non-traditional signal channels with lead time, bias, deception risk, licensing, point-in-time statement |
 | `models.json` | Seven model families (catalog only; no trained models) |
 | `workflows.json` | Five workflows with decision-path classes and review gates; a workflow's class must cover its strictest agent |
+| `routing.json` | Request-routing rules: task kinds and agent chains, forbidden intents with the human who owns each decision, regions, and class and clearance rules |
 | `coverage.json` | Agent roster (built and planned, each with a decision-path class) and the child-spec roadmap `0084`–`0092` plus `0094` |
 | `gaps.json` | Known unknowns with severity and owning spec |
 | `glossary.json` | Terms; the dictionary section in `agentic_dictionary.md` is generated from it |

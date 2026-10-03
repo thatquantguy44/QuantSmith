@@ -595,6 +595,24 @@
       "citation": "unverified",
       "review_status": "draft",
       "review": null
+    },
+    {
+      "id": "term.routing_plan",
+      "term": "Routing Plan",
+      "definition": "The orchestrator's output for a request: status, task kind, ordered agent steps, the strictest decision-path class, required clearance, review gates, and decision owner; not authorization to act.",
+      "owner_doc": "knowledge/venture_intelligence/routing.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "term.refusal_with_owner",
+      "term": "Refusal With Owner",
+      "definition": "A refusal that names the human who owns the decision the suite will not make, and the allowed alternative work.",
+      "owner_doc": "knowledge/venture_intelligence/routing.json",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
     }
   ]
 }
