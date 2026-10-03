@@ -443,6 +443,23 @@ All six are contract-only today (no SDK runtime); their inputs are always
 caller-supplied, the posture `agents/credit_risk/counterparty_limits` took
 before its own runtime existed.
 
+## Venture Intelligence Agents (`venture_intelligence/`)
+
+Grouped under specs `0083-venture-intelligence-foundation` and
+`0084-venture-regional-agents-southeast-asia`, sharing
+`instructions/venture_intelligence.md`. Regional agents are organized by world
+region (Southeast Asia built first); `multilingual_document_nlp` is cross-cutting.
+
+| Agent | Handles | Feeds mainly |
+| --- | --- | --- |
+| `venture_intelligence/multilingual_document_nlp/` | Source-anchored extraction from Mandarin, Bahasa, Vietnamese, Thai, Filipino and English start-up documents; never gives legal translation | `deep_learning/nlp_llm`, `knowledge/knowledge_ingestion`, regional agents |
+| `venture_intelligence/southeast_asia/regional_lead/` | Market-by-market Southeast Asia view and routing; never recommends investments | `research_analyst`, `briefer` |
+| `venture_intelligence/southeast_asia/entity_structure_analyst/` | Holding/operating structure and ownership indicators; never designates or attributes | `enterprise_risk/aml_financial_crime`, counsel |
+| `venture_intelligence/southeast_asia/funding_ecosystem_analyst/` | Comparable rounds, investors, exit routes; never recommends or values | `research_analyst`, investment committee |
+
+Contract-only today (no SDK runtime); remaining regions are reserved in
+`agents/venture_intelligence/README.md`.
+
 ## Formulaic Alpha Agents (`formulaic_alphas/`)
 
 Grouped in the `formulaic_alphas/` category folder; they operationalize the
