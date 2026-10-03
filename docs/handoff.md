@@ -295,7 +295,7 @@ designs**: create and
 approve one only when the foundation it consumes — `0063` or `0072` — has frozen
 that contract and the prior dependency named above is satisfied. Do not add
 agents merely to fill the map; prefer a canonical knowledge artifact or tested
-runtime that an existing agent can use. **Next unreserved spec number: `0093`** (`0083`–`0092` are the venture-intelligence foundation and its reserved children, item 32).
+runtime that an existing agent can use. **Next unreserved spec number: `0095`** (`0083`–`0092` are the venture-intelligence foundation and its reserved children, item 32; `0093` is taken by another agent; `0094` is the Asian-language NLP foundation).
 Reserving a number here does not create the directory; copy `templates/spec/`
 only when that slice becomes active.
 
@@ -1574,6 +1574,10 @@ manual-task persistence question stays deferred until a real consumer needs it.
     `hiring_signal_analyst` (person_adjacent), `narrative_news_analyst`,
     `technology_landscape_analyst`, `deal_sourcing`, `company_diligence` — and
     a workflow-class consistency rule.
+    `0094` (Draft, spec only; `0093` is taken by another agent) specifies the
+    Asian-language NLP foundation: language/script ID, segmentation baseline,
+    rule-based amount/date/era extraction with spans, per-language evaluation,
+    and a baseline-vs-LLM comparison harness.
     Proof of concept: no legal collection limits set yet; they must be set
     before operational use. Next: the `0083` knowledge pack and validator.
 
