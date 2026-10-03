@@ -47,7 +47,9 @@ def growth_signal(counts: Sequence[float], lag_periods: int = 2, recent: int = 6
     """Emergence indicator for one domain's count series (oldest first).
 
     The last ``lag_periods`` are dropped as incomplete. The recent log-count slope is compared with the
-    baseline slope in units of the baseline's robust noise. Returns ``status`` ``emerging``,
+    baseline slope in units of the baseline's robust noise. This is an *onset* detector: an emergence that
+    has been under way longer than the recent window starts to fill the baseline and stops being flagged,
+    so a ``not_emerging`` result does not mean a technology is not growing. Returns ``status`` ``emerging``,
     ``not_emerging``, or ``not_assessable`` with the numbers behind it.
     """
     series = list(counts[:-lag_periods]) if lag_periods else list(counts)
@@ -55,7 +57,6 @@ def growth_signal(counts: Sequence[float], lag_periods: int = 2, recent: int = 6
     if len(series) < recent + baseline:
         return {**base, "status": "not_assessable", "reasons": [f"needs {recent + baseline} complete periods, has {len(series)}"]}
     rec_w = series[-recent:]
-    base_w = series[-(recent + baseline):-recent]
     if sum(rec_w) / recent < min_count:
         return {**base, "status": "not_assessable", "reasons": [f"recent mean count below {min_count}"]}
     lg = [math.log1p(v) for v in series]

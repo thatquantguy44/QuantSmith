@@ -241,22 +241,36 @@ def fit_hazard_model(subjects: Sequence[Mapping[str, Any]], causes: Sequence[str
     return HazardModel(tuple(causes), n_features, interval_days, n_intervals, weights, len(subjects), converged)
 
 
+def _interval_hazards(model: HazardModel, features: Sequence[float], k: int) -> Dict[str, float]:
+    h = {}
+    for c in model.causes:
+        w = model.weights[c]
+        eta = w[k] + sum(w[model.n_intervals + f] * float(v) for f, v in enumerate(features))
+        h[c] = _sigmoid(eta)
+    total = sum(h.values())
+    if total >= 1.0:                                  # keep the hazards a valid sub-distribution
+        h = {c: v / (total + 1e-12) for c, v in h.items()}
+    return h
+
+
 def predict_cif(model: HazardModel, features: Sequence[float], cause: str, horizon_days: int) -> float:
-    """Cumulative incidence of ``cause`` by ``horizon_days`` from cause-specific discrete hazards."""
-    k_max = min(model.n_intervals, max(1, math.ceil(horizon_days / model.interval_days)))
+    """Cumulative incidence of ``cause`` by ``horizon_days`` from cause-specific discrete hazards.
+
+    A horizon that falls inside an interval takes the completed intervals in full and a proportional
+    share of the next interval's incidence (it is never rounded up to the interval boundary, which would
+    count days the horizon does not cover). Horizons past the last fitted interval are capped there.
+    """
+    if horizon_days <= 0:
+        return 0.0
+    full, rem = divmod(horizon_days, model.interval_days)
     surv, cif = 1.0, 0.0
-    for k in range(k_max):
-        h = {}
-        for c in model.causes:
-            w = model.weights[c]
-            eta = w[k] + sum(w[model.n_intervals + f] * float(v) for f, v in enumerate(features))
-            h[c] = _sigmoid(eta)
-        total = sum(h.values())
-        if total >= 1.0:                              # keep the hazards a valid sub-distribution
-            h = {c: v / (total + 1e-12) for c, v in h.items()}
-            total = sum(h.values())
+    for k in range(min(full, model.n_intervals)):
+        h = _interval_hazards(model, features, k)
         cif += surv * h[cause]
-        surv *= 1.0 - total
+        surv *= 1.0 - sum(h.values())
+    if rem and full < model.n_intervals:
+        h = _interval_hazards(model, features, full)
+        cif += (rem / model.interval_days) * surv * h[cause]
     return cif
 
 

@@ -47,9 +47,10 @@ config/venture_overlay.example.yml        (adopter-local overlay template; real 
 | 0088 | Source adapters/entries, point-in-time ingestion, entity resolution | Built (Draft); live adapters not built |
 | 0089 | Signal analysts and sourcing/diligence agents | Built (Draft) |
 | 0090 | Tradecraft and screening-support agents | Built (Draft) |
-| 0091 | Fund/portfolio analytics and predictive models | Reserved |
-| 0092 | Retrieval wiring (`0052`–`0054`) and product writers | Reserved |
-| 0094 | Asian-language NLP foundation (`0093` is taken by another agent) | Built (Draft) |
+| 0091 | Fund and portfolio analytics (predictive models split out to `0095`) | Built (Draft) |
+| 0092 | Private store, memory candidates, retrieval contract (live search stays `0054`), and brief and memo writers | Built (Draft) |
+| 0094 | Asian-language NLP foundation (`0093` is the visualization packs spec) | Built (Draft) |
+| 0095 | Predictive-model reference baselines and deployability gate (synthetic validation only) | Built (Draft) |
 
 ## Interfaces & Data Contracts
 
