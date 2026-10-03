@@ -89,3 +89,4 @@ that. Omit them unconditionally in this repository.
 - `agentic_dictionary.md` — shared vocabulary.
 - `docs/sdk_plan.md` — roadmap.
 - `specs/0001-daily-momentum-signal/` — a worked, fully traceable spec example.
+- `instructions/venture_intelligence.md`, `knowledge/venture_intelligence/`, and `agents/venture_intelligence/README.md` — the venture and non-traditional intelligence standard, pack, and agent roster (spec `0083` and children). Validate with `PYTHONPATH=src python3 -m quantsmith.pipelines.venture_pack`.

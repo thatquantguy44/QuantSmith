@@ -11,7 +11,6 @@ Slice 3 (governance, citation, audit, curation) and Slice 4 (scheduling).
 from __future__ import annotations
 
 import datetime
-import json
 import sys
 from pathlib import Path
 
@@ -26,18 +25,12 @@ from quantsmith.pipelines.market_research import (
     CONFIDENTIALITY_LEVELS,
     DEFAULT_FRESHNESS_DAYS,
     SOURCE_TYPES,
-    STATUSES,
-    VALID_TRANSITIONS,
     CitationResult,
-    ConflictGroup,
-    GovernanceDecision,
     InMemoryResearchCatalog,
     KnowledgeCandidate,
     MarketResearchItem,
-    QuarantineFlag,
     ResearchAuditLedger,
     UnsupportedGap,
-    _scan_quarantine,
     check_governance,
     classify_item,
     filter_by_access_tier,

@@ -38,3 +38,6 @@ quantsmith-nl-analytics = "quantsmith.nl_analytics.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+"quantsmith.asian_nlp" = ["fixtures/*.json"]

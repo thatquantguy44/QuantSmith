@@ -1,0 +1,34 @@
+source_id: "gh_archive"
+name: "GH Archive (public GitHub event stream)"
+type: file_feed
+owner: "quant-research"
+description: >
+  Hourly archive of public GitHub events for open-source activity signals. Venture and intelligence source (spec 0088); endpoints, terms, and
+  coverage are unverified until confirmed against current documentation.
+
+domain: ["open_source", "technology_scouting"]
+access_level: public
+
+quality:
+  completeness: medium
+  timeliness: "hourly files; events are timestamped"
+  known_issues:
+    - "stars and forks can be inflated"
+    - "bot accounts"
+    - "repository renames and deletions"
+  last_assessed: "2026-10-02"
+
+point_in_time:
+  supports_asof: true
+  known_at_policy: "event"
+  revision_policy: "record source file or endpoint, public timestamp when available, and retrieval timestamp; retain dated snapshots where the source keeps no history"
+
+connection:
+  method: file_download
+  endpoint_or_host: "https://www.gharchive.org/"
+  credential_ref: "not_required_public_access"
+
+documentation_uri: "https://www.gharchive.org/"
+status: evaluating
+
+data_contract_refs: ["specs/0088-venture-sources-pit-ingestion/"]

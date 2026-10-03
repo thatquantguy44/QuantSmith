@@ -15,7 +15,7 @@ from __future__ import annotations
 import abc
 import contextlib
 from dataclasses import dataclass, field
-from typing import Any, Dict, Generator, List, Optional, Sequence
+from typing import Any, Dict, Generator, List, Sequence
 
 import numpy as np
 

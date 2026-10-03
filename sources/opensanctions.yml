@@ -1,0 +1,34 @@
+source_id: "opensanctions"
+name: "OpenSanctions (sanctions and PEP aggregate)"
+type: api
+owner: "quant-research"
+description: >
+  Aggregated open sanctions, watchlists, and politically exposed person data in one schema. Venture and intelligence source (spec 0088); endpoints, terms, and
+  coverage are unverified until confirmed against current documentation.
+
+domain: ["foreign_influence_screening"]
+access_level: public
+
+quality:
+  completeness: medium
+  timeliness: "updated frequently; entity IDs may merge"
+  known_issues:
+    - "licence differs for commercial use; check before relying"
+    - "matches are indicators, never findings"
+    - "entity merges change IDs over time"
+  last_assessed: "2026-10-02"
+
+point_in_time:
+  supports_asof: false
+  known_at_policy: "snapshot"
+  revision_policy: "record source file or endpoint, public timestamp when available, and retrieval timestamp; retain dated snapshots where the source keeps no history"
+
+connection:
+  method: rest_api
+  endpoint_or_host: "https://api.opensanctions.org"
+  credential_ref: "not_required_public_access"
+
+documentation_uri: "https://www.opensanctions.org/docs/"
+status: evaluating
+
+data_contract_refs: ["specs/0088-venture-sources-pit-ingestion/"]

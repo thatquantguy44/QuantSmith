@@ -17,7 +17,6 @@ import pathlib
 
 import pytest
 
-import os
 
 from quantsmith.pipelines.access_control import (
     AUTHOR_HANDLE_RE,

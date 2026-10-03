@@ -17,7 +17,7 @@ unbounded problems are named, never silently returned as a wrong number.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Callable, Dict, Hashable, List, Optional, Sequence, Tuple
 
 _EPS = 1e-9

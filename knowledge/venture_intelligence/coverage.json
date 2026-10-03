@@ -9,7 +9,8 @@
       "never": "Give legal translation or interpretation",
       "creating_spec": "0084",
       "status": "built",
-      "path": "agents/venture_intelligence/multilingual_document_nlp"
+      "path": "agents/venture_intelligence/multilingual_document_nlp",
+      "decision_path_class": "analytic_support"
     },
     {
       "id": "southeast_asia_regional_lead",
@@ -18,7 +19,8 @@
       "never": "Recommend or rank investments",
       "creating_spec": "0084",
       "status": "built",
-      "path": "agents/venture_intelligence/southeast_asia/regional_lead"
+      "path": "agents/venture_intelligence/southeast_asia/regional_lead",
+      "decision_path_class": "analytic_support"
     },
     {
       "id": "southeast_asia_entity_structure_analyst",
@@ -27,7 +29,8 @@
       "never": "Designate, attribute, or accuse",
       "creating_spec": "0084",
       "status": "built",
-      "path": "agents/venture_intelligence/southeast_asia/entity_structure_analyst"
+      "path": "agents/venture_intelligence/southeast_asia/entity_structure_analyst",
+      "decision_path_class": "sovereign_adjacent"
     },
     {
       "id": "southeast_asia_funding_ecosystem_analyst",
@@ -36,7 +39,8 @@
       "never": "Recommend, size, or value an investment",
       "creating_spec": "0084",
       "status": "built",
-      "path": "agents/venture_intelligence/southeast_asia/funding_ecosystem_analyst"
+      "path": "agents/venture_intelligence/southeast_asia/funding_ecosystem_analyst",
+      "decision_path_class": "analytic_support"
     },
     {
       "id": "greater_china_east_asia_lead",
@@ -44,7 +48,9 @@
       "workflow": "Greater China and East Asia market view and routing",
       "never": "Recommend investments",
       "creating_spec": "0085",
-      "status": "planned"
+      "status": "built",
+      "path": "agents/venture_intelligence/greater_china_east_asia/regional_lead",
+      "decision_path_class": "analytic_support"
     },
     {
       "id": "south_asia_lead",
@@ -52,7 +58,9 @@
       "workflow": "South Asia market view and routing",
       "never": "Recommend investments",
       "creating_spec": "0085",
-      "status": "planned"
+      "status": "built",
+      "path": "agents/venture_intelligence/south_asia/regional_lead",
+      "decision_path_class": "analytic_support"
     },
     {
       "id": "mena_lead",
@@ -60,7 +68,8 @@
       "workflow": "Middle East and North Africa market view and routing",
       "never": "Recommend investments",
       "creating_spec": "0086",
-      "status": "planned"
+      "status": "planned",
+      "decision_path_class": "analytic_support"
     },
     {
       "id": "europe_lead",
@@ -68,15 +77,18 @@
       "workflow": "Europe market view and routing",
       "never": "Recommend investments",
       "creating_spec": "0086",
-      "status": "planned"
+      "status": "planned",
+      "decision_path_class": "analytic_support"
     },
     {
-      "id": "central_asia_caucasus_lead",
+      "id": "central_asia_lead",
       "group": "regional",
-      "workflow": "Central Asia and Caucasus market view and routing",
+      "workflow": "Central Asia market-by-market view and routing",
       "never": "Recommend investments",
       "creating_spec": "0086",
-      "status": "planned"
+      "status": "built",
+      "path": "agents/venture_intelligence/central_asia/regional_lead",
+      "decision_path_class": "analytic_support"
     },
     {
       "id": "sub_saharan_africa_lead",
@@ -84,7 +96,8 @@
       "workflow": "Sub-Saharan Africa market view and routing",
       "never": "Recommend investments",
       "creating_spec": "0087",
-      "status": "planned"
+      "status": "planned",
+      "decision_path_class": "analytic_support"
     },
     {
       "id": "latin_america_lead",
@@ -92,7 +105,8 @@
       "workflow": "Latin America and Caribbean market view and routing",
       "never": "Recommend investments",
       "creating_spec": "0087",
-      "status": "planned"
+      "status": "planned",
+      "decision_path_class": "analytic_support"
     },
     {
       "id": "north_america_lead",
@@ -100,7 +114,8 @@
       "workflow": "North America market view and routing",
       "never": "Recommend investments",
       "creating_spec": "0087",
-      "status": "planned"
+      "status": "planned",
+      "decision_path_class": "analytic_support"
     },
     {
       "id": "oceania_lead",
@@ -108,7 +123,8 @@
       "workflow": "Oceania market view and routing",
       "never": "Recommend investments",
       "creating_spec": "0087",
-      "status": "planned"
+      "status": "planned",
+      "decision_path_class": "analytic_support"
     },
     {
       "id": "entity_resolution_agent",
@@ -116,7 +132,9 @@
       "workflow": "Cross-source company identity resolution",
       "never": "Merge entities without a registry identifier",
       "creating_spec": "0088",
-      "status": "planned"
+      "status": "built",
+      "path": "agents/venture_intelligence/entity_resolution",
+      "decision_path_class": "analytic_support"
     },
     {
       "id": "deal_sourcing",
@@ -124,7 +142,9 @@
       "workflow": "Candidate company discovery from channels",
       "never": "Rank companies for investment",
       "creating_spec": "0089",
-      "status": "planned"
+      "status": "built",
+      "path": "agents/venture_intelligence/deal_sourcing",
+      "decision_path_class": "analytic_support"
     },
     {
       "id": "company_diligence",
@@ -132,7 +152,9 @@
       "workflow": "Structured company diligence memo assembly",
       "never": "Approve an investment",
       "creating_spec": "0089",
-      "status": "planned"
+      "status": "built",
+      "path": "agents/venture_intelligence/company_diligence",
+      "decision_path_class": "analytic_support"
     },
     {
       "id": "patent_ip_analyst",
@@ -140,7 +162,9 @@
       "workflow": "Patent and IP landscape signals",
       "never": "Assess legal validity of a patent",
       "creating_spec": "0089",
-      "status": "planned"
+      "status": "built",
+      "path": "agents/venture_intelligence/patent_ip_analyst",
+      "decision_path_class": "analytic_support"
     },
     {
       "id": "hiring_signal_analyst",
@@ -148,7 +172,9 @@
       "workflow": "Hiring and workforce signals",
       "never": "Profile individuals",
       "creating_spec": "0089",
-      "status": "planned"
+      "status": "built",
+      "path": "agents/venture_intelligence/hiring_signal_analyst",
+      "decision_path_class": "person_adjacent"
     },
     {
       "id": "narrative_news_analyst",
@@ -156,7 +182,9 @@
       "workflow": "Multilingual news and narrative signals",
       "never": "Present narrative as fact",
       "creating_spec": "0089",
-      "status": "planned"
+      "status": "built",
+      "path": "agents/venture_intelligence/narrative_news_analyst",
+      "decision_path_class": "analytic_support"
     },
     {
       "id": "technology_landscape_analyst",
@@ -164,7 +192,9 @@
       "workflow": "Technology-domain landscape and readiness",
       "never": "Predict commercial success",
       "creating_spec": "0089",
-      "status": "planned"
+      "status": "built",
+      "path": "agents/venture_intelligence/technology_landscape_analyst",
+      "decision_path_class": "analytic_support"
     },
     {
       "id": "source_reliability_grader",
@@ -172,7 +202,9 @@
       "workflow": "Source and information grading",
       "never": "Override a human grade",
       "creating_spec": "0090",
-      "status": "planned"
+      "status": "built",
+      "decision_path_class": "analytic_support",
+      "path": "agents/venture_intelligence/source_reliability_grader"
     },
     {
       "id": "confidence_language_reviewer",
@@ -180,7 +212,9 @@
       "workflow": "Calibrated confidence language review",
       "never": "Change a judgement",
       "creating_spec": "0090",
-      "status": "planned"
+      "status": "built",
+      "decision_path_class": "analytic_support",
+      "path": "agents/venture_intelligence/confidence_language_reviewer"
     },
     {
       "id": "competing_hypotheses_analyst",
@@ -188,7 +222,9 @@
       "workflow": "Competing-hypotheses and red-team analysis",
       "never": "Select a conclusion for the analyst",
       "creating_spec": "0090",
-      "status": "planned"
+      "status": "built",
+      "decision_path_class": "analytic_support",
+      "path": "agents/venture_intelligence/competing_hypotheses_analyst"
     },
     {
       "id": "collection_gap_tracker",
@@ -196,7 +232,9 @@
       "workflow": "Evidence-gap and collection-requirement tracking",
       "never": "Initiate collection from non-public sources",
       "creating_spec": "0090",
-      "status": "planned"
+      "status": "built",
+      "decision_path_class": "analytic_support",
+      "path": "agents/venture_intelligence/collection_gap_tracker"
     },
     {
       "id": "ownership_screen",
@@ -204,7 +242,9 @@
       "workflow": "Ownership-chain and foreign-capital indicators",
       "never": "Designate, attribute, or recommend action",
       "creating_spec": "0090",
-      "status": "planned"
+      "status": "built",
+      "decision_path_class": "sovereign_adjacent",
+      "path": "agents/venture_intelligence/ownership_screen"
     },
     {
       "id": "dual_use_indicator",
@@ -212,7 +252,9 @@
       "workflow": "Dual-use and export-control indicators",
       "never": "Rule on export-control classification",
       "creating_spec": "0090",
-      "status": "planned"
+      "status": "built",
+      "decision_path_class": "sovereign_adjacent",
+      "path": "agents/venture_intelligence/dual_use_indicator"
     },
     {
       "id": "fund_performance_analyst",
@@ -220,7 +262,8 @@
       "workflow": "Fund metrics, J-curve, and benchmark comparison",
       "never": "Set or certify a valuation",
       "creating_spec": "0091",
-      "status": "planned"
+      "status": "planned",
+      "decision_path_class": "analytic_support"
     },
     {
       "id": "valuation_marks_reviewer",
@@ -228,7 +271,8 @@
       "workflow": "Review of private-company marks for consistency",
       "never": "Approve a mark",
       "creating_spec": "0091",
-      "status": "planned"
+      "status": "planned",
+      "decision_path_class": "analytic_support"
     },
     {
       "id": "portfolio_reserve_analyst",
@@ -236,7 +280,8 @@
       "workflow": "Reserve and follow-on policy simulation",
       "never": "Decide follow-on investments",
       "creating_spec": "0091",
-      "status": "planned"
+      "status": "planned",
+      "decision_path_class": "analytic_support"
     },
     {
       "id": "intelligence_brief_writer",
@@ -244,7 +289,8 @@
       "workflow": "BLUF-style intelligence brief drafting",
       "never": "Publish without human review",
       "creating_spec": "0092",
-      "status": "planned"
+      "status": "planned",
+      "decision_path_class": "analytic_support"
     },
     {
       "id": "investment_memo_writer",
@@ -252,7 +298,27 @@
       "workflow": "Investment memo drafting from approved evidence",
       "never": "Recommend an investment",
       "creating_spec": "0092",
-      "status": "planned"
+      "status": "planned",
+      "decision_path_class": "analytic_support"
+    },
+    {
+      "id": "greater_china_east_asia_entity_structure_analyst",
+      "group": "regional",
+      "workflow": "Greater China offshore-onshore structure and contractual-control mapping",
+      "never": "Designate, attribute, or conclude control by any government or party",
+      "creating_spec": "0085",
+      "status": "built",
+      "path": "agents/venture_intelligence/greater_china_east_asia/entity_structure_analyst",
+      "decision_path_class": "sovereign_adjacent"
+    },
+    {
+      "id": "caucasus_lead",
+      "group": "regional",
+      "workflow": "Caucasus market-by-market view and routing",
+      "never": "Recommend investments",
+      "creating_spec": "0087",
+      "status": "planned",
+      "decision_path_class": "analytic_support"
     }
   ],
   "roadmap": [
@@ -278,28 +344,30 @@
       ],
       "closes": [
         "greater_china_east_asia_lead",
-        "south_asia_lead"
+        "south_asia_lead",
+        "greater_china_east_asia_entity_structure_analyst"
       ]
     },
     {
       "spec": "0086",
-      "scope": "Regional wave 3: MENA, Europe, Central Asia and Caucasus",
+      "scope": "Regional wave 3: Central Asia",
+      "depends_on": [
+        "0084"
+      ],
+      "closes": [
+        "central_asia_lead"
+      ]
+    },
+    {
+      "spec": "0087",
+      "scope": "Regional wave 4: MENA, Europe, Caucasus, Africa, Latin America, North America, Oceania",
       "depends_on": [
         "0084"
       ],
       "closes": [
         "mena_lead",
         "europe_lead",
-        "central_asia_caucasus_lead"
-      ]
-    },
-    {
-      "spec": "0087",
-      "scope": "Regional wave 4: Africa, Latin America, North America, Oceania",
-      "depends_on": [
-        "0084"
-      ],
-      "closes": [
+        "caucasus_lead",
         "sub_saharan_africa_lead",
         "latin_america_lead",
         "north_america_lead",
@@ -370,6 +438,16 @@
         "intelligence_brief_writer",
         "investment_memo_writer"
       ]
+    },
+    {
+      "spec": "0094",
+      "scope": "Asian-language NLP foundation (identification, segmentation, extraction, evaluation, model comparison)",
+      "depends_on": [
+        "0083",
+        "0071",
+        "0084"
+      ],
+      "closes": []
     }
   ]
 }

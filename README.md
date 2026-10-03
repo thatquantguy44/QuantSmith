@@ -13,9 +13,9 @@ signal and model **reproducible, leakage-safe, and traceable to a spec**.
 [![CI](https://github.com/joshualutkemuller/QuantSmith/actions/workflows/ci.yml/badge.svg)](https://github.com/joshualutkemuller/QuantSmith/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](pyproject.toml)
 [![Approach: Spec-Driven](https://img.shields.io/badge/Approach-Spec--Driven-ff6f00)](instructions/spec_driven_development.md)
-[![Agents: 183](https://img.shields.io/badge/Agents-183-6f42c1)](agents/README.md)
+[![Agents: 200](https://img.shields.io/badge/Agents-200-6f42c1)](agents/README.md)
 [![Quality Gates: 35](https://img.shields.io/badge/Quality%20Gates-35-2ea44f)](hooks/README.md)
-[![Specs: 71](https://img.shields.io/badge/Specs-71-0969da)](specs/README.md)
+[![Specs: 77](https://img.shields.io/badge/Specs-77-0969da)](specs/README.md)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](.github/GIT_GUIDELINES.md)
 
 <br/>
@@ -65,7 +65,7 @@ signal and model **reproducible, leakage-safe, and traceable to a spec**.
 | 🧠 Plan research from a hypothesis | Spec-driven planning agents + traceable requirements |
 | 🔎 Catch leakage & time-alignment bugs | Point-in-time standards + `leakage`/`backtest` gates |
 | 📝 Document features, models, backtests | Templates, cards, and reproducible run artifacts |
-| 🤖 Reuse research workflows | 183 narrow, inspectable agent roles across the stack |
+| 🤖 Reuse research workflows | 200 narrow, inspectable agent roles across the stack |
 | 🚦 Stop mistakes before commit/push | 35 quality gates, advisory by default, CI-enforceable |
 | 🗣️ Share a common vocabulary | An [agentic dictionary](agentic_dictionary.md) for the team |
 
@@ -181,6 +181,8 @@ quantsmith/
 ├── 🗂️ specs/                     # source-of-truth specifications
 ├── 🧾 templates/                 # repeatable artifacts (memos, cards, reports)
 ├── 🗃️ sources/                   # data source catalog (APIs, DBs, feeds)
+├── 🧬 knowledge/                 # versioned domain packs (credit risk, short-term markets, analytics, venture intelligence)
+├── ⚙️ config/                    # example configuration and local-overlay templates
 ├── 🧪 examples/
 └── 📚 docs/
 ```
@@ -194,7 +196,7 @@ quantsmith/
 - `.githooks/` contains seed Git hooks.
 - `.github/` contains seed GitHub workflow and contribution templates.
 - `agents/`, `adapters/`, `hooks/`, `instructions/`, `prompts/`, `templates/`, and `examples/` are the intended public SDK surfaces.
-- `src/quantsmith/` contains executable runtime packages: `pipelines/` for reference runtimes, `orchestration/` for prompt/context/harness evidence, `knowledge_console/` for read-only memory/research inspection, `adapters/mcp_servers/` for resource authorities, and `quant/agentic_quant/` for CLI-driven quant examples.
+- `src/quantsmith/` contains executable runtime packages: `pipelines/` for reference runtimes, `asian_nlp/` for Asian-language identification, segmentation, and extraction, `orchestration/` for prompt/context/harness evidence, `knowledge_console/` for read-only memory/research inspection, `adapters/mcp_servers/` for resource authorities, and `quant/agentic_quant/` for CLI-driven quant examples.
 - The old app-specific assets have been removed from the working tree; the remaining seed files now describe the SDK workflow.
 
 </details>
@@ -308,6 +310,12 @@ each. Uses the catalog as its routing table.
 
 **Test engineering** (`agents/test_engineering/`) — `test_engineering_orchestrator/`, `python_test_engineer/`, `cpp_test_fuzz_engineer/`, `javascript_test_engineer/`, `typescript_test_engineer/`: language-specific test authoring — pytest, GoogleTest/Catch2 plus libFuzzer/AFL++ fuzzing (authorized targets only), Jest/Vitest/Mocha, and TypeScript type-level tests, with an orchestrator that routes by detected stack. Writes and reviews the tests and fuzz harnesses only; `testing_validation` decides whether they close an acceptance criterion and `quality-guard-agent` decides whether a stage may release (spec `0062`).
 
+**Credit risk & enterprise risk** (`agents/credit_risk/`, `agents/enterprise_risk/`) — credit risk has its own domain foundation (spec `0072`, pack in `knowledge/credit_risk/`) with agents for credit-document analysis, counterparty limits, and fair-lending review; enterprise risk adds six narrowly scoped agents (operational, model risk, counterparty/XVA, AML, liquidity/IRRBB, climate/ESG) that measure and surface but never decide (spec `0082`). `agents/risk/` stays the investment and portfolio risk reviewer.
+
+**Optimization, machine learning & deep learning** (`agents/optimization/`, `agents/machine_learning/`, `agents/deep_learning/`) — orchestrator-led families that frame constrained decisions, supervised and online learning, and neural architectures, training systems, and serving; catalogued in [`agents/README.md`](agents/README.md).
+
+**Venture & non-traditional intelligence** (`agents/venture_intelligence/`) — 21 contract-only agents for technology scouting, portfolio consulting, and foreign-influence screening support, under the shared [`instructions/venture_intelligence.md`](instructions/venture_intelligence.md) standard (inform, never decide) and the `knowledge/venture_intelligence/` pack: a multilingual document agent (Mandarin, Japanese, Korean, Thai, Vietnamese, Bahasa, Russian-script and South Asian business text), regional leads for Southeast Asia, Greater China & East Asia, South Asia, and Central Asia (with Southeast Asia and Greater China structure analysts), an `entity_resolution` agent, signal analysts (patents, hiring, narrative/news, technology landscape), sourcing and diligence agents, and tradecraft and screening-support agents (source grading, calibrated confidence language, competing hypotheses, collection gaps, ownership screening, dual-use indicators). Specs `0083`–`0090`, `0094` (the `asian_nlp` package makes the multilingual agent testable).
+
 </details>
 
 ---
@@ -395,6 +403,8 @@ Reusable standards and behavioral rules that agents follow.
 - [`asset_class_mechanics.md`](instructions/asset_class_mechanics.md)
 - [`securities_financing.md`](instructions/securities_financing.md)
 - [`short_term_markets.md`](instructions/short_term_markets.md)
+- [`credit_risk.md`](instructions/credit_risk.md)
+- [`venture_intelligence.md`](instructions/venture_intelligence.md) — venture and non-traditional intelligence standard
 - [`macro_economic_analysis.md`](instructions/macro_economic_analysis.md)
 - [`formulaic_alphas.md`](instructions/formulaic_alphas.md)
 - [`optimization.md`](instructions/optimization.md)
@@ -508,6 +518,14 @@ the [spec index](specs/README.md).
 | [`0081`](specs/0081-analytics-domain-packs/) | Analytics domain packs — 40 pluggable financial-services packs across seven families (business lines, markets, risk, finance, control, operations, cross-cutting), each declaring metric vocabulary, unit, and additivity, suppress-only insight rules, caveats, chart conventions, reviewer agents, and self-checking golden cases; selected by `sources/*.yml` domain tags for `0080` natural-language analytics; all ship `draft`, write-back requires named review | `analytics_packs.py` (validator + selection; packs in `knowledge/analytics_packs/`) |
 | [`0093`](specs/0093-visualization-packs/) | Domain visualization packs — seven domains and fourteen recipes, governed evidence, executive findings, analyst detail, and portable HTML/JSON/Markdown; implementation in progress | `visualization_packs/` ([guide](knowledge/visualization_packs/README.md)) |
 | [`0082`](specs/0082-enterprise-risk-agents/) | Enterprise risk agents — six agents (operational, model risk management, counterparty credit/XVA, AML/financial crime, liquidity/treasury/IRRBB, climate/ESG risk) fixing a real gap `0081` found: 27 of 40 packs fell back to the generic `agents/risk`, whose charter is investment/portfolio risk, not these six disciplines; re-points the 7 mismatched packs, leaves `agents/risk` and the other 20 unchanged; contract-only, no runtime | `agents/enterprise_risk/`, `instructions/enterprise_risk.md` |
+| [`0083`](specs/0083-venture-intelligence-foundation/) | Venture & non-traditional intelligence foundation — taxonomy, venture data-time and bias contracts, source-grade and confidence conventions, channel and model catalogs, multilingual normalization rules, decision-path classes, coverage matrix and roadmap, per-record review sign-off, and a stdlib validator with golden cases | `venture_pack.py` (validator + normalization helpers; pack in `knowledge/venture_intelligence/`) |
+| [`0084`](specs/0084-venture-regional-agents-southeast-asia/) | Multilingual start-up document NLP agent and Southeast Asia regional agents | `agents/venture_intelligence/` (contract-only) |
+| [`0085`](specs/0085-venture-regional-agents-east-and-south-asia/) | Greater China & East Asia lead and structure analyst, South Asia lead, Traditional Chinese/Korean/lakh-crore/Japanese-era normalization | `agents/venture_intelligence/` (contract-only) |
+| [`0086`](specs/0086-venture-regional-agents-central-asia/) | Central Asia lead, Cyrillic script-variant entity resolution, Russian-locale numbers | `agents/venture_intelligence/` (contract-only) |
+| [`0088`](specs/0088-venture-sources-pit-ingestion/) | Venture sources and point-in-time ingestion — eleven public source entries with `known_at` policies, as-of views, outcome-independent cohorts, deterministic entity resolution that never merges on a name alone | `venture_ingestion.py` |
+| [`0089`](specs/0089-venture-signal-and-sourcing-agents/) | Venture signal analysts (patent/IP, hiring, narrative/news, technology landscape) and sourcing/diligence agents | `agents/venture_intelligence/` (contract-only) |
+| [`0090`](specs/0090-venture-tradecraft-and-screening-agents/) | Venture tradecraft and screening support — grades, origin-aware corroboration, competing-hypotheses matrix, effective ownership, conclusion-language lint | `venture_tradecraft.py` |
+| [`0094`](specs/0094-asian-language-nlp-foundation/) | Asian-language NLP foundation — dependency-free language/script identification, a segmentation baseline with a declared segmenter slot, rule-based amount/currency/date/era-year/fiscal-period extraction with verbatim spans and offsets (Mandarin, Japanese, Korean, Thai, Vietnamese, Indonesian/Malay, Filipino, Russian, Kazakh, Uzbek, English), per-language evaluation that refuses pooled scores, and a baseline-vs-model comparison that never overwrites | `asian_nlp/` package (`src/quantsmith/asian_nlp/`) |
 | [`0055`](specs/0055-workflow-scheduling-operations/) | Workflow scheduling operations — registry validation, cron dry-run evidence, idempotent dispatch, JSONL ledger, manual reminders, daily reports, alert handoff, memory candidates | `workflow_scheduling.py` |
 | [`0060`](specs/0060-scheduler-monitoring/) | Scheduler monitoring — executable report and alert-preview CLI plus caller-injected alert delivery over the workflow-scheduling runtime | `workflow_scheduling.py` *(extended)*, `workflow_scheduling_cli.py` |
 | [`0047`](specs/0047-downstream-contract/) | Downstream consumer contract — `DashboardSpec.schema_version` + compatibility check, release-notify workflow, and a copyable `quantsmith-version` gate for a separate consuming repository | `dashboard_spec.py` *(extended)* |
@@ -564,7 +582,7 @@ Learning, Analytics Pipeline, workflow-memory, and knowledge workflows as ordere
 agent + gate chains, all on the Spec-Driven Development backbone. The newest
 cross-cutting chain is `0070` orchestration evidence feeding Approved, implemented `0071` text
 intelligence, so LLM/plugin/local-model outputs can be governed like any other
-quant artifact.
+quant artifact. The venture and non-traditional intelligence workflows (deal sourcing to diligence memo, signal to thesis, technology landscape scan, portfolio and fund review, counter-diligence screening) are in `docs/workflows.md` and `knowledge/venture_intelligence/workflows.json`.
 
 ---
 
@@ -588,6 +606,9 @@ From inside `quantsmith`, run:
 | Doc | What's inside |
 | --- | --- |
 | [`specs/README.md`](specs/README.md) | The spec index — every spec with its runtime and tests |
+| [`knowledge/venture_intelligence/README.md`](knowledge/venture_intelligence/README.md) | The venture & non-traditional intelligence pack — files, validation, review sign-off, and the adopter-local overlay |
+| [`docs/gate_runbook.md`](docs/gate_runbook.md) | How to run, read, and graduate the quality gates |
+| [`docs/ownership.md`](docs/ownership.md) | Who owns and supports each surface |
 | [`src/quantsmith/pipelines/README.md`](src/quantsmith/pipelines/README.md) | The runtime catalog — every reference pipeline mapped to its spec and tests |
 | [`adapters/README.md`](adapters/README.md) | The adapter catalog — provider boundaries for alerts, schedulers, artifacts, data access, dashboards, MCP resources, LLM runtimes, and model plugins |
 | [`sources/README.md`](sources/README.md) | The data source catalog — every API/DB/feed with quality, point-in-time, and credential-pointer metadata |

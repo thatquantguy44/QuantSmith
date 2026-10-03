@@ -15,11 +15,11 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
-from typing import Dict, List, Mapping, Optional, Protocol, Sequence, Tuple, runtime_checkable
+from typing import Dict, List, Mapping, Optional, Protocol, Tuple, runtime_checkable
 
 from quantsmith.pipelines.metrics_semantic_layer import SemanticLayer
 
-from .plan import Clarification, Comparison, Filter, QueryPlan, TimeWindow
+from .plan import Clarification, Comparison, QueryPlan, TimeWindow
 
 _WORD_RE = re.compile(r"[a-z0-9]+")
 
