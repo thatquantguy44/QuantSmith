@@ -21,6 +21,9 @@ patterns locally rather than expecting them to update in place.
 ## [Unreleased]
 
 ### Added
+- `uv.lock` pins the full dependency set (all extras, Python 3.10+); CI now runs
+  `uv lock --check` and installs with `uv sync --frozen --all-extras`. Refresh steps
+  are in `docs/gate_runbook.md`.
 - Venture & non-traditional intelligence (specs `0083`–`0090`, `0094`): the
   `knowledge/venture_intelligence/` pack (taxonomy, conventions, channels, models,
   workflows, coverage, gaps, glossary, golden cases, per-record review sign-off),

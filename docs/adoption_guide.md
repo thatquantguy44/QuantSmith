@@ -37,7 +37,7 @@ optional, so you can start with one of either layer.
 
 ```sh
 # From a checkout (editable), with the extras you need:
-pip install -e ".[dev,data,quant]"
+pip install -e ".[dev,data,quant]"        # or: uv sync --frozen --all-extras (pinned by uv.lock)
 
 # Or from Git (pin a tag/commit for reproducibility):
 pip install "quantsmith @ git+https://github.com/joshualutkemuller/quantsmith@<tag>"
