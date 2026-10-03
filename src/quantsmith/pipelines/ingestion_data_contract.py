@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import datetime
 from collections import Counter
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Callable, Dict, List, Optional, Sequence
 
 from quantsmith.pipelines.workflow_memory import CandidateSpec

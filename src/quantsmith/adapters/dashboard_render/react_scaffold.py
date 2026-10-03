@@ -11,7 +11,7 @@ from __future__ import annotations
 import json
 import os
 import re
-from typing import Dict, Optional
+from typing import Dict
 
 from ...pipelines.react_profile import ReactDashboardPayload
 from .result import RenderResult, contains_secret, manifest

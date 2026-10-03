@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
-from typing import Callable, Dict, List, Optional, Protocol, Sequence, runtime_checkable
+from typing import Dict, List, Optional, Protocol, Sequence, runtime_checkable
 
 from quantsmith.pipelines import workflow_memory as wm
 

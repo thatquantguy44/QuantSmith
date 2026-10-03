@@ -11,8 +11,8 @@ Standard library only.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Dict, Optional, Sequence, Tuple
+from dataclasses import dataclass
+from typing import Dict, Optional, Tuple
 
 from quantsmith.pipelines.dashboard_spec import CHART_TYPES, DashboardSpecError, Panel
 from quantsmith.pipelines.metrics_semantic_layer import SemanticLayer
