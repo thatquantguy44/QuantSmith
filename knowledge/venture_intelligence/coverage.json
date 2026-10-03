@@ -324,6 +324,16 @@
       "creating_spec": "0087",
       "status": "planned",
       "decision_path_class": "analytic_support"
+    },
+    {
+      "id": "venture_orchestrator",
+      "group": "orchestration",
+      "workflow": "Request routing, refusal, and plan assembly across the venture agents",
+      "never": "Decide, recommend, or release anything, or override a refusal",
+      "creating_spec": "0096",
+      "status": "built",
+      "path": "agents/venture_intelligence/venture_orchestrator",
+      "decision_path_class": "analytic_support"
     }
   ],
   "roadmap": [
@@ -463,6 +473,19 @@
         "0026"
       ],
       "closes": []
+    },
+    {
+      "spec": "0096",
+      "scope": "Request routing and the venture orchestrator agent",
+      "depends_on": [
+        "0083",
+        "0089",
+        "0090",
+        "0092"
+      ],
+      "closes": [
+        "venture_orchestrator"
+      ]
     }
   ]
 }

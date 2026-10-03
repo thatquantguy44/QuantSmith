@@ -1,0 +1,641 @@
+{
+  "schema_version": "0083.1",
+  "status": "draft_structural_contract",
+  "class_rules": {
+    "strictness_order": [
+      "analytic_support",
+      "person_adjacent",
+      "sovereign_adjacent"
+    ],
+    "required_clearance": {
+      "analytic_support": "public",
+      "person_adjacent": "restricted",
+      "sovereign_adjacent": "restricted"
+    },
+    "human_review": {
+      "person_adjacent": "named human review before any output informs a decision",
+      "sovereign_adjacent": "named human review and counsel before any output informs a decision"
+    }
+  },
+  "placeholders": {
+    "{regional_lead}": "the lead of each region named in the request",
+    "{regional_structure_analyst}": "the structure analyst of each built region named in the request, where one exists"
+  },
+  "language_step": {
+    "agent": "multilingual_document_nlp",
+    "rule": "inserted first when the request text contains non-English script"
+  },
+  "task_kinds": [
+    {
+      "id": "task.document_extraction",
+      "keywords": [
+        "extract",
+        "term sheet",
+        "prospectus",
+        "financial statement",
+        "shareholder agreement",
+        "pitch deck",
+        "translate",
+        "filing text"
+      ],
+      "chain": [
+        "multilingual_document_nlp",
+        "entity_resolution_agent"
+      ],
+      "review_gates": [
+        "bilingual human reviewer for low-resource or high-stakes extractions"
+      ],
+      "decision_owner": "the requesting analyst",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "task.entity_resolution",
+      "keywords": [
+        "same company",
+        "match records",
+        "duplicate",
+        "entity resolution",
+        "registry id",
+        "merge records"
+      ],
+      "chain": [
+        "entity_resolution_agent"
+      ],
+      "review_gates": [
+        "registry identifier before any merge"
+      ],
+      "decision_owner": "the data owner",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "task.region_overview",
+      "keywords": [
+        "market overview",
+        "funding trend",
+        "ecosystem",
+        "compare markets",
+        "market coverage",
+        "funding in"
+      ],
+      "chain": [
+        "{regional_lead}",
+        "southeast_asia_funding_ecosystem_analyst"
+      ],
+      "review_gates": [
+        "per-market coverage stated"
+      ],
+      "decision_owner": "the requesting analyst",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "task.company_longlist",
+      "keywords": [
+        "longlist",
+        "candidate companies",
+        "sourcing",
+        "discover companies",
+        "screen companies"
+      ],
+      "chain": [
+        "{regional_lead}",
+        "deal_sourcing",
+        "entity_resolution_agent",
+        "collection_gap_tracker"
+      ],
+      "review_gates": [
+        "screening criteria stated by the caller"
+      ],
+      "decision_owner": "the investment committee",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "task.landscape_scan",
+      "keywords": [
+        "technology landscape",
+        "landscape",
+        "emerging technology",
+        "patent landscape",
+        "technology scouting"
+      ],
+      "chain": [
+        "{regional_lead}",
+        "patent_ip_analyst",
+        "narrative_news_analyst",
+        "technology_landscape_analyst",
+        "source_reliability_grader",
+        "confidence_language_reviewer"
+      ],
+      "review_gates": [
+        "corroboration status on every finding",
+        "coverage by region, language, and channel"
+      ],
+      "decision_owner": "the requesting analyst",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "task.signal_thesis",
+      "keywords": [
+        "thesis",
+        "signal",
+        "corroborat",
+        "competing hypotheses",
+        "hypothesis"
+      ],
+      "chain": [
+        "patent_ip_analyst",
+        "hiring_signal_analyst",
+        "narrative_news_analyst",
+        "technology_landscape_analyst",
+        "source_reliability_grader",
+        "competing_hypotheses_analyst",
+        "confidence_language_reviewer",
+        "intelligence_brief_writer"
+      ],
+      "review_gates": [
+        "organization-level analysis only",
+        "a deception or artifact hypothesis is included",
+        "named human reviewer releases the brief"
+      ],
+      "decision_owner": "the accountable analyst and reviewer",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "task.diligence_memo",
+      "keywords": [
+        "diligence",
+        "due diligence",
+        "investment memo",
+        "committee memo",
+        "committee"
+      ],
+      "chain": [
+        "multilingual_document_nlp",
+        "entity_resolution_agent",
+        "{regional_structure_analyst}",
+        "company_diligence",
+        "collection_gap_tracker",
+        "confidence_language_reviewer",
+        "investment_memo_writer"
+      ],
+      "review_gates": [
+        "claims are claims until independently evidenced",
+        "named human reviewer releases the memo"
+      ],
+      "decision_owner": "the investment committee",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "task.counter_diligence",
+      "keywords": [
+        "foreign influence",
+        "ownership chain",
+        "beneficial owner",
+        "foreign capital",
+        "sanction",
+        "export control",
+        "dual-use",
+        "dual use",
+        "counter-diligence",
+        "counter diligence",
+        "screening"
+      ],
+      "chain": [
+        "multilingual_document_nlp",
+        "entity_resolution_agent",
+        "{regional_structure_analyst}",
+        "ownership_screen",
+        "dual_use_indicator",
+        "collection_gap_tracker"
+      ],
+      "review_gates": [
+        "indicators with confidence, never conclusions",
+        "list matches carry false-positive notes",
+        "questions for counsel",
+        "named human review before any output informs a decision"
+      ],
+      "decision_owner": "counsel and the designated reviewing officer",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "task.fund_review",
+      "keywords": [
+        "fund performance",
+        "tvpi",
+        "dpi",
+        "irr",
+        "j-curve",
+        "pme",
+        "vintage",
+        "lp report"
+      ],
+      "chain": [
+        "fund_performance_analyst",
+        "valuation_marks_reviewer"
+      ],
+      "review_gates": [
+        "every metric states its basis (gross or net, which NAV)"
+      ],
+      "decision_owner": "the valuation committee and the investment committee",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "task.mark_review",
+      "keywords": [
+        "valuation mark",
+        "mark review",
+        "stale mark",
+        "last round price",
+        "marks"
+      ],
+      "chain": [
+        "valuation_marks_reviewer"
+      ],
+      "review_gates": [
+        "thresholds come from the valuation policy"
+      ],
+      "decision_owner": "the valuation committee",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "task.reserve_scenarios",
+      "keywords": [
+        "reserve",
+        "follow-on",
+        "scenario",
+        "simulation",
+        "power-law",
+        "hit rate"
+      ],
+      "chain": [
+        "portfolio_reserve_analyst",
+        "fund_performance_analyst"
+      ],
+      "review_gates": [
+        "assumptions returned with every result",
+        "gross, illustrative, not a forecast"
+      ],
+      "decision_owner": "the investment committee",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "task.brief_draft",
+      "keywords": [
+        "intelligence brief",
+        "bluf",
+        "brief"
+      ],
+      "chain": [
+        "source_reliability_grader",
+        "intelligence_brief_writer",
+        "confidence_language_reviewer"
+      ],
+      "review_gates": [
+        "named human reviewer releases the brief"
+      ],
+      "decision_owner": "the accountable analyst and reviewer",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "task.source_grading",
+      "keywords": [
+        "grade source",
+        "source reliability",
+        "credibility",
+        "corroboration status"
+      ],
+      "chain": [
+        "source_reliability_grader"
+      ],
+      "review_gates": [
+        "the analyst's grade replaces the proposed grade"
+      ],
+      "decision_owner": "the accountable analyst",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "task.collection_gaps",
+      "keywords": [
+        "information requirement",
+        "missing evidence",
+        "evidence gaps",
+        "collection gaps"
+      ],
+      "chain": [
+        "collection_gap_tracker"
+      ],
+      "review_gates": [
+        "lawful channels only; the accountable human approves any collection"
+      ],
+      "decision_owner": "the accountable human",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    }
+  ],
+  "forbidden_intents": [
+    {
+      "id": "intent.recommend_investment",
+      "patterns": [
+        "\\bshould (we|i) (invest|buy|back|fund|pass)\\b",
+        "\\brecommend (an? |the )?(investment|deal|company)\\b",
+        "\\bis (it|this) a (good|bad) (investment|deal|buy)\\b",
+        "\\b(approve|reject|greenlight) (the |this )?(deal|investment)\\b",
+        "\\bgo/no-go\\b",
+        "\\bbuy rating\\b",
+        "\\b(we|i) should (invest|buy|back|fund|pass)\\b",
+        "\\bwhether (to|we should|i should) (invest|buy|back|fund|pass)\\b",
+        "\\bworth investing\\b"
+      ],
+      "refusal": "This suite informs investment decisions and never makes or recommends them.",
+      "decision_owner": "the investment committee",
+      "alternatives": [
+        "task.diligence_memo",
+        "task.fund_review"
+      ],
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "intent.designate_or_attribute",
+      "patterns": [
+        "\\b(designate|attribute|accuse)\\b",
+        "\\bfront company\\b",
+        "\\bsanctions? evasion\\b",
+        "\\bprove\\b.*\\b(controlled|owned) by\\b"
+      ],
+      "refusal": "The suite reports ownership and control as dated indicators with confidence; it never designates, attributes, or accuses.",
+      "decision_owner": "counsel and the designated reviewing officer",
+      "alternatives": [
+        "task.counter_diligence"
+      ],
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "intent.profile_individual",
+      "patterns": [
+        "\\bprofile\\b.*\\b(founder|employee|person|individual|candidate|executive)\\b",
+        "\\b(dox|surveil)\\b",
+        "\\bbackground check\\b",
+        "\\bpersonal (data|details|history)\\b",
+        "\\btrack (a |an |the )?(person|employee|individual|founder)\\b"
+      ],
+      "refusal": "Individuals appear only as public registry officers or holders of record; the suite does not profile people.",
+      "decision_owner": "not permitted by this suite",
+      "alternatives": [
+        "task.counter_diligence"
+      ],
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "intent.non_public_collection",
+      "patterns": [
+        "\\bhack\\b",
+        "\\bbypass\\b",
+        "\\bcircumvent\\b",
+        "\\bpaywall\\b",
+        "\\bbehind (a )?login\\b",
+        "\\bleaked\\b",
+        "\\bdark ?web\\b",
+        "\\bdeanonymi[sz]e\\b"
+      ],
+      "refusal": "Collection is limited to public, licensed, or caller-supplied sources.",
+      "decision_owner": "the accountable human with legal authority",
+      "alternatives": [
+        "task.collection_gaps"
+      ],
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "intent.release_without_review",
+      "patterns": [
+        "\\b(publish|release|send out|distribute)\\b.*\\bwithout (a )?(review|reviewer)\\b",
+        "\\bskip (the )?review\\b"
+      ],
+      "refusal": "A product is released only by a named human reviewer.",
+      "decision_owner": "the named human reviewer",
+      "alternatives": [
+        "task.brief_draft",
+        "task.diligence_memo"
+      ],
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "intent.set_valuation",
+      "patterns": [
+        "\\b(set|approve|change|override)\\b.*\\b(mark|valuation)\\b",
+        "\\bwhat should the mark be\\b"
+      ],
+      "refusal": "The suite flags inconsistencies in marks and never sets or approves one.",
+      "decision_owner": "the valuation committee",
+      "alternatives": [
+        "task.mark_review"
+      ],
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "intent.classify_export",
+      "patterns": [
+        "\\b(eccn|usml)\\b",
+        "\\bdoes (this|it) require a licen[sc]e\\b",
+        "\\bexport[- ]control(led)? (classification|status)\\b"
+      ],
+      "refusal": "Dual-use findings are resemblances turned into questions for counsel, never a classification.",
+      "decision_owner": "counsel and the responsible compliance authority",
+      "alternatives": [
+        "task.counter_diligence"
+      ],
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "intent.forecast_returns",
+      "patterns": [
+        "\\b(forecast|predict)\\b.*\\b(fund|irr|tvpi|returns?)\\b"
+      ],
+      "refusal": "Simulations are scenarios under stated assumptions, not forecasts.",
+      "decision_owner": "the investment committee",
+      "alternatives": [
+        "task.reserve_scenarios"
+      ],
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    }
+  ],
+  "regions": [
+    {
+      "id": "region.southeast_asia",
+      "name": "Southeast Asia",
+      "keywords": [
+        "southeast asia",
+        "singapore",
+        "indonesia",
+        "vietnam",
+        "thailand",
+        "malaysia",
+        "philippines",
+        "cambodia",
+        "laos",
+        "myanmar",
+        "brunei",
+        "jakarta",
+        "ho chi minh",
+        "hanoi",
+        "bangkok",
+        "kuala lumpur",
+        "manila"
+      ],
+      "lead": "southeast_asia_regional_lead",
+      "structure_analyst": "southeast_asia_entity_structure_analyst",
+      "status": "built",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "region.greater_china_east_asia",
+      "name": "Greater China and East Asia",
+      "keywords": [
+        "greater china",
+        "china",
+        "mainland",
+        "hong kong",
+        "taiwan",
+        "japan",
+        "korea",
+        "east asia",
+        "macau",
+        "mongolia",
+        "shenzhen",
+        "shanghai",
+        "beijing",
+        "guangzhou",
+        "hangzhou",
+        "tokyo",
+        "seoul"
+      ],
+      "lead": "greater_china_east_asia_lead",
+      "structure_analyst": "greater_china_east_asia_entity_structure_analyst",
+      "status": "built",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "region.south_asia",
+      "name": "South Asia",
+      "keywords": [
+        "south asia",
+        "india",
+        "bangladesh",
+        "pakistan",
+        "sri lanka",
+        "nepal",
+        "bhutan",
+        "maldives",
+        "bangalore",
+        "bengaluru",
+        "mumbai",
+        "delhi",
+        "dhaka",
+        "karachi",
+        "colombo"
+      ],
+      "lead": "south_asia_lead",
+      "structure_analyst": null,
+      "status": "built",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "region.central_asia",
+      "name": "Central Asia",
+      "keywords": [
+        "central asia",
+        "kazakhstan",
+        "uzbekistan",
+        "kyrgyzstan",
+        "tajikistan",
+        "turkmenistan",
+        "almaty",
+        "astana",
+        "tashkent",
+        "bishkek",
+        "dushanbe"
+      ],
+      "lead": "central_asia_lead",
+      "structure_analyst": null,
+      "status": "built",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    },
+    {
+      "id": "region.deferred",
+      "name": "Deferred regions",
+      "keywords": [
+        "middle east",
+        "gulf",
+        "israel",
+        "turkey",
+        "europe",
+        "caucasus",
+        "georgia",
+        "armenia",
+        "azerbaijan",
+        "africa",
+        "latin america",
+        "north america",
+        "oceania",
+        "australia",
+        "brazil"
+      ],
+      "lead": null,
+      "structure_analyst": null,
+      "status": "reserved (spec 0087)",
+      "citation": "unverified",
+      "review_status": "draft",
+      "review": null
+    }
+  ],
+  "limits": "Keyword matching, not understanding: an ambiguous request returns needs_clarification, never a guess. A clean routing plan is not authorization to act."
+}

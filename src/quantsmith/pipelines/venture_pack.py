@@ -22,7 +22,7 @@ from quantsmith.venture_models.validation import deployability
 
 PACK_DIR = Path("knowledge/venture_intelligence")
 FILES = ("taxonomy", "conventions", "channels", "models", "workflows",
-         "coverage", "gaps", "glossary", "golden_cases")
+         "coverage", "gaps", "glossary", "golden_cases", "routing")
 SCHEMA_VERSION = "0083.1"
 
 DECISION_CLASSES = {"analytic_support", "person_adjacent", "sovereign_adjacent"}
@@ -206,6 +206,9 @@ def reviewable_records(pack: Mapping[str, Any]) -> List[Mapping[str, Any]]:
     out.extend(conv["data_time"]["contracts"])
     out.extend(conv.get("mark_review_flags", []))
     out.extend(conv[k] for k in ("product_rules", "retrieval_contract") if k in conv)
+    routing = pack.get("routing", {})
+    for key in ("task_kinds", "forbidden_intents", "regions"):
+        out.extend(routing.get(key, []))
     norm = conv["normalization"]
     for key in ("numeral_units", "calendar_offsets", "number_locales", "currency_markers"):
         out.extend(norm.get(key, []))
@@ -442,6 +445,40 @@ def validate_pack(pack: Mapping[str, Any], root: Path = Path(".")) -> List[str]:
         ok, reasons = deployability(mdl)
         if mdl["usable_for_decisions"] is True and not ok:
             errors.append(f"models: {mdl['id']} is marked usable_for_decisions but is not deployable: {'; '.join(reasons)}")
+
+    # routing rules (spec 0096): every reference resolves, every refusal names the human who decides
+    rt = pack["routing"]
+    built_ids = {a["id"] for a in agents if a["status"] == "built"}
+    task_ids = {t["id"] for t in rt["task_kinds"]}
+    placeholders = set(rt["placeholders"])
+    for t in rt["task_kinds"]:
+        if not t["keywords"] or not t["chain"]:
+            errors.append(f"routing: {t['id']} needs keywords and a chain")
+        for entry in t["chain"]:
+            if entry not in built_ids and entry not in placeholders:
+                errors.append(f"routing: {t['id']} names {entry}, which is not a built agent")
+        if not _filled(t.get("decision_owner")) or not t.get("review_gates"):
+            errors.append(f"routing: {t['id']} needs a decision_owner and review_gates")
+    for f in rt["forbidden_intents"]:
+        for pat in f["patterns"]:
+            try:
+                re.compile(pat)
+            except re.error:
+                errors.append(f"routing: {f['id']} has an invalid pattern {pat!r}")
+        if not _filled(f.get("decision_owner")) or not _filled(f.get("refusal")):
+            errors.append(f"routing: {f['id']} needs a refusal and a decision_owner")
+        for alt in f["alternatives"]:
+            if alt not in task_ids:
+                errors.append(f"routing: {f['id']} alternative {alt} is not a task kind")
+    for r in rt["regions"]:
+        for key in ("lead", "structure_analyst"):
+            if r.get(key) and r[key] not in built_ids:
+                errors.append(f"routing: {r['id']} {key} {r[key]} is not a built agent")
+        if r["status"] == "built" and not r.get("lead"):
+            errors.append(f"routing: {r['id']} is built but has no lead")
+    order, req = rt["class_rules"]["strictness_order"], rt["class_rules"]["required_clearance"]
+    if set(order) != DECISION_CLASSES or set(req) != DECISION_CLASSES:
+        errors.append("routing: class rules must cover exactly the three decision-path classes")
 
     # gaps (REQ-012)
     for g in pack["gaps"]["gaps"]:

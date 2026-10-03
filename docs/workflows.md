@@ -314,6 +314,7 @@ Everything informs a human; nothing here invests, designates, or attributes.
 | Counter-diligence screening | regional structure analysts → `ownership_screen` → `dual_use_indicator` → named human review and counsel | sovereign_adjacent |
 
 - Standard: `instructions/venture_intelligence.md`; pack: `knowledge/venture_intelligence/`; private companion store: `knowledge_local/venture_intelligence/` (gitignored, `templates/knowledge_local/`).
+- Entry point: `venture_orchestrator` (`venture_routing.plan_request`) routes a request to the chains above, refuses what the suite must not do, and applies the strictest class and clearance.
 - Products: `intelligence_brief_writer` and `investment_memo_writer` draft; `validate_product` checks; a named human reviewer releases.
 - Validate: `PYTHONPATH=src python3 -m quantsmith.pipelines.venture_pack`.
 

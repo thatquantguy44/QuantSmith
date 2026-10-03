@@ -21,6 +21,11 @@ patterns locally rather than expecting them to update in place.
 ## [Unreleased]
 
 ### Added
+- Venture request routing (spec `0096`): `venture_routing.py` and reviewable rules in `routing.json` turn a
+  request into an ordered agent chain with review gates, decision owner, the strictest decision-path class, and
+  the clearance it needs; forbidden requests (recommend an investment, designate or attribute, profile a person,
+  non-public collection, release without review, set a mark, classify export control, forecast returns) are refused
+  with the human who owns the decision; ambiguous requests ask. New `venture_orchestrator` agent.
 - Venture predictive-model reference baselines (spec `0095`): `quantsmith.venture_models` with a
   point-in-time validation harness (`as_of_view`, `out_of_time_split`, `assert_features_known`), a
   computed `deployability` gate, competing-risks survival (Kaplan-Meier, Aalen-Johansen, discrete-time
