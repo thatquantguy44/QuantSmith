@@ -310,7 +310,7 @@ Everything informs a human; nothing here invests, designates, or attributes.
 | Deal sourcing to diligence memo | `deal_sourcing` → `entity_resolution` → `multilingual_document_nlp` → `company_diligence` (with `collection_gap_tracker`, `confidence_language_reviewer`) | analytic_support |
 | Signal to thesis | `patent_ip_analyst` / `hiring_signal_analyst` / `narrative_news_analyst` → `technology_landscape_analyst` → `source_reliability_grader` → `competing_hypotheses_analyst` → `confidence_language_reviewer` | person_adjacent |
 | Technology landscape scan | regional leads (`southeast_asia`, `greater_china_east_asia`, `south_asia`, `central_asia`) → `technology_landscape_analyst` | analytic_support |
-| Portfolio and fund review | `southeast_asia/funding_ecosystem_analyst` (fund analytics planned, `0091`) | analytic_support |
+| Portfolio and fund review | `fund_performance_analyst` → `valuation_marks_reviewer` → `portfolio_reserve_analyst`, with `southeast_asia/funding_ecosystem_analyst` for round comparability | analytic_support |
 | Counter-diligence screening | regional structure analysts → `ownership_screen` → `dual_use_indicator` → named human review and counsel | sovereign_adjacent |
 
 - Standard: `instructions/venture_intelligence.md`; pack: `knowledge/venture_intelligence/`.

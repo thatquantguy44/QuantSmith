@@ -10,7 +10,7 @@
 > direction included. See item 1 of *What's Next* and items 29–30.
 
 The SDK has a working v1: a **spec-driven engineering framework** over the six
-software-development stages, **200 agents** in `agents/`,
+software-development stages, **203 agents** in `agents/`,
 **35 quality gates**, **38 instruction standards**, and CI that
 enforces the deterministic gates. It remains primarily a scaffold to be copied
 into quant repos, with `src/quantsmith/pipelines/`, `src/quantsmith/orchestration/`,
@@ -35,7 +35,7 @@ it via stable IDs (`REQ`/`NFR`/`AC`/`RISK`/`T`).
 - `specs/NNNN-slug/{spec,plan,tasks}.md` from `templates/spec/`; worked example at
   `specs/0001-daily-momentum-signal/`.
 
-**Agents (200, verified by the `agent-catalog` gate — treat `agents/README.md`
+**Agents (203, verified by the `agent-catalog` gate — treat `agents/README.md`
 as the live count, not the number here)** — all on the four-file contract
 (`README`/`prompt`/`instructions`/`tasks`) with a `Spec-Driven Role`:
 
@@ -295,7 +295,7 @@ designs**: create and
 approve one only when the foundation it consumes — `0063` or `0072` — has frozen
 that contract and the prior dependency named above is satisfied. Do not add
 agents merely to fill the map; prefer a canonical knowledge artifact or tested
-runtime that an existing agent can use. **Next unreserved spec number: `0095`** (`0083`–`0092` are the venture-intelligence foundation and its reserved children, item 32; `0093` is the visualization packs spec; `0094` is the Asian-language NLP foundation).
+runtime that an existing agent can use. **Next unreserved spec number: `0096`** (`0083`–`0092` are the venture-intelligence foundation and its reserved children, item 32; `0093` is the visualization packs spec; `0094` is the Asian-language NLP foundation; `0095` is reserved for the venture predictive models).
 Reserving a number here does not create the directory; copy `templates/spec/`
 only when that slice becomes active.
 
@@ -718,7 +718,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
     to populate `sources/` as real sources come into use.
 
 14. **P1 Generalization & Team Onboarding — making QuantSmith self-serve across
-    domains.** QuantSmith is now a comprehensive framework (200 agents, 69 specs,
+    domains.** QuantSmith is now a comprehensive framework (203 agents, 69 specs,
     33 gates, 35 standards); the next phase is reducing discovery friction and
     enabling team-intuitive adoption without deep codebase reading.
     - **P0 Phase 1a: Role profiles** (`roles/{portfolio_manager,risk_manager,quant_researcher,data_engineer,compliance_officer}.md`):
@@ -1582,6 +1582,12 @@ manual-task persistence question stays deferred until a real consumer needs it.
     with spans, per-language evaluation, and a baseline-vs-LLM comparison harness.
     It is a checkable baseline only: scores apply to 240 synthetic cases; Kazakh,
     Uzbek, and Filipino month names need native-speaker review.
+    `0091` (Draft, built) adds fund and portfolio analytics: `venture_fund_analytics.py`
+    (multiples, XIRR with all roots, J-curve, KS-PME, peer rank, mark-consistency
+    flags, seeded fund and reserve simulation) and three contract agents
+    (`fund_performance_analyst`, `valuation_marks_reviewer`, `portfolio_reserve_analyst`).
+    The predictive models are split out to reserved `0095`. Validated on synthetic
+    flows only.
     Proof of concept: no legal collection limits set yet; they must be set
     before operational use. The `0083` knowledge pack and validator are built
     (per-record review sign-off; all records still `draft`). Next: `0091` (fund analytics), the deferred regions in `0087`, and
@@ -1616,7 +1622,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
       `specs/0083-venture-intelligence-foundation/run_card.md` (see
       `docs/gate_runbook.md`); every `knowledge/venture_intelligence/` record is
       `draft` and most cite `unverified`; `agents/agent_registry.yaml` was incomplete (6 of
-      200 agents, with broken `skills_library/` paths); it is now generated from the
+      203 agents, with broken `skills_library/` paths); it is now generated from the
       agents by `scripts/build_agent_registry.py` and guarded by a test and the
       `agent-catalog` gate.
 
@@ -1648,7 +1654,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
 
 ## Risks
 
-- Breadth: 200 agents is useful only if each stays narrow and inspectable.
+- Breadth: 203 agents is useful only if each stays narrow and inspectable.
 - Heuristic gates (`leakage`, `backtest`, `secret-scan` fallback) can false-positive
   or miss; keep them advisory unless a repo's layout makes them reliable.
 - Docs can drift from the code; the `docs-link`, `agent-catalog`, and `spec-index` gates help, but

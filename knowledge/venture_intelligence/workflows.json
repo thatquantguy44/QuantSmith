@@ -95,8 +95,9 @@
       "decision_support_only": false,
       "human_review": [],
       "agents": [
-        "fund_performance_analyst (planned)",
-        "valuation_marks_reviewer (planned)",
+        "fund_performance_analyst",
+        "valuation_marks_reviewer",
+        "portfolio_reserve_analyst",
         "southeast_asia/funding_ecosystem_analyst"
       ],
       "inputs": [

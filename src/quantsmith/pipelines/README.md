@@ -903,3 +903,14 @@ structure and arithmetic; it never grades, concludes, classifies, or designates.
 
 Tests: `tests/test_venture_tradecraft.py`.
 
+## `venture_fund_analytics` — spec `0091-venture-fund-and-portfolio-analytics`
+
+DPI/RVPI/TVPI as of a date from flows known then, XIRR (Actual/365) that reports every
+root and warns when it is not unique, the J-curve cash profile and report-date series,
+Kaplan-Schoar PME against a supplied index, vintage-matched peer percentile (refused
+below ten peers), mark-consistency flags (numbers, never a decision), and seeded
+fund-outcome, cohort-bootstrap, and reserve-policy simulation with assumption ledgers.
+Scenario tools, not forecasts; validated on synthetic flows only.
+
+Tests: `tests/test_venture_fund_analytics.py`.
+

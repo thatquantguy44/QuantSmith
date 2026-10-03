@@ -19,7 +19,7 @@ nothing here is reviewed by a named person yet, and many records carry
 
 Companion code: `src/quantsmith/pipelines/venture_pack.py` (validator and
 normalization helpers), `venture_ingestion.py` (point-in-time and entity resolution),
-`venture_tradecraft.py` (grades, corroboration, hypotheses, ownership). Companion
+`venture_fund_analytics.py` (multiples, XIRR, J-curve, PME, mark flags, simulation), `venture_tradecraft.py` (grades, corroboration, hypotheses, ownership). Companion
 agents: `agents/venture_intelligence/`. Sources: `sources/` (eleven venture entries).
 
 ## Validate

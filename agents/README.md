@@ -452,6 +452,9 @@ region (Southeast Asia built first); `multilingual_document_nlp` is cross-cuttin
 
 | Agent | Handles | Feeds mainly |
 | --- | --- | --- |
+| `venture_intelligence/fund_performance_analyst/` | Fund multiples, XIRR with every root, J-curve, KS-PME, and vintage-matched peer rank as of a date; never sets or certifies a valuation | `valuation_marks_reviewer`, `portfolio_reserve_analyst`, investment committee |
+| `venture_intelligence/valuation_marks_reviewer/` | Mark-consistency flags with numbers against policy thresholds; never approves, sets, or proposes a mark | `fund_performance_analyst`, valuation committee |
+| `venture_intelligence/portfolio_reserve_analyst/` | Seeded fund-outcome and reserve-policy scenarios with assumptions and intervals; never decides follow-ons or forecasts returns | `fund_performance_analyst`, investment committee |
 | `venture_intelligence/source_reliability_grader/` | Proposed source/information grades with stated bases and origin counting; never overrides a human grade or grades on reputation | `confidence_language_reviewer`, `competing_hypotheses_analyst` |
 | `venture_intelligence/confidence_language_reviewer/` | Likelihood wording vs probability bands and vague-term flags; never changes a judgement | `company_diligence`, `research_analyst` |
 | `venture_intelligence/competing_hypotheses_analyst/` | Competing-hypotheses matrix including a deception/artifact hypothesis; never selects the conclusion | `company_diligence`, `technology_landscape_analyst` |
