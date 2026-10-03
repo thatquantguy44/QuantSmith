@@ -98,6 +98,61 @@ def test_folds_purged_embargoed_AC_003():
             assert t_tr + HORIZON < test_start - EMBARGO
 
 
+def test_folds_embargo_boundary_is_exact_AC_003():
+    """Pin the purge boundary on a small case worked out by hand.
+
+    40 days, 3 folds -> block of 10, so the first test block starts at day 10. A training
+    day d keeps its label window (d, d + horizon] clear of the test start only if
+    d + horizon < 10 - embargo. With horizon 5 and embargo 1 that is d <= 3: day 3 is kept
+    (3 + 5 = 8 < 9) and day 4 is dropped (4 + 5 = 9 is not < 9).
+    """
+    days = list(range(40))
+
+    def first(emb):
+        return make_folds(days, n_folds=3, horizon=5, embargo=emb)[0]
+
+    assert first(1).train_days == (0, 1, 2, 3) and first(1).test_days[0] == 10
+    assert first(0).train_days == (0, 1, 2, 3, 4)        # without an embargo day 4 is kept
+    assert first(3).train_days == (0, 1)                  # a larger embargo drops more
+    # the embargo is therefore really applied: each extra embargo day removes one training day
+    assert len(first(0).train_days) - len(first(1).train_days) == 1
+
+
+def test_folds_are_neither_leaky_nor_over_purged_AC_003():
+    """Across a grid of horizons, embargoes, and sizes: sufficient (no leak) and maximal (no waste)."""
+    for horizon in (1, 3, 5, 6):
+        for embargo in (0, 1, 2, 3):
+            for n_days in (30, 57, 130):
+                days = list(range(n_days))
+                folds = make_folds(days, n_folds=3, horizon=horizon, embargo=embargo)
+                block = n_days // 4
+                assert folds
+                prev_test_end = -1
+                for fold in folds:
+                    test_start = fold.test_days[0]
+                    # a fold is dropped (not shortened) when the purge leaves it no training days
+                    assert test_start % block == 0 and 1 <= test_start // block <= 3
+                    assert list(fold.test_days) == sorted(fold.test_days)
+                    assert min(fold.test_days) > prev_test_end          # test blocks do not overlap
+                    prev_test_end = max(fold.test_days)
+                    assert max(fold.train_days) < test_start            # training precedes testing
+                    for d in fold.train_days:                          # sufficient: label window clears every test day
+                        assert all(d + horizon < t - embargo for t in fold.test_days)
+                    kept = set(fold.train_days)
+                    for d in days[:test_start]:                        # maximal: every dropped day really violates
+                        if d not in kept:
+                            assert d + horizon >= test_start - embargo
+
+
+def test_a_fold_with_no_surviving_training_days_is_dropped_not_shortened():
+    """Documents current behavior: asking for 3 folds can return fewer (leak-safe, but silent)."""
+    days = list(range(30))                      # block of 7; first test block starts at day 7
+    folds = make_folds(days, n_folds=3, horizon=6, embargo=1)
+    assert len(folds) == 2                      # d + 6 < 7 - 1 leaves no training day for the first block
+    assert folds[0].test_days[0] == 14
+    assert all(fold.train_days for fold in folds)
+
+
 # --- AC-004: baseline and challenger compared on identical test rows ---
 
 
