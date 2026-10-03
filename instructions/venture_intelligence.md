@@ -63,3 +63,13 @@ against a named person or entity. The decision belongs to the accountable human
 | `southeast_asia/regional_lead` | Recommend or rank investments, or rule on regulatory permissibility |
 | `southeast_asia/entity_structure_analyst` | Designate, attribute, or accuse; conclude a structure is unlawful |
 | `southeast_asia/funding_ecosystem_analyst` | Recommend, size, or value an investment |
+
+## Runtime helpers and validation
+
+Deterministic helpers back the rules above: `quantsmith.pipelines.venture_pack`
+(pack validator, normalization, fund metrics), `venture_ingestion` (`known_at`,
+as-of views, cohorts, entity resolution), and `venture_tradecraft` (grades,
+corroboration, hypotheses matrix, effective ownership, conclusion-language lint).
+They report structure and arithmetic; they never grade, conclude, classify, or
+designate. Validate the pack with
+`PYTHONPATH=src python3 -m quantsmith.pipelines.venture_pack`.

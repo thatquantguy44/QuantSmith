@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from datetime import date
 import re
-from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple
+from typing import Any, Dict, Iterable, List, Mapping, Sequence, Tuple
 
 VAGUE_TERMS = ("may", "might", "could", "possibly", "perhaps", "potentially", "conceivably")
 CONCLUSION_TERMS = ("evad", "violat", "illegal", "unlawful", "guilty", "front company",

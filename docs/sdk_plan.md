@@ -17,12 +17,13 @@ The SDK now has a working v1 built on a spec-driven engineering framework:
 - **200 agents** in `agents/`, indexed by the catalog `agents/README.md` (the
   live count — this file is a roadmap, not the source of truth): an
   orchestrator, six lifecycle agents (one per SDLC stage), core domain agents, and
-  19 grouped categories — `optimization/`, `machine_learning/`,
+  22 grouped categories — `optimization/`, `machine_learning/`,
   `deep_learning/`, `portfolio_management/`, `role_operations/`, `tooling/`,
   `economists/`, `trading_strategies/`, `data_engineering/`, `asset_classes/`,
   `analytics/`, `knowledge/`, `secrets_management/`, `securities_financing/`,
-  `alerts/`, `data_ingestion/`, `formulaic_alphas/`, `monitoring/`, and
-  `test_engineering/`.
+  `alerts/`, `data_ingestion/`, `formulaic_alphas/`, `monitoring/`,
+  `test_engineering/`, `credit_risk/`, `enterprise_risk/`, and
+  `venture_intelligence/`.
 - **35 quality gates** in `hooks/stages/` (SDLC stages, quant gates, and repo
   gates) driven by `run-stage.sh`; advisory by default, blocking under
   `QF_STAGE_ENFORCE=1`.

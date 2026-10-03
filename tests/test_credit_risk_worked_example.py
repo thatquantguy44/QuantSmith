@@ -10,6 +10,7 @@ specs' own arithmetic.
 
 from __future__ import annotations
 
+import math
 import shutil
 from pathlib import Path
 
@@ -138,7 +139,6 @@ def test_worked_example_narrative_states_the_two_populations_are_distinct():
     """The one claim this whole module exists to get right: wholesale and
     retail are not fictionalized as the same borrower."""
 
-    report = run_worked_example  # not called; assert against the module docstring instead
     import quantsmith.pipelines.credit_risk_worked_example as module
 
     assert "not the same borrower" in module.__doc__ or "not Cascadia" in module.__doc__
@@ -175,6 +175,17 @@ def test_no_arithmetic_is_reimplemented():
 # --- the committed example ---------------------------------------------------
 
 
+def _same(a, b, rel_tol=1e-9):
+    """Structural equality that tolerates last-digit float differences across platforms."""
+    if isinstance(a, float) and isinstance(b, float):
+        return math.isclose(a, b, rel_tol=rel_tol, abs_tol=1e-12)
+    if isinstance(a, dict) and isinstance(b, dict):
+        return a.keys() == b.keys() and all(_same(a[k], b[k], rel_tol) for k in a)
+    if isinstance(a, list) and isinstance(b, list):
+        return len(a) == len(b) and all(_same(x, y, rel_tol) for x, y in zip(a, b))
+    return a == b
+
+
 def test_committed_example_exists_and_matches_regeneration():
     assert (COMMITTED / "report.json").exists()
     assert (COMMITTED / "narrative.md").exists()
@@ -188,8 +199,8 @@ def test_committed_example_exists_and_matches_regeneration():
     try:
         fresh_dir = generate_worked_example(out_root)
         fresh = json.loads((fresh_dir / "report.json").read_text())
-        assert fresh["wholesale_measurement"] == committed["wholesale_measurement"]
-        assert fresh["retail_fairness"] == committed["retail_fairness"]
+        assert _same(fresh["wholesale_measurement"], committed["wholesale_measurement"])
+        assert _same(fresh["retail_fairness"], committed["retail_fairness"])
         assert fresh["document_intelligence"]["admission"] == committed["document_intelligence"]["admission"]
     finally:
         shutil.rmtree(out_root, ignore_errors=True)
