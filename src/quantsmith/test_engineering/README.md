@@ -5,11 +5,14 @@ Runtime for the test-engineering agents (spec `0097`): Python and C++, JSON out,
 ```sh
 quantsmith-test-engineering detect --root .
 quantsmith-test-engineering run    --tool pytest --root . -- -k fast
-quantsmith-test-engineering edges  --target pkg.mod:func --allow ValueError --write-tests tests/test_func_edges.py
+quantsmith-test-engineering edges  --target pkg.mod:func --allow ValueError --hint name=str --write-tests tests/test_func_edges.py
 quantsmith-test-engineering cpp    --header lib.hpp --signature "int add(int a, int b)" --root .
 quantsmith-test-engineering mutate --target src/pkg/mod.py --root .
 quantsmith-test-engineering flaky  --tool pytest --root . --runs 5 --shuffles 3
 ```
+
+Use `--python PATH` to run a project's tests with the project's interpreter and `--env KEY=VALUE` (repeatable) for
+environment-dependent behaviour. Untyped functions need `--hint name=type`; a probe that tested nothing exits `2`.
 
 Exit status: `0` nothing to flag, `1` findings, `2` could not run. From a checkout, use
 `python -m quantsmith.test_engineering.cli` if the entry point is not installed.

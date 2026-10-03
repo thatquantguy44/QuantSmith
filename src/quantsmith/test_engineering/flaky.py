@@ -46,9 +46,10 @@ def collect_ids(cwd, args: Sequence[str] = (), python: Optional[str] = None, tim
 
 
 def check_pytest(cwd, args: Sequence[str] = (), runs: int = 5, shuffles: int = 2, hash_seeds: Sequence[str] = ("0", "1", "12345"),
-                 seed: int = 20260101, python: Optional[str] = None, timeout_s: float = 600.0) -> Dict[str, Any]:
+                 seed: int = 20260101, python: Optional[str] = None, timeout_s: float = 600.0,
+                 env: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
     """Classify tests via repeated, shuffled, and hash-seed-varied runs."""
-    default_runs = [run_pytest(cwd, args, timeout_s, python) for _ in range(max(2, runs))]
+    default_runs = [run_pytest(cwd, args, timeout_s, python, env_extra=env) for _ in range(max(2, runs))]
     base = default_runs[0]
     if base.verdict in ("no_tests", "error", "timeout") or not base.results:
         return {"verdict": base.verdict, "runs": len(default_runs), "tests": 0, "classification": {}, "flaky": [], "order_dependent": [],
@@ -60,13 +61,13 @@ def check_pytest(cwd, args: Sequence[str] = (), runs: int = 5, shuffles: int = 2
         seen = {o.get(tid, "missing") for o in per_run}
         classification[tid] = "always_fails" if seen <= {"failed", "error"} else ("flaky" if len(seen) > 1 else "stable")
     shuffle_detail: List[Dict[str, Any]] = []
-    order_dep: Dict[str, int] = {}
+    order_dep: Dict[str, List[int]] = {}
     runnable = [t for t in ids if classification[t] == "stable" and per_run[0].get(t) == "passed"]
     for k in range(shuffles):
         s = seed + k
         order = list(runnable)
         random.Random(s).shuffle(order)
-        rep = run_pytest(cwd, args, timeout_s, python, ids=[to_node_id(cwd, t) for t in order])
+        rep = run_pytest(cwd, args, timeout_s, python, env_extra=env, ids=[to_node_id(cwd, t) for t in order])
         out = _outcomes(rep.results)
         if not out:
             shuffle_detail.append({"seed": s, "ran": 0, "failed": 0, "error": "shuffled run produced no results; order check not performed"})
@@ -74,11 +75,11 @@ def check_pytest(cwd, args: Sequence[str] = (), runs: int = 5, shuffles: int = 2
         newly = [t for t in order if out.get(t) in ("failed", "error")]
         shuffle_detail.append({"seed": s, "ran": len(out), "failed": len(newly)})
         for t in newly:
-            order_dep[t] = s
+            order_dep.setdefault(t, []).append(s)
             classification[t] = "order_dependent"
     hash_dep: Dict[str, str] = {}
     for hs in hash_seeds:
-        rep = run_pytest(cwd, args, timeout_s, python, env_extra={"PYTHONHASHSEED": hs})
+        rep = run_pytest(cwd, args, timeout_s, python, env_extra={**(env or {}), "PYTHONHASHSEED": hs})
         out = _outcomes(rep.results)
         for t in ids:
             if classification[t] in ("stable",) and per_run[0].get(t) != out.get(t) and t in out:
@@ -89,7 +90,8 @@ def check_pytest(cwd, args: Sequence[str] = (), runs: int = 5, shuffles: int = 2
         "runs": len(default_runs), "shuffles": shuffle_detail, "hash_seeds": list(hash_seeds), "tests": len(ids),
         "classification": classification,
         "flaky": [t for t, v in classification.items() if v == "flaky"],
-        "order_dependent": [{"test": t, "seed": s, "reproduce": "run the explicit node ids in `random.Random(seed).shuffle` order"} for t, s in order_dep.items()],
+        "order_dependent": [{"test": t, "seed": seeds[0], "seeds": seeds, "failed_in_shuffles": len(seeds),
+                            "reproduce": "run the explicit node ids in `random.Random(seed).shuffle` order"} for t, seeds in order_dep.items()],
         "hash_seed_dependent": [{"test": t, "failing_or_differing_seed": s} for t, s in hash_dep.items()],
         "always_fails": [t for t, v in classification.items() if v == "always_fails"],
         "note": f"observed over {len(default_runs)} identical runs, {shuffles} shuffles and {len(hash_seeds)} hash seeds; "

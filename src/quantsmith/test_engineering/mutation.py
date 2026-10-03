@@ -159,19 +159,20 @@ def _copy_project(root: Path, dest: Path) -> None:
 
 
 def run_mutation(root: str | Path, target: str, test_args: Sequence[str] = (), python: Optional[str] = None, max_mutants: int = 60,
-                 timeout_s: float = 120.0, use_coverage: bool = True, line_range: Optional[Tuple[int, int]] = None) -> Dict[str, Any]:
+                 timeout_s: float = 120.0, use_coverage: bool = True, line_range: Optional[Tuple[int, int]] = None,
+                 env: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
     """Mutate ``target`` (path relative to ``root``) and run the tests on each mutant."""
     root = Path(root).resolve()
     target_path = (root / target).resolve()
     if not target_path.is_file() or root not in target_path.parents:
         raise ValueError(f"target {target!r} is not a file inside {root}")
     source = target_path.read_text(encoding="utf-8")
-    base = run_pytest(root, test_args, timeout_s, python)
+    base = run_pytest(root, test_args, timeout_s, python, env_extra=env)
     if base.verdict != "passed":
         return {"target": target, "baseline": base.verdict, "score": None, "mutants": [], "note": "baseline tests do not pass; fix them before mutating"}
     covered: Optional[Set[int]] = None
-    if use_coverage and coverage_available():
-        cov = run_pytest_with_coverage(root, [str(target_path.parent)], test_args, timeout_s, python)
+    if use_coverage and coverage_available(python):
+        cov = run_pytest_with_coverage(root, [str(target_path.parent)], test_args, timeout_s, python, env)
         files = cov.get("files", {})
         info = next((v for k, v in files.items() if Path(k).resolve() == target_path or k.endswith(target)), None)
         if info is not None:
@@ -192,7 +193,7 @@ def run_mutation(root: str | Path, target: str, test_args: Sequence[str] = (), p
             work = Path(tmp) / "proj"
             _copy_project(root, work)
             (work / target).write_text(apply_mutant(source, s.index), encoding="utf-8")
-            r = run_pytest(work, [*test_args, "-x", "-q"], timeout_s, python)
+            r = run_pytest(work, [*test_args, "-x", "-q"], timeout_s, python, env_extra=env)
         if r.verdict == "timeout":
             results.append(MutantResult(s, "timeout", "tests hung; counted as killed"))
         elif r.verdict in ("failed", "error"):
