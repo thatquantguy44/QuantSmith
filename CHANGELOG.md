@@ -21,6 +21,11 @@ patterns locally rather than expecting them to update in place.
 ## [Unreleased]
 
 ### Added
+- Venture fund and portfolio analytics (spec `0091`): `venture_fund_analytics.py` (multiples as of a
+  date, XIRR that reports every root, J-curve profile and series, Kaplan-Schoar PME, vintage-matched
+  peer percentile, mark-consistency flags, seeded fund-outcome, bootstrap, and reserve-policy
+  simulation), three contract agents (`fund_performance_analyst`, `valuation_marks_reviewer`,
+  `portfolio_reserve_analyst`), and the new XIRR, peer-percentile, and mark-flag conventions.
 - `agents/agent_registry.yaml` is now generated from the agents (all 200, was 6) by
   `scripts/build_agent_registry.py`: category, purpose, inputs, outputs, skill path, and
   decision-path class per agent. The six original entries keep their machine identifiers
