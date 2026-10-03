@@ -1,0 +1,69 @@
+{
+  "schema_version": "0083.1",
+  "status": "draft_structural_contract",
+  "gaps": [
+    {
+      "id": "gap.licensed_database_schemas",
+      "title": "Licensed database schemas and backfill behaviour unknown until vendors are trialled",
+      "severity": "high",
+      "owner_spec": "0088",
+      "status": "open"
+    },
+    {
+      "id": "gap.legal_collection_limits",
+      "title": "Agency legal authorities and collection limits not set (proof of concept)",
+      "severity": "high",
+      "owner_spec": "0090",
+      "status": "open"
+    },
+    {
+      "id": "gap.no_runtime",
+      "title": "All venture agents are contract-only; no runtime",
+      "severity": "medium",
+      "owner_spec": "0089",
+      "status": "open"
+    },
+    {
+      "id": "gap.low_resource_languages",
+      "title": "No evaluation sets for Khmer, Burmese, Lao",
+      "severity": "medium",
+      "owner_spec": "0084",
+      "status": "open"
+    },
+    {
+      "id": "gap.entity_resolution_eval",
+      "title": "No labelled cross-script entity pairs",
+      "severity": "high",
+      "owner_spec": "0088",
+      "status": "open"
+    },
+    {
+      "id": "gap.channel_lead_times",
+      "title": "Channel lead times are judgement, not measured",
+      "severity": "medium",
+      "owner_spec": "0091",
+      "status": "open"
+    },
+    {
+      "id": "gap.stage_comparability",
+      "title": "Cross-region stage comparability rule untested",
+      "severity": "low",
+      "owner_spec": "0085",
+      "status": "open"
+    },
+    {
+      "id": "gap.jurisdiction_rules",
+      "title": "Jurisdictional ownership rules not encoded (deliberately; counsel-owned)",
+      "severity": "medium",
+      "owner_spec": "0090",
+      "status": "open"
+    },
+    {
+      "id": "gap.citations",
+      "title": "Many records carry citation unverified",
+      "severity": "medium",
+      "owner_spec": "0092",
+      "status": "open"
+    }
+  ]
+}

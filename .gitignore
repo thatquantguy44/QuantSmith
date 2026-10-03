@@ -89,3 +89,9 @@ agents.zip
 # bake-off notes may name licensed vendors and a real reference cohort; never
 # commit it. Anchored to the repo root.
 /docs/venture_database_recommendations.md
+
+# Local venture / intelligence overlay (spec 0083 REQ-015) -- names real
+# handling environment, retention, and cohort paths; never commit it. Anchored
+# to the repo root so it does not hide config/venture_overlay.example.yml.
+/venture_overlay.yml
+/venture_overlay.yaml

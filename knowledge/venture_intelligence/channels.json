@@ -1,0 +1,116 @@
+{
+  "schema_version": "0083.1",
+  "status": "draft_structural_contract",
+  "channels": [
+    {
+      "id": "channel.patents",
+      "name": "Patents",
+      "lead_time": "Filing precedes product by years; US applications are generally published about 18 months after filing (35 U.S.C. 122(b), unverified here).",
+      "coverage": "Strong for hardware, biotech, deep tech; weak for software and services.",
+      "biases": "Large firms file more; filing is not invention quality; classification drift.",
+      "deception_risks": "Defensive or strategic filings and shell assignees.",
+      "licensing": "Open bulk data from patent offices; commercial aggregators vary.",
+      "point_in_time": "Use publication or grant date as known_at, not filing date.",
+      "citation": "unverified"
+    },
+    {
+      "id": "channel.publications",
+      "name": "Scientific publications and preprints",
+      "lead_time": "Years ahead of commercial products.",
+      "coverage": "Strong in science and engineering; uneven by language and region.",
+      "biases": "Citation lag; prestige bias; author-name ambiguity.",
+      "deception_risks": "Paper mills and predatory venues.",
+      "licensing": "Open scholarly graphs are open; full text varies.",
+      "point_in_time": "Use first-posted date; versions change.",
+      "citation": "unverified"
+    },
+    {
+      "id": "channel.open_source",
+      "name": "Open-source activity",
+      "lead_time": "Months ahead of adoption.",
+      "coverage": "Software and AI infrastructure only.",
+      "biases": "Popularity bias; bot activity.",
+      "deception_risks": "Fake stars, inflated forks, abandoned-but-active repos.",
+      "licensing": "Public archives; platform terms apply.",
+      "point_in_time": "Event timestamps are good; account metadata is not PIT.",
+      "citation": "unverified"
+    },
+    {
+      "id": "channel.hiring_labour",
+      "name": "Hiring and labour data",
+      "lead_time": "Weeks to months ahead of growth or contraction.",
+      "coverage": "Strong for companies that post publicly; weak for small or non-English markets.",
+      "biases": "Posting is not hiring; duplicates; platform panel bias.",
+      "deception_risks": "Ghost postings and mass posting for appearance.",
+      "licensing": "Commercial panels; check redistribution terms.",
+      "point_in_time": "Posting date is observable; vendors often restate history.",
+      "citation": "unverified"
+    },
+    {
+      "id": "channel.grants_procurement",
+      "name": "Grants and procurement",
+      "lead_time": "Awards precede deployment and revenue.",
+      "coverage": "Strong for government-facing technology in jurisdictions with open award data.",
+      "biases": "Only covers government-funded work; award is not delivery.",
+      "deception_risks": "Pass-through and prime/sub obscuring the performer.",
+      "licensing": "Open government data in many countries.",
+      "point_in_time": "Award date is public; amendments restate values.",
+      "citation": "unverified"
+    },
+    {
+      "id": "channel.regulatory_filings",
+      "name": "Regulatory and registry filings",
+      "lead_time": "Coincident with or after events; the main verifiable record.",
+      "coverage": "Strong for registered companies; thin for exempt, offshore, or unfiled activity.",
+      "biases": "Filing lag; exemptions; non-English filings.",
+      "deception_risks": "Nominee holders and layered structures.",
+      "licensing": "Public registries; terms vary by jurisdiction.",
+      "point_in_time": "Use filed_time; amendments are new facts.",
+      "citation": "unverified"
+    },
+    {
+      "id": "channel.trade_customs",
+      "name": "Trade and customs",
+      "lead_time": "Weeks to months ahead of reported revenue for hardware.",
+      "coverage": "Goods only; coverage depends on the country's disclosure.",
+      "biases": "Aggregation hides firms; classification codes are coarse.",
+      "deception_risks": "Transshipment and mis-declaration.",
+      "licensing": "Commercial and public sources; licence-gated in many countries.",
+      "point_in_time": "Reporting lag varies by country.",
+      "citation": "unverified"
+    },
+    {
+      "id": "channel.web_app_telemetry",
+      "name": "Web and app telemetry",
+      "lead_time": "Days to weeks.",
+      "coverage": "Consumer products with web or app presence.",
+      "biases": "Panel composition; bot traffic; modelled estimates.",
+      "deception_risks": "Purchased traffic and fake installs.",
+      "licensing": "Commercial panels; contractual limits.",
+      "point_in_time": "Vendors revise estimates silently.",
+      "citation": "unverified"
+    },
+    {
+      "id": "channel.narrative_news",
+      "name": "Narrative and news",
+      "lead_time": "Coincident; sentiment can lead or lag.",
+      "coverage": "Wide but promotional and multilingual.",
+      "biases": "Press-release amplification; language and region skew.",
+      "deception_risks": "Seeded or coordinated stories.",
+      "licensing": "Open event data and licensed news; terms vary.",
+      "point_in_time": "Publication timestamps are usable; republished stories are not new.",
+      "citation": "unverified"
+    },
+    {
+      "id": "channel.satellite_geospatial",
+      "name": "Satellite and geospatial",
+      "lead_time": "Days; physical activity at sites.",
+      "coverage": "Physical facilities and logistics only.",
+      "biases": "Resolution, cloud cover, and cost limit coverage.",
+      "deception_risks": "Decoys and temporary activity.",
+      "licensing": "Commercial imagery; open low-resolution archives.",
+      "point_in_time": "Acquisition date is exact; tasking is selective.",
+      "citation": "unverified"
+    }
+  ]
+}

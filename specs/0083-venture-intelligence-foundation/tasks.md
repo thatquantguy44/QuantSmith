@@ -16,20 +16,20 @@
 | ID | Task | Covers | Status | Notes |
 | --- | --- | --- | --- | --- |
 | T-001 | Write `instructions/venture_intelligence.md` incl. multilingual section | REQ-001, REQ-018 | done | |
-| T-002 | Taxonomy pack | REQ-002 | todo | |
-| T-003 | Convention registry (valuation, dilution, fund metrics) | REQ-003 | todo | |
-| T-004 | Data-time and bias contract | REQ-004 | todo | |
-| T-005 | Source grade and confidence conventions | REQ-005 | todo | |
-| T-006 | Channel catalog with licence and PIT statements | REQ-006, NFR-006 | todo | |
-| T-007 | Glossary JSON and dictionary section | REQ-007 | in-progress | |
-| T-008 | Coverage matrix, agent roster, roadmap in `specs/README.md` | REQ-008, REQ-016, REQ-019 | in-progress | |
-| T-009 | Model catalog | REQ-009 | todo | |
-| T-010 | Workflow registry with decision-path classes | REQ-010, REQ-011, REQ-017 | todo | |
-| T-011 | Gap register and golden cases (incl. per-language normalization) | REQ-012, REQ-018 | todo | |
-| T-012 | Stdlib validator and tests | REQ-011, REQ-013, NFR-001, NFR-004 | todo | |
-| T-013 | Overlay template and gitignore | REQ-015 | todo | |
-| T-014 | Document reuse of 0070/0071/0052-0054/0025/0026 | REQ-014 | todo | |
-| T-015 | Run gates, synthetic disclosure, additive-diff check | NFR-002, NFR-003, NFR-005, NFR-004 | todo | |
+| T-002 | Taxonomy pack | REQ-002 | done | |
+| T-003 | Convention registry (valuation, dilution, fund metrics) | REQ-003 | done | |
+| T-004 | Data-time and bias contract | REQ-004 | done | |
+| T-005 | Source grade and confidence conventions | REQ-005 | done | |
+| T-006 | Channel catalog with licence and PIT statements | REQ-006, NFR-006 | done | |
+| T-007 | Glossary JSON and dictionary section | REQ-007 | done | |
+| T-008 | Coverage matrix, agent roster, roadmap in `specs/README.md` | REQ-008, REQ-016, REQ-019 | done | |
+| T-009 | Model catalog | REQ-009 | done | |
+| T-010 | Workflow registry with decision-path classes | REQ-010, REQ-011, REQ-017 | done | |
+| T-011 | Gap register and golden cases (incl. per-language normalization) | REQ-012, REQ-018 | done | |
+| T-012 | Stdlib validator and tests | REQ-011, REQ-013, NFR-001, NFR-004 | done | |
+| T-013 | Overlay template and gitignore | REQ-015 | done | |
+| T-014 | Document reuse of 0070/0071/0052-0054/0025/0026 | REQ-014 | done | |
+| T-015 | Run gates, synthetic disclosure, additive-diff check | NFR-002, NFR-003, NFR-005, NFR-004 | done | Gates pass; see commit |
 
 Status values: `todo` | `in-progress` | `blocked` | `done`.
 
@@ -37,24 +37,24 @@ Status values: `todo` | `in-progress` | `blocked` | `done`.
 
 | Acceptance criterion | Test(s) | Status |
 | --- | --- | --- |
-| AC-001 | manual read of standard | todo |
-| AC-002 | tests/test_venture_pack.py (to be written) | todo |
-| AC-003 | tests/test_venture_pack.py (to be written) | todo |
-| AC-004 | tests/test_venture_pack.py (to be written) | todo |
-| AC-005 | tests/test_venture_pack.py (to be written) | todo |
-| AC-006 | tests/test_venture_pack.py (to be written) | todo |
-| AC-007 | test_glossary_matches_dictionary | todo |
-| AC-008 | tests/test_venture_pack.py (to be written) | todo |
-| AC-009 | tests/test_venture_pack.py (to be written) | todo |
-| AC-010 | tests/test_venture_pack.py (to be written) | todo |
-| AC-011 | tests/test_venture_pack.py (to be written) | todo |
-| AC-012 | tests/test_venture_pack.py (to be written) | todo |
-| AC-013 | tests/test_venture_pack.py (to be written) | todo |
-| AC-014 | tests/test_venture_pack.py (to be written) | todo |
-| AC-015 | manual read of specs/README.md | todo |
-| AC-016 | manual read of workflows | todo |
-| AC-017 | run-stage.sh spec + agent-catalog | todo |
-| AC-018 | test_fixtures_synthetic | todo |
-| AC-019 | git diff + citation check | todo |
-| AC-020 | manual read + golden cases | todo |
-| AC-021 | agent-catalog gate + manual roster read | todo |
+| AC-001 | tests/test_venture_pack.py::test_ac001_* | done |
+| AC-002 | tests/test_venture_pack.py::test_ac002_* | done |
+| AC-003 | tests/test_venture_pack.py::test_ac003_* | done |
+| AC-004 | tests/test_venture_pack.py::test_ac004_* | done |
+| AC-005 | tests/test_venture_pack.py::test_ac005_* | done |
+| AC-006 | tests/test_venture_pack.py::test_ac006_* | done |
+| AC-007 | tests/test_venture_pack.py::test_ac007_* | done |
+| AC-008 | tests/test_venture_pack.py::test_ac008_* | done |
+| AC-009 | tests/test_venture_pack.py::test_ac009_* | done |
+| AC-010 | tests/test_venture_pack.py::test_ac010_* | done |
+| AC-011 | tests/test_venture_pack.py::test_ac011_* | done |
+| AC-012 | tests/test_venture_pack.py::test_ac012_* | done |
+| AC-013 | tests/test_venture_pack.py::test_ac013_* | done |
+| AC-014 | tests/test_venture_pack.py::test_ac014_* | done |
+| AC-015 | tests/test_venture_pack.py::test_ac015_* | done |
+| AC-016 | tests/test_venture_pack.py::test_ac016_* | done |
+| AC-017 | run-stage.sh spec + agent-catalog (manual) | todo |
+| AC-018 | tests/test_venture_pack.py::test_ac018_* | done |
+| AC-019 | tests/test_venture_pack.py::test_ac019_every_claim_cited_or_unverified + git diff | todo |
+| AC-020 | tests/test_venture_pack.py::test_ac020_* | done |
+| AC-021 | tests/test_venture_pack.py::test_ac021_* | done |
