@@ -10,8 +10,8 @@
 > direction included. See item 1 of *What's Next* and items 29–30.
 
 The SDK has a working v1: a **spec-driven engineering framework** over the six
-software-development stages, **179 agents** in `agents/`,
-**35 quality gates**, **37 instruction standards**, and CI that
+software-development stages, **200 agents** in `agents/`,
+**35 quality gates**, **38 instruction standards**, and CI that
 enforces the deterministic gates. It remains primarily a scaffold to be copied
 into quant repos, with `src/quantsmith/pipelines/`, `src/quantsmith/orchestration/`,
 and `src/quantsmith/text_intelligence/` holding runnable, dependency-light
@@ -35,7 +35,7 @@ it via stable IDs (`REQ`/`NFR`/`AC`/`RISK`/`T`).
 - `specs/NNNN-slug/{spec,plan,tasks}.md` from `templates/spec/`; worked example at
   `specs/0001-daily-momentum-signal/`.
 
-**Agents (179, verified by the `agent-catalog` gate — treat `agents/README.md`
+**Agents (200, verified by the `agent-catalog` gate — treat `agents/README.md`
 as the live count, not the number here)** — all on the four-file contract
 (`README`/`prompt`/`instructions`/`tasks`) with a `Spec-Driven Role`:
 
@@ -64,7 +64,7 @@ as the live count, not the number here)** — all on the four-file contract
   `doc-counts`, `quantsmith-version`, `agent-attribution`, `handoff-sync`, `upstream-drift`, `ownership`, `persistent-knowledge`, `knowledge`, `memory`, `access`, `role-context`,
   `model-plugin`, `source-catalog`.
 
-**Instructions (37)** — constitution, SDD method, point-in-time, and the domain
+**Instructions (38)** — constitution, SDD method, point-in-time, and the domain
 standards; see `README.md`'s "Public Instructions" table for the current list
 (this file lists categories, not every filename, to avoid drifting again).
 
@@ -295,7 +295,7 @@ designs**: create and
 approve one only when the foundation it consumes — `0063` or `0072` — has frozen
 that contract and the prior dependency named above is satisfied. Do not add
 agents merely to fill the map; prefer a canonical knowledge artifact or tested
-runtime that an existing agent can use. **Next unreserved spec number: `0083`.**
+runtime that an existing agent can use. **Next unreserved spec number: `0095`** (`0083`–`0092` are the venture-intelligence foundation and its reserved children, item 32; `0093` is taken by another agent; `0094` is the Asian-language NLP foundation).
 Reserving a number here does not create the directory; copy `templates/spec/`
 only when that slice becomes active.
 
@@ -718,7 +718,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
     to populate `sources/` as real sources come into use.
 
 14. **P1 Generalization & Team Onboarding — making QuantSmith self-serve across
-    domains.** QuantSmith is now a comprehensive framework (179 agents, 69 specs,
+    domains.** QuantSmith is now a comprehensive framework (200 agents, 69 specs,
     33 gates, 35 standards); the next phase is reducing discovery friction and
     enabling team-intuitive adoption without deep codebase reading.
     - **P0 Phase 1a: Role profiles** (`roles/{portfolio_manager,risk_manager,quant_researcher,data_engineer,compliance_officer}.md`):
@@ -1545,6 +1545,80 @@ manual-task persistence question stays deferred until a real consumer needs it.
     only, no runtime, matching `0022`/`0033`'s precedent; `agent-catalog`
     gate and the `0081` validator both pass.
 
+32. **Venture & non-traditional intelligence (specs `0083`–`0090` and `0094`, all Draft).** New direction for venture capital, technology
+    scouting, portfolio consulting, and foreign-influence screening. `0083` is
+    an umbrella foundation (taxonomy, venture data-time and survivorship
+    contracts, source-grade and confidence tradecraft, channel catalog,
+    multilingual-document standard, decision-path classes
+    `analytic_support`/`person_adjacent`/`sovereign_adjacent`) and reserves
+    child specs `0084`–`0092`: `0084` multilingual document NLP plus Southeast
+    Asia agents; `0085`–`0087` the other regions in waves; `0088` source
+    adapters and point-in-time ingestion; `0089` sourcing, diligence, and
+    signal analysts; `0090` tradecraft and sovereign-adjacent screening
+    support; `0091` fund analytics and predictive models; `0092` retrieval and
+    dictionary wiring. `0084` ships four contract-only agents under
+    `agents/venture_intelligence/` (`multilingual_document_nlp`,
+    `southeast_asia/{regional_lead,entity_structure_analyst,
+    funding_ecosystem_analyst}`) and `instructions/venture_intelligence.md`.
+    `0088` (Draft, built) adds eleven public source entries with `known_at`
+    policies, `venture_ingestion.py` (as-of views, outcome-independent
+    cohorts, entity resolution), and the `entity_resolution` agent.
+    `0085` (Draft, built) adds the Greater China & East Asia lead and
+    entity-structure analyst and the South Asia lead, with Traditional Chinese,
+    Korean, lakh/crore, and Japanese-era normalization.
+    `0086` (Draft, built) adds the Central Asia lead with Cyrillic/Latin
+    script-variant handling and Russian-locale numbers; focus is Asia first, so
+    `0087` now carries the deferred non-Asian regions.
+    `0089` (Draft, built) adds six cross-cutting agents — `patent_ip_analyst`,
+    `hiring_signal_analyst` (person_adjacent), `narrative_news_analyst`,
+    `technology_landscape_analyst`, `deal_sourcing`, `company_diligence` — and
+    a workflow-class consistency rule.
+    `0090` (Draft, built) adds six tradecraft and screening-support agents and
+    `venture_tradecraft.py` helpers (grades, corroboration, hypotheses matrix,
+    effective ownership, conclusion-language lint).
+    `0094` (Draft, built; `0093` is taken by another agent) is the
+    Asian-language NLP foundation, `src/quantsmith/asian_nlp/`: language/script ID,
+    segmentation baseline, rule-based amount/currency/date/era/fiscal extraction
+    with spans, per-language evaluation, and a baseline-vs-LLM comparison harness.
+    It is a checkable baseline only: scores apply to 240 synthetic cases; Kazakh,
+    Uzbek, and Filipino month names need native-speaker review.
+    Proof of concept: no legal collection limits set yet; they must be set
+    before operational use. The `0083` knowledge pack and validator are built
+    (per-record review sign-off; all records still `draft`). Next: `0091` (fund analytics), the deferred regions in `0087`, and
+    native-speaker review of the `0094` lexicons.
+
+33. **Deferred lint review (24 ruff findings, left unfixed on purpose).** A repo-wide
+    `ruff check --fix` pass (2026-10-03, commit `7b7fbcd`) applied only the safe
+    fixes (54 unused imports and f-string prefixes, 34 files, no behavior change,
+    full suite green). The remaining 24 need a human decision; re-run
+    `ruff check --output-format concise .` to list them.
+    - **13 × E402 (import not at top of file)** — intentional `sys.path`
+      bootstraps in `agents/agentic_code_tools/__init__.py`,
+      `agents/quant_analyst/{agentic_quant/__init__,run_rebalancer,run_sec_lending,run_sp500}.py`,
+      and late imports in `tests/test_market_research.py`, `test_mcp_servers.py`,
+      `test_nl_analytics.py`. Leave alone unless the bootstrap pattern is replaced.
+    - **6 × E702 (semicolon-separated statements)** — the min-cost-flow arc setup
+      in `src/quantsmith/pipelines/optimization_solvers.py:269-270`. Style only.
+    - **5 × F841 (unused variable)** — review each; two may matter:
+      - `src/quantsmith/pipelines/return_forecasting.py:205` — `gap = horizon + embargo`
+        is assigned but unused in fold construction. Check that the embargo is
+        actually applied by `make_folds` (spec `0006` AC-003, purge + embargo); if
+        the variable was meant to be used, this is a leakage-protection bug, not
+        lint.
+      - `src/quantsmith/adapters/mcp_servers/market_research_resources.py:156` —
+        `citation = render_citation(item)` is unused; confirm the call has no
+        needed side effect (for example validation) before removing it.
+      - `src/quantsmith/pipelines/return_forecasting.py:486` (`n` in `_pearson`),
+        `tests/test_market_research.py:800` (`item`), and
+        `tests/test_nl_analytics.py:763` (`envelope2`) look safe to remove.
+    - Also still open from the repository health check: the `repro` gate's lockfile
+      finding is closed by `uv.lock` and its run-manifest finding by
+      `specs/0083-venture-intelligence-foundation/run_card.md` (see
+      `docs/gate_runbook.md`); every `knowledge/venture_intelligence/` record is
+      `draft` and most cite `unverified`; `agents/agent_registry.yaml` lists only 6 skill
+      agents in total, so it does not include the venture agents (nor most others);
+      decide whether it should be complete or retired.
+
 ## Open Questions For The Owner
 
 - Copyable scaffold, Python package, or CLI/copier? (Directionally answered in
@@ -1560,7 +1634,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
 
 ## Risks
 
-- Breadth: 179 agents is useful only if each stays narrow and inspectable.
+- Breadth: 200 agents is useful only if each stays narrow and inspectable.
 - Heuristic gates (`leakage`, `backtest`, `secret-scan` fallback) can false-positive
   or miss; keep them advisory unless a repo's layout makes them reliable.
 - Docs can drift from the code; the `docs-link`, `agent-catalog`, and `spec-index` gates help, but

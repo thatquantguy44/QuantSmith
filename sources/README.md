@@ -44,6 +44,17 @@ sources/
 | [`alpha_vantage_news`](alpha_vantage_news.yml) | Alpha Vantage NEWS_SENTIMENT (ticker-tagged news + sentiment) | api | internal | active | medium |
 | [`finnhub_news`](finnhub_news.yml) | Finnhub Company/Market News (ticker-scoped news) | api | internal | active | medium |
 | [`text_intelligence_fixture`](text_intelligence_fixture.yml) | QuantSmith Synthetic Text-Intelligence Fixtures | file_feed | public | active | high |
+| [`patentsview`](patentsview.yml) | PatentsView (USPTO patent data) | api | public | evaluating | medium |
+| [`openalex`](openalex.yml) | OpenAlex (scholarly works, authors, institutions) | api | public | evaluating | medium |
+| [`usaspending`](usaspending.yml) | USAspending.gov (federal awards) | api | public | evaluating | medium |
+| [`sbir_gov`](sbir_gov.yml) | SBIR.gov (SBIR/STTR awards) | api | public | evaluating | medium |
+| [`gleif_lei`](gleif_lei.yml) | GLEIF Legal Entity Identifier (LEI) data | file_feed | public | evaluating | medium |
+| [`trade_csl`](trade_csl.yml) | Consolidated Screening List (trade.gov) | api | public | evaluating | medium |
+| [`opensanctions`](opensanctions.yml) | OpenSanctions (sanctions and PEP aggregate) | api | public | evaluating | medium |
+| [`uk_companies_house`](uk_companies_house.yml) | UK Companies House (register and PSC data) | api | public | evaluating | high |
+| [`gh_archive`](gh_archive.yml) | GH Archive (public GitHub event stream) | file_feed | public | evaluating | medium |
+| [`gdelt`](gdelt.yml) | GDELT (global news events and tone) | api | public | evaluating | low |
+| [`venture_fixture`](venture_fixture.yml) | QuantSmith Synthetic Venture Fixtures | file_feed | public | active | high |
 
 `fred.yml` is a filled-in reference showing the schema in use — the same
 role `specs/0001-daily-momentum-signal/` plays for the spec format. Copy
@@ -110,3 +121,11 @@ name) are fine to register here using the same discretion any other
 tracked file in this repo requires; if a source is genuinely too sensitive
 to name at all, register it with a generic `name`/`description` and keep
 the identifying detail in whatever your `credential_ref` points at instead.
+
+The eleven venture and intelligence entries (`patentsview` through
+`venture_fixture`) back spec `0088`'s point-in-time ingestion contract. Each
+declares a `known_at_policy` (`filed`, `published`, `event`, `snapshot`, or
+`retrieved`) that says which timestamp counts as when the adopter could first
+have known a record. Endpoints, terms, and coverage there are `unverified`
+until checked against current documentation; none needs a key beyond what its
+own terms require.

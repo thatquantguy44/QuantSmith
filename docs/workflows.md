@@ -299,6 +299,23 @@ testing.
   `0074` retail fairness testing) against one reporting cycle, in
   `src/quantsmith/pipelines/credit_risk_worked_example.py`.
 
+### Venture & Non-Traditional Intelligence (cross-cutting)
+
+Five workflows, defined in `knowledge/venture_intelligence/workflows.json`, each with
+a decision-path class (`analytic_support`, `person_adjacent`, or `sovereign_adjacent`).
+Everything informs a human; nothing here invests, designates, or attributes.
+
+| Workflow | Chain | Class |
+| --- | --- | --- |
+| Deal sourcing to diligence memo | `deal_sourcing` → `entity_resolution` → `multilingual_document_nlp` → `company_diligence` (with `collection_gap_tracker`, `confidence_language_reviewer`) | analytic_support |
+| Signal to thesis | `patent_ip_analyst` / `hiring_signal_analyst` / `narrative_news_analyst` → `technology_landscape_analyst` → `source_reliability_grader` → `competing_hypotheses_analyst` → `confidence_language_reviewer` | person_adjacent |
+| Technology landscape scan | regional leads (`southeast_asia`, `greater_china_east_asia`, `south_asia`, `central_asia`) → `technology_landscape_analyst` | analytic_support |
+| Portfolio and fund review | `southeast_asia/funding_ecosystem_analyst` (fund analytics planned, `0091`) | analytic_support |
+| Counter-diligence screening | regional structure analysts → `ownership_screen` → `dual_use_indicator` → named human review and counsel | sovereign_adjacent |
+
+- Standard: `instructions/venture_intelligence.md`; pack: `knowledge/venture_intelligence/`.
+- Validate: `PYTHONPATH=src python3 -m quantsmith.pipelines.venture_pack`.
+
 ## Group Workflows
 
 Role and scenario workflows above compose capabilities across groups. For groups
@@ -311,6 +328,7 @@ mini-map:
 | [Knowledge Management](../agents/knowledge/README.md#group-workflow) | Ingest → curate → retrieve or persist |
 | [Data Ingestion](../agents/data_ingestion/README.md#group-workflow) | Ingest → validate → emit data contract |
 | [Securities Financing](../agents/securities_financing/README.md#group-workflow) | Model financing inputs → all-in cost → backtest and risk |
+| [Venture Intelligence](../agents/venture_intelligence/README.md) | Regional lead and signal analysts → entity resolution → diligence; separately, tradecraft review and sovereign-adjacent screening support |
 | [Credit Risk](../agents/credit_risk/README.md#group-workflow) | Document evidence admission → wholesale measurement/limits; separately, retail fairness testing |
 | [Secrets Management](../agents/secrets_management/README.md#group-workflow) | Store → access → rotate, with scanning throughout |
 | [Analytics](../agents/analytics/README.md#group-workflow) | Define metrics → design/read out experiments; feeds dashboards and reports |

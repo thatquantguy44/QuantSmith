@@ -17,7 +17,7 @@ from pathlib import Path
 import pytest
 
 from quantsmith.pipelines.dashboard_spec import DashboardSpec
-from quantsmith.pipelines.metrics_semantic_layer import Fact, MetricDefinition, SemanticLayer
+from quantsmith.pipelines.metrics_semantic_layer import Fact, SemanticLayer
 from quantsmith.pipelines.powerbi_profile import render_powerbi
 from quantsmith.nl_analytics.plan import (
     Clarification,
@@ -31,7 +31,6 @@ from quantsmith.nl_analytics.plan import (
 )
 from quantsmith.nl_analytics.interpret import (
     InterpretContext,
-    KeywordInterpreter,
     interpret,
     register_interpreter,
 )
@@ -39,7 +38,7 @@ from quantsmith.nl_analytics.authorize import AccessPolicy, authorize_clarificat
 from quantsmith.nl_analytics.execute import execute
 from quantsmith.nl_analytics.chart import ChartError, choose_chart, is_minimal_vega_lite, to_markdown_table, to_panel, to_vega_lite
 from quantsmith.nl_analytics.insights import compute_insights
-from quantsmith.nl_analytics.narrate import default_caveats, ground, template_narrative
+from quantsmith.nl_analytics.narrate import default_caveats, ground
 from quantsmith.nl_analytics.respond import AnswerContext, ChatResponse, ResponseError, WriteBackRequest, answer
 
 

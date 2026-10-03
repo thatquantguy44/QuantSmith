@@ -15,7 +15,7 @@ from __future__ import annotations
 import re
 import statistics
 from dataclasses import dataclass
-from typing import Dict, Optional, Sequence, Tuple
+from typing import Optional, Sequence, Tuple
 
 from .execute import Result
 from .insights import Insight

@@ -1,0 +1,33 @@
+source_id: "sbir_gov"
+name: "SBIR.gov (SBIR/STTR awards)"
+type: api
+owner: "quant-research"
+description: >
+  Small Business Innovation Research and Technology Transfer awards: firm, topic, agency, amount. Venture and intelligence source (spec 0088); endpoints, terms, and
+  coverage are unverified until confirmed against current documentation.
+
+domain: ["grants_procurement", "technology_scouting"]
+access_level: public
+
+quality:
+  completeness: medium
+  timeliness: "award records published after agency submission"
+  known_issues:
+    - "API availability and terms change (unverified)"
+    - "firm identifiers are inconsistent"
+  last_assessed: "2026-10-02"
+
+point_in_time:
+  supports_asof: true
+  known_at_policy: "published"
+  revision_policy: "record source file or endpoint, public timestamp when available, and retrieval timestamp; retain dated snapshots where the source keeps no history"
+
+connection:
+  method: rest_api
+  endpoint_or_host: "https://www.sbir.gov/api"
+  credential_ref: "not_required_public_access"
+
+documentation_uri: "https://www.sbir.gov/api"
+status: evaluating
+
+data_contract_refs: ["specs/0088-venture-sources-pit-ingestion/"]

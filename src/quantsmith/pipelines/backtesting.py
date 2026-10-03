@@ -287,7 +287,7 @@ def render_backtest_report(
     o.append("> completed simulation. Every figure below is computed from the realized")
     o.append("> net path, never entered by hand.")
     if spec_id:
-        o.append(f">")
+        o.append(">")
         o.append(f"> **Spec:** {spec_id}")
     if last_updated:
         o.append(f"> **Last updated:** {last_updated}")

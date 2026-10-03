@@ -810,3 +810,96 @@ least one `0081` pack family being reviewed by its owner.
 Remaining (spec `0080` task T-018 onward): the CLI and worked example (which
 also wires `answer()` to write-back end to end), and applying `0081`'s
 domain packs once at least one family is reviewed.
+
+## `credit_risk_knowledge` — spec `0072-credit-risk-domain-foundation`
+
+Validates the committed credit-risk domain pack under `knowledge/credit_risk/` and
+runs its golden cases; exposes no scoring, provisioning, or underwriting API.
+
+Tests: `tests/test_credit_risk_knowledge.py`.
+
+## `credit_document_intelligence` — spec `0077-credit-document-intelligence`
+
+Bridges a real, emitted `0071` bundle into `0072`'s LLM evidence-admission boundary.
+
+Tests: `tests/test_credit_document_intelligence.py`.
+
+## `wholesale_credit_measurement` — spec `0073-wholesale-credit-measurement`
+
+Facility-level EL/EAD/RWA, counterparty exposure aggregation, limit-breach detection,
+and concentration, composing `0072`'s arithmetic. No rating or PD/LGD model.
+
+Tests: `tests/test_wholesale_credit_measurement.py`.
+
+## `retail_fairness_harness` — spec `0074-retail-underwriting-fairness-harness`
+
+Disparity measurement, proxy-feature association, and a less-discriminatory-alternative
+search over caller-supplied cutoffs. No scorecard ships.
+
+Tests: `tests/test_retail_fairness_harness.py`.
+
+## `credit_risk_worked_example` — cross-cutting (`0077`, `0073`, `0074`)
+
+Threads the three credit runtimes through one reporting cycle and regenerates the
+committed example under `examples/credit_risk_worked_example/`.
+
+Tests: `tests/test_credit_risk_worked_example.py` (float-tolerant comparison across platforms).
+
+## `market_brief` — spec `0059`
+
+Morning market brief from free-API commentary providers.
+
+Tests: `tests/test_market_brief.py`.
+
+## `quant_factory` — spec `0061-quant-model-factory`
+
+Parallel model-development lanes converged by a gate into a `FactoryDecision`.
+
+Tests: `tests/test_quant_factory.py`.
+
+## `workflow_memory_cli` — spec `0049`
+
+CLI for the workflow-memory write path (propose, stage, promote).
+
+Tests: `tests/test_workflow_memory_write_path.py`.
+
+## `workflow_scheduling_cli` — spec `0060`
+
+Operational surface for `0055`: render a daily operations report or preview routed
+alert handoffs from a run ledger.
+
+Tests: `tests/test_workflow_scheduling_cli.py`.
+
+## `venture_pack` — spec `0083-venture-intelligence-foundation`
+
+Validates `knowledge/venture_intelligence/` (referential integrity, decision-path
+class rules, citation discipline, review sign-off, workflow-class consistency),
+recomputes its golden cases, and provides the normalization helpers behind them
+(valuation and fund metrics, IRR, confidence bands, 万/億/亿/만/억/조/lakh/crore,
+Buddhist/ROC/Japanese era years, locale numbers). Unknown or ambiguous units raise.
+
+Tests: `tests/test_venture_pack.py`, `tests/test_venture_regions.py`,
+`tests/test_venture_central_asia.py`, `tests/test_venture_signals.py`.
+
+```sh
+PYTHONPATH=src python3 -m quantsmith.pipelines.venture_pack
+```
+
+## `venture_ingestion` — spec `0088-venture-sources-pit-ingestion`
+
+`derive_known_at` under five source policies with a late-retrieval flag, as-of views,
+outcome-independent cohorts, and deterministic entity resolution (`match`, `candidate`,
+`candidate_cross_script`, `needs_registry_id`, `no_match`) that never merges on a name
+alone and handles Han, Thai, Hangul, kana, Cyrillic, and Latin names.
+
+Tests: `tests/test_venture_ingestion.py`, `tests/test_venture_central_asia.py`.
+
+## `venture_tradecraft` — spec `0090-venture-tradecraft-and-screening-agents`
+
+Grade parsing, origin-aware corroboration status, likelihood-band checks, vague-term
+finding, a competing-hypotheses matrix with sensitivity, effective ownership through
+equity chains, a conclusion-language lint, and a prohibited-source check. Reports
+structure and arithmetic; it never grades, concludes, classifies, or designates.
+
+Tests: `tests/test_venture_tradecraft.py`.
+

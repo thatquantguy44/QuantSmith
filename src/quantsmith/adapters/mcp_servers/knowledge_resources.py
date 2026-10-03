@@ -42,7 +42,6 @@ from .contract import (
     ERR_NOT_FOUND,
     KNOWN_AUTHORITIES,
     METHOD_LIST,
-    METHOD_READ,
     SUPPORTED_CLEARANCES,
     SUPPORTED_METHODS,
     KnowledgeUri,

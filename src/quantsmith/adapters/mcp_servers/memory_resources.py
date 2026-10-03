@@ -32,7 +32,7 @@ records from YAML. This module has no I/O of its own.
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Sequence, Tuple
+from typing import Any, Dict, List, Sequence
 
 from .contract import (
     AUTHORITY_MEMORY,

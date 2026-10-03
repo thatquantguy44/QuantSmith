@@ -1,0 +1,34 @@
+source_id: "gleif_lei"
+name: "GLEIF Legal Entity Identifier (LEI) data"
+type: file_feed
+owner: "quant-research"
+description: >
+  Global LEI golden-copy files: legal name, registration authority ID, jurisdiction, direct and ultimate parent relationships. Venture and intelligence source (spec 0088); endpoints, terms, and
+  coverage are unverified until confirmed against current documentation.
+
+domain: ["ownership", "entity_resolution", "foreign_influence_screening"]
+access_level: public
+
+quality:
+  completeness: medium
+  timeliness: "published as frequent full and delta files"
+  known_issues:
+    - "only entities that obtained an LEI appear; most start-ups have none"
+    - "parent relationships are self-reported"
+    - "history requires retaining your own snapshots"
+  last_assessed: "2026-10-02"
+
+point_in_time:
+  supports_asof: false
+  known_at_policy: "snapshot"
+  revision_policy: "record source file or endpoint, public timestamp when available, and retrieval timestamp; retain dated snapshots where the source keeps no history"
+
+connection:
+  method: file_download
+  endpoint_or_host: "https://api.gleif.org/api/v1"
+  credential_ref: "not_required_public_access"
+
+documentation_uri: "https://www.gleif.org/en/lei-data/gleif-golden-copy"
+status: evaluating
+
+data_contract_refs: ["specs/0088-venture-sources-pit-ingestion/"]

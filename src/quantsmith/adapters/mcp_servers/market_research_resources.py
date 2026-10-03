@@ -34,7 +34,7 @@ has no I/O of its own.
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Tuple
 
 from .contract import (
     AUTHORITY_MARKET_RESEARCH,
@@ -48,7 +48,6 @@ from .contract import (
     McpResponse,
     ResourceContent,
     ResourceMeta,
-    clearance_allows,
     error_response,
     parse_request,
 )

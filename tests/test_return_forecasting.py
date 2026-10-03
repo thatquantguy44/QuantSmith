@@ -13,7 +13,6 @@ from quantsmith.pipelines.return_forecasting import (
     FeatureStore,
     PriceBar,
     build_labels,
-    evaluate,
     make_folds,
     monitor,
     run_forecast,

@@ -1,0 +1,240 @@
+{
+  "schema_version": "0083.1",
+  "status": "draft_structural_contract",
+  "synthetic": true,
+  "disclosure": "All values are synthetic arithmetic examples; no real entity, person, or filing.",
+  "cases": [
+    {
+      "id": "golden.post_money",
+      "kind": "post_money",
+      "pre_money": 8000000,
+      "new_money": 2000000,
+      "existing_ownership_before": 0.1,
+      "expect": {
+        "post_money": 10000000,
+        "new_ownership": 0.2,
+        "existing_ownership_after": 0.08
+      }
+    },
+    {
+      "id": "golden.fund_metrics",
+      "kind": "fund_metrics",
+      "paid_in": 100,
+      "distributions": 40,
+      "nav": 90,
+      "expect": {
+        "dpi": 0.4,
+        "rvpi": 0.9,
+        "tvpi": 1.3
+      }
+    },
+    {
+      "id": "golden.irr",
+      "kind": "irr",
+      "cashflows": [
+        [
+          0.0,
+          -100.0
+        ],
+        [
+          2.0,
+          121.0
+        ]
+      ],
+      "expect": {
+        "irr": 0.1
+      }
+    },
+    {
+      "id": "golden.confidence",
+      "kind": "confidence_label",
+      "probability": 0.7,
+      "expect": {
+        "label": "likely"
+      }
+    },
+    {
+      "id": "golden.confidence_high",
+      "kind": "confidence_label",
+      "probability": 0.97,
+      "expect": {
+        "label": "almost certain"
+      }
+    },
+    {
+      "id": "golden.grade",
+      "kind": "source_grade",
+      "grade": "B2",
+      "expect": {
+        "valid": true
+      }
+    },
+    {
+      "id": "golden.grade_invalid",
+      "kind": "source_grade",
+      "grade": "G9",
+      "expect": {
+        "valid": false
+      }
+    },
+    {
+      "id": "golden.zh_yi",
+      "kind": "cn_number",
+      "text": "3.5亿",
+      "expect": {
+        "value": 350000000
+      }
+    },
+    {
+      "id": "golden.zh_wan",
+      "kind": "cn_number",
+      "text": "1,200万",
+      "expect": {
+        "value": 12000000
+      }
+    },
+    {
+      "id": "golden.th_be",
+      "kind": "buddhist_year",
+      "year": 2567,
+      "expect": {
+        "gregorian": 2024
+      }
+    },
+    {
+      "id": "golden.roc",
+      "kind": "roc_year",
+      "year": 113,
+      "expect": {
+        "gregorian": 2024
+      }
+    },
+    {
+      "id": "golden.id_locale",
+      "kind": "localized_number",
+      "text": "1.250.000,5",
+      "locale": "id",
+      "expect": {
+        "value": 1250000.5
+      }
+    },
+    {
+      "id": "golden.vi_locale",
+      "kind": "localized_number",
+      "text": "2.000.000",
+      "locale": "vi",
+      "expect": {
+        "value": 2000000
+      }
+    },
+    {
+      "id": "golden.survivorship",
+      "kind": "survivorship",
+      "true_cohort": 20,
+      "true_reached_b": 4,
+      "db_listed": 12,
+      "db_reached_b": 4,
+      "expect": {
+        "biased_rate": 0.3333333333333333,
+        "corrected_rate": 0.2
+      }
+    },
+    {
+      "id": "golden.missing_known_at",
+      "kind": "fact_record",
+      "record": {
+        "entity_id": "synthetic.company.001",
+        "value": 1,
+        "unit": "count",
+        "source_id": "synthetic.source",
+        "source_grade": "B2",
+        "event_time": "2026-01-01",
+        "announced_time": "2026-01-02",
+        "filed_time": null,
+        "ingested_time": "2026-01-03",
+        "language": "en",
+        "derived": false,
+        "confidence": "likely"
+      },
+      "expect": {
+        "valid": false
+      }
+    },
+    {
+      "id": "golden.lakh",
+      "kind": "cn_number",
+      "text": "5.2 lakh",
+      "expect": {
+        "value": 520000
+      }
+    },
+    {
+      "id": "golden.crore",
+      "kind": "cn_number",
+      "text": "12 crore",
+      "expect": {
+        "value": 120000000
+      }
+    },
+    {
+      "id": "golden.trad_yi",
+      "kind": "cn_number",
+      "text": "2.5億",
+      "expect": {
+        "value": 250000000
+      }
+    },
+    {
+      "id": "golden.ko_jo",
+      "kind": "cn_number",
+      "text": "1.2조",
+      "expect": {
+        "value": 1200000000000
+      }
+    },
+    {
+      "id": "golden.ko_eok",
+      "kind": "cn_number",
+      "text": "350억",
+      "expect": {
+        "value": 35000000000
+      }
+    },
+    {
+      "id": "golden.era_reiwa",
+      "kind": "era_year",
+      "era": "norm.reiwa",
+      "year": 6,
+      "expect": {
+        "gregorian": 2024
+      }
+    },
+    {
+      "id": "golden.era_heisei",
+      "kind": "era_year",
+      "era": "norm.heisei",
+      "year": 30,
+      "expect": {
+        "gregorian": 2018
+      }
+    },
+    {
+      "id": "golden.ru_locale",
+      "kind": "localized_number",
+      "text": "1 250 000,5",
+      "locale": "ru",
+      "expect": {
+        "value": 1250000.5
+      }
+    },
+    {
+      "id": "golden.ru_locale_nbsp",
+      "kind": "localized_number",
+      "text": "2 000 000",
+      "locale": "kk",
+      "expect": {
+        "value": 2000000
+      }
+    }
+  ]
+}
