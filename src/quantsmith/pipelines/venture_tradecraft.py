@@ -224,4 +224,5 @@ def requirement_age_days(opened: str, today: str) -> int:
 
 def orphan_requirements(register: Iterable[Mapping[str, Any]]) -> List[str]:
     """Requirement IDs that link to no decision."""
-    return [r["id"] for r in register if not str(r.get("decision", "")).strip()]
+    return [r["id"] for r in register
+            if not (isinstance(r.get("decision"), str) and r["decision"].strip())]

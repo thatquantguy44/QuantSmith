@@ -1483,5 +1483,74 @@
       "review_status": "draft",
       "review": null
     }
-  ]
+  ],
+  "product_rules": {
+    "id": "conv.product_rules",
+    "kinds": {
+      "intelligence_brief": {
+        "required_sections": [
+          "bluf",
+          "evidence",
+          "assumptions",
+          "judgements",
+          "open_gaps"
+        ],
+        "bluf_max_chars": 600
+      },
+      "investment_memo": {
+        "required_sections": [
+          "evidence",
+          "assumptions",
+          "judgements",
+          "open_gaps"
+        ],
+        "required_fields": [
+          "decision_owner"
+        ]
+      }
+    },
+    "evidence_confidence_levels": [
+      "low",
+      "moderate",
+      "high"
+    ],
+    "recommendation_terms": [
+      "\\brecommend(?:s|ed|ation|ations)?\\b",
+      "\\bshould (?:invest|buy|pass|proceed|back|fund)\\b",
+      "\\bwe (?:will |would )?(?:invest|pass|buy)\\b",
+      "\\bapprov(?:e|es|ed|al)\\b",
+      "\\breject(?:s|ed)?\\b",
+      "\\b(?:strong )?buy\\b"
+    ],
+    "draft_statuses": [
+      "draft",
+      "draft_for_human_review"
+    ],
+    "release_rule": "A product is releasable only when it validates and a named human reviewer is recorded; the writer never sets the reviewer.",
+    "rules": [
+      "every evidence item cites at least one retrieved passage that resolves, was known at the product date, and does not exceed the product's classification",
+      "evidence, assumptions, judgements, and open gaps are separate sections, none empty",
+      "every judgement states a likelihood word consistent with its probability, an evidence-confidence level, and the evidence it rests on",
+      "high evidence confidence requires a corroborated claim (independent origins across channels)",
+      "a judgement may not rest only on derived (translated or model-produced) evidence without a named reviewer",
+      "no conclusion language and no vague hedging; an investment memo also carries no recommendation language"
+    ],
+    "citation": "ODNI ICD 203 (Analytic Standards); recommendation-term list unverified",
+    "review_status": "draft",
+    "review": null
+  },
+  "retrieval_contract": {
+    "id": "conv.retrieval_contract",
+    "order": [
+      "require caller_clearance (deny if absent)",
+      "drop items above the caller's clearance, not yet known at as_of, or superseded",
+      "rank on statistics from the eligible passages only",
+      "return cited spans (document, offsets, hash, known_at, grade, access level) or not_found",
+      "never mention or count dropped items; not_found looks the same whether the item is absent, future-dated, or restricted"
+    ],
+    "owner_of_live_search": "spec 0054 (reserved); it must satisfy retrieval_contract_violations",
+    "citation": "unverified",
+    "review_status": "draft",
+    "review": null
+  }
 }

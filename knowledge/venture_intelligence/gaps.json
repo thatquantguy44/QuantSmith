@@ -99,6 +99,20 @@
       "severity": "medium",
       "owner_spec": "0091",
       "status": "open"
+    },
+    {
+      "id": "gap.live_semantic_retrieval",
+      "title": "Live semantic search (embeddings, per-tier indexes) is not built; the lexical contract retriever is a reference for spec 0054",
+      "severity": "medium",
+      "owner_spec": "0092",
+      "status": "open"
+    },
+    {
+      "id": "gap.product_validator_checks_form_not_truth",
+      "title": "The product validator cannot tell whether a cited passage supports its claim; a human reviewer must",
+      "severity": "medium",
+      "owner_spec": "0092",
+      "status": "open"
     }
   ]
 }

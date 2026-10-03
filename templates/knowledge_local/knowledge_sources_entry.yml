@@ -1,0 +1,10 @@
+# Add under `sources:` in your local, gitignored knowledge_sources.yml (template:
+# templates/knowledge/knowledge_sources.yml) so the `sources` MCP authority and the `knowledge`
+# gate see the local store. Each immediate subfolder is a domain.
+  - name: knowledge_local
+    path: ./knowledge_local
+    domains_from_subfolders: true
+    access_level: restricted
+    include: ["*.md", "*.txt", "*.json"]
+    exclude: ["**/indexes/**"]
+    freshness_days: 90

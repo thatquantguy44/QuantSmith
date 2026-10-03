@@ -95,3 +95,10 @@ agents.zip
 # to the repo root so it does not hide config/venture_overlay.example.yml.
 /venture_overlay.yml
 /venture_overlay.yaml
+
+# Local knowledge stores (spec 0092): private, real companions to the committed packs under
+# knowledge/. One subfolder per domain, named after its pack (knowledge_local/venture_intelligence/).
+# Holds real source notes, screening decisions, cohorts, and vendor material; never commit it.
+# Root-anchored so templates/knowledge_local/ (placeholders only) stays tracked.
+/knowledge_local/
+

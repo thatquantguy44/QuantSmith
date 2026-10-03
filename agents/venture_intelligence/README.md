@@ -24,6 +24,13 @@ by world region plus cross-cutting capabilities. Foundation spec:
 | `deal_sourcing/` | Longlist from signals against caller-stated criteria | analytic_support | Rank by merit; recommend |
 | `company_diligence/` | Evidence/assumption/judgement memo from supplied evidence | analytic_support | Approve, reject, certify |
 
+## Product writers (cross-cutting)
+
+| Agent | Handles | Class | Never |
+| --- | --- | --- | --- |
+| `intelligence_brief_writer/` | BLUF brief from cited, graded passages; separate evidence, assumptions, judgements, gaps | analytic_support | Release without a named reviewer; state an uncited claim |
+| `investment_memo_writer/` | Committee memo from diligence, tradecraft, and fund outputs; decision owner named | analytic_support | Recommend, approve, or reject an investment |
+
 ## Fund and portfolio analytics agents (cross-cutting)
 
 | Agent | Handles | Class | Never |

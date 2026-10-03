@@ -7,5 +7,6 @@ access_tiers: ["public", "licensed", "restricted"]   # reuse the 0052-0054 tier 
 retention_days: 365                    # set from counsel guidance
 enabled_source_classes: ["public_registry", "licensed_database", "open_scholarly", "open_government"]
 prohibited_source_classes_ack: true    # you have read conventions.json prohibited_source_classes
-reference_cohort_path: ""              # local path to your verified bake-off company list (not committed)
+store_root: "knowledge_local/venture_intelligence"   # the gitignored private store (spec 0092); must be under knowledge_local/
+reference_cohort_path: ""              # path to your verified bake-off company list, inside the store (not committed)
 vendor_credentials_ref: ""             # env var NAME holding a vendor key, never the key

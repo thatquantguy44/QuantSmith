@@ -1,0 +1,7 @@
+# Add under `workflows:` in memory/manifest.yaml, or in an external manifest, so the memory
+# runtime (specs 0048/0049) reads the local venture store instead of the committed memory/.
+# Path is relative to memory/ or absolute. Placeholders only.
+  - name: venture_intelligence
+    path: ../knowledge_local/venture_intelligence/memory
+    persistence: external
+    access_level: restricted
