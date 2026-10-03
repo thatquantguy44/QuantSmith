@@ -47,7 +47,7 @@ pattern-based; tune them to your repository.
 | --- | --- | --- |
 | Secret leak scan | `secret-scan-check.sh` | `agents/secrets_management/` |
 | Markdown link check | `docs-link-check.sh` | all docs |
-| Agent catalog sync | `agent-catalog-check.sh` | `agents/README.md` |
+| Agent catalog sync | `agent-catalog-check.sh` | `agents/README.md`, `agents/agent_registry.yaml` |
 | Spec index sync | `spec-index-check.sh` | `specs/README.md` |
 | README index/runtime sync | `readme-sync-check.sh` | `specs/README.md`, root `README.md` |
 | Documented-count drift | `doc-counts-check.sh` | root `README.md`, `docs/handoff.md`, `docs/sdk_plan.md` |
@@ -124,7 +124,8 @@ hooks/stages/run-stage.sh spec
 - **`docs-link-check.sh`** verifies relative Markdown links and image paths
   resolve to existing files. External links and pure anchors are skipped.
 - **`agent-catalog-check.sh`** verifies every public agent (a directory with
-  `prompt.md`) is listed in `agents/README.md`.
+  `prompt.md`) is listed in `agents/README.md` and in the generated
+  `agents/agent_registry.yaml`.
 - **`spec-index-check.sh`** verifies every tracked spec (a directory under `specs/`
   with `spec.md`) is listed in the spec index, `specs/README.md`. Enforced in CI.
 - **`knowledge-check.sh`** validates the configurable knowledge-base source
