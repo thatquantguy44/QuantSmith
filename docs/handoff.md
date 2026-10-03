@@ -1587,7 +1587,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
     (per-record review sign-off; all records still `draft`). Next: `0091` (fund analytics), the deferred regions in `0087`, and
     native-speaker review of the `0094` lexicons.
 
-33. **Deferred lint review (24 ruff findings, left unfixed on purpose).** A repo-wide
+33. **Deferred lint review (24 ruff findings originally, left unfixed on purpose; 22 remain).** A repo-wide
     `ruff check --fix` pass (2026-10-03, commit `7b7fbcd`) applied only the safe
     fixes (54 unused imports and f-string prefixes, 34 files, no behavior change,
     full suite green). The remaining 24 need a human decision; re-run
@@ -1599,18 +1599,26 @@ manual-task persistence question stays deferred until a real consumer needs it.
       `test_nl_analytics.py`. Leave alone unless the bootstrap pattern is replaced.
     - **6 × E702 (semicolon-separated statements)** — the min-cost-flow arc setup
       in `src/quantsmith/pipelines/optimization_solvers.py:269-270`. Style only.
-    - **5 × F841 (unused variable)** — review each; two may matter:
-      - `src/quantsmith/pipelines/return_forecasting.py:205` — `gap = horizon + embargo`
-        is assigned but unused in fold construction. Check that the embargo is
-        actually applied by `make_folds` (spec `0006` AC-003, purge + embargo); if
-        the variable was meant to be used, this is a leakage-protection bug, not
-        lint.
+    - **3 × F841 (unused variable)** remain (two were resolved, see below):
       - `src/quantsmith/adapters/mcp_servers/market_research_resources.py:156` —
-        `citation = render_citation(item)` is unused; confirm the call has no
-        needed side effect (for example validation) before removing it.
-      - `src/quantsmith/pipelines/return_forecasting.py:486` (`n` in `_pearson`),
-        `tests/test_market_research.py:800` (`item`), and
-        `tests/test_nl_analytics.py:763` (`envelope2`) look safe to remove.
+        `citation = render_citation(item)` is unused. Checked: `render_citation` and
+        `classify_item` are pure and `classify_item` cannot raise, so the call has no
+        side effect; its only observable effect is an `AttributeError` if an item has
+        no `published_at`. Removing it is safe for well-formed items; left alone
+        because it would change that error path.
+      - `tests/test_market_research.py:800` (`item`) and `tests/test_nl_analytics.py:763`
+        (`envelope2`) look safe to remove.
+    - **Resolved (2026-10-03):** `return_forecasting.py` `gap = horizon + embargo` was dead
+      code, **not** a leakage bug: `make_folds` already applies the embargo inline
+      (`d + horizon < test_start - embargo`, identical to `d + gap < test_start`).
+      Removed the variable and the unused `n` in `_pearson`, and added tests that pin the
+      exact boundary, show each embargo day removes one training day, and prove the purge
+      is both sufficient (no train label reaches a test day) and maximal (every dropped day
+      really violates the rule) across a grid of horizons, embargoes, and sizes.
+      **Open design note:** `make_folds` silently *drops* a fold whose purge leaves no
+      training days (for example 30 days, horizon 6, embargo 1 returns 2 folds when 3 were
+      requested). That is leak-safe but silent; consider warning or raising. A test now
+      documents the current behavior.
     - Also still open from the repository health check: the `repro` gate's lockfile
       finding is closed by `uv.lock` and its run-manifest finding by
       `specs/0083-venture-intelligence-foundation/run_card.md` (see
