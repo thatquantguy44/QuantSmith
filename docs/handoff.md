@@ -1585,6 +1585,36 @@ manual-task persistence question stays deferred until a real consumer needs it.
     (per-record review sign-off; all records still `draft`). Next: build `0094`,
     then `0091` (fund analytics) and the deferred regions in `0087`.
 
+33. **Deferred lint review (24 ruff findings, left unfixed on purpose).** A repo-wide
+    `ruff check --fix` pass (2026-10-03, commit `7b7fbcd`) applied only the safe
+    fixes (54 unused imports and f-string prefixes, 34 files, no behavior change,
+    full suite green). The remaining 24 need a human decision; re-run
+    `ruff check --output-format concise .` to list them.
+    - **13 × E402 (import not at top of file)** — intentional `sys.path`
+      bootstraps in `agents/agentic_code_tools/__init__.py`,
+      `agents/quant_analyst/{agentic_quant/__init__,run_rebalancer,run_sec_lending,run_sp500}.py`,
+      and late imports in `tests/test_market_research.py`, `test_mcp_servers.py`,
+      `test_nl_analytics.py`. Leave alone unless the bootstrap pattern is replaced.
+    - **6 × E702 (semicolon-separated statements)** — the min-cost-flow arc setup
+      in `src/quantsmith/pipelines/optimization_solvers.py:269-270`. Style only.
+    - **5 × F841 (unused variable)** — review each; two may matter:
+      - `src/quantsmith/pipelines/return_forecasting.py:205` — `gap = horizon + embargo`
+        is assigned but unused in fold construction. Check that the embargo is
+        actually applied by `make_folds` (spec `0006` AC-003, purge + embargo); if
+        the variable was meant to be used, this is a leakage-protection bug, not
+        lint.
+      - `src/quantsmith/adapters/mcp_servers/market_research_resources.py:156` —
+        `citation = render_citation(item)` is unused; confirm the call has no
+        needed side effect (for example validation) before removing it.
+      - `src/quantsmith/pipelines/return_forecasting.py:486` (`n` in `_pearson`),
+        `tests/test_market_research.py:800` (`item`), and
+        `tests/test_nl_analytics.py:763` (`envelope2`) look safe to remove.
+    - Also still open from the repository health check: the `repro` gate reports
+      no dependency lockfile; every `knowledge/venture_intelligence/` record is
+      `draft` and most cite `unverified`; `agents/agent_registry.yaml` lists only 6 skill
+      agents in total, so it does not include the venture agents (nor most others);
+      decide whether it should be complete or retired.
+
 ## Open Questions For The Owner
 
 - Copyable scaffold, Python package, or CLI/copier? (Directionally answered in
