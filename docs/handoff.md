@@ -1594,6 +1594,12 @@ manual-task persistence question stays deferred until a real consumer needs it.
     validation with a release gate, and the `intelligence_brief_writer` and
     `investment_memo_writer` agents. It also fixed a defect where `None` read as a reviewer
     name in the pack's sign-off checks. Live semantic search remains `0054`.
+    `0095` (Draft, built) adds `quantsmith.venture_models`: a point-in-time validation harness, a
+    computed deployability gate, and reference baselines for the five predictive families
+    (competing-risks survival, emergence, organization-level link prediction, anomaly, chain-ladder
+    nowcast). All validation is synthetic; every catalog model is `usable_for_decisions: false`
+    until real-data evidence and a named reviewer exist. Next: a real Southeast Asia cohort in
+    `knowledge_local/venture_intelligence/cohorts/`, then real-data validation.
     Proof of concept: no legal collection limits set yet; they must be set
     before operational use. The `0083` knowledge pack and validator are built
     (per-record review sign-off; all records still `draft`). Next: `0091` (fund analytics), the deferred regions in `0087`, and

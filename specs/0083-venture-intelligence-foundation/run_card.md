@@ -1,6 +1,6 @@
 # Run Card: Venture intelligence pack validation
 
-- **Run ID:** 0083-pack-validation-2026-10-03-r4 (supersedes r3, recorded at `ca508df`, r2 at `dab341c`, and the first run at `9477e9f`)
+- **Run ID:** 0083-pack-validation-2026-10-03-r5 (supersedes r4, recorded at `8f356e1`, r3 at `ca508df`, r2 at `dab341c`, and the first run at `9477e9f`)
 - **Spec:** 0083-venture-intelligence-foundation
 - **Author:** Joshua Lutkemuller, CFA (accountable owner); executed in a Claude Code session
 - **Date:** 2026-10-03
@@ -16,14 +16,14 @@ The standard-library validator for the `knowledge/venture_intelligence/` pack
 (`quantsmith.pipelines.venture_pack`), which checks referential integrity,
 decision-path class rules, citation discipline, review sign-off, workflow-class
 consistency, and recomputes every golden case; then the eight venture, Asian-language, and fund-analytics
-test modules and the full repository test suite. This fourth run follows the `0092`
-change, which added product-rule and retrieval-contract conventions, two built agents, workflow
-entries, gap entries, and a fix for `None` being read as a name in the pack's sign-off checks. There is no model, no training, and no external
+test modules and the full repository test suite. This fifth run follows the `0095`
+change, which added model-governance fields to the catalog (synthetic-only, not usable for decisions),
+a validator rule using the computed deployability gate, a retitled gap, and a roadmap scope. There is no model, no training, and no external
 data in this run; it validates committed knowledge records and synthetic golden cases.
 
 ## Code Version
 
-- Commit: `8f356e105a3b3ea46246097ff2979872908f9eb3`
+- Commit: `0ba173c227862c2874d38a485d968ee657c25842`
 - Branch / tag: `claude/venture-intelligence-sea-0083`
 - Dirty working tree at run time? no. This card is committed after the run; it does
   not change any validated file.
@@ -39,11 +39,11 @@ data in this run; it validates committed knowledge records and synthetic golden 
   | --- | --- |
   | `channels.json` | `196fc2889a67` |
   | `conventions.json` | `b481ff974f8f` |
-  | `coverage.json` | `cf8c583cddfa` |
-  | `gaps.json` | `9bee36fec8c5` |
+  | `coverage.json` | `97e3b1970831` |
+  | `gaps.json` | `3b6b8e1796d1` |
   | `glossary.json` | `7e5bc6476aea` |
   | `golden_cases.json` | `32e6d1f35aeb` |
-  | `models.json` | `f07557a6c5b9` |
+  | `models.json` | `1c6ed93a0168` |
   | `taxonomy.json` | `47bea5b30d2f` |
   | `workflows.json` | `a1677faa793f` |
   | `asian_nlp/fixtures/extraction_cases.json` | `57a9da51cf22` |
@@ -81,8 +81,8 @@ data in this run; it validates committed knowledge records and synthetic golden 
 | Records reviewed / draft | 0 / 210 | No record has named human review yet |
 | Records citing `unverified` | 183 of 210 | Recorded honestly; not a failure |
 | Golden cases recomputed | 24 | All match expected values |
-| Venture, Asian-language, fund-analytics, and knowledge-integration test modules | 336 passed | nine modules, including 220 in `tests/test_asian_nlp.py`, 25 in `tests/test_venture_fund_analytics.py`, and 24 in `tests/test_venture_knowledge.py` |
-| Full repository suite | 1129 passed | Python 3.11.17 (the 3.13.9 run of the earlier card also passed) |
+| Venture-family test modules | 369 passed | ten modules, including 33 in `tests/test_venture_models.py` |
+| Full repository suite | 1162 passed | Python 3.11.17 (the 3.13.9 run of the earlier card also passed) |
 | Validator output digest, two runs | `8feb9d24ac95` = `8feb9d24ac95` | Byte-identical output |
 
 - Output artifact location: none written; results are printed to the terminal.
@@ -97,7 +97,7 @@ PYTHONPATH=src .venv/bin/python -m quantsmith.pipelines.venture_pack
 PYTHONPATH=src .venv/bin/python -m pytest \
   tests/test_venture_pack.py tests/test_venture_ingestion.py tests/test_venture_regions.py \
   tests/test_venture_central_asia.py tests/test_venture_signals.py tests/test_venture_tradecraft.py \
-  tests/test_asian_nlp.py tests/test_venture_fund_analytics.py tests/test_venture_knowledge.py -q
+  tests/test_asian_nlp.py tests/test_venture_fund_analytics.py tests/test_venture_knowledge.py tests/test_venture_models.py -q
 PYTHONPATH=src .venv/bin/python -m pytest -q
 ```
 
@@ -107,7 +107,9 @@ PYTHONPATH=src .venv/bin/python -m pytest -q
   correct. Every record is `draft` and 108 cite `unverified`; a named person must
   review them before any is relied on.
 - This card covers the pack, its helpers, the `0094` baseline, and the `0091` fund
-  analytics, and the `0092` retrieval reference and product validators. The baseline's scores apply only to the 240 synthetic cases and the fund
+  analytics, the `0092` retrieval reference and product validators, and the `0095` predictive-model baselines. The
+  `0095` baselines are validated on synthetic data only and the catalog marks every model not usable for
+  decisions. The baseline's scores apply only to the 240 synthetic cases and the fund
   functions are checked on synthetic flows with hand-computed answers; neither is a
   claim of accuracy on real documents or real funds. No live data adapter is built.
 - If the pack files change, the hashes above change; re-run and record a new card.

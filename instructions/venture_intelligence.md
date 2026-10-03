@@ -73,7 +73,7 @@ against a named person or entity. The decision belongs to the accountable human
 
 Deterministic helpers back the rules above: `quantsmith.pipelines.venture_pack`
 (pack validator, normalization, fund metrics), `venture_ingestion` (`known_at`,
-as-of views, cohorts, entity resolution), and `venture_knowledge` (private store, memory candidates, retrieval contract) and `venture_products` (brief and memo validation), `venture_fund_analytics` (multiples, XIRR, J-curve, PME, peer rank, mark-consistency flags, seeded fund and reserve simulation), and `venture_tradecraft` (grades,
+as-of views, cohorts, entity resolution), and `venture_knowledge` (private store, memory candidates, retrieval contract) and `venture_products` (brief and memo validation), `venture_fund_analytics` (multiples, XIRR, J-curve, PME, peer rank, mark-consistency flags, seeded fund and reserve simulation), and `quantsmith.venture_models` (point-in-time validation harness and reference baselines for the predictive families; none usable for decisions without real-data evidence and a named reviewer), and `venture_tradecraft` (grades,
 corroboration, hypotheses matrix, effective ownership, conclusion-language lint).
 `quantsmith.asian_nlp` supplies the deterministic baseline for Asian-language text (identification, segmentation, span-preserving extraction); model output is compared against it and never replaces it. They report structure and arithmetic; they never grade, conclude, classify, or
 designate. Validate the pack with

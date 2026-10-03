@@ -21,6 +21,13 @@ patterns locally rather than expecting them to update in place.
 ## [Unreleased]
 
 ### Added
+- Venture predictive-model reference baselines (spec `0095`): `quantsmith.venture_models` with a
+  point-in-time validation harness (`as_of_view`, `out_of_time_split`, `assert_features_known`), a
+  computed `deployability` gate, competing-risks survival (Kaplan-Meier, Aalen-Johansen, discrete-time
+  hazards with calibration and concordance), an emergence indicator with a Poisson noise floor,
+  organization-level link prediction, a seasonal anomaly indicator, and a chain-ladder nowcast on
+  real-time vintages. All validation is synthetic; the model catalog marks every model not usable for
+  decisions and the pack validator enforces it.
 - Venture knowledge integration (spec `0092`): the gitignored `knowledge_local/<domain>/` private
   store (templates in `templates/knowledge_local/`; `docs-link` skips it and `memory` scans it),
   `venture_knowledge.py` (store validation, memory candidates staged only inside the store, a
