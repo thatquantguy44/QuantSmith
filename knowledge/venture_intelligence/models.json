@@ -11,10 +11,20 @@
       "validation": "Labelled pairs with precision and recall per language and script.",
       "failure_modes": "Transliteration collisions; shared names; merging subsidiaries into parents.",
       "decision_path_class": "analytic_support",
-      "status": "catalog_only",
+      "status": "reference_implementation",
       "citation": "unverified",
       "review_status": "draft",
-      "review": null
+      "review": null,
+      "implementation": "src/quantsmith/pipelines/venture_ingestion.py (resolve_entities)",
+      "validation_status": "deterministic_rules",
+      "usable_for_decisions": false,
+      "limitations": "Rules, not a trained model; no labelled cross-script pairs have been evaluated.",
+      "validation_evidence": [],
+      "required_before_use": [
+        "real-data validation on a point-in-time cohort with a dataset snapshot hash",
+        "out-of-time evaluation with interval estimates against the stated baseline",
+        "a named human reviewer's sign-off in the catalog record"
+      ]
     },
     {
       "id": "model.round_progression",
@@ -25,10 +35,20 @@
       "validation": "Out-of-time cohorts; calibration; bias-corrected denominators.",
       "failure_modes": "Survivorship and reporting lag; censoring of quiet companies treated as failures.",
       "decision_path_class": "analytic_support",
-      "status": "catalog_only",
+      "status": "reference_baseline",
       "citation": "unverified",
       "review_status": "draft",
-      "review": null
+      "review": null,
+      "implementation": "src/quantsmith/venture_models/survival.py",
+      "validation_status": "synthetic_only",
+      "usable_for_decisions": false,
+      "limitations": "Cause-specific discrete-time hazards and Aalen-Johansen on synthetic cohorts only; no real cohort, vendor backfill, or survivorship has been tested.",
+      "validation_evidence": [],
+      "required_before_use": [
+        "real-data validation on a point-in-time cohort with a dataset snapshot hash",
+        "out-of-time evaluation with interval estimates against the stated baseline",
+        "a named human reviewer's sign-off in the catalog record"
+      ]
     },
     {
       "id": "model.technology_emergence",
@@ -39,10 +59,20 @@
       "validation": "Retrospective detection of known past emergences with lead time reported.",
       "failure_modes": "Hype terms; reclassification; publication lag.",
       "decision_path_class": "analytic_support",
-      "status": "catalog_only",
+      "status": "reference_baseline",
       "citation": "unverified",
       "review_status": "draft",
-      "review": null
+      "review": null,
+      "implementation": "src/quantsmith/venture_models/emergence.py",
+      "validation_status": "synthetic_only",
+      "usable_for_decisions": false,
+      "limitations": "Robust growth indicator checked on synthetic series; real technologies, reclassification, and hype terms are untested.",
+      "validation_evidence": [],
+      "required_before_use": [
+        "real-data validation on a point-in-time cohort with a dataset snapshot hash",
+        "out-of-time evaluation with interval estimates against the stated baseline",
+        "a named human reviewer's sign-off in the catalog record"
+      ]
     },
     {
       "id": "model.network_link",
@@ -53,10 +83,20 @@
       "validation": "Temporal link-prediction splits.",
       "failure_modes": "Hub bias; privacy drift toward individuals; no person-level profiling.",
       "decision_path_class": "analytic_support",
-      "status": "catalog_only",
+      "status": "reference_baseline",
       "citation": "unverified",
       "review_status": "draft",
-      "review": null
+      "review": null,
+      "implementation": "src/quantsmith/venture_models/links.py",
+      "validation_status": "synthetic_only",
+      "usable_for_decisions": false,
+      "limitations": "Neighbourhood scores on a synthetic block graph; hub bias and real co-investment structure are untested. Organization-level only.",
+      "validation_evidence": [],
+      "required_before_use": [
+        "real-data validation on a point-in-time cohort with a dataset snapshot hash",
+        "out-of-time evaluation with interval estimates against the stated baseline",
+        "a named human reviewer's sign-off in the catalog record"
+      ]
     },
     {
       "id": "model.funding_anomaly",
@@ -67,10 +107,20 @@
       "validation": "Injected synthetic anomalies; false-positive review.",
       "failure_modes": "Reporting lag looks like a drop; seasonality; indicator is not a finding.",
       "decision_path_class": "analytic_support",
-      "status": "catalog_only",
+      "status": "reference_baseline",
       "citation": "unverified",
       "review_status": "draft",
-      "review": null
+      "review": null,
+      "implementation": "src/quantsmith/venture_models/anomaly.py",
+      "validation_status": "synthetic_only",
+      "usable_for_decisions": false,
+      "limitations": "Seasonal robust-z indicator on synthetic series; real reporting-lag patterns and seasonality are untested.",
+      "validation_evidence": [],
+      "required_before_use": [
+        "real-data validation on a point-in-time cohort with a dataset snapshot hash",
+        "out-of-time evaluation with interval estimates against the stated baseline",
+        "a named human reviewer's sign-off in the catalog record"
+      ]
     },
     {
       "id": "model.sector_nowcast",
@@ -81,10 +131,20 @@
       "validation": "Real-time vintages compared with final data.",
       "failure_modes": "Revisions; structural breaks; incomplete recent data.",
       "decision_path_class": "analytic_support",
-      "status": "catalog_only",
+      "status": "reference_baseline",
       "citation": "unverified",
       "review_status": "draft",
-      "review": null
+      "review": null,
+      "implementation": "src/quantsmith/venture_models/nowcast.py",
+      "validation_status": "synthetic_only",
+      "usable_for_decisions": false,
+      "limitations": "Chain-ladder on synthetic vintages; real vendor revisions and structural breaks are untested.",
+      "validation_evidence": [],
+      "required_before_use": [
+        "real-data validation on a point-in-time cohort with a dataset snapshot hash",
+        "out-of-time evaluation with interval estimates against the stated baseline",
+        "a named human reviewer's sign-off in the catalog record"
+      ]
     },
     {
       "id": "model.fund_simulation",
@@ -99,7 +159,16 @@
       "citation": "unverified",
       "review_status": "draft",
       "review": null,
-      "implementation": "src/quantsmith/pipelines/venture_fund_analytics.py (simulate_fund, bootstrap_fund, simulate_reserves); scenario tool, not a forecast"
+      "implementation": "src/quantsmith/pipelines/venture_fund_analytics.py",
+      "validation_status": "synthetic_only",
+      "usable_for_decisions": false,
+      "limitations": "Scenario tool under assumed hit rates and tails; not a forecast.",
+      "validation_evidence": [],
+      "required_before_use": [
+        "real-data validation on a point-in-time cohort with a dataset snapshot hash",
+        "out-of-time evaluation with interval estimates against the stated baseline",
+        "a named human reviewer's sign-off in the catalog record"
+      ]
     }
   ]
 }
