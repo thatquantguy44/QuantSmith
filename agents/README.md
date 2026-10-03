@@ -468,16 +468,20 @@ dashboard/reporting agents.
 | `analytics/experimentation/` | A/B test design and readout — power/sample-size, sample-ratio-mismatch validity, p-value/CI consistency, power-gated verdict | Reporting, Testing |
 | `analytics/data_storytelling/` | Governed `Report` → audience-tailored narrative (situation → insight → action); reuse-only, evidence-bounded | Reporting, Dashboards |
 | `analytics/dashboard_design/` | Tool-agnostic dashboard spec (hierarchy, chart selection, drill paths, accessibility) | Dashboards, Reporting |
+| `analytics/data_visualization/` | Single-chart encoding — chart-type form rule, color, sort, units/labels, accessibility, for one chart at a time | Dashboards, `nl_analytics` |
+| `analytics/nl_analytics/` | Natural-language question → governed `QueryPlan` → chart + grounded insights → chat response and/or reversible database write-back | Reporting, Dashboards |
 
-The last two are the communication layer (spec `0014-data-analyst-storytelling`) — they
-compose `0008`/`0009`/`0010` outputs and hand off to `reporting-agent` and the
-tool-specific dashboard agents. Runtimes:
+The last four are the communication layer (specs `0014-data-analyst-storytelling`,
+`0080-nl-analytics-insights`) — they
+compose `0008`/`0009`/`0010` outputs and hand off to `reporting-agent`, the
+tool-specific dashboard agents, `data_visualization`, and `sql-integration-agent`
+rather than duplicating them. Runtimes:
 `src/quantsmith/pipelines/metrics_semantic_layer.py`,
-`src/quantsmith/pipelines/experimentation.py`; specs:
-`specs/0008-metrics-semantic-layer/`, `specs/0009-experimentation/`,
-`specs/0014-data-analyst-storytelling/`; standards:
-`instructions/metrics_semantic_layer.md`, `instructions/data_storytelling.md`,
-`instructions/model_validation.md`.
+`src/quantsmith/pipelines/experimentation.py`, `src/quantsmith/nl_analytics/`;
+specs: `specs/0008-metrics-semantic-layer/`, `specs/0009-experimentation/`,
+`specs/0014-data-analyst-storytelling/`, `specs/0080-nl-analytics-insights/`;
+standards: `instructions/metrics_semantic_layer.md`,
+`instructions/data_storytelling.md`, `instructions/model_validation.md`.
 
 ## Analytics Pipeline Agents
 

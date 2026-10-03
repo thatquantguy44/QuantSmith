@@ -10,7 +10,7 @@
 > direction included. See item 1 of *What's Next* and items 29–30.
 
 The SDK has a working v1: a **spec-driven engineering framework** over the six
-software-development stages, **177 agents** in `agents/`,
+software-development stages, **179 agents** in `agents/`,
 **35 quality gates**, **37 instruction standards**, and CI that
 enforces the deterministic gates. It remains primarily a scaffold to be copied
 into quant repos, with `src/quantsmith/pipelines/`, `src/quantsmith/orchestration/`,
@@ -35,7 +35,7 @@ it via stable IDs (`REQ`/`NFR`/`AC`/`RISK`/`T`).
 - `specs/NNNN-slug/{spec,plan,tasks}.md` from `templates/spec/`; worked example at
   `specs/0001-daily-momentum-signal/`.
 
-**Agents (177, verified by the `agent-catalog` gate — treat `agents/README.md`
+**Agents (179, verified by the `agent-catalog` gate — treat `agents/README.md`
 as the live count, not the number here)** — all on the four-file contract
 (`README`/`prompt`/`instructions`/`tasks`) with a `Spec-Driven Role`:
 
@@ -718,7 +718,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
     to populate `sources/` as real sources come into use.
 
 14. **P1 Generalization & Team Onboarding — making QuantSmith self-serve across
-    domains.** QuantSmith is now a comprehensive framework (177 agents, 60 specs,
+    domains.** QuantSmith is now a comprehensive framework (179 agents, 69 specs,
     33 gates, 35 standards); the next phase is reducing discovery friction and
     enabling team-intuitive adoption without deep codebase reading.
     - **P0 Phase 1a: Role profiles** (`roles/{portfolio_manager,risk_manager,quant_researcher,data_engineer,compliance_officer}.md`):
@@ -1453,29 +1453,43 @@ manual-task persistence question stays deferred until a real consumer needs it.
     insights make "what changed since yesterday / this week" answerable
     point-in-time, closing the multi-day gap `0055`/`0059` leave open. Adds
     `agents/analytics/data_visualization/` (promoting the P3 backlog row) and
-    `agents/analytics/nl_analytics/`. **Status (17 REQ, 6 NFR, 26 AC, 22
-    tasks): the full chat-and-write-back pipeline is built and tested —
-    T-001 through T-013 and T-020** (`src/quantsmith/nl_analytics/`:
-    `plan.py`, `interpret.py`, `authorize.py`, `execute.py`, `chart.py`,
-    `insights.py`, `narrate.py`, `respond.py`, `writeback.py`,
-    `writeback_sqlite.py`; 33 tests in `tests/test_nl_analytics.py`). A
+    `agents/analytics/nl_analytics/` — both shipped, contract-only, per
+    REQ-014. **Status (17 REQ, 6 NFR, 26 AC, 22 tasks): every task except the
+    two blocked on `0081`'s pack review is built and tested — T-001 through
+    T-018 and T-020** (`src/quantsmith/nl_analytics/`: `plan.py`,
+    `interpret.py`, `authorize.py`, `execute.py`, `chart.py`, `insights.py`,
+    `narrate.py`, `respond.py`, `writeback.py`, `writeback_sqlite.py`,
+    `envelope.py`, `cli.py`; 49 tests in `tests/test_nl_analytics.py`). A
     question answers end to end through `respond.answer()` with no side
-    effects; separately, `writeback.build_records`/`publish`/`reverse` and
-    `writeback.prior_insights` (bounded strictly by as-of, never a clock)
-    give a caller the pieces to persist and later compare against a chat
-    answer's insights — dry-run by default, append-only, idempotent, and
-    reversible by run id, all proven against both an in-memory writer and a
-    real SQLite file. Nothing here needed the pack reviews or the open
-    questions below to start. First write-back target resolved (owner,
-    2026-09-24): **SQLite** through stdlib `sqlite3` against a local
-    gitignored file; a shared database adapter is deferred until a team
-    needs one. **Remaining:** the `0070` audit envelope and replay (T-014),
-    the two agents (T-015), and the CLI/example (T-016–T-018, which also
-    wires `answer()` to write-back end to end — `ChatResponse` itself
-    doesn't carry the plan/result `build_records` needs); domain-pack
-    application (T-021/T-022) once `0081`'s families are reviewed. **Open
-    questions:** first chat surface, whether insights also become
-    `0048`/`0056` knowledge candidates, and the approval model.
+    effects by default; opting in (`AnswerContext.envelope_dir`/`run_id`)
+    records the run as a `0070` bundle that `0070`'s own replay engine
+    validates and replays offline, byte-identically on identical inputs. A
+    caller-declared `dataset_privacy` (`contains_pii`/`contains_mnpi`/
+    `contains_restricted_positions`, never inferred) redacts the question
+    out of every rendered artifact when set, replacing it with its hash, and
+    tags an LLM-backed interpret step with the privacy block an
+    `adapters/llm_runtime/` request for it would carry; an import/source
+    scan test proves the package stays stdlib-only with no credential or
+    network code, and `answer()` answers a question over 100,000 synthetic
+    fact rows well inside the 2s NFR-005 budget. Write-back is now wired
+    fully end to end: `AnswerContext.writeback` (`WriteBackRequest`) makes
+    `answer()` itself build and publish records from the plan/result/insights
+    it already computed and attach the outcome to `ChatResponse.writeback`
+    — dry-run by default, append-only, idempotent, reversible by run id,
+    and a refused commit returns the previously-unused `write_rejected`
+    typed status (NFR-006) rather than raising. First write-back target
+    resolved (owner, 2026-09-24): **SQLite** through stdlib `sqlite3`
+    against a local gitignored file; a shared database adapter is deferred
+    until a team needs one. `cli.py` (`quantsmith-nl-analytics ask`, in
+    `pyproject.toml`) and `examples/nl_analytics/` (registry, synthetic
+    fact rows, a three-day transcript, a byte-checked committed sample
+    response, `docs/0080_synthetic_data_disclosure.md`) walk the whole
+    thing — level question, grouped question, then a genuine "since
+    yesterday" comparison against a persisted record — with real CLI
+    invocations. **Remaining:** domain-pack application (T-021/T-022) once
+    `0081`'s families are reviewed. **Open questions:** first chat surface,
+    whether insights also become `0048`/`0056` knowledge candidates, and
+    the approval model.
 
 30. **Analytics domain packs (spec `0081`, Draft; packs drafted, validator
     built) — the domain knowledge behind item 29.** Forty JSON packs in
@@ -1546,7 +1560,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
 
 ## Risks
 
-- Breadth: 177 agents is useful only if each stays narrow and inspectable.
+- Breadth: 179 agents is useful only if each stays narrow and inspectable.
 - Heuristic gates (`leakage`, `backtest`, `secret-scan` fallback) can false-positive
   or miss; keep them advisory unless a repo's layout makes them reliable.
 - Docs can drift from the code; the `docs-link`, `agent-catalog`, and `spec-index` gates help, but

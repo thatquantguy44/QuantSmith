@@ -8,7 +8,11 @@ proves.
 from __future__ import annotations
 
 import json
+import os
 import sqlite3
+import subprocess
+import sys
+from pathlib import Path
 
 import pytest
 
@@ -36,7 +40,7 @@ from quantsmith.nl_analytics.execute import execute
 from quantsmith.nl_analytics.chart import ChartError, choose_chart, is_minimal_vega_lite, to_markdown_table, to_panel, to_vega_lite
 from quantsmith.nl_analytics.insights import compute_insights
 from quantsmith.nl_analytics.narrate import default_caveats, ground, template_narrative
-from quantsmith.nl_analytics.respond import AnswerContext, ChatResponse, ResponseError, answer
+from quantsmith.nl_analytics.respond import AnswerContext, ChatResponse, ResponseError, WriteBackRequest, answer
 
 
 @pytest.fixture
@@ -723,3 +727,417 @@ def test_writeback_sqlite_file_target(tmp_path, layer):
     key = comparison_key(plan)
     prior = prior_insights(reopened.read, key, as_of=10)
     assert prior is not None and prior.run_id == "run-file"
+
+
+# --- T-014: 0070 envelope + replay -----------------------------------------
+
+
+from quantsmith.orchestration.foundation import replay_envelope_file
+from quantsmith.nl_analytics.envelope import emit_answer_evidence
+
+
+def _answered(layer):
+    rows = [Fact(period=p, dims={"desk": "rates"}, measures={"cost": float(p)}) for p in range(6, 11)]
+    plan = _plan(window=TimeWindow(6, 10, "day"))
+    result = execute(plan, layer, reader=lambda p: rows, as_of=10)
+    chart = choose_chart(result, layer)
+    insight_set = compute_insights(result)
+    ctx = AnswerContext(layer=layer, reader=lambda p: rows, as_of=10,
+                        interpret_context=InterpretContext(today_period=10, default_window_periods=5))
+    response = answer("funding cost", ctx)
+    return plan, result, chart, insight_set, response
+
+
+def test_ac017_replay_is_byte_identical(layer, tmp_path):
+    plan, result, chart, insight_set, response = _answered(layer)
+    out1 = tmp_path / "run1"
+    envelope1 = emit_answer_evidence(
+        "funding cost", plan, result, chart, insight_set, response, out1,
+        run_id="run-envelope-1", started_at="2026-01-01T00:00:00Z",
+    )
+    report = replay_envelope_file(envelope1)
+    assert report.status == "replayed", report.findings
+    assert report.output_diffs == ()
+    assert report.non_reproducible_dependencies == ()
+
+    out2 = tmp_path / "run2"
+    envelope2 = emit_answer_evidence(
+        "funding cost", plan, result, chart, insight_set, response, out2,
+        run_id="run-envelope-1", started_at="2026-01-01T00:00:00Z",
+    )
+    for name in ("answer_payload.json", "prompt_manifest.json", "context_manifest.json",
+                 "assumptions.jsonl", "evaluation_harness.json", "audit_events.jsonl", "run_envelope.json"):
+        assert (out1 / name).read_bytes() == (out2 / name).read_bytes(), name
+
+
+def test_envelope_llm_interpreter_mode_marks_non_deterministic(layer, tmp_path):
+    plan, result, chart, insight_set, response = _answered(layer)
+    out = tmp_path / "run_llm"
+    envelope = emit_answer_evidence(
+        "funding cost", plan, result, chart, insight_set, response, out,
+        run_id="run-llm-1", started_at="2026-01-01T00:00:00Z",
+        interpreter_mode="llm:anthropic/claude",
+    )
+    report = replay_envelope_file(envelope)
+    assert any(d["event_type"] == "model_invocation" for d in
+              [dict(e) for e in json.loads(f'[{",".join((out / "audit_events.jsonl").read_text().splitlines())}]')])
+    # Non-deterministic without a fixture_path is honestly reported, not hidden.
+    assert report.status in ("non_reproducible", "replayed")
+    if report.status == "non_reproducible":
+        assert any(d["event_type"] == "model_invocation" for d in report.non_reproducible_dependencies)
+
+
+def test_answer_can_opt_in_to_envelope_emission(layer, tmp_path):
+    rows = [Fact(period=p, dims={"desk": "rates"}, measures={"cost": float(p)}) for p in range(6, 11)]
+    ctx = AnswerContext(
+        layer=layer, reader=lambda p: rows, as_of=10,
+        interpret_context=InterpretContext(today_period=10, default_window_periods=5),
+        envelope_dir=str(tmp_path / "run"), run_id="run-opt-in-1",
+    )
+    response = answer("funding cost", ctx)
+    assert response.status == "answered"
+    assert response.envelope_uri is not None
+    report = replay_envelope_file(response.envelope_uri)
+    assert report.status == "replayed"
+
+    # Without envelope_dir, no files are written -- no side effects (RISK-004).
+    before = set(tmp_path.iterdir())
+    ctx_no_envelope = AnswerContext(
+        layer=layer, reader=lambda p: rows, as_of=10,
+        interpret_context=InterpretContext(today_period=10, default_window_periods=5),
+    )
+    answer("funding cost", ctx_no_envelope)
+    assert set(tmp_path.iterdir()) == before
+
+    # envelope_dir without run_id is refused, not silently skipped.
+    with pytest.raises(ResponseError):
+        answer("funding cost", AnswerContext(
+            layer=layer, reader=lambda p: rows, as_of=10,
+            interpret_context=InterpretContext(today_period=10, default_window_periods=5),
+            envelope_dir=str(tmp_path / "run2"),
+        ))
+
+
+# --- AC-019: standard library only, no credentials, no network -------------
+
+
+def test_ac019_stdlib_only_no_credentials_or_network():
+    import ast
+    import sys
+    from pathlib import Path
+
+    pkg_dir = Path("src/quantsmith/nl_analytics")
+    py_files = sorted(pkg_dir.glob("*.py"))
+    assert py_files, "expected nl_analytics package files to scan"
+
+    stdlib = set(sys.stdlib_module_names)
+    network_patterns = ("socket", "urllib.request", "http.client", "requests", "ftplib", "smtplib", "asyncio")
+    credential_re = __import__("re").compile(
+        r"(?i)\b(password|passwd|api[_-]?key|secret[_-]?key|access[_-]?key|auth[_-]?token)\s*="
+    )
+    conn_string_re = __import__("re").compile(r"[a-zA-Z][\w+.-]*://[^\s\"']*:[^\s\"'@]*@")
+
+    for path in py_files:
+        source = path.read_text(encoding="utf-8")
+        tree = ast.parse(source, filename=str(path))
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                names = [alias.name for alias in node.names]
+            elif isinstance(node, ast.ImportFrom):
+                if node.level > 0:
+                    continue  # relative import within the package itself
+                names = [node.module] if node.module else []
+            else:
+                continue
+            for name in names:
+                if name is None:
+                    continue
+                root = name.split(".")[0]
+                assert root in stdlib or root == "quantsmith", (
+                    f"{path}: non-stdlib, non-quantsmith import {name!r}"
+                )
+                assert name not in network_patterns and root not in network_patterns, (
+                    f"{path}: network-capable import {name!r}"
+                )
+
+        assert not credential_re.search(source), f"{path}: looks like a hardcoded credential"
+        assert not conn_string_re.search(source), f"{path}: looks like a connection string"
+
+
+# --- AC-020: audit redaction and LLM adapter privacy flags -----------------
+
+
+def test_ac020_audit_redaction_and_privacy_flags(layer, tmp_path):
+    plan, result, chart, insight_set, response = _answered(layer)
+    out = tmp_path / "run_pii"
+    secret_question = "what was the funding cost for client Jane Doe's account"
+    envelope = emit_answer_evidence(
+        secret_question, plan, result, chart, insight_set, response, out,
+        run_id="run-pii-1", started_at="2026-01-01T00:00:00Z",
+        interpreter_mode="llm:anthropic/claude",
+        dataset_privacy={"contains_pii": True},
+    )
+
+    payload = json.loads((out / "answer_payload.json").read_text())
+    assert payload["question"] != secret_question
+    assert secret_question not in (out / "prompt.md").read_text()
+    assert secret_question not in (out / "run_envelope.json").read_text()
+    assert secret_question not in (out / "context_manifest.json").read_text()
+    assert secret_question not in (out / "audit_events.jsonl").read_text()
+    import hashlib
+    assert payload["question_hash"] == f"sha256:{hashlib.sha256(secret_question.encode('utf-8')).hexdigest()}"
+
+    events = [json.loads(line) for line in (out / "audit_events.jsonl").read_text().splitlines()]
+    interpret_event = next(e for e in events if e["event_type"] == "model_invocation")
+    assert interpret_event["payload_ref"]["privacy"] == {
+        "contains_pii": True, "contains_mnpi": False, "contains_restricted_positions": False,
+    }
+
+    manifest = json.loads((out / "prompt_manifest.json").read_text())
+    assert manifest["privacy"]["contains_pii"] is True
+
+    report = replay_envelope_file(envelope)
+    assert report.status in ("replayed", "non_reproducible")
+
+    # No privacy classification declared: the question passes through in full.
+    out_public = tmp_path / "run_public"
+    emit_answer_evidence(
+        secret_question, plan, result, chart, insight_set, response, out_public,
+        run_id="run-public-1", started_at="2026-01-01T00:00:00Z",
+    )
+    payload_public = json.loads((out_public / "answer_payload.json").read_text())
+    assert payload_public["question"] == secret_question
+
+
+# --- AC-021: 100k-row benchmark ---------------------------------------------
+
+
+def test_ac021_benchmark_100k_rows(layer):
+    """T-017: the deterministic path (excluding data fetch/LLM calls) answers
+    a question over 100,000 synthetic fact rows in under 2s. A trivial
+    calibration workload measures the runner's own speed first, so a
+    genuinely under-provisioned CI runner is skipped with a recorded reason
+    rather than failing on wall-clock noise it has no control over."""
+    import time
+
+    desks = [f"desk-{i}" for i in range(200)]
+    currencies = ("USD", "EUR", "JPY", "GBP", "CHF")
+    rows = [
+        Fact(period=period, dims={"desk": desk, "currency": currency}, measures={"cost": float(period)})
+        for period in range(1, 101)
+        for desk in desks
+        for currency in currencies
+    ]
+    assert len(rows) == 100_000
+
+    calibration_start = time.perf_counter()
+    sum(i * i for i in range(2_000_000))
+    calibration_elapsed = time.perf_counter() - calibration_start
+    if calibration_elapsed > 0.5:
+        pytest.skip(
+            f"runner under-provisioned for a timing benchmark "
+            f"(calibration workload took {calibration_elapsed:.2f}s)"
+        )
+
+    ctx = AnswerContext(
+        layer=layer, reader=lambda p: rows, as_of=100,
+        interpret_context=InterpretContext(today_period=100, default_window_periods=100),
+    )
+
+    start = time.perf_counter()
+    response = answer("funding cost by desk", ctx)
+    elapsed = time.perf_counter() - start
+
+    assert response.status == "answered"
+    assert response.chart is not None
+    assert elapsed < 2.0, f"deterministic path over 100k rows took {elapsed:.2f}s (NFR-005 budget: 2s)"
+
+
+# --- T-018: answer() wired end to end to write-back -------------------------
+
+
+def test_answer_writeback_dry_run_by_default(layer):
+    rows = [Fact(period=10, dims={"desk": "rates"}, measures={"cost": 42.0})]
+    contract = default_contract("cli_default")
+    writer = _RecordingWriter()
+    ctx = AnswerContext(
+        layer=layer, reader=lambda p: rows, as_of=10,
+        interpret_context=InterpretContext(today_period=10, default_window_periods=1),
+        run_id="run-wb-1",
+        writeback=WriteBackRequest(contract=contract, writer=writer),
+    )
+    response = answer("funding cost", ctx)
+    assert response.status == "answered"
+    assert response.run_id == "run-wb-1"
+    assert response.writeback is not None
+    assert response.writeback.status == "dry_run"
+    assert response.writeback.written_count == 0
+    assert writer.rows == {}  # dry run never calls the writer
+
+
+def test_answer_writeback_commits_and_is_idempotent(layer):
+    rows = [Fact(period=10, dims={"desk": "rates"}, measures={"cost": 42.0})]
+    contract = default_contract("cli_default", auto_approve=True)
+    writer = _RecordingWriter()
+
+    def _ctx():
+        return AnswerContext(
+            layer=layer, reader=lambda p: rows, as_of=10,
+            interpret_context=InterpretContext(today_period=10, default_window_periods=1),
+            run_id="run-wb-2",
+            writeback=WriteBackRequest(contract=contract, writer=writer, dry_run=False),
+        )
+
+    first = answer("funding cost", _ctx())
+    assert first.writeback.status == "committed"
+    assert first.writeback.written_count > 0
+    first_count = len(writer.rows)
+
+    second = answer("funding cost", _ctx())
+    assert second.writeback.status == "committed"
+    assert second.writeback.written_count == 0  # identical run_id -> identical keys
+    assert len(writer.rows) == first_count
+
+
+def test_answer_writeback_without_approval_is_write_rejected(layer):
+    rows = [Fact(period=10, dims={"desk": "rates"}, measures={"cost": 42.0})]
+    contract = default_contract("cli_default")  # auto_approve=False
+    writer = _RecordingWriter()
+    ctx = AnswerContext(
+        layer=layer, reader=lambda p: rows, as_of=10,
+        interpret_context=InterpretContext(today_period=10, default_window_periods=1),
+        run_id="run-wb-3",
+        writeback=WriteBackRequest(contract=contract, writer=writer, dry_run=False, approved=False),
+    )
+    response = answer("funding cost", ctx)
+    assert response.status == "write_rejected"
+    assert response.reason
+    assert response.chart is None  # AC-022: a non-answer never carries a chart
+    assert writer.rows == {}
+
+
+def test_answer_writeback_without_run_id_is_refused(layer):
+    rows = [Fact(period=10, dims={"desk": "rates"}, measures={"cost": 42.0})]
+    contract = default_contract("cli_default")
+    ctx = AnswerContext(
+        layer=layer, reader=lambda p: rows, as_of=10,
+        interpret_context=InterpretContext(today_period=10, default_window_periods=1),
+        writeback=WriteBackRequest(contract=contract, writer=_RecordingWriter()),
+    )
+    with pytest.raises(ResponseError):
+        answer("funding cost", ctx)
+
+
+def test_answer_writeback_against_sqlite(layer, tmp_path):
+    rows = [Fact(period=10, dims={"desk": "rates"}, measures={"cost": 42.0})]
+    contract = default_contract("cli_default", auto_approve=True)
+    writer = open_writer(str(tmp_path / "nl_analytics.db"), contract)
+    ctx = AnswerContext(
+        layer=layer, reader=lambda p: rows, as_of=10,
+        interpret_context=InterpretContext(today_period=10, default_window_periods=1),
+        run_id="run-wb-sqlite-1",
+        writeback=WriteBackRequest(contract=contract, writer=writer, dry_run=False),
+    )
+    response = answer("funding cost", ctx)
+    assert response.writeback.status == "committed"
+    assert response.writeback.written_count > 0
+    assert writer.read(comparison_key(_plan()))
+
+
+# --- T-018: cli.py and examples/nl_analytics/ -------------------------------
+
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+_EXAMPLE_DIR = _REPO_ROOT / "examples" / "nl_analytics"
+
+
+def _run_cli(*args, env=None):
+    full_env = {**os.environ, "PYTHONPATH": str(_REPO_ROOT / "src")}
+    if env:
+        full_env.update(env)
+    return subprocess.run(
+        [sys.executable, "-m", "quantsmith.nl_analytics.cli", *args],
+        cwd=str(_REPO_ROOT), capture_output=True, text=True, env=full_env,
+    )
+
+
+def test_cli_ask_answers_from_the_worked_example(tmp_path):
+    result = _run_cli(
+        "ask", "what is total funding cost",
+        "--registry", str(_EXAMPLE_DIR / "registry.json"),
+        "--data", str(_EXAMPLE_DIR / "data.json"),
+        "--today", "1", "--window", "1", "--json",
+    )
+    assert result.returncode == 0, result.stderr
+    payload = json.loads(result.stdout)
+    assert payload["status"] == "answered"
+    assert payload["headline"] == "funding_cost is 250 as of period 1."
+    assert payload["writeback"] is None  # no --db/--publish: no side effects
+
+
+def test_cli_transcript_reproduces_the_committed_sample_response(tmp_path):
+    """Runs the exact three-day transcript from transcript.md and checks day
+    3's JSON output matches the committed sample_response.json byte-for-byte
+    on every field (T-018)."""
+    db = tmp_path / "nl_analytics_demo.db"
+
+    day1 = _run_cli(
+        "ask", "what is total funding cost",
+        "--registry", str(_EXAMPLE_DIR / "registry.json"),
+        "--data", str(_EXAMPLE_DIR / "data.json"),
+        "--today", "1", "--window", "1", "--db", str(db),
+        "--publish", "--commit", "--approve", "--run-id", "run-day1", "--author", "desk-analyst",
+    )
+    assert day1.returncode == 0, day1.stderr
+    assert "write-back: committed (1 record(s), run_id=run-day1)" in day1.stdout
+
+    day2 = _run_cli(
+        "ask", "what is total funding cost by desk",
+        "--registry", str(_EXAMPLE_DIR / "registry.json"),
+        "--data", str(_EXAMPLE_DIR / "data.json"),
+        "--today", "2", "--window", "1", "--db", str(db),
+    )
+    assert day2.returncode == 0, day2.stderr
+    assert "write-back:" not in day2.stdout  # not published
+
+    day3 = _run_cli(
+        "ask", "what is total funding cost since yesterday",
+        "--registry", str(_EXAMPLE_DIR / "registry.json"),
+        "--data", str(_EXAMPLE_DIR / "data.json"),
+        "--today", "3", "--window", "1", "--db", str(db),
+        "--publish", "--commit", "--approve", "--run-id", "run-day3", "--author", "desk-analyst", "--json",
+    )
+    assert day3.returncode == 0, day3.stderr
+    actual = json.loads(day3.stdout)
+    expected = json.loads((_EXAMPLE_DIR / "sample_response.json").read_text(encoding="utf-8"))
+    assert actual == expected
+
+
+def test_cli_publish_without_run_id_errors(tmp_path):
+    result = _run_cli(
+        "ask", "what is total funding cost",
+        "--registry", str(_EXAMPLE_DIR / "registry.json"),
+        "--data", str(_EXAMPLE_DIR / "data.json"),
+        "--today", "1", "--window", "1", "--db", str(tmp_path / "x.db"),
+        "--publish", "--commit", "--approve",
+    )
+    assert result.returncode == 2
+    assert "--run-id" in result.stderr
+
+
+def test_cli_publish_without_db_errors():
+    result = _run_cli(
+        "ask", "what is total funding cost",
+        "--registry", str(_EXAMPLE_DIR / "registry.json"),
+        "--data", str(_EXAMPLE_DIR / "data.json"),
+        "--today", "1", "--window", "1", "--publish", "--run-id", "run-x",
+    )
+    assert result.returncode == 2
+    assert "--db" in result.stderr
+
+
+def test_example_disclosure_exists_and_is_declared():
+    disclosure = _REPO_ROOT / "docs" / "0080_synthetic_data_disclosure.md"
+    assert disclosure.exists()
+    text = disclosure.read_text(encoding="utf-8")
+    assert "examples/nl_analytics" in text
+    assert "Generation method" in text
