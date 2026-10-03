@@ -415,3 +415,19 @@ A company's number in an official register within one jurisdiction; with the jur
 ### Entity Resolution Candidate
 
 A pair of records whose names suggest the same company but which lacks a registry identifier; never merged until evidence is added.
+
+### VIE Structure
+
+Variable interest entity: a contractual-control arrangement, rather than direct equity, by which an offshore holding company may consolidate an onshore operating entity. Equity and contract links are shown separately.
+
+### Fiscal Year-End Convention
+
+The month a market's companies typically close their financial year (e.g. March 31 in India and Japan); stated for every annual figure, never assumed to be a calendar year.
+
+### Era Year
+
+A year counted from an imperial or republican era (Reiwa, Heisei, Showa, Minguo) and converted to Gregorian by a stated offset.
+
+### Onshore / Offshore Renminbi
+
+CNY is the onshore and CNH the offshore renminbi; they can differ in rate and are not silently combined.

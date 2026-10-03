@@ -36,7 +36,7 @@ against a named person or entity. The decision belongs to the accountable human
 ## Multilingual documents
 
 - Keep the verbatim source-language span for every extracted field; translation is a labelled, separate field.
-- Normalize numerals, units, dates, currencies, and accounting bases by stated rule (e.g. 万 = 10^4, 亿 = 10^8; Thai Buddhist year - 543; ROC year + 1911); flag ambiguity instead of guessing.
+- Normalize numerals, units, dates, currencies, fiscal years, and accounting bases by stated rule (e.g. 万 = 10^4, 亿 = 10^8, 억 = 10^8, lakh = 10^5, crore = 10^7; Thai Buddhist year - 543; ROC year + 1911; Reiwa year + 2018); flag ambiguity such as 兆 instead of guessing.
 - Never merge entities across scripts or transliterations without a registry ID; keep legal-form suffixes.
 - Report quality per language; a bilingual human reviewer is required for low-resource or high-stakes extractions.
 
@@ -46,6 +46,8 @@ against a named person or entity. The decision belongs to the accountable human
 | --- | --- |
 | `multilingual_document_nlp` | Give a legal translation, interpret legal effect, or certify authenticity |
 | `entity_resolution` | Merge records on a name alone or collapse a parent and subsidiary |
+| `greater_china_east_asia/regional_lead`, `south_asia/regional_lead` | Recommend or rank investments, or rule on permissibility of a transfer or structure |
+| `greater_china_east_asia/entity_structure_analyst` | Designate, attribute, accuse, or conclude control by any government or party |
 | `southeast_asia/regional_lead` | Recommend or rank investments, or rule on regulatory permissibility |
 | `southeast_asia/entity_structure_analyst` | Designate, attribute, or accuse; conclude a structure is unlawful |
 | `southeast_asia/funding_ecosystem_analyst` | Recommend, size, or value an investment |
