@@ -259,3 +259,25 @@ A tradable signal expressed as an explicit formula over market inputs, composed 
 ## Financing-Aware Backtest
 
 A backtest that nets the cost of borrowing and funding — borrow fee, short rebate, repo/funding, margin — from returns. Short and long-short backtests that ignore financing overstate their edge; checked by the `backtest` gate's financing theme.
+
+## Venture & Intelligence
+
+### Decision-Path Class
+
+A label on every venture/intelligence workflow: `analytic_support`, `person_adjacent`, or `sovereign_adjacent`. The latter two are decision-support only with named human review. See `instructions/venture_intelligence.md`.
+
+### Source Reliability / Information Credibility
+
+A two-axis grade for a source (how reliable the provider has been) and a piece of information (how credible it is given corroboration), kept separate so a good source's weak claim is not over-trusted.
+
+### Survivorship / Backfill Bias
+
+In venture data, databases overrepresent companies that survived or were later added with historical dates, inflating apparent hit rates. Every fact needs a `known_at` date.
+
+### Derived Evidence
+
+A translation or extraction produced by a model. Labelled, never substituted for the source-language span, and human-reviewed before informing a decision (specs `0070`/`0071`).
+
+### Holdco / Opco
+
+Holding company (often Singapore, Cayman, BVI, or Delaware) above local operating companies. Domicile of the holdco is not the market of operation.

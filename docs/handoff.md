@@ -295,7 +295,7 @@ designs**: create and
 approve one only when the foundation it consumes — `0063` or `0072` — has frozen
 that contract and the prior dependency named above is satisfied. Do not add
 agents merely to fill the map; prefer a canonical knowledge artifact or tested
-runtime that an existing agent can use. **Next unreserved spec number: `0083`.**
+runtime that an existing agent can use. **Next unreserved spec number: `0093`** (`0083`–`0092` are the venture-intelligence foundation and its reserved children, item 32).
 Reserving a number here does not create the directory; copy `templates/spec/`
 only when that slice becomes active.
 
@@ -1544,6 +1544,25 @@ manual-task persistence question stays deferred until a real consumer needs it.
     was specific to these six disciplines, not a general shortage. Contract
     only, no runtime, matching `0022`/`0033`'s precedent; `agent-catalog`
     gate and the `0081` validator both pass.
+
+32. **Venture & non-traditional intelligence (specs `0083` foundation and `0084`
+    first build, both Draft).** New direction for venture capital, technology
+    scouting, portfolio consulting, and foreign-influence screening. `0083` is
+    an umbrella foundation (taxonomy, venture data-time and survivorship
+    contracts, source-grade and confidence tradecraft, channel catalog,
+    multilingual-document standard, decision-path classes
+    `analytic_support`/`person_adjacent`/`sovereign_adjacent`) and reserves
+    child specs `0084`–`0092`: `0084` multilingual document NLP plus Southeast
+    Asia agents; `0085`–`0087` the other regions in waves; `0088` source
+    adapters and point-in-time ingestion; `0089` sourcing, diligence, and
+    signal analysts; `0090` tradecraft and sovereign-adjacent screening
+    support; `0091` fund analytics and predictive models; `0092` retrieval and
+    dictionary wiring. `0084` ships four contract-only agents under
+    `agents/venture_intelligence/` (`multilingual_document_nlp`,
+    `southeast_asia/{regional_lead,entity_structure_analyst,
+    funding_ecosystem_analyst}`) and `instructions/venture_intelligence.md`.
+    Proof of concept: no legal collection limits set yet; they must be set
+    before operational use. Next: the `0083` knowledge pack and validator.
 
 ## Open Questions For The Owner
 

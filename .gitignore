@@ -84,3 +84,8 @@ agents.zip
 # it is local signal, not a shared artifact.
 .qf-usage.tsv
 *.qf-usage.tsv
+
+# Local venture database evaluation notes (spec 0083) -- vendor shortlist and
+# bake-off notes may name licensed vendors and a real reference cohort; never
+# commit it. Anchored to the repo root.
+/docs/venture_database_recommendations.md
