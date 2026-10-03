@@ -1,0 +1,93 @@
+{
+  "schema_version": "0093.1",
+  "pack_id": "asset_management",
+  "name": "Asset Management — visual stories",
+  "analytics_pack_ids": [
+    "asset_management"
+  ],
+  "reviewer_agents": [
+    "agents/analytics/data_storytelling",
+    "agents/analytics/data_visualization",
+    "agents/portfolio_management/monitoring_governance",
+    "agents/portfolio_management/performance_attribution"
+  ],
+  "review": {
+    "status": "draft",
+    "reviewer": null,
+    "reviewed_on": null
+  },
+  "recipes": [
+    {
+      "recipe_id": "asset_flows",
+      "intent": "flows",
+      "decision": "How have assets under management and net flows developed?",
+      "audiences": [
+        "executive",
+        "analyst"
+      ],
+      "sections": [
+        {
+          "section_id": "aum",
+          "metric": "aum",
+          "dimensions": [],
+          "view": "trend",
+          "chart_rule": "shape",
+          "fallback_reason": "",
+          "interpretation": "How much of the asset movement can be reconciled to separately governed flow and valuation evidence?",
+          "caveats": [
+            "AUM observations are snapshots; these views do not constitute a reconciled AUM bridge."
+          ]
+        },
+        {
+          "section_id": "flows",
+          "metric": "net_flows",
+          "dimensions": [],
+          "view": "trend",
+          "chart_rule": "shape",
+          "fallback_reason": "",
+          "interpretation": "Do the observed flows warrant a review of mandate retention?",
+          "caveats": []
+        }
+      ],
+      "action": "Investigate asset movements using separately governed flow and valuation evidence."
+    },
+    {
+      "recipe_id": "mandate_performance",
+      "intent": "performance",
+      "decision": "How do excess returns and fee rates compare across strategies?",
+      "audiences": [
+        "executive",
+        "analyst"
+      ],
+      "sections": [
+        {
+          "section_id": "returns",
+          "metric": "excess_return",
+          "dimensions": [
+            "strategy"
+          ],
+          "view": "breakdown",
+          "chart_rule": "table",
+          "fallback_reason": "Cumulative performance requires governed wealth-path evidence; show observed strategy values in a table.",
+          "interpretation": "Are benchmark, fee, and measurement-window definitions comparable across strategies?",
+          "caveats": [
+            "These observed excess returns are not cumulative wealth paths."
+          ]
+        },
+        {
+          "section_id": "fees",
+          "metric": "management_fee_rate",
+          "dimensions": [
+            "strategy"
+          ],
+          "view": "breakdown",
+          "chart_rule": "shape",
+          "fallback_reason": "",
+          "interpretation": "Do fee arrangements explain differences that need further investigation?",
+          "caveats": []
+        }
+      ],
+      "action": "Review benchmark definitions and fee arrangements before drawing cross-strategy conclusions."
+    }
+  ]
+}
