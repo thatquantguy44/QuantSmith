@@ -46,3 +46,13 @@ real behavior rather than a chased number. Grounded in this repo's own
   contract.
 - Assertions on behavior, not just "no exception raised."
 - Coverage read honestly — a number is not proof of correctness.
+
+## Runtime
+
+Spec `0097` (`src/quantsmith/test_engineering/`) gives this agent a real runtime:
+
+- `quantsmith-test-engineering run --tool pytest` for a uniform result; `edges --target pkg.mod:func` to probe a function and
+  `--write-tests` for characterization tests; `mutate --target path.py` to find assertions that do not bite;
+  `flaky` to find order- or hash-seed-dependent tests.
+
+The runtime's reports are evidence for a human; they do not prove correctness.
