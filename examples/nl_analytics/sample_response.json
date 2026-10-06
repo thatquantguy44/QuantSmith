@@ -1,6 +1,7 @@
 {
   "caveats": [
-    "Small sample: only 3 row(s) behind this answer."
+    "Small sample: only 3 row(s) behind this answer.",
+    "No analytics domain pack matched this dataset; generic behavior was used (funding_cost treated as additive, from its metric definition only)."
   ],
   "chart": {
     "chart_type": "kpi",
@@ -18,6 +19,7 @@
     "funding_cost \u2014 owner: treasury-ops",
     "as of period 3"
   ],
+  "domain_packs": [],
   "envelope_uri": null,
   "headline": "funding_cost is 255 as of period 3.",
   "insights": [

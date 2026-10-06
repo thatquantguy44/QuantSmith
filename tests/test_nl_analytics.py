@@ -1140,3 +1140,192 @@ def test_example_disclosure_exists_and_is_declared():
     text = disclosure.read_text(encoding="utf-8")
     assert "examples/nl_analytics" in text
     assert "Generation method" in text
+
+
+# --- AC-023..AC-026: analytics domain packs (T-021, T-022) -----------------
+
+import copy
+from dataclasses import replace
+
+from quantsmith.nl_analytics.domain import (
+    MetricPolicy,
+    generic_additivity,
+    resolve_policy,
+    select,
+)
+from quantsmith.nl_analytics.narrate import template_narrative
+from quantsmith.pipelines.analytics_packs import load_packs
+
+_PACKS = tuple(load_packs("."))
+
+# A 2y/10y/30y curve over two years: 2y moves 4.00% -> 4.20% (+20 bp).
+_CURVE = {1: {"2y": 4.00, "10y": 4.10, "30y": 4.30}, 2: {"2y": 4.20, "10y": 4.15, "30y": 4.32}}
+
+
+def _rates_layer():
+    layer = SemanticLayer()
+    layer.define(name="yield", owner="rates", grain="year", dimensions=("tenor",), source="ytm", agg="mean")
+    layer.define(name="notional", owner="rates", grain="year", dimensions=("desk",), source="face", agg="sum")
+    return layer
+
+
+def _curve_rows(tenors=("2y", "10y", "30y")):
+    return [Fact(period=p, dims={"tenor": t}, measures={"ytm": y})
+            for p, curve in _CURVE.items() for t, y in curve.items() if t in tenors]
+
+
+def _yearly_context(layer, rows, **kwargs):
+    return AnswerContext(
+        layer=layer, reader=lambda p: rows, as_of=2,
+        interpret_context=InterpretContext(today_period=2, default_grain="year", default_window_periods=1),
+        **kwargs,
+    )
+
+
+def test_ac023_pack_units_and_additivity_applied():
+    layer = _rates_layer()
+    ctx = _yearly_context(layer, _curve_rows(("2y",)), dataset_domains=("fixed_income_rates",), domain_packs=_PACKS)
+    # "YTM" is a rates-pack synonym: pack vocabulary extends interpretation.
+    response = answer("YTM yoy", ctx)
+    assert response.status == "answered", response.reason
+    assert response.domain_packs == ("rates_fixed_income",)
+    change = {i.kind: i for i in response.insights}["change"]
+    assert change.values["bps"] == pytest.approx(20.0)
+    assert change.values["percent"] is None
+    assert "+20 bp" in change.statement
+    assert "5%" not in change.statement and "+5" not in change.statement
+    assert any("+20 bp, not +5%" in c for c in response.caveats)  # the pack's own caveat
+    assert response.chart.units == "%"
+    assert ground(template_narrative(response.insights), response.insights).ok
+
+    # var under market_risk: no contributor, no concentration, no cross-desk sum.
+    risk = SemanticLayer()
+    risk.define(name="var", owner="risk", grain="year", dimensions=("desk",), source="var", agg="sum")
+    rows = [Fact(period=p, dims={"desk": d}, measures={"var": v})
+            for p, d, v in ((1, "rates", 5.0), (1, "fx", 3.0), (2, "rates", 6.0), (2, "fx", 4.0))]
+    ctx = _yearly_context(risk, rows, dataset_domains=("market_risk",), domain_packs=_PACKS)
+    response = answer("var by desk yoy", ctx)
+    assert response.status == "answered", response.reason
+    kinds = {i.kind for i in response.insights}
+    assert "contributor" not in kinds and "concentration" not in kinds
+    level = {i.kind: i for i in response.insights}["level"]
+    assert "level" not in level.values  # no firm total
+    assert level.values["levels"] == {"fx": 4.0, "rates": 6.0}
+    assert "10" not in response.headline  # 6 + 4 is never stated
+    assert {i.kind: i for i in response.insights}["change"].values["absolute"] == {"fx": 1.0, "rates": 1.0}
+    assert any("Not shown for var: contributor, concentration" in c for c in response.caveats)
+
+    # Ungrouped var over desk-level rows: the total is caveated as a cross-group sum.
+    response = answer("var yoy", ctx)
+    assert any("it is not a var of any of them" in c for c in response.caveats)
+
+
+def test_non_additive_metric_is_never_summed_across_groups():
+    """The original defect: yields by tenor were summed into one 'level'."""
+    layer = _rates_layer()
+    rows = _curve_rows()
+    plan = _plan(metric="yield", dims=("tenor",), window=TimeWindow(2, 2, "year"))
+    result = execute(plan, layer, reader=lambda p: rows, as_of=2)
+    policy = resolve_policy(layer, "yield")  # generic: a mean is not additive
+    assert policy.additivity == "non_additive"
+    by_kind = {i.kind: i for i in compute_insights(result, policy=policy)}
+    assert set(by_kind) == {"level"}
+    assert by_kind["level"].values["levels"] == {"10y": 4.15, "2y": 4.2, "30y": 4.32}
+    assert "12.67" not in by_kind["level"].statement  # 4.20 + 4.15 + 4.32
+    assert ground(by_kind["level"].statement, list(by_kind.values()), result).ok  # "10y" is a label
+
+    # Ungrouped, the level is the metric's own value over all rows, not a sum.
+    flat = execute(_plan(metric="yield", window=TimeWindow(2, 2, "year")), layer, reader=lambda p: rows, as_of=2)
+    level = compute_insights(flat, policy=policy)[0]
+    assert level.values["level"] == pytest.approx((4.20 + 4.15 + 4.32) / 3)
+
+    # A ratio metric's level is the ratio of the sums, not the sum of the ratios.
+    ratio = SemanticLayer()
+    ratio.define(name="sum_cost", owner="o", grain="day", dimensions=("desk",), source="cost")
+    ratio.define(name="sum_rev", owner="o", grain="day", dimensions=("desk",), source="rev")
+    ratio.define(name="margin", owner="o", grain="day", dimensions=("desk",), numerator="cost", denominator="rev")
+    rrows = [Fact(1, {"desk": "a"}, {"cost": 1.0, "rev": 2.0}), Fact(1, {"desk": "b"}, {"cost": 3.0, "rev": 4.0})]
+    rres = execute(_plan(metric="margin", dims=("desk",), window=TimeWindow(1, 1, "day")), ratio, lambda p: rrows, 1)
+    assert rres.total == pytest.approx(4.0 / 6.0)
+    assert compute_insights(rres, policy=resolve_policy(ratio, "margin"))[0].values["levels"] == {"a": 0.5, "b": 0.75}
+
+
+def test_semi_additive_level_is_the_latest_period_not_a_window_sum():
+    layer = _rates_layer()
+    rows = [Fact(p, {"desk": d}, {"face": v}) for p in (1, 2, 3) for d, v in (("a", 100.0), ("b", 50.0))]
+    plan = _plan(metric="notional", dims=("desk",), window=TimeWindow(1, 3, "year"))
+    result = execute(plan, layer, reader=lambda p: rows, as_of=3)
+    policy = resolve_policy(layer, "notional", select(("fixed_income_rates",), _PACKS))
+    assert policy.additivity == "semi_additive"
+    by_kind = {i.kind: i for i in compute_insights(result, policy=policy)}
+    assert by_kind["level"].values["level"] == pytest.approx(150.0)  # not 450 over three years
+    assert by_kind["level"].values["period"] == 3
+    assert by_kind["concentration"].values["top_share"] == pytest.approx(100.0 / 150.0)
+    chart = choose_chart(result, layer, snapshot=not policy.sums_across_time)
+    assert [row["value"] for row in chart.data] == [100.0, 50.0]
+
+
+def test_ac024_cross_pack_term_conflict_clarifies(layer):
+    ctx = AnswerContext(
+        layer=layer, reader=lambda p: [], as_of=1,
+        interpret_context=InterpretContext(today_period=1, default_window_periods=1),
+        dataset_domains=("equities", "fx"), domain_packs=_PACKS,
+    )
+    response = answer("vol by pair", ctx)
+    assert response.status == "clarification_needed"
+    assert "implied_volatility" in response.reason and "realized_volatility" in response.reason
+    assert response.chart is None
+
+
+def test_ac025_draft_pack_caveat_and_writeback_gate():
+    layer = _rates_layer()
+    rows = _curve_rows(("2y",))
+    writer = _RecordingWriter()
+    wb = WriteBackRequest(contract=default_contract("cli_default"), writer=writer)
+
+    ctx = _yearly_context(layer, rows, dataset_domains=("fixed_income_rates",), domain_packs=_PACKS)
+    chat = answer("yield yoy", ctx)
+    assert any("Unreviewed domain pack: rates_fixed_income" in c for c in chat.caveats)
+
+    refused = answer("yield yoy", replace(ctx, run_id="run-pack-1", writeback=wb))
+    assert refused.status == "write_rejected"
+    assert "rates_fixed_income" in refused.reason
+    assert writer.rows == {}
+
+    reviewed = []
+    for p in _PACKS:
+        p = copy.deepcopy(p)
+        p["review"] = {"status": "reviewed", "reviewer": "Test Reviewer", "reviewed_on": "2026-10-01", "notes": ""}
+        reviewed.append(p)
+    ok = answer("yield yoy", replace(ctx, domain_packs=tuple(reviewed), run_id="run-pack-1", writeback=wb))
+    assert ok.status == "answered"
+    assert ok.writeback is not None and ok.writeback.status == "dry_run"
+    assert not any("Unreviewed" in c for c in ok.caveats)
+
+
+def test_ac026_generic_fallback_and_restrict_only():
+    layer = _rates_layer()
+    ctx = _yearly_context(layer, _curve_rows(("2y",)), dataset_domains=("no_such_domain",), domain_packs=_PACKS)
+    response = answer("yield yoy", ctx)
+    assert response.domain_packs == ()
+    assert any("generic behavior was used" in c for c in response.caveats)
+
+    strictness = {"additive": 0, "semi_additive": 1, "non_additive": 2}
+    for pack in _PACKS:
+        selection = select(tuple(pack["source_domains"]), [pack])
+        for m in pack["metrics"]:
+            for agg in ("sum", "mean"):
+                lay = SemanticLayer()
+                lay.define(name=m["name"], owner="o", grain="day", source="x", agg=agg)
+                generic, packed = resolve_policy(lay, m["name"]), resolve_policy(lay, m["name"], selection)
+                assert set(generic.suppressed) <= set(packed.suppressed), (pack["pack_id"], m["name"])
+                assert strictness[packed.additivity] >= strictness[generic.additivity]
+                assert strictness[packed.additivity] >= strictness[m["additivity"]]
+                assert generic_additivity(lay, m["name"]) == generic.additivity
+
+
+def test_default_policy_keeps_legacy_additive_behavior(layer):
+    assert MetricPolicy().sums_across_dimensions and MetricPolicy().sums_across_time
+    rows = [Fact(2, {"desk": "rates"}, {"cost": 30.0}), Fact(2, {"desk": "fx"}, {"cost": 10.0})]
+    result = execute(_plan(dims=("desk",), window=TimeWindow(2, 2, "day")), layer, lambda p: rows, 2)
+    assert compute_insights(result) == compute_insights(result, policy=resolve_policy(layer, "funding_cost"))

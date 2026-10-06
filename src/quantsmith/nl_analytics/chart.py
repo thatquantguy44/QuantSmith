@@ -11,7 +11,7 @@ Standard library only.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Dict, Optional, Tuple
 
 from quantsmith.pipelines.dashboard_spec import CHART_TYPES, DashboardSpecError, Panel
@@ -67,6 +67,7 @@ def choose_chart(
     *,
     compare: Optional[Result] = None,
     units: str = "",
+    snapshot: bool = False,
 ) -> ChartSpec:
     """Choose a chart deterministically from ``result``'s shape (REQ-006).
 
@@ -80,10 +81,22 @@ def choose_chart(
     4. No dimensions, more than one period in the series -> ``line`` (a time
        series).
     5. No dimensions, one or zero periods -> ``kpi`` (a single value).
+
+    ``snapshot`` is set for a metric that may not be summed over time (a
+    balance, a rate — ``MetricPolicy.sums_across_time`` is false): the bar,
+    table, and KPI shapes then show the latest period's values rather than a
+    whole-window aggregate, matching the level insight (T-021).
     """
     metric = result.plan.metric
     dims = result.plan.dimensions
     footnote = _footnote(layer, metric, result)
+    if snapshot and result.latest_period is not None and result.latest_period in result.series:
+        latest = result.latest_period
+        result = replace(
+            result,
+            values=dict(result.series[latest]),
+            total=result.period_totals.get(latest, result.total),
+        )
 
     if compare is not None:
         return _scatter(result, compare, layer, units, footnote)
