@@ -28,6 +28,7 @@ plan: metric 'funding_cost'; for periods 1-1 (day); defaults applied: window
   - [level] funding_cost is 250 as of period 1.
 caveats:
   - Small sample: only 3 row(s) behind this answer.
+  - No analytics domain pack matched this dataset; generic behavior was used (funding_cost treated as additive, from its metric definition only).
 citations:
   - funding_cost — owner: treasury-ops
   - as of period 1
@@ -61,6 +62,7 @@ plan: metric 'funding_cost'; by desk; for periods 2-2 (day); defaults applied: w
   - [concentration] desk = rates holds 49.0% of funding_cost (HHI 0.379 across 3 groups).
 caveats:
   - Small sample: only 3 row(s) behind this answer.
+  - No analytics domain pack matched this dataset; generic behavior was used (funding_cost treated as additive, from its metric definition only).
 citations:
   - funding_cost — owner: treasury-ops
   - as of period 2

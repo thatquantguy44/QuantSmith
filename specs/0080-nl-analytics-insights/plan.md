@@ -3,7 +3,7 @@
 - **Spec:** 0080-nl-analytics-insights (`spec.md`)
 - **Status:** Draft
 - **Author:** Joshua Lutkemuller, CFA
-- **Last updated:** 2026-09-26
+- **Last updated:** 2026-10-06
 
 > HOW. This plan requires an approved `spec.md`. Every requirement in the spec
 > appears in the traceability matrix below.
@@ -50,7 +50,7 @@ question ──▶ interpret ──▶ validate ──▶ authorize ──▶ ex
 | --- | --- |
 | `plan.py` | `QueryPlan`, `TimeWindow`, `Comparison`, `Filter` frozen dataclasses; `validate_plan(plan, layer, config)`; `describe_plan(plan)` for the plain-language echo. No SQL/code field exists. |
 | `interpret.py` | `Interpreter` protocol (`name`, `interpret(question, context) -> QueryPlan \| Clarification`); `KeywordInterpreter` baseline (metric/dimension synonyms, relative-date phrases such as "last week", "yesterday", "MTD"); `register_interpreter` hook. LLM interpreters live outside the package and plug in here. |
-| `domain.py` | Selects `0081` packs from the dataset's source domain tags; merges pack vocabulary into the interpreter; applies units, `can_sum`, `suppressed_insights`, caveats, and chart conventions; exposes `Selection.all_reviewed` to write-back. Restrict-only: its outputs are intersected with the generic rules, never unioned. |
+| `domain.py` | Selects `0081` packs from the dataset's source domain tags; merges pack vocabulary into the interpreter; applies units, `can_sum`, `suppressed_insights`, caveats, and chart conventions; exposes `writeback_refusal(selection)` to write-back (refuses while any *applied* pack is unreviewed; no pack applied is not refused). Restrict-only: additivity is the stricter of generic and pack, suppressed insights the union, so a pack never permits an insight the generic rules forbid. |
 | `authorize.py` | Applies `0058` `access_level_allows` to the metric, dimensions, and dataset; masks restricted names out of clarification candidates. |
 | `execute.py` | `execute(plan, layer, reader, as_of) -> Result`; the `reader` is a caller-injected callable returning `Fact` rows; filters to `period <= as_of`; computes content hash, row count, latest period. |
 | `chart.py` | `choose_chart(result) -> ChartSpec` (declared form rule); `to_vega_lite(spec)`; `to_markdown_table(result)`; `to_panel(spec) -> dashboard_spec.Panel`. |
@@ -157,6 +157,7 @@ derived from the plan window and re-filtered by the same bound;
 | REQ-015 | `domain.py`: `0081` selection, vocabulary merge, unit/additivity/caveat/chart application | T-021 |
 | REQ-016 | draft-pack caveat + write-back gate on `Selection.all_reviewed` | T-022 |
 | REQ-017 | generic fallback + restrict-only merge | T-021 |
+| REQ-018 | `AnswerContext.domain_pack_source` (`0081` `PackSource`) echoed in citations, `ChatResponse.domain_pack_source`, and the envelope answer payload | T-023 |
 | NFR-001 | canonical JSON hashing; no clock reads in stages | T-006, T-014 |
 | NFR-002 | as-of bound in execute and prior-insight lookup | T-006, T-013 |
 | NFR-003 | stdlib-only package; injected I/O; import scan test | T-016 |

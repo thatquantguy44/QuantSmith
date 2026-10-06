@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Callable, Dict, Optional, Sequence, Tuple
 
 from quantsmith.pipelines.metrics_semantic_layer import Fact, SemanticLayer
@@ -33,8 +33,14 @@ class Result:
     ``()``). ``series`` is the same aggregation done separately per period, in
     ascending period order, so trend and outlier insights and a time-series
     chart have something to work from without a second read of the data.
-    ``content_hash`` covers the plan, ``values``, and ``series``, so two runs
-    over identical inputs are provably identical (NFR-001).
+
+    ``total`` and ``period_totals`` are the metric computed by the semantic
+    layer over *all* the rows (whole window, and per period) with no grouping.
+    For a summed metric they equal the sum of the groups; for a mean, ratio,
+    or any other non-additive metric they do not, and summing ``values``
+    across groups would be wrong — insights read these instead (T-021).
+    ``content_hash`` covers the plan, ``values``, ``series``, and both totals,
+    so two runs over identical inputs are provably identical (NFR-001).
     """
 
     plan: QueryPlan
@@ -44,6 +50,8 @@ class Result:
     latest_period: Optional[int]
     as_of: int
     content_hash: str
+    total: float = 0.0
+    period_totals: Dict[int, float] = field(default_factory=dict)
 
 
 def _row_matches(row: Fact, f: Filter) -> bool:
@@ -83,6 +91,9 @@ def execute(plan: QueryPlan, layer: SemanticLayer, reader: Reader, as_of: int) -
             period_groups.setdefault(key, []).append(r)
         series[period] = {key: layer.compute(plan.metric, rows) for key, rows in period_groups.items()}
 
+    total = layer.compute(plan.metric, filtered)
+    period_totals = {period: layer.compute(plan.metric, by_period[period]) for period in sorted(by_period)}
+
     latest_period = max((r.period for r in filtered), default=None)
 
     payload = {
@@ -92,6 +103,8 @@ def execute(plan: QueryPlan, layer: SemanticLayer, reader: Reader, as_of: int) -
             str(period): {"|".join(k): v for k, v in sorted(vals.items())}
             for period, vals in sorted(series.items())
         },
+        "total": total,
+        "period_totals": {str(period): v for period, v in sorted(period_totals.items())},
         "row_count": len(filtered),
         "latest_period": latest_period,
         "as_of": as_of,
@@ -108,4 +121,6 @@ def execute(plan: QueryPlan, layer: SemanticLayer, reader: Reader, as_of: int) -
         latest_period=latest_period,
         as_of=as_of,
         content_hash=content_hash,
+        total=total,
+        period_totals=period_totals,
     )

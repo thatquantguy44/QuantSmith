@@ -20,6 +20,28 @@ rates series tagged `["macro", "fixed_income_rates"]` selects
 same word for different metrics, `0080` asks a clarification instead of
 picking. No match means generic behavior, stated in the response.
 
+## Where packs are loaded from
+
+This directory is the single source. A build of the `quantsmith` package
+copies it, byte for byte, into the package as read-only **bundled defaults**
+(`setup.py`), so `pip install quantsmith` works without a checkout.
+`analytics_packs.resolve_packs()` then picks one whole catalog:
+
+1. `--packs-root DIR` (or `resolve_packs(DIR)`): only `DIR/knowledge/analytics_packs/`.
+   No packs there is an error; it never falls back to the bundle.
+2. Otherwise `./knowledge/analytics_packs/` under the working directory, if it
+   holds any packs. It **replaces** the bundle entirely — packs are never
+   merged one by one, so an answer's review status is never a mix of your
+   reviewed packs and newer bundled drafts.
+3. Otherwise the bundled defaults.
+
+Every answer that applies a pack cites the source (local or bundled, location,
+package version, catalog hash), so you can tell which packs a reviewer signed
+off. Bundled defaults change with each release; pin the package version or keep
+a local copy if answers must not move on upgrade. To customize or review packs,
+copy this directory into your repository and edit or `--mark-reviewed` there —
+never edit the bundled copy inside `site-packages`.
+
 ## What a pack can and cannot do
 
 - **Only restrict.** A pack suppresses insights, adds caveats, and fixes units.

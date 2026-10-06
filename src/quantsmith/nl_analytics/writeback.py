@@ -301,6 +301,9 @@ def prior_insights(reader: PriorInsightReader, key: str, as_of: int) -> Optional
     visible = [
         r for r in rows
         if r["insight_kind"] == "level"
+        # A per-group level (a non-additive metric asked by a dimension)
+        # has no single total to compare against.
+        and "level" in json.loads(str(r["values_json"]))
         and int(r["created_at"]) <= as_of
         and (r.get("reversed_at") is None or int(r["reversed_at"]) > as_of)
     ]

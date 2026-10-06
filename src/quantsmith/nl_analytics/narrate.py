@@ -65,6 +65,15 @@ def _allowed_numbers(insights: Sequence[Insight], result: Optional[Result]) -> s
         _flatten_numbers(insight.values, allowed)
     if result is not None:
         _flatten_numbers(result.values, allowed)
+        # Dimension values are governed labels, not claims: a tenor "10y" or
+        # a fiscal year "2026" in a statement is backed by the data itself.
+        for key in list(result.values) + [k for vals in result.series.values() for k in vals]:
+            for part in key:
+                for token in _NUMBER_RE.findall(part):
+                    try:
+                        allowed.add(_parse_token(token))
+                    except ValueError:
+                        continue
         _flatten_numbers(list(result.series.keys()), allowed)
         allowed.add(float(result.row_count))
         allowed.add(float(result.as_of))

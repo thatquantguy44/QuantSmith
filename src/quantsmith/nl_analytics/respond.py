@@ -13,12 +13,21 @@ from __future__ import annotations
 import hashlib
 import json
 from dataclasses import asdict, dataclass, field, replace
-from typing import Callable, Dict, Optional, Tuple
+from typing import Callable, Dict, Mapping, Optional, Tuple
 
+from quantsmith.pipelines.analytics_packs import PackSource
 from quantsmith.pipelines.metrics_semantic_layer import SemanticLayer
 
 from .authorize import AccessPolicy, authorize_clarification, authorize_plan
 from .chart import ChartSpec, choose_chart, to_markdown_table, to_vega_lite
+from .domain import (
+    domain_caveats,
+    extend_interpret_context,
+    resolve_policy,
+    select,
+    term_conflict,
+    writeback_refusal,
+)
 from .execute import Reader, execute
 from .insights import Insight, compute_insights
 from .interpret import Interpreter, InterpretContext, interpret
@@ -86,6 +95,12 @@ class ChatResponse:
     run_id: Optional[str] = None
     envelope_uri: Optional[str] = None
     writeback: Optional[WriteBackOutcome] = None
+    # Analytics domain packs (0081) applied to this answer, by pack id; empty
+    # means generic behavior (REQ-015, REQ-017).
+    domain_packs: Tuple[str, ...] = ()
+    # Where the applied packs' catalog came from (``PackSource.describe()``,
+    # REQ-018); empty when no pack applied.
+    domain_pack_source: str = ""
 
     def __post_init__(self) -> None:
         if self.status not in RESPONSE_STATUSES:
@@ -137,6 +152,18 @@ class AnswerContext:
     # ``run_id`` (shared with envelope emission, if both are requested);
     # unset by default, so asking a question never writes anywhere.
     writeback: Optional[WriteBackRequest] = None
+    # The dataset's ``domain:`` tags (as declared in ``sources/*.yml``) and
+    # the loaded analytics domain packs (``analytics_packs.load_packs``) to
+    # select from (REQ-015). Both caller-supplied — this module reads no
+    # files. No tags, or no pack matching them, means generic behavior,
+    # stated in the response (REQ-017).
+    dataset_domains: Tuple[str, ...] = ()
+    domain_packs: Tuple[Mapping, ...] = ()
+    # Where ``domain_packs`` came from — the ``PackSource`` that
+    # ``analytics_packs.resolve_packs`` returns with them (REQ-018). When a
+    # caller supplies packs without one, the response still identifies the
+    # catalog by a hash of the packs it was given.
+    domain_pack_source: Optional[PackSource] = None
 
 
 def _refuse(status: str, reason: str, plan_echo: str = "") -> ChatResponse:
@@ -153,7 +180,28 @@ def _metric_definition_hash(layer: SemanticLayer, metric: str) -> str:
 
 def answer(question: str, context: AnswerContext) -> ChatResponse:
     """Answer ``question``, or say precisely why not (REQ-009, NFR-006)."""
-    interpreted = interpret(question, context.layer, context.interpret_context, context.interpreter)
+    if context.dataset_domains and not context.domain_packs:
+        # Tags with no catalog to select from would silently answer with
+        # generic behavior; that is a configuration error (REQ-018).
+        raise ResponseError(
+            "dataset_domains is set but domain_packs is empty; load a catalog with "
+            "analytics_packs.resolve_packs() and pass its packs and source"
+        )
+    selection = select(context.dataset_domains, context.domain_packs)
+
+    # A term two selected packs map to different metrics is a clarification,
+    # never a guess (REQ-015, AC-024) — checked before any interpretation.
+    conflict = term_conflict(question, selection)
+    if conflict is not None:
+        masked = authorize_clarification(conflict, context.access_policy, context.viewer_clearance)
+        candidates = f" Candidates: {', '.join(masked.candidates)}." if masked.candidates else ""
+        return _refuse("clarification_needed", masked.reason + candidates)
+
+    interpret_context = (
+        extend_interpret_context(context.interpret_context, context.layer, selection)
+        if selection.packs else context.interpret_context
+    )
+    interpreted = interpret(question, context.layer, interpret_context, context.interpreter)
 
     if isinstance(interpreted, Clarification):
         masked = authorize_clarification(interpreted, context.access_policy, context.viewer_clearance)
@@ -189,8 +237,12 @@ def answer(question: str, context: AnswerContext) -> ChatResponse:
 
     comparison_result = _resolve_comparison(plan, context) if plan.comparison is not None else None
 
-    chart = choose_chart(result, context.layer, units=context.units)
-    insight_set = compute_insights(result, comparison_result)
+    policy = resolve_policy(context.layer, plan.metric, selection)
+    chart = choose_chart(
+        result, context.layer, units=context.units or policy.display_unit,
+        snapshot=not policy.sums_across_time,
+    )
+    insight_set = compute_insights(result, comparison_result, policy=policy)
     narrative = template_narrative(insight_set)
     grounding = ground(narrative, insight_set, result)
     if not grounding.ok:
@@ -202,22 +254,34 @@ def answer(question: str, context: AnswerContext) -> ChatResponse:
     caveats = default_caveats(
         result, synthetic=context.synthetic, min_sample_rows=context.min_sample_rows,
         staleness_periods=context.staleness_caveat_periods,
-    )
+    ) + domain_caveats(selection, policy, plan)
     citations = (
         f"{plan.metric} — owner: {context.layer.definition(plan.metric).owner}",
         f"as of period {context.as_of}",
     )
+    pack_source = ""
+    if selection.packs:
+        pack_source = _pack_source(context).describe()
+        citations += (f"domain packs: {pack_source}",)
 
     final = ChatResponse(
-        status="answered", reason="", headline=insight_set[0].statement,
+        # A pack may suppress any kind, the level included (``0081`` allows it);
+        # the plan echo then stands in as the headline rather than crashing.
+        status="answered", reason="", headline=insight_set[0].statement if insight_set else describe_plan(plan),
         insights=insight_set, chart=chart, vega_lite=to_vega_lite(chart),
         markdown_table=to_markdown_table(chart), plan_echo=describe_plan(plan),
-        caveats=caveats, citations=citations,
+        caveats=caveats, citations=citations, domain_packs=selection.pack_ids,
+        domain_pack_source=pack_source,
     )
 
     if context.writeback is not None:
         if not context.run_id:
             raise ResponseError("writeback is set but run_id is not (a write-back record is keyed by a caller-assigned run id)")
+        refusal = writeback_refusal(selection)
+        if refusal is not None:
+            # Write-back is eligible only when every applied pack is
+            # reviewed (REQ-016, AC-025); refused before any record is built.
+            return _refuse("write_rejected", refusal, describe_plan(plan))
         request = context.writeback
         records = build_records(
             plan, result, insight_set, run_id=context.run_id, question=question,
@@ -254,6 +318,19 @@ def answer(question: str, context: AnswerContext) -> ChatResponse:
         final = replace(final, envelope_uri=str(envelope_path))
 
     return final
+
+
+def _pack_source(context: AnswerContext) -> PackSource:
+    if context.domain_pack_source is not None:
+        return context.domain_pack_source
+    canonical = json.dumps(list(context.domain_packs), sort_keys=True, separators=(",", ":"))
+    from quantsmith import __version__
+
+    return PackSource(
+        kind="caller-supplied", location="(in memory)", version=__version__,
+        content_hash=f"sha256:{hashlib.sha256(canonical.encode('utf-8')).hexdigest()}",
+        pack_count=len(context.domain_packs),
+    )
 
 
 def comparison_key(plan: QueryPlan) -> str:
