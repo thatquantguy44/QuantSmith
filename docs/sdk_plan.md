@@ -365,6 +365,14 @@ operations, data provenance):
   `instructions/test_engineering.md`; hands off to `testing_validation` and
   `quality-guard-agent` rather than duplicating either's AC-coverage or
   release-gate decision.
+- `src/quantsmith/test_engineering/` — built (specs `0097`, `0098`, Draft).
+  `0097`: stack detection, pytest/CTest/GoogleTest runners with one honest
+  result model, edge-case probes (C++ under ASan/UBSan), AST mutation testing,
+  and flakiness checks. `0098`: model-behaviour checks — seeded generators
+  including convex LP/QP with a known optimum, metamorphic relations, a
+  differential runner, KKT certificates, regression and ML checks — validated
+  on the SDK's own LP and portfolio solvers. Open: diff-aware selection, a
+  fuzz harness, and an orchestrated workflow (`0097/plan.md` items 7–9).
 
 ## Open Decisions
 

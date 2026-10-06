@@ -36,3 +36,9 @@ Owns baselines, validation design, hyperparameter search, leakage controls, robu
 - Data availability, point-in-time semantics, and provenance.
 - Assumptions, constraints, costs, and operational limits.
 - Validation design and monitoring after launch.
+
+## Runtime
+
+Spec `0098` (`src/quantsmith/test_engineering/ml_checks.py`) provides determinism, label-shuffled placebo (permutation p-value), noise-feature and
+baseline checks on a chronological holdout by default. They catch evaluation mistakes (a model that reads held-out labels, an unseeded fit); they
+do not replace a leakage-free validation scheme or an out-of-time test.

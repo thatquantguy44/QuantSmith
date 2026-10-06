@@ -295,7 +295,7 @@ designs**: create and
 approve one only when the foundation it consumes — `0063` or `0072` — has frozen
 that contract and the prior dependency named above is satisfied. Do not add
 agents merely to fill the map; prefer a canonical knowledge artifact or tested
-runtime that an existing agent can use. **Next unreserved spec number: `0098`** (`0083`–`0092` are the venture-intelligence foundation and its reserved children, item 32; `0093` is the visualization packs spec; `0094` is the Asian-language NLP foundation; `0095` is the venture predictive-model baselines; `0096` is request routing; `0097` is the test-engineering runtime).
+runtime that an existing agent can use. **Next unreserved spec number: `0099`** (`0083`–`0092` are the venture-intelligence foundation and its reserved children, item 32; `0093` is the visualization packs spec; `0094` is the Asian-language NLP foundation; `0095` is the venture predictive-model baselines; `0096` is request routing; `0097` is the test-engineering runtime; `0098` is the model testing helpers).
 Reserving a number here does not create the directory; copy `templates/spec/`
 only when that slice becomes active.
 
@@ -1609,8 +1609,13 @@ manual-task persistence question stays deferred until a real consumer needs it.
     Python and C++: stack detector, pytest/CTest/GoogleTest runners, edge-case probes (C++ under ASan/UBSan), AST
     mutation testing (uncovered kept apart from survived), and flaky/order/hash-seed checks. `coverage` joined the
     `dev` extra. CTest and GoogleTest paths are tested with fixtures and a stand-in binary because CMake and
-    GoogleTest were not installed; run them once against a real build. Items 6–9 (property/differential/metamorphic,
-    diff-aware selection, fuzz harness, orchestrated workflow) are scoped in `0097/plan.md`, not built.
+    GoogleTest were not installed; run them once against a real build. Items 7–9 (diff-aware selection, fuzz
+    harness, orchestrated workflow) are scoped in `0097/plan.md`, not built.
+    `0098` (Draft, built; item 6) adds model-behaviour checks to the same package: seeded generators including convex LP/QP
+    instances whose optimum is known by KKT construction, metamorphic relations, a differential runner, KKT optimality
+    certificates and a solver instance runner, regression and ML checks (determinism, label-shuffled placebo, noise
+    features, baseline), and `metamorphic`/`differential` subcommands. numpy only; SciPy is a test oracle. Run on
+    `solve_lp` and `solve_portfolio` it found no defect (see `0098/validation.md`). Hypothesis was not added.
     Proof of concept: no legal collection limits set yet; they must be set
     before operational use. The `0083` knowledge pack and validator are built
     (per-record review sign-off; all records still `draft`). Next: `0091` (fund analytics), the deferred regions in `0087`, and

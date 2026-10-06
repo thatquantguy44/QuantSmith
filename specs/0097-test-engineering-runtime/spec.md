@@ -4,7 +4,7 @@
 - **Status:** Draft (built)
 - **Author:** Joshua Lutkemuller, CFA
 - **Approver:**
-- **Last updated:** 2026-10-03
+- **Last updated:** 2026-10-06
 
 > WHAT and WHY only. Gives the contract-only test-engineering agents (`test_engineering_orchestrator`, `python_test_engineer`, `cpp_test_fuzz_engineer`) something real to run. Items 6–9 of the roadmap are scoped in `plan.md`, not built here.
 
@@ -42,8 +42,8 @@ runs, a "no flakiness" verdict from a single run, and a C++ crash in one boundar
 | REQ-004 | The runtime shall parse AddressSanitizer, UndefinedBehaviorSanitizer, LeakSanitizer, ThreadSanitizer and MemorySanitizer output into findings with sanitizer, kind, location and frames. | must |
 | REQ-005 | The runtime shall probe a Python function one parameter at a time across a boundary catalog (integers, floats including NaN and infinities, strings, bytes, dates, decimals, containers, `None`), with a per-call timeout, and flag undocumented exceptions, crash-like exceptions on valid input, hangs, non-finite results from finite inputs, and mutation of an input; exceptions the caller documents shall not be flagged. Unannotated parameters take a supplied type or a simple default; a probe that tested nothing shall say `nothing_probed` and exit `2`, never read as clean; calls run in a throwaway working directory. | must |
 | REQ-006 | The runtime shall generate characterization tests from a probe that record current behaviour and say they do not assert correctness. | should |
-| REQ-007 | The runtime shall compile a C++ function's boundary-value harness with sanitizers and run each case in its own process, reporting compile failure as `built: false` (never as success), unsupported parameter types as an error, and crash, timeout, nonzero exit and sanitizer findings per case. | must |
-| REQ-008 | The runtime shall apply single-point AST mutations (arithmetic, comparison, boolean, `not`, condition negation, constants, boolean constants, return value, augmented assignment) to one Python file inside a temporary copy, refuse a failing baseline, skip docstrings, and report mutants as killed, survived or uncovered, with the score computed over covered mutants only. | must |
+| REQ-007 | The runtime shall compile a C++ function's boundary-value harness with sanitizers and run each case in its own process, reporting compile failure as `built: false` (never as success), unsupported parameter types as an error, and crash, timeout, nonzero exit and sanitizer findings per case. Without an explicit compiler it shall use the first installed compiler that can build and run a sanitizer program (an installed compiler that cannot link the sanitizer runtime shall not hide a working one) and report each compiler tried and why it failed. | must |
+| REQ-008 | The runtime shall apply single-point AST mutations (arithmetic, comparison, boolean, `not`, condition negation, constants, boolean constants, return value, augmented assignment) to one Python file inside a temporary copy, refuse a failing baseline, skip docstrings, and report mutants as killed, survived or uncovered, with the score computed over covered mutants only. The tests shall import the mutated copy, never an installed copy of the project; the runtime shall verify where the target module resolves from and refuse to score (`mutated_file_not_imported`, exit `2`) when it is provably outside the copy. | must |
 | REQ-009 | The runtime shall classify tests as `stable`, `flaky`, `order_dependent`, `hash_seed_dependent` or `always_fails` from repeated runs, seeded shuffled runs of explicit node ids, and varied `PYTHONHASHSEED`, and for GoogleTest from repeats and `--gtest_shuffle` with fixed seeds; reproduction details (seed) shall be reported, a shuffled run that cannot execute shall be reported rather than ignored, and a run with no tests shall never read as stable. | must |
 | REQ-010 | The runtime shall provide the `quantsmith-test-engineering` command with `detect`, `run`, `edges`, `cpp`, `mutate` and `flaky` subcommands that print JSON and exit `0` (nothing to flag), `1` (findings) or `2` (could not run), pass arguments after `--` to the test runner, and accept `--python` (the project's interpreter), repeatable `--env KEY=VALUE`, and `--hint name=type`. | must |
 | REQ-011 | The SDK shall add `coverage` to the `dev` extra with a refreshed `uv.lock`, update the three test-engineering agents to name the runtime, and list the spec in the indexes. | must |
@@ -66,8 +66,8 @@ runs, a "no flakiness" verdict from a single run, and a C++ crash in one boundar
 | AC-003 | Given passing, failing and empty test directories, when run, then verdicts are `passed`, `failed` and `no_tests` or `error`; and JUnit and GoogleTest XML (including an oversized file) parse or are rejected as specified. | REQ-003 |
 | AC-004 | Given sample sanitizer output for each sanitizer, when parsed, then kind and sanitizer are recovered and clean text yields no findings. | REQ-004 |
 | AC-005 | Given functions that divide by zero, index an empty list, raise a documented exception, and mutate their input, when probed, then the first, second and fourth are flagged and the third is not. | REQ-005, REQ-006 |
-| AC-006 | Given a C++ header with signed overflow, a null dereference and a safe function, when probed with a compiler present, then the first two report sanitizer findings, the safe one reports none, and a missing symbol reports a compile failure. | REQ-007 |
-| AC-007 | Given a tested function, an untested function and an unpinned function, when mutated, then the working tree is unchanged, the untested lines are `uncovered`, a weak assertion produces a survivor, and a failing baseline refuses to score. | REQ-008 |
+| AC-006 | Given a C++ header with signed overflow, a null dereference and a safe function, when probed with a compiler present, then the first two report sanitizer findings, the safe one reports none, and a missing symbol reports a compile failure; and given a first compiler that cannot link sanitizers and a working second one, then the second is used and the first's failure is reported. | REQ-007 |
+| AC-007 | Given a tested function, an untested function and an unpinned function, when mutated, then the working tree is unchanged, the untested lines are `uncovered`, a weak assertion produces a survivor, and a failing baseline refuses to score; and given a `src`-layout project whose package is also importable from outside the copy, then mutants are still killed, and given a target the tests cannot import from the copy, then scoring is refused. | REQ-008 |
 | AC-008 | Given tests that are flaky, order-dependent and hash-seed-dependent, when checked, then each is classified with its seed, stable tests stay stable, JUnit ids convert to node ids, and an empty directory does not read as stable. | REQ-009 |
 | AC-009 | Given the command line, when each subcommand runs, then it prints JSON, exits `0`/`1`/`2` as specified, forwards arguments after `--`, and honours `--python`, `--env` and `--hint`. | REQ-010 |
 | AC-010 | Given the repository, when gates, ruff, `uv lock --check` and the full suite run, then no gate has findings and no previously passing test fails; the agents and indexes agree. | REQ-011, NFR-001, NFR-002, NFR-003, NFR-004 |
@@ -86,7 +86,7 @@ ReproFlake) belong in the gitignored `knowledge_local/` if used.
 | RISK-001 | Probing or mutating executes untrusted code. | Arbitrary code runs on the host. | Documented as owner-authorised only; argv only; mutation in a temporary copy; no network. |
 | RISK-002 | Mutation score is read as test quality. | False assurance. | Uncovered separated from survived; equivalent-mutant caveat; score over covered mutants only. |
 | RISK-003 | Rerun-based flakiness misses rare flakes. | A flaky test is called stable. | Verdict names the number of runs; "no flakiness observed" never "deterministic". |
-| RISK-004 | CTest/GoogleTest paths are untested against real tools. | Adapter bugs surface in the field. | Exercised with XML fixtures and a stand-in binary, labelled as such; real-tool test when installed. |
+| RISK-004 | CTest/GoogleTest paths are untested against real tools. | Adapter bugs surface in the field. | CTest is exercised with a real CMake project when CMake 3.21+ is installed; GoogleTest with XML fixtures and a stand-in binary, labelled as such. |
 | RISK-005 | Sanitizer output formats change across compiler versions. | Findings missed. | Parsers tolerate unknown lines; raw stderr is kept in the outcome. |
 | RISK-006 | Characterization tests are mistaken for correctness tests. | Bugs pinned as expected behaviour. | Generated file states it records current behaviour only. |
 
@@ -94,7 +94,7 @@ ReproFlake) belong in the gitignored `knowledge_local/` if used.
 
 - Assumption: POSIX (macOS/Linux) is the target; process-group kill and SIGALRM timeouts are POSIX-only.
 - Open question: which first real codebase to point this at, and whether its tests are deterministic enough for mutation scoring.
-- Open question: whether Hypothesis becomes a dependency for item 6 (see `plan.md`).
+- Resolved by `0098`: Hypothesis does not become a dependency; item 6 uses seeded NumPy generators.
 
 ## Exceptions
 
