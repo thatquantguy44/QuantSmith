@@ -1,7 +1,7 @@
 # Tasks: Natural-Language Analytics — Visualization, Interpretation, and Write-Back
 
 - **Spec:** 0080-nl-analytics-insights (`spec.md`, `plan.md`)
-- **Last updated:** 2026-09-26
+- **Last updated:** 2026-10-06
 
 > Ordered, testable units of work. Every task cites the requirement(s) it advances
 > and carries a Definition of Done. No task without a requirement.
@@ -45,6 +45,7 @@
 
 | T-021 | `domain.py`: apply `0081` packs (vocabulary, units, additivity, insight suppression, caveats, chart conventions), term-conflict clarification, and generic fallback. | REQ-015, REQ-017, AC-023, AC-024, AC-026 | done | Fixes insights summing groups for every metric (yields across tenors, VaR across desks). `execute.Result` now carries the layer's own ungrouped `total`/`period_totals`; `insights.py` reads those, never a sum of groups, under a `domain.MetricPolicy`. Generic additivity comes from the `0008` definition only (`sum`/`count` additive; `mean`/ratio non-additive); packs can only make it stricter and only add suppressed kinds. A grouped question on a non-additive metric reports per-group levels and changes with no total; contributor/concentration also require the groups to reconcile to the total, so a direct `compute_insights` call without a policy cannot decompose a mean either. Non-time-summable metrics (stocks, rates) read the latest period, and the chart follows (`snapshot`). `pct`/`bps` changes are in basis points with no percent change. Grounding now treats digits in dimension labels (`10y`) as backed. CLI gains `--domain`/`--packs-root`. |
 | T-022 | Unreviewed-pack caveat and write-back refusal unless every applied pack is reviewed. | REQ-016, AC-025 | done | Gate is `domain.writeback_refusal`, not `Selection.all_reviewed` as `plan.md` sketched: `all_reviewed` is false with zero packs, which would refuse every generic (no-pack) write-back; REQ-016 governs *applied* packs only. |
+| T-023 | Pack source in the response and envelope; `answer()` raises on domain tags with no catalog; CLI resolves packs via `0081` `resolve_packs` (local, then bundled) and errors only for an explicit empty `--packs-root` or no packs anywhere. | REQ-018, AC-027 | done | |
 
 Status values: `todo` | `in-progress` | `blocked` | `done`.
 
@@ -79,6 +80,7 @@ Every acceptance criterion must be named by at least one test.
 | AC-024 | `test_ac024_cross_pack_term_conflict_clarifies` | done |
 | AC-025 | `test_ac025_draft_pack_caveat_and_writeback_gate` | done |
 | AC-026 | `test_ac026_generic_fallback_and_restrict_only` | done |
+| AC-027 | `test_ac027_pack_source_reported_and_missing_catalog_raises` | done |
 | AC-022 | `test_ac022_typed_status_on_every_failure_path` | done |
 
 ## Follow-ups

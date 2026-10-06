@@ -3,7 +3,7 @@
 - **Spec:** 0080-nl-analytics-insights (`spec.md`)
 - **Status:** Draft
 - **Author:** Joshua Lutkemuller, CFA
-- **Last updated:** 2026-09-26
+- **Last updated:** 2026-10-06
 
 > HOW. This plan requires an approved `spec.md`. Every requirement in the spec
 > appears in the traceability matrix below.
@@ -157,6 +157,7 @@ derived from the plan window and re-filtered by the same bound;
 | REQ-015 | `domain.py`: `0081` selection, vocabulary merge, unit/additivity/caveat/chart application | T-021 |
 | REQ-016 | draft-pack caveat + write-back gate on `Selection.all_reviewed` | T-022 |
 | REQ-017 | generic fallback + restrict-only merge | T-021 |
+| REQ-018 | `AnswerContext.domain_pack_source` (`0081` `PackSource`) echoed in citations, `ChatResponse.domain_pack_source`, and the envelope answer payload | T-023 |
 | NFR-001 | canonical JSON hashing; no clock reads in stages | T-006, T-014 |
 | NFR-002 | as-of bound in execute and prior-insight lookup | T-006, T-013 |
 | NFR-003 | stdlib-only package; injected I/O; import scan test | T-016 |

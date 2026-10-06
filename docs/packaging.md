@@ -37,6 +37,11 @@ to sync reference content without clobbering local tuning.
   `data` (pandas), `dev` (pytest, openpyxl). Most `pipelines/*` runtimes are
   standard-library-only and need no extras.
 - Console scripts under `[project.scripts]` for the agentic-quant CLIs.
+- One piece of scaffold ships inside the package: the analytics domain pack
+  catalog (`knowledge/analytics_packs/`), copied at build time by `setup.py`
+  into `quantsmith/_bundled/analytics_packs/` as read-only defaults. A local
+  copy of the directory still wins as a whole catalog, so it stays copy-and-own
+  (spec `0081` REQ-013).
 - Versioned per `CHANGELOG.md`; consumers pin a version or Git tag.
 
 The remainder of this record is the original reasoning, preserved.

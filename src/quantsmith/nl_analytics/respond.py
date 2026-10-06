@@ -15,6 +15,7 @@ import json
 from dataclasses import asdict, dataclass, field, replace
 from typing import Callable, Dict, Mapping, Optional, Tuple
 
+from quantsmith.pipelines.analytics_packs import PackSource
 from quantsmith.pipelines.metrics_semantic_layer import SemanticLayer
 
 from .authorize import AccessPolicy, authorize_clarification, authorize_plan
@@ -97,6 +98,9 @@ class ChatResponse:
     # Analytics domain packs (0081) applied to this answer, by pack id; empty
     # means generic behavior (REQ-015, REQ-017).
     domain_packs: Tuple[str, ...] = ()
+    # Where the applied packs' catalog came from (``PackSource.describe()``,
+    # REQ-018); empty when no pack applied.
+    domain_pack_source: str = ""
 
     def __post_init__(self) -> None:
         if self.status not in RESPONSE_STATUSES:
@@ -155,6 +159,11 @@ class AnswerContext:
     # stated in the response (REQ-017).
     dataset_domains: Tuple[str, ...] = ()
     domain_packs: Tuple[Mapping, ...] = ()
+    # Where ``domain_packs`` came from — the ``PackSource`` that
+    # ``analytics_packs.resolve_packs`` returns with them (REQ-018). When a
+    # caller supplies packs without one, the response still identifies the
+    # catalog by a hash of the packs it was given.
+    domain_pack_source: Optional[PackSource] = None
 
 
 def _refuse(status: str, reason: str, plan_echo: str = "") -> ChatResponse:
@@ -171,6 +180,13 @@ def _metric_definition_hash(layer: SemanticLayer, metric: str) -> str:
 
 def answer(question: str, context: AnswerContext) -> ChatResponse:
     """Answer ``question``, or say precisely why not (REQ-009, NFR-006)."""
+    if context.dataset_domains and not context.domain_packs:
+        # Tags with no catalog to select from would silently answer with
+        # generic behavior; that is a configuration error (REQ-018).
+        raise ResponseError(
+            "dataset_domains is set but domain_packs is empty; load a catalog with "
+            "analytics_packs.resolve_packs() and pass its packs and source"
+        )
     selection = select(context.dataset_domains, context.domain_packs)
 
     # A term two selected packs map to different metrics is a clarification,
@@ -243,6 +259,10 @@ def answer(question: str, context: AnswerContext) -> ChatResponse:
         f"{plan.metric} — owner: {context.layer.definition(plan.metric).owner}",
         f"as of period {context.as_of}",
     )
+    pack_source = ""
+    if selection.packs:
+        pack_source = _pack_source(context).describe()
+        citations += (f"domain packs: {pack_source}",)
 
     final = ChatResponse(
         # A pack may suppress any kind, the level included (``0081`` allows it);
@@ -251,6 +271,7 @@ def answer(question: str, context: AnswerContext) -> ChatResponse:
         insights=insight_set, chart=chart, vega_lite=to_vega_lite(chart),
         markdown_table=to_markdown_table(chart), plan_echo=describe_plan(plan),
         caveats=caveats, citations=citations, domain_packs=selection.pack_ids,
+        domain_pack_source=pack_source,
     )
 
     if context.writeback is not None:
@@ -297,6 +318,19 @@ def answer(question: str, context: AnswerContext) -> ChatResponse:
         final = replace(final, envelope_uri=str(envelope_path))
 
     return final
+
+
+def _pack_source(context: AnswerContext) -> PackSource:
+    if context.domain_pack_source is not None:
+        return context.domain_pack_source
+    canonical = json.dumps(list(context.domain_packs), sort_keys=True, separators=(",", ":"))
+    from quantsmith import __version__
+
+    return PackSource(
+        kind="caller-supplied", location="(in memory)", version=__version__,
+        content_hash=f"sha256:{hashlib.sha256(canonical.encode('utf-8')).hexdigest()}",
+        pack_count=len(context.domain_packs),
+    )
 
 
 def comparison_key(plan: QueryPlan) -> str:

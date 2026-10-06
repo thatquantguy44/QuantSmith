@@ -3,7 +3,7 @@
 - **Spec:** 0081-analytics-domain-packs (`spec.md`)
 - **Status:** Draft
 - **Author:** Joshua Lutkemuller, CFA
-- **Last updated:** 2026-09-24
+- **Last updated:** 2026-10-06
 
 > HOW. This plan requires an approved `spec.md`. Every requirement in the spec
 > appears in the traceability matrix below.
@@ -47,6 +47,8 @@ knowledge/analytics_packs/*.json ──▶ analytics_packs.load_packs()
 | `analytics_packs.validate_pack` / `validate_catalog` | Structure, vocabularies, rate-like additivity rule, insight-rule and caveat targets, golden cases, review completeness, agent and `builds_on` existence, family coverage, README sync. |
 | `analytics_packs.select_packs` | Tag intersection, deterministic order, term conflicts, write-back eligibility. |
 | `analytics_packs.coverage_report` / CLI | Counts by family and status; uncovered source tags. |
+| `analytics_packs.resolve_packs` / `PackSource` | Whole-catalog resolution: explicit root, else local `knowledge/analytics_packs/` under the working directory, else the bundled copy; returns the packs and their source (kind, location, version, content hash). |
+| `setup.py` `build_py` | Copies `knowledge/analytics_packs/*.json` byte for byte into `quantsmith/_bundled/analytics_packs/` in the build; fails when it finds none. `MANIFEST.in` carries the catalog into the sdist so a wheel built from the sdist bundles it too. |
 | `tests/test_analytics_packs.py` | Acceptance tests naming each `AC-*`. |
 
 ## Interfaces & Data Contracts
@@ -61,6 +63,17 @@ single home). Key rules:
 - `suppressed_insights(pack, metric)` = `{contributor}` if non-additive, plus
   every `suppress_kinds` of each rule whose `applies_to` glob matches.
 - `Selection.all_reviewed` is the write-back gate `0080` REQ-016 reads.
+- Resolution order (REQ-013): an explicit root is used alone and must hold
+  packs; otherwise `./knowledge/analytics_packs/` if it holds any JSON;
+  otherwise the bundle — `quantsmith/_bundled/analytics_packs/` in an
+  installed wheel, or the repository's own `knowledge/analytics_packs/` when
+  running from a source tree or an editable install (where `build_py`'s copy
+  is not on the import path). The content hash is SHA-256 over each file's
+  name and bytes in file-name order, so a local copy of an unmodified bundle
+  hashes the same.
+- Bundled packs load without strict validation: their `reviewer_agents` and
+  `builds_on` paths point into the repository, which an installed package does
+  not have. CI validates the catalog (AC-001) before any build.
 
 ## Constitution Check
 
@@ -89,7 +102,9 @@ single home). Key rules:
 | REQ-012 | `review_sheet`, `mark_reviewed`, `FAMILY_REVIEWERS`, CLI flags | T-008 |
 | NFR-001 | stdlib only; sorted loading | T-003, T-006 |
 | NFR-002 | content scan test | T-006 |
+| REQ-013 | `resolve_packs`, `PackSource`, bundled data dir | T-009, T-010 |
 | NFR-003 | `schema_version` check | T-003 |
+| NFR-004 | `setup.py` `build_py` copy + empty-catalog failure; `MANIFEST.in` | T-010 |
 
 ## Trade-offs & Alternatives
 
@@ -100,6 +115,7 @@ single home). Key rules:
 | Selection key | Existing `sources/*.yml` domain tags | New per-dataset pack field | Reuses `0027`; no second registry to keep in sync. |
 | Draft packs in chat | Allowed with caveat | Blocked until reviewed | Blocking makes 40 packs useless until all are reviewed; the caveat keeps chat honest. |
 | Deep domains | Reference `knowledge/credit_risk` and `short_term_markets` | Copy their rules | One source of truth. |
+| Distribution | Bundled defaults copied at build time; local catalog shadows the whole bundle | Bundle only; repo only; per-pack merge; committed mirror under `src/` | Bundle-only makes `--mark-reviewed` impossible for installed users and keeps write-back closed; repo-only gives installed users nothing; per-pack merge makes review status ambiguous; a committed mirror is a second source of truth to keep in sync. |
 
 ## Validation Strategy
 
@@ -119,4 +135,4 @@ reviewed diff to one JSON file. Rollback: revert the file or set status back to
 ## Open Questions
 
 - ~~Named reviewer per family~~ — resolved 2026-09-24: the owner reviews all seven families.
-- Adopter override mechanism (file shadowing vs. overlay field).
+- ~~Adopter override mechanism~~ — resolved 2026-10-06: whole-catalog shadowing (REQ-013).
