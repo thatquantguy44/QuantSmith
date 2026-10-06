@@ -94,7 +94,7 @@ ReproFlake) belong in the gitignored `knowledge_local/` if used.
 
 - Assumption: POSIX (macOS/Linux) is the target; process-group kill and SIGALRM timeouts are POSIX-only.
 - Open question: which first real codebase to point this at, and whether its tests are deterministic enough for mutation scoring.
-- Open question: whether Hypothesis becomes a dependency for item 6 (see `plan.md`).
+- Resolved by `0098`: Hypothesis does not become a dependency; item 6 uses seeded NumPy generators.
 
 ## Exceptions
 
