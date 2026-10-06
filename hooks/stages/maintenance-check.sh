@@ -25,6 +25,8 @@ model_changed=0
 card_changed=0
 for f in $changed; do
   case "$f" in
+    # A test file is not model code, whatever it is named (tests/test_model_*.py tests models; it is not one).
+    tests/*|*/tests/*|test_*.py|*/test_*.py|*_test.py) ;;
     *model*.py|*models/*|*pipeline*.py|*pipelines/*|*feature*.py) model_changed=1 ;;
     *model_card*.md|*dataset_card*.md|*runbook*.md) card_changed=1 ;;
   esac
