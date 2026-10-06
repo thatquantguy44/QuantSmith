@@ -295,7 +295,7 @@ designs**: create and
 approve one only when the foundation it consumes — `0063` or `0072` — has frozen
 that contract and the prior dependency named above is satisfied. Do not add
 agents merely to fill the map; prefer a canonical knowledge artifact or tested
-runtime that an existing agent can use. **Next unreserved spec number: `0099`** (`0083`–`0092` are the venture-intelligence foundation and its reserved children, item 32; `0093` is the visualization packs spec; `0094` is the Asian-language NLP foundation; `0095` is the venture predictive-model baselines; `0096` is request routing; `0097` is the test-engineering runtime; `0098` is the model testing helpers).
+runtime that an existing agent can use. **Next unreserved spec number: `0100`** (`0083`–`0092` are the venture-intelligence foundation and its reserved children, item 32; `0093` is the visualization packs spec; `0094` is the Asian-language NLP foundation; `0095` is the venture predictive-model baselines; `0096` is request routing; `0097` is the test-engineering runtime; `0098` is the model testing helpers; `0099` is the Dataset Investigator).
 Reserving a number here does not create the directory; copy `templates/spec/`
 only when that slice becomes active.
 
@@ -1616,6 +1616,9 @@ manual-task persistence question stays deferred until a real consumer needs it.
     certificates and a solver instance runner, regression and ML checks (determinism, label-shuffled placebo, noise
     features, baseline), and `metamorphic`/`differential` subcommands. numpy only; SciPy is a test oracle. Run on
     `solve_lp` and `solve_portfolio` it found no defect (see `0098/validation.md`). Hypothesis was not added.
+    `0099` (Draft, spec only) specifies the Dataset Investigator: deterministic registered tools measure a dataset,
+    model roles (as a saved Claude Code workflow) propose and interpret hypotheses from evidence only, a validator
+    gates every claim, and each run exports the Python package that reproduces it. Nothing built yet (T-001–T-016).
     Proof of concept: no legal collection limits set yet; they must be set
     before operational use. The `0083` knowledge pack and validator are built
     (per-record review sign-off; all records still `draft`). Next: `0091` (fund analytics), the deferred regions in `0087`, and
