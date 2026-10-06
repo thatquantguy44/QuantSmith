@@ -12,6 +12,9 @@ REQ-009, REQ-012, T-018.
 ``--domain`` names the dataset's ``domain:`` tags (as in ``sources/*.yml``);
 the matching analytics domain packs under ``<packs-root>/knowledge/analytics_packs/``
 then govern units, additivity, suppressed insights, and caveats (REQ-015).
+The packs ship with the repository scaffold, not the pip package, so
+``--domain`` with no packs under ``--packs-root`` is an error rather than a
+silent fall back to generic behavior.
 
 ``--registry`` and ``--data`` are local JSON files the caller supplies (see
 ``examples/nl_analytics/`` for the worked shapes); this module never reads a
@@ -30,7 +33,7 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List
 
-from quantsmith.pipelines.analytics_packs import load_packs
+from quantsmith.pipelines.analytics_packs import PACKS_DIR, load_packs
 from quantsmith.pipelines.metrics_semantic_layer import Fact, SemanticLayer
 
 from .interpret import InterpretContext
@@ -142,6 +145,18 @@ def _cmd_ask(args: argparse.Namespace) -> int:
         def prior_insight_lookup(key: str, lookup_as_of: int, _writer=writer):
             return prior_insights(_writer.read, key, lookup_as_of)
 
+    domain_packs = ()
+    if args.domain:
+        domain_packs = tuple(load_packs(args.packs_root))
+        if not domain_packs:
+            print(
+                f"error: --domain was given but no analytics domain packs were found under "
+                f"{Path(args.packs_root) / PACKS_DIR}; the packs ship with the QuantSmith repository, "
+                f"not the pip package — point --packs-root at a checkout or copy that has them",
+                file=sys.stderr,
+            )
+            return 2
+
     context = AnswerContext(
         layer=layer, reader=lambda plan: rows, as_of=as_of,
         interpret_context=InterpretContext(today_period=args.today, default_window_periods=args.window),
@@ -151,7 +166,7 @@ def _cmd_ask(args: argparse.Namespace) -> int:
         prior_insight_lookup=prior_insight_lookup,
         writeback=writeback,
         dataset_domains=tuple(args.domain),
-        domain_packs=tuple(load_packs(args.packs_root)) if args.domain else (),
+        domain_packs=domain_packs,
     )
 
     try:

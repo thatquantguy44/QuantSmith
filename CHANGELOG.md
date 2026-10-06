@@ -121,7 +121,8 @@ patterns locally rather than expecting them to update in place.
   and rates are read at the latest period, and `pct`/`bps` changes are reported in basis points. Analytics domain
   packs (`0081`) now apply through `nl_analytics/domain.py` (vocabulary, units, additivity, suppressed insights,
   caveats, term-conflict clarification, and a write-back refusal while any applied pack is unreviewed), with a
-  stated generic fallback; the CLI gains `--domain`.
+  stated generic fallback; the CLI gains `--domain`, which exits with an error when no packs are found under
+  `--packs-root` (the packs ship with the repository, not the pip package).
 - The `maintenance` gate no longer treats test files as model code. Its `*model*.py` pattern matched `tests/test_model_*.py` and warned that model code
   changed with no model card; files under `tests/` and `test_*.py` are now skipped, and real model or pipeline code still needs a card or runbook.
 - Mutation testing (`0097`) now runs the tests against the mutated copy. With a `src`-layout package that was also installed (an editable

@@ -1134,6 +1134,24 @@ def test_cli_publish_without_db_errors():
     assert "--db" in result.stderr
 
 
+def test_cli_domain_without_packs_errors(tmp_path):
+    args = (
+        "ask", "what is total funding cost",
+        "--registry", str(_EXAMPLE_DIR / "registry.json"),
+        "--data", str(_EXAMPLE_DIR / "data.json"),
+        "--today", "1", "--window", "1", "--domain", "treasury",
+    )
+    missing = _run_cli(*args, "--packs-root", str(tmp_path))
+    assert missing.returncode == 2
+    assert "no analytics domain packs were found" in missing.stderr
+    assert str(tmp_path / "knowledge" / "analytics_packs") in missing.stderr
+    assert missing.stdout == ""
+
+    found = _run_cli(*args, "--packs-root", str(_REPO_ROOT), "--json")
+    assert found.returncode == 0, found.stderr
+    assert "no analytics domain packs" not in found.stderr
+
+
 def test_example_disclosure_exists_and_is_declared():
     disclosure = _REPO_ROOT / "docs" / "0080_synthetic_data_disclosure.md"
     assert disclosure.exists()
