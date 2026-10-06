@@ -1134,22 +1134,23 @@ def test_cli_publish_without_db_errors():
     assert "--db" in result.stderr
 
 
-def test_cli_domain_without_packs_errors(tmp_path):
+def test_cli_domain_resolves_packs_and_empty_packs_root_errors(tmp_path):
     args = (
         "ask", "what is total funding cost",
         "--registry", str(_EXAMPLE_DIR / "registry.json"),
         "--data", str(_EXAMPLE_DIR / "data.json"),
-        "--today", "1", "--window", "1", "--domain", "treasury",
+        "--today", "1", "--window", "1", "--domain", "treasury", "--json",
     )
     missing = _run_cli(*args, "--packs-root", str(tmp_path))
     assert missing.returncode == 2
-    assert "no analytics domain packs were found" in missing.stderr
+    assert "no analytics domain packs under" in missing.stderr
     assert str(tmp_path / "knowledge" / "analytics_packs") in missing.stderr
     assert missing.stdout == ""
 
-    found = _run_cli(*args, "--packs-root", str(_REPO_ROOT), "--json")
+    # No --packs-root: the repo's local catalog (cwd is the repo root).
+    found = _run_cli(*args)
     assert found.returncode == 0, found.stderr
-    assert "no analytics domain packs" not in found.stderr
+    assert json.loads(found.stdout)["domain_pack_source"].startswith("local analytics domain packs")
 
 
 def test_example_disclosure_exists_and_is_declared():
@@ -1347,3 +1348,41 @@ def test_default_policy_keeps_legacy_additive_behavior(layer):
     rows = [Fact(2, {"desk": "rates"}, {"cost": 30.0}), Fact(2, {"desk": "fx"}, {"cost": 10.0})]
     result = execute(_plan(dims=("desk",), window=TimeWindow(2, 2, "day")), layer, lambda p: rows, 2)
     assert compute_insights(result) == compute_insights(result, policy=resolve_policy(layer, "funding_cost"))
+
+
+def test_ac027_pack_source_reported_and_missing_catalog_raises(tmp_path, monkeypatch):
+    from quantsmith.nl_analytics.envelope import emit_answer_evidence
+    from quantsmith.pipelines.analytics_packs import resolve_packs
+
+    monkeypatch.chdir(tmp_path)  # no local catalog: the bundled defaults
+    packs, source = resolve_packs()
+    assert source.kind == "bundled"
+    layer = _rates_layer()
+    rows = _curve_rows(("2y",))
+    ctx = _yearly_context(layer, rows, dataset_domains=("fixed_income_rates",),
+                          domain_packs=tuple(packs), domain_pack_source=source)
+    response = answer("yield yoy", ctx)
+    assert response.status == "answered"
+    assert response.domain_pack_source == source.describe()
+    cited = [c for c in response.citations if c.startswith("domain packs:")]
+    assert cited and "bundled" in cited[0] and source.version in cited[0] and source.content_hash in cited[0]
+
+    plan = _plan(metric="yield", window=TimeWindow(2, 2, "year"))
+    result = execute(plan, layer, reader=lambda p: rows, as_of=2)
+    emit_answer_evidence("yield yoy", plan, result, response.chart, response.insights, response,
+                         tmp_path / "env", run_id="run-src-1", started_at="2026-01-01T00:00:00Z")
+    payload = json.loads((tmp_path / "env" / "answer_payload.json").read_text(encoding="utf-8"))
+    assert payload["domain_pack_source"] == source.describe()
+    assert payload["domain_packs"] == ["rates_fixed_income"]
+
+    # Packs passed without a source are still identified, by a hash of what was given.
+    unsourced = answer("yield yoy", replace(ctx, domain_pack_source=None))
+    assert unsourced.domain_pack_source.startswith("caller-supplied analytics domain packs")
+
+    # No pack applied: nothing to cite.
+    generic = answer("yield yoy", replace(ctx, dataset_domains=("no_such_domain",)))
+    assert generic.domain_pack_source == ""
+    assert not any(c.startswith("domain packs:") for c in generic.citations)
+
+    with pytest.raises(ResponseError, match="domain_packs is empty"):
+        answer("yield yoy", replace(ctx, domain_packs=(), domain_pack_source=None))

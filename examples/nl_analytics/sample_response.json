@@ -19,6 +19,7 @@
     "funding_cost \u2014 owner: treasury-ops",
     "as of period 3"
   ],
+  "domain_pack_source": "",
   "domain_packs": [],
   "envelope_uri": null,
   "headline": "funding_cost is 255 as of period 3.",

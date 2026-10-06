@@ -20,6 +20,10 @@ What this module guarantees, and what it does not:
   (REQ-005). Until then ``0080`` may apply it in chat with a visible caveat.
 * Packs only ever **restrict** interpretation (suppress insights, add caveats,
   force units). Nothing here can widen access or loosen ``0008`` governance.
+* The installed package carries the catalog as read-only **bundled defaults**
+  (copied at build time by ``setup.py``); a local
+  ``knowledge/analytics_packs/`` shadows them as a whole catalog
+  (:func:`resolve_packs`, REQ-013).
 
 Standard library only (NFR-001).
 """
@@ -27,9 +31,11 @@ Standard library only (NFR-001).
 from __future__ import annotations
 
 import fnmatch
+import hashlib
 import json
 import math
 import re
+import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, Iterable, List, Mapping, Optional, Sequence, Tuple
@@ -80,9 +86,16 @@ TOLERANCE = 1e-6
 
 PACKS_DIR = Path("knowledge") / "analytics_packs"
 
+# Where ``setup.py``'s ``build_py`` puts the bundled copy inside the package.
+BUNDLED_DIR = ("_bundled", "analytics_packs")
+
 
 class PackValidationError(ValueError):
     """Raised by :func:`load_packs` when ``strict`` and any pack is invalid."""
+
+
+class PackSourceError(LookupError):
+    """Raised by :func:`resolve_packs` when no pack catalog can be found (REQ-013)."""
 
 
 @dataclass(frozen=True)
@@ -134,6 +147,104 @@ def load_packs(root: str | Path = ".", *, strict: bool = False) -> List[dict]:
         if errors:
             raise PackValidationError("; ".join(str(e) for e in errors))
     return packs
+
+
+@dataclass(frozen=True)
+class PackSource:
+    """Where a resolved pack catalog came from (REQ-013).
+
+    ``kind`` is ``local`` (a ``knowledge/analytics_packs/`` directory the
+    caller owns) or ``bundled`` (the read-only defaults shipped with the
+    package — in a source checkout or editable install, the repository's own
+    catalog, which is what a build bundles). ``content_hash`` covers every
+    file's name and bytes in file-name order, so an unmodified local copy of
+    the bundle hashes the same as the bundle.
+    """
+
+    kind: str
+    location: str
+    version: str
+    content_hash: str
+    pack_count: int
+
+    def describe(self) -> str:
+        return (f"{self.kind} analytics domain packs ({self.pack_count}) from {self.location}; "
+                f"quantsmith {self.version}; catalog {self.content_hash}")
+
+
+def _catalog_hash(files: Sequence[Tuple[str, bytes]]) -> str:
+    h = hashlib.sha256()
+    for name, data in files:
+        h.update(name.encode("utf-8") + b"\0" + hashlib.sha256(data).hexdigest().encode("ascii") + b"\n")
+    return f"sha256:{h.hexdigest()}"
+
+
+def _package_version() -> str:
+    # The parent package is always imported before this module; reading it
+    # from sys.modules keeps this module standard-library only (AC-014).
+    return str(getattr(sys.modules[__name__.split(".")[0]], "__version__", "unknown"))
+
+
+def _bundled_catalog():
+    """The bundled catalog: package data in an installed wheel, else the
+    repository's own catalog when running from a source tree or an editable
+    install (where the build's copy is not on the import path)."""
+    from importlib import resources
+
+    data = resources.files("quantsmith")
+    for part in BUNDLED_DIR:
+        data = data.joinpath(part)
+    if data.is_dir() and any(f.name.endswith(".json") for f in data.iterdir()):
+        return data
+    tree = Path(__file__).resolve().parents[3] / PACKS_DIR
+    if tree.is_dir() and any(tree.glob("*.json")):
+        return tree
+    return None
+
+
+def _read_catalog(directory) -> List[Tuple[str, bytes]]:
+    return sorted((f.name, f.read_bytes()) for f in directory.iterdir() if f.name.endswith(".json"))
+
+
+def resolve_packs(root: str | Path | None = None) -> Tuple[List[dict], PackSource]:
+    """Resolve the pack catalog to use, and say where it came from (REQ-013).
+
+    * ``root`` given: ``<root>/knowledge/analytics_packs/`` is used alone; if
+      it holds no packs that is an error — an explicit choice never falls
+      back to the bundle.
+    * Otherwise a local ``knowledge/analytics_packs/`` under the working
+      directory, if it holds any packs, replaces the bundle as a whole
+      catalog — never merged pack by pack, so an answer's review status is
+      never a mix of the team's reviewed packs and newer bundled drafts.
+    * Otherwise the bundled defaults.
+
+    Packs are loaded without strict validation: a bundled pack's
+    ``reviewer_agents`` and ``builds_on`` paths point into the repository,
+    which an installed package does not have. CI validates the catalog before
+    it is ever built (NFR-004).
+    """
+    if root is not None:
+        directory = Path(root) / PACKS_DIR
+        if not directory.is_dir() or not any(directory.glob("*.json")):
+            raise PackSourceError(f"no analytics domain packs under {directory}")
+        kind, location = "local", directory
+    else:
+        local = Path.cwd() / PACKS_DIR
+        if local.is_dir() and any(local.glob("*.json")):
+            kind, location = "local", local
+        else:
+            location = _bundled_catalog()
+            if location is None:
+                raise PackSourceError(
+                    f"no analytics domain packs: no {PACKS_DIR} under {Path.cwd()} and the installed "
+                    f"quantsmith package carries no bundled catalog"
+                )
+            kind = "bundled"
+    files = _read_catalog(location)
+    packs = [json.loads(data.decode("utf-8")) for _, data in files]
+    source = PackSource(kind=kind, location=str(location), version=_package_version(),
+                        content_hash=_catalog_hash(files), pack_count=len(packs))
+    return packs, source
 
 
 # ---------------------------------------------------------------------------

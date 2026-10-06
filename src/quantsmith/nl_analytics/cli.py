@@ -10,11 +10,12 @@ REQ-009, REQ-012, T-018.
         [--publish --approve --contract PATH --db PATH]
 
 ``--domain`` names the dataset's ``domain:`` tags (as in ``sources/*.yml``);
-the matching analytics domain packs under ``<packs-root>/knowledge/analytics_packs/``
-then govern units, additivity, suppressed insights, and caveats (REQ-015).
-The packs ship with the repository scaffold, not the pip package, so
-``--domain`` with no packs under ``--packs-root`` is an error rather than a
-silent fall back to generic behavior.
+the matching analytics domain packs then govern units, additivity, suppressed
+insights, and caveats (REQ-015). Packs resolve as ``0081`` REQ-013 says: a
+local ``knowledge/analytics_packs/`` under the working directory replaces the
+bundled defaults as a whole; otherwise the defaults bundled in the package
+are used. ``--packs-root DIR`` names the catalog explicitly and is an error
+if it holds no packs — it never falls back to the bundle.
 
 ``--registry`` and ``--data`` are local JSON files the caller supplies (see
 ``examples/nl_analytics/`` for the worked shapes); this module never reads a
@@ -33,7 +34,7 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List
 
-from quantsmith.pipelines.analytics_packs import PACKS_DIR, load_packs
+from quantsmith.pipelines.analytics_packs import PackSourceError, resolve_packs
 from quantsmith.pipelines.metrics_semantic_layer import Fact, SemanticLayer
 
 from .interpret import InterpretContext
@@ -77,6 +78,7 @@ def _response_to_dict(response: ChatResponse) -> Dict[str, Any]:
         "plan_echo": response.plan_echo,
         "caveats": list(response.caveats),
         "domain_packs": list(response.domain_packs),
+        "domain_pack_source": response.domain_pack_source,
         "citations": list(response.citations),
         "run_id": response.run_id,
         "envelope_uri": response.envelope_uri,
@@ -145,17 +147,16 @@ def _cmd_ask(args: argparse.Namespace) -> int:
         def prior_insight_lookup(key: str, lookup_as_of: int, _writer=writer):
             return prior_insights(_writer.read, key, lookup_as_of)
 
-    domain_packs = ()
+    domain_packs, pack_source = (), None
     if args.domain:
-        domain_packs = tuple(load_packs(args.packs_root))
-        if not domain_packs:
-            print(
-                f"error: --domain was given but no analytics domain packs were found under "
-                f"{Path(args.packs_root) / PACKS_DIR}; the packs ship with the QuantSmith repository, "
-                f"not the pip package — point --packs-root at a checkout or copy that has them",
-                file=sys.stderr,
-            )
+        try:
+            packs, pack_source = resolve_packs(args.packs_root)
+        except PackSourceError as exc:
+            hint = ("point --packs-root at a directory holding knowledge/analytics_packs/, or omit it to "
+                    "use the bundled defaults") if args.packs_root else "reinstall quantsmith or pass --packs-root"
+            print(f"error: --domain was given but {exc}; {hint}", file=sys.stderr)
             return 2
+        domain_packs = tuple(packs)
 
     context = AnswerContext(
         layer=layer, reader=lambda plan: rows, as_of=as_of,
@@ -167,6 +168,7 @@ def _cmd_ask(args: argparse.Namespace) -> int:
         writeback=writeback,
         dataset_domains=tuple(args.domain),
         domain_packs=domain_packs,
+        domain_pack_source=pack_source,
     )
 
     try:
@@ -202,7 +204,11 @@ def main(argv=None) -> int:
         "--domain", action="append", default=[],
         help="a domain: tag of the dataset (repeatable); selects analytics domain packs",
     )
-    p_ask.add_argument("--packs-root", default=".", help="repository root holding knowledge/analytics_packs/")
+    p_ask.add_argument(
+        "--packs-root", default=None,
+        help="use only the catalog under DIR/knowledge/analytics_packs/ (default: a local catalog in the "
+             "working directory, else the bundled defaults)",
+    )
     p_ask.add_argument("--envelope-dir", default=None, help="emit a 0070 audit envelope here")
     p_ask.add_argument("--run-id", default=None, help="caller-assigned run id (required for --envelope-dir/--publish)")
     p_ask.add_argument("--publish", action="store_true", help="build and publish a write-back record")

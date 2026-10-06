@@ -112,6 +112,13 @@ patterns locally rather than expecting them to update in place.
 - `docs/packaging.md` updated — the Python-package phase is now active (real code
   exists); `docs/adoption_guide.md` rewritten to cover both the package and the
   scaffold.
+- The `quantsmith` package now bundles the analytics domain pack catalog (spec `0081` REQ-013): `setup.py` copies
+  `knowledge/analytics_packs/*.json` into `quantsmith/_bundled/analytics_packs/` at build time, and the build fails if
+  there are none. `analytics_packs.resolve_packs()` uses an explicit root alone, else a local
+  `knowledge/analytics_packs/` as a whole catalog, else the bundle, and returns a `PackSource` (kind, location, version,
+  content hash). NL analytics (spec `0080` REQ-018) cites that source in every answer that applies a pack and in the
+  envelope, raises when domain tags come with no catalog, and the CLI's `--domain` now works from a pip install;
+  `--packs-root` is optional and errors only when it names an empty catalog.
 
 ### Fixed
 - NL analytics insights (spec `0080`, T-021/T-022) no longer sum per-group values for every metric: yields across tenors,

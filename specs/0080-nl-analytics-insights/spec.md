@@ -4,7 +4,7 @@
 - **Status:** Draft
 - **Author:** Joshua Lutkemuller, CFA
 - **Approver:** — (pending owner review)
-- **Last updated:** 2026-09-24
+- **Last updated:** 2026-10-06
 
 > WHAT and WHY only. Implementation lives in `plan.md`.
 
@@ -100,6 +100,7 @@ It supports two decisions: *what does the data say about my question right now*
 | REQ-015 | The system shall apply the analytics domain packs (`0081`) selected by the dataset's `sources/*.yml` domain tags: pack vocabulary extends interpretation, pack units and conventions govern display (e.g. basis points for yield moves), pack additivity governs aggregation and contributor insights, and pack caveats and chart conventions are added to the response. A term that is a conflict between selected packs yields a clarification. | must |
 | REQ-016 | When any applied pack is not `reviewed`, the response shall carry an "unreviewed domain pack" caveat naming it, and database write-back shall be refused; write-back is eligible only when every applied pack is `reviewed` (`0081` REQ-005). | must |
 | REQ-017 | When no pack matches, the system shall use generic behavior (unit and additivity taken from the `0008` definition only) and say so in the response; packs may only restrict interpretation, never widen access or enable an insight the generic rules forbid. | must |
+| REQ-018 | When any pack is applied, the response and its `0070` envelope shall record where the pack catalog came from (`0081` REQ-013: local or bundled, location, package version, content hash). Domain tags supplied with no pack catalog at all shall be a configuration error, never a silent generic answer. | must |
 | REQ-014 | The SDK shall add two narrow agents: `agents/analytics/data_visualization/` (chart choice, encoding, color, accessibility — promoting the `proposed` backlog row) and `agents/analytics/nl_analytics/` (question → plan → response orchestration, clarification, write-back request), each handing off to `metrics_semantic_layer`, `data_storytelling`, and `sql-integration-agent` rather than duplicating them. | must |
 
 ## Non-Functional Requirements
@@ -142,6 +143,7 @@ It supports two decisions: *what does the data say about my question right now*
 | AC-024 | Given a dataset tagged `equities` and `fx` and the question "vol by pair", when interpreted, then the response is `clarification_needed` naming both candidate metrics. | REQ-015, REQ-002 |
 | AC-025 | Given only `draft` packs applied, when answered, then the unreviewed caveat names each pack and a write-back request is rejected with that reason; with all applied packs `reviewed`, the same write-back proceeds to its normal checks. | REQ-016 |
 | AC-026 | Given a dataset whose tags select no pack, when answered, then the response states generic behavior was used; given any pack, the set of permitted insights is a subset of the generic set. | REQ-017 |
+| AC-027 | Given packs resolved from the bundle and a question that applies one, when answered, then the response citations and the envelope's answer payload name the source kind, package version, and catalog hash; given domain tags with no pack catalog supplied, then `answer()` raises. | REQ-018 |
 | AC-022 | Given each failure path (clarification, masked, empty result, stale data, write rejected), when a response is returned, then it carries a typed status and a non-empty reason, and no chart spec is attached to a non-answer. | NFR-006 |
 
 ## Data & Dependencies
