@@ -43,8 +43,8 @@
 | T-020 | `writeback_sqlite.py`: `SQLiteWriter` + reader over stdlib `sqlite3` (schema from contract, `ON CONFLICT DO NOTHING` idempotency, tombstone reversal, as-of prior-insight read); runs AC-014/015/016 against both the recording writer and SQLite (`:memory:` and a temp file). First supported target, resolved by the owner 2026-09-24. | REQ-010, REQ-011, REQ-012, AC-014, AC-015, AC-016 | done | Table name is fixed at construction from the contract (`nl_analytics_writeback_<name>`), never from a record or a later call; every statement is parameterized. |
 | T-019 | Update `specs/README.md`, `src/quantsmith/pipelines/README.md` or package README, `docs/handoff.md`, `docs/handoffs/future_features.md`, and `CHANGELOG.md` on ship. | REQ-014 | todo | |
 
-| T-021 | `domain.py`: apply `0081` packs (vocabulary, units, additivity, insight suppression, caveats, chart conventions), term-conflict clarification, and generic fallback. | REQ-015, REQ-017, AC-023, AC-024, AC-026 | todo | Packs and validator shipped by `0081`. |
-| T-022 | Unreviewed-pack caveat and write-back refusal unless every applied pack is reviewed. | REQ-016, AC-025 | todo | |
+| T-021 | `domain.py`: apply `0081` packs (vocabulary, units, additivity, insight suppression, caveats, chart conventions), term-conflict clarification, and generic fallback. | REQ-015, REQ-017, AC-023, AC-024, AC-026 | done | Fixes insights summing groups for every metric (yields across tenors, VaR across desks). `execute.Result` now carries the layer's own ungrouped `total`/`period_totals`; `insights.py` reads those, never a sum of groups, under a `domain.MetricPolicy`. Generic additivity comes from the `0008` definition only (`sum`/`count` additive; `mean`/ratio non-additive); packs can only make it stricter and only add suppressed kinds. A grouped question on a non-additive metric reports per-group levels and changes with no total; contributor/concentration also require the groups to reconcile to the total, so a direct `compute_insights` call without a policy cannot decompose a mean either. Non-time-summable metrics (stocks, rates) read the latest period, and the chart follows (`snapshot`). `pct`/`bps` changes are in basis points with no percent change. Grounding now treats digits in dimension labels (`10y`) as backed. CLI gains `--domain`/`--packs-root`. |
+| T-022 | Unreviewed-pack caveat and write-back refusal unless every applied pack is reviewed. | REQ-016, AC-025 | done | Gate is `domain.writeback_refusal`, not `Selection.all_reviewed` as `plan.md` sketched: `all_reviewed` is false with zero packs, which would refuse every generic (no-pack) write-back; REQ-016 governs *applied* packs only. |
 
 Status values: `todo` | `in-progress` | `blocked` | `done`.
 
@@ -75,10 +75,10 @@ Every acceptance criterion must be named by at least one test.
 | AC-019 | `test_ac019_stdlib_only_no_credentials_or_network` | done |
 | AC-020 | `test_ac020_audit_redaction_and_privacy_flags` | done |
 | AC-021 | `test_ac021_benchmark_100k_rows` | done |
-| AC-023 | `test_ac023_pack_units_and_additivity_applied` | todo |
-| AC-024 | `test_ac024_cross_pack_term_conflict_clarifies` | todo |
-| AC-025 | `test_ac025_draft_pack_caveat_and_writeback_gate` | todo |
-| AC-026 | `test_ac026_generic_fallback_and_restrict_only` | todo |
+| AC-023 | `test_ac023_pack_units_and_additivity_applied`, `test_non_additive_metric_is_never_summed_across_groups`, `test_semi_additive_level_is_the_latest_period_not_a_window_sum` | done |
+| AC-024 | `test_ac024_cross_pack_term_conflict_clarifies` | done |
+| AC-025 | `test_ac025_draft_pack_caveat_and_writeback_gate` | done |
+| AC-026 | `test_ac026_generic_fallback_and_restrict_only` | done |
 | AC-022 | `test_ac022_typed_status_on_every_failure_path` | done |
 
 ## Follow-ups

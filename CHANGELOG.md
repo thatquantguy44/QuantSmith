@@ -114,6 +114,14 @@ patterns locally rather than expecting them to update in place.
   scaffold.
 
 ### Fixed
+- NL analytics insights (spec `0080`, T-021/T-022) no longer sum per-group values for every metric: yields across tenors,
+  VaR across desks, and ratios were summed into a single "level", and percent changes were reported for rates.
+  Levels now use the semantic layer's own ungrouped value. A non-additive metric asked by a dimension reports
+  each group with no total. Contributor and concentration insights need groups that add up to the total. Stocks
+  and rates are read at the latest period, and `pct`/`bps` changes are reported in basis points. Analytics domain
+  packs (`0081`) now apply through `nl_analytics/domain.py` (vocabulary, units, additivity, suppressed insights,
+  caveats, term-conflict clarification, and a write-back refusal while any applied pack is unreviewed), with a
+  stated generic fallback; the CLI gains `--domain`.
 - The `maintenance` gate no longer treats test files as model code. Its `*model*.py` pattern matched `tests/test_model_*.py` and warned that model code
   changed with no model card; files under `tests/` and `test_*.py` are now skipped, and real model or pipeline code still needs a card or runbook.
 - Mutation testing (`0097`) now runs the tests against the mutated copy. With a `src`-layout package that was also installed (an editable

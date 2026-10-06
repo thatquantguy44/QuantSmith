@@ -6,7 +6,12 @@ REQ-009, REQ-012, T-018.
     quantsmith-nl-analytics ask "<question>" --registry registry.json \\
         --data data.json --today 3 [--as-of N] [--window N] \\
         [--viewer-clearance public] [--envelope-dir DIR --run-id ID] \\
+        [--domain TAG ... [--packs-root DIR]] \\
         [--publish --approve --contract PATH --db PATH]
+
+``--domain`` names the dataset's ``domain:`` tags (as in ``sources/*.yml``);
+the matching analytics domain packs under ``<packs-root>/knowledge/analytics_packs/``
+then govern units, additivity, suppressed insights, and caveats (REQ-015).
 
 ``--registry`` and ``--data`` are local JSON files the caller supplies (see
 ``examples/nl_analytics/`` for the worked shapes); this module never reads a
@@ -25,6 +30,7 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List
 
+from quantsmith.pipelines.analytics_packs import load_packs
 from quantsmith.pipelines.metrics_semantic_layer import Fact, SemanticLayer
 
 from .interpret import InterpretContext
@@ -67,6 +73,7 @@ def _response_to_dict(response: ChatResponse) -> Dict[str, Any]:
         "markdown_table": response.markdown_table,
         "plan_echo": response.plan_echo,
         "caveats": list(response.caveats),
+        "domain_packs": list(response.domain_packs),
         "citations": list(response.citations),
         "run_id": response.run_id,
         "envelope_uri": response.envelope_uri,
@@ -143,6 +150,8 @@ def _cmd_ask(args: argparse.Namespace) -> int:
         envelope_actor_clearance=args.viewer_clearance,
         prior_insight_lookup=prior_insight_lookup,
         writeback=writeback,
+        dataset_domains=tuple(args.domain),
+        domain_packs=tuple(load_packs(args.packs_root)) if args.domain else (),
     )
 
     try:
@@ -174,6 +183,11 @@ def main(argv=None) -> int:
     p_ask.add_argument("--window", type=int, default=7, help="default window size in periods")
     p_ask.add_argument("--viewer-clearance", default="public")
     p_ask.add_argument("--json", action="store_true", help="print the response as JSON")
+    p_ask.add_argument(
+        "--domain", action="append", default=[],
+        help="a domain: tag of the dataset (repeatable); selects analytics domain packs",
+    )
+    p_ask.add_argument("--packs-root", default=".", help="repository root holding knowledge/analytics_packs/")
     p_ask.add_argument("--envelope-dir", default=None, help="emit a 0070 audit envelope here")
     p_ask.add_argument("--run-id", default=None, help="caller-assigned run id (required for --envelope-dir/--publish)")
     p_ask.add_argument("--publish", action="store_true", help="build and publish a write-back record")
