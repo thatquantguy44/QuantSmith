@@ -28,8 +28,20 @@
 4. The coverage check looked at the tool's interpreter, not the project's. It now checks the one given by `--python`.
 5. Order-dependence reports named only the last failing seed. They now list every failing seed.
 
+## Follow-up: defects found by running the runtime on the `0098` code (2026-10-06)
+
+Mutation-testing the new `0098` modules and running the suite on a second machine exposed two more defects, both fixed with regression tests
+(each test was shown to fail on the old behaviour):
+
+1. **Mutation score of 0 on a `src`-layout package that is also installed.** The tests imported the original package from the editable install, not
+   the mutated copy, so all 11 covered mutants in one probe survived (score `0.0`, no warning). The `cookiecutter` project above is flat-layout, which hid
+   it. The copy's `src/` and root now come first on `PYTHONPATH`, the tool asks the interpreter where the target resolves from, and it refuses to score
+   (`mutated_file_not_imported`) when that is provably outside the copy. The same probe then killed 10 of 11.
+2. **A compiler that cannot link sanitizers hid one that can.** `probe_cpp` took `clang++` first; where it lacked the ASan runtime (`libclang_rt.asan*.a`)
+   it reported `built: false` although `g++` worked. It now probes each installed compiler and reports `compilers_tried`.
+
 ## Limits of this validation
 
 One project, one bug, Python only. It shows the runner, mutation, flakiness and probe paths work on real code and exposed real
-defects; it does not measure detection rates. The CTest and GoogleTest paths were not covered (CMake and GoogleTest not installed).
+defects; it does not measure detection rates. The GoogleTest path was not covered (GoogleTest not installed). The CTest path is now covered by a real CMake project (CMake 3.28) in the test suite.
 Kaggle was not used: its defect datasets hold metrics, not code. Larger studies should draw on IDoFT (flaky tests) and more BugsInPy bugs.

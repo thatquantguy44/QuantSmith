@@ -87,11 +87,11 @@ tests/test_test_engineering.py
 
 Additive. Rollback: delete the package, test, spec, and entry point, and revert the `coverage` extra and lockfile.
 
-## Follow-on scope: items 6–9 (not built)
+## Follow-on scope: items 6–9 (item 6 built as `0098`; 7–9 not built)
 
 | # | Item | Sketch | Depends on | Decision needed |
 | --- | --- | --- | --- | --- |
-| 6 | Property, differential and metamorphic helpers | Hypothesis strategies derived from type hints and the edge catalog; differential runner comparing two implementations (old vs new, Python vs C++) on shared inputs; a small library of metamorphic relations (scaling, permutation, idempotence, monotonicity) for numeric and quant functions | `edgecases.py`; Hypothesis (new optional extra) | Add Hypothesis to the `dev` extra? Which quant relations first? |
+| 6 | **Built as `0098-model-testing-helpers`** (no Hypothesis; seeded generators instead). Original sketch: property, differential and metamorphic helpers | Hypothesis strategies derived from type hints and the edge catalog; differential runner comparing two implementations (old vs new, Python vs C++) on shared inputs; a small library of metamorphic relations (scaling, permutation, idempotence, monotonicity) for numeric and quant functions | `edgecases.py`; Hypothesis (new optional extra) | Add Hypothesis to the `dev` extra? Which quant relations first? |
 | 7 | Diff-aware test selection | Map `git diff` hunks to functions and to tests that cover them (coverage contexts), run those first and the rest on a schedule; reuse the mutation line filter to mutate only changed lines | `coverage_adapter.py`, `mutation.line_range` | Per-test coverage cost; fall back to full run when the map is stale |
 | 8 | Python fuzz harness | Coverage-guided or Hypothesis-stateful fuzzing of parsers and data loaders with a corpus directory, crash minimisation and replay; C++ fuzz targets (libFuzzer) reuse the sanitizer parser | `cpp_harness.py`, `sanitizers.py` | Atheris dependency vs Hypothesis only; corpus storage under `knowledge_local/` |
 | 9 | Orchestrated workflow | One `workflow` subcommand and a workflow doc: detect → run → flaky → edge probes → mutate → report, writing a single evidence report that the `test_engineering_orchestrator` agent consumes | items 1–5 | Report format; thresholds that turn findings into a failing gate |

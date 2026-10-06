@@ -36,3 +36,10 @@ Reviews solver status, infeasibility, duals, shadow prices, slacks, degeneracy, 
 - Data availability, point-in-time semantics, and provenance.
 - Assumptions, constraints, costs, and operational limits.
 - Validation design and monitoring after launch.
+
+## Runtime
+
+Spec `0098` (`src/quantsmith/test_engineering/`) gives solver review something to run: `kkt_check_quadratic` certifies a returned point
+(primal feasibility, stationarity, multiplier signs, complementary slackness; a global optimum only for convex problems), and
+`check_solver_on_instances` runs a solver on seeded LP/QP instances whose optimum is known by construction, with scaling and
+relaxation checks. Report the measured residuals and the seed, not only a verdict.

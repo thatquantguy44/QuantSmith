@@ -21,11 +21,15 @@ patterns locally rather than expecting them to update in place.
 ## [Unreleased]
 
 ### Added
+- Model testing helpers (spec `0098`): `quantsmith.test_engineering` gains seeded generators (including convex LP/QP instances whose optimum
+  is known by construction), metamorphic relations, a differential runner, KKT optimality certificates with a solver instance runner,
+  regression and ML checks (determinism, label-shuffled placebo, noise features, baseline), and `metamorphic` and `differential`
+  subcommands. numpy only; SciPy is used as a test oracle. Run on `solve_lp` and `solve_portfolio` it found no defect.
 - Test engineering runtime (spec `0097`): `quantsmith.test_engineering` and the `quantsmith-test-engineering`
   command (`detect`, `run`, `edges`, `cpp`, `mutate`, `flaky`) for Python and C++. Zero tests never reads as a pass;
   C++ cases run one per process under AddressSanitizer and UndefinedBehaviorSanitizer; mutation testing reports
   uncovered mutants apart from survivors; flakiness checks name the seed that reproduces an order dependence.
-  `coverage` is added to the `dev` extra. Items 6–9 are scoped in the spec plan.
+  `coverage` is added to the `dev` extra. Items 7–9 are scoped in the spec plan.
 - Venture request routing (spec `0096`): `venture_routing.py` and reviewable rules in `routing.json` turn a
   request into an ordered agent chain with review gates, decision owner, the strictest decision-path class, and
   the clearance it needs; forbidden requests (recommend an investment, designate or attribute, profile a person,
@@ -110,6 +114,15 @@ patterns locally rather than expecting them to update in place.
   scaffold.
 
 ### Fixed
+- The `maintenance` gate no longer treats test files as model code. Its `*model*.py` pattern matched `tests/test_model_*.py` and warned that model code
+  changed with no model card; files under `tests/` and `test_*.py` are now skipped, and real model or pipeline code still needs a card or runbook.
+- Mutation testing (`0097`) now runs the tests against the mutated copy. With a `src`-layout package that was also installed (an editable
+  install), the tests imported the original, every mutant survived, and the tool reported a score of 0 with no warning. The copy's `src/` and
+  root now come first on `PYTHONPATH`, the tool verifies where the target module resolves from, and it refuses to score
+  (`mutated_file_not_imported`, exit `2`) when it is provably outside the copy.
+- The C++ boundary probe (`0097`) now uses the first installed compiler that can build and run a sanitizer program. An installed `clang++`
+  without the sanitizer runtime used to hide a working `g++` and report `built: false`; the result now lists each compiler tried and why it
+  failed. The CTest path is also tested against a real CMake project.
 - Repaired the dead `agentic_code_tools/powerbi.py` (missing `PowerBIPayload`
   contract) so the Power BI runtime imports.
 

@@ -55,5 +55,7 @@ Spec `0097` (`src/quantsmith/test_engineering/`) gives this agent a real runtime
 - `quantsmith-test-engineering detect` reports the stack, tools and suggested commands; each specialist's findings come from
   `run`, `edges`, `cpp`, `mutate` and `flaky`, all printing JSON with exit `0` (clean), `1` (findings), `2` (could not run).
   An orchestrated end-to-end workflow is scoped, not built (`0097/plan.md`, item 9).
+- Spec `0098` adds `metamorphic` and `differential` subcommands and model-behaviour checks (KKT certificates, regression, ML placebo) as
+  Python API. Route a request to test a regression, an ML model or an optimizer to `python_test_engineer` with these named.
 
 The runtime's reports are evidence for a human; they do not prove correctness.
