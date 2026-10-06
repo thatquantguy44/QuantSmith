@@ -114,6 +114,8 @@ patterns locally rather than expecting them to update in place.
   scaffold.
 
 ### Fixed
+- The `maintenance` gate no longer treats test files as model code. Its `*model*.py` pattern matched `tests/test_model_*.py` and warned that model code
+  changed with no model card; files under `tests/` and `test_*.py` are now skipped, and real model or pipeline code still needs a card or runbook.
 - Mutation testing (`0097`) now runs the tests against the mutated copy. With a `src`-layout package that was also installed (an editable
   install), the tests imported the original, every mutant survived, and the tool reported a score of 0 with no warning. The copy's `src/` and
   root now come first on `PYTHONPATH`, the tool verifies where the target module resolves from, and it refuses to score
