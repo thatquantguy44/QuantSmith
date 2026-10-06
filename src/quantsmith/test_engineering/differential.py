@@ -5,7 +5,8 @@ a solver against an oracle, a new version against the old one, a vectorised rewr
 first implementation (or ``reference``) is the one the others are compared with.
 
 Agreement is not correctness: implementations that share a bug, or the same wrong formula, agree.
-Disagreement means at least one is wrong or the tolerance is too tight; the report names the case.
+Disagreement means at least one is wrong or the tolerance is too tight; the report names the case. ``worst_case`` is the mismatch with the
+largest deviation; a difference that is not numeric (one implementation raised, a shape differs) counts as infinite, so it ranks first.
 """
 
 from __future__ import annotations
@@ -79,7 +80,7 @@ def compare_implementations(impls: Mapping[str, Callable[[Any], Any]], *, inputs
         status = "inconclusive"
     else:
         status = "agree"
-    worst = max(mismatches, key=lambda m: (math.isfinite(m["deviation"]), m["deviation"] if math.isfinite(m["deviation"]) else 0.0), default=None)
+    worst = max(mismatches, key=lambda m: m["deviation"], default=None)                  # a non-numeric mismatch (an exception, a shape) is infinite
     return {"check": "differential", "status": status, "reference": ref, "implementations": names, "seed": seed, "cases": len(cases_in),
             "per_implementation": summary, "disagreements": disagreements, "inconclusive": inconclusive,
             "tolerance": {"rtol": rtol, "atol": atol, "equal_nan": equal_nan}, "worst_case": worst,

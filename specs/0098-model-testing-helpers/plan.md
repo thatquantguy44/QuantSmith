@@ -45,7 +45,8 @@ tests/test_model_testing_helpers.py
 - Status vocabulary: relation-type checks return `holds | violated | inconclusive | nothing_checked`; `compare_implementations` returns
   `agree | disagree | inconclusive | nothing_compared`. Exit codes: `0` holds/agree, `1` violated/disagree, `2` inconclusive/nothing/bad input.
 - Common fields: `seed`, `cases`, `status`, `limits`, and, on failure, `counterexample` / `worst_case` with the case index so
-  `rng_for(seed, case)` regenerates it.
+  `rng_for(seed, case)` regenerates it. `worst_case` is the mismatch with the largest deviation; a non-numeric difference (an exception, a shape) is infinite.
+- Comparison (`_compare.compare_values`): `|a - b| <= atol + rtol*|b|`; an infinite or NaN expected value is matched only by itself (`equal_nan` for NaN), so `inf <= inf` can never make a finite value agree with an infinity.
 - Callable conventions: relation and differential checks call `fn(x)` where `x` is a NumPy array (or any object when `inputs=` is given);
   regression `fit(X, y) -> coef` with the intercept first when `intercept=True`; ML `fit_predict(X_train, y_train, X_test) -> predictions`;
   solver `solve(instance) -> (x, objective) | None`.

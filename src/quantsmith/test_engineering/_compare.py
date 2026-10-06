@@ -38,8 +38,10 @@ def compare_values(actual: Any, expected: Any, rtol: float, atol: float, equal_n
     same = a == b                                                      # equal infinities count as equal
     with np.errstate(invalid="ignore"):
         diff = np.where(same, 0.0, np.abs(a - b))
+        tolerance = atol + rtol * np.abs(b)                            # infinite when b is, and nan for rtol=0 and b infinite
     diff = np.where(np.isnan(diff), math.inf, diff)
-    ok = bool(np.all(diff <= atol + rtol * np.abs(b)))
+    # An infinite expected value is matched only by the same infinity: `inf <= inf` must never make 5.0 agree with inf.
+    ok = bool(np.all(same | (np.isfinite(b) & (diff <= tolerance))))
     return ok, float(diff.max()), ""
 
 
