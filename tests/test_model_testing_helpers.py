@@ -470,7 +470,8 @@ def test_regression_checks_report_crashes_wrong_shapes_and_zero_cases_AC_004():
     assert crash["status"] == "inconclusive" and crash["error_count"] == 3
     wrong = check_coefficient_recovery(lambda X, y: [1.0], cases=2)
     assert wrong["status"] == "inconclusive" and "expected 5" in wrong["errors"][0]["error"]
-    assert check_coefficient_recovery(ols_fit, cases=0)["status"] == "nothing_checked"
+    none = check_coefficient_recovery(ols_fit, cases=0)
+    assert none["status"] == "nothing_checked" and none["evaluated"] == 0 and none["failure_count"] == 0 and none["error_count"] == 0
     assert check_regression(ols_fit, cases=0)["status"] == "nothing_checked"
     assert check_feature_scaling_equivariance(lambda X, y: "not numbers", cases=1)["status"] == "inconclusive"
 
@@ -1086,7 +1087,8 @@ def test_determinism_notices_a_run_that_differs_in_the_middle_AC_006():
             return np.array([values[min(k, len(values) - 1)]] * len(Xb))
         return fit_predict
 
-    assert check_determinism(sequence([0.0, 1.0, 0.0]), ML_X, ML_Y_SIGNAL)["status"] == "violated"
+    middle = check_determinism(sequence([0.0, 1.0, 0.0]), ML_X, ML_Y_SIGNAL)
+    assert middle["status"] == "violated" and middle["max_deviation"] == pytest.approx(1.0)       # the worst run is the middle one
     assert check_determinism(sequence(["up", "down", "up"]), ML_X, ML_Y_SIGNAL)["status"] == "violated"
 
 
@@ -1103,6 +1105,7 @@ def test_nnls_reports_its_residual_when_it_stops_early_and_empty_problems_are_co
     A, b = np.eye(3), np.array([1.0, 2.0, 3.0])
     x, resid, converged = nonneg_least_squares(A, b, max_iter=1)
     assert converged is False and resid > 0 and resid == pytest.approx(np.linalg.norm(A @ x - b))
+    assert x.max() > 0                                                            # it did one iteration of work before stopping
     empty = kkt_check_quadratic(None, [], [])
     assert empty["convex"] is True and empty["satisfied"] is True
 
