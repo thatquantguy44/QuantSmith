@@ -41,6 +41,59 @@ None. `solve_lp` and `solve_portfolio` passed every check on this sample. That i
 4. Two of this suite's own assertions were vacuous or tested nothing (a stray `or` that made an assertion always true, and a "symmetric output"
    permutation case that did not exercise symmetry). Found on review, replaced with assertions that can fail.
 
+## Mutation testing of the helpers (the `0097` runtime run on the `0098` code)
+
+The helpers were mutation-tested with `quantsmith-test-engineering mutate` against `tests/test_model_testing_helpers.py` (the slower solver tests were left out
+of the loop). Every run reported `import_check: verified`, meaning the tests imported the mutated copy. That check exists because the first attempt did not:
+see `0097/validation.md`. `generators`, `ml_checks` and `optimization_checks` were sampled at 120 mutants each (of 154, 162 and 238); the other five modules
+were run in full. Mutants outside the sample were not assessed.
+
+| Module | First run, killed / survived (score) | After round 1 | Final |
+| --- | --- | --- | --- |
+| `_compare` | 28 / 12 (0.70) | 49 / 1 (0.98) | 49 / 1 (0.98) |
+| `_guard` | 5 / 2 (0.71) | 6 / 1 (0.86) | 6 / 1 (0.86) |
+| `differential` | 28 / 10 (0.74) | 36 / 1 (0.97) | 37 / 0 (1.00) |
+| `generators` | 66 / 52 (0.56) | 103 / 15 (0.87) | 109 / 9 (0.92) |
+| `metamorphic` | 75 / 28 (0.73) | 95 / 8 (0.92) | 95 / 8 (0.92) |
+| `ml_checks` | 76 / 25 (0.75) | 90 / 13 (0.87) | 93 / 10 (0.90) |
+| `optimization_checks` | 78 / 31 (0.72) | 89 / 23 (0.79) | 92 / 20 (0.82) |
+| `regression_checks` | 61 / 33 (0.65) | 73 / 21 (0.78) | 73 / 21 (0.78) |
+| **Total** | **417 / 193 (0.684)** | **541 / 83 (0.867)** | **554 / 70 (0.888)** |
+
+After the final run, three more survivors that were real gaps (not equivalent) were closed with assertions and each was re-checked on its own line with the
+same tool, all killed: `ml_checks` L108 (the reported worst deviation when only a middle run differs), `optimization_checks` L41 (the NNLS iteration cap
+is exact: it does one iteration of work before stopping) and `regression_checks` L70 (`cases=0` reports `evaluated == 0`). These are not in the table.
+
+### Defects and hazards the mutation results exposed
+
+1. **`compare_values` let a finite value agree with an infinity.** At default tolerances `rtol * |inf|` is `inf`, so `|a - b| <= inf` held: `5.0` agreed with
+   `inf` and `+inf` agreed with `-inf`, and `compare_implementations` reported `agree` when the reference overflowed. With `rtol=0` the same arithmetic gave
+   `0 * inf = nan` and two equal infinities disagreed. This was in already-pushed code. An infinite or NaN expected value is now matched only by itself.
+2. **`compare_implementations` ranked its worst case backwards.** A finite deviation outranked an infinite one, so an exception-versus-return mismatch could
+   never be the worst case. The largest deviation now wins and a non-numeric difference counts as infinite.
+3. **A leaked timer was undetectable.** Mutating the `setitimer(..., 0)` that disarms the timeout to `1` left a one-second timer armed after every guarded call, which
+   would later kill the host process with `SIGALRM`, and no test noticed. There is now a test that no timer or handler is left behind.
+4. **Untested branches:** the non-convergent NNLS path and the residual it reports, the combined inequality and equality KKT recovery, the relative stationarity
+   tolerance, the numerical convexity tolerance, the failure-list caps, malformed solver results, and several relation edge cases (scalar input, bad axis, empty
+   input, out-of-range index).
+
+### The 67 survivors that remain (after the three above) and why they are accepted
+
+| Kind | Count | Why accepted |
+| --- | --- | --- |
+| Default argument values (`timeout_s=10.0`, `n_obs=200`, `seed=0`, ...) | 15 | A different default is a different valid default; the tests exercise explicit values |
+| RNG stream ids and seed-space sizes (`rng_for(seed, i, 1)`, `2 ** 31 - 1`) | 18 | Any value gives a valid independent stream; the tests assert properties, not particular draws |
+| `reshape(-1)` | 11 | NumPy treats any negative dimension as "infer", so `-2` behaves like `-1` |
+| Ranges of random distributions (`uniform(0.5, 2.0)`, ...) | 7 | The properties hold for any positive range; the tests pin the ranges' observable bounds where they matter |
+| Iteration caps, numerical tolerances and one division guard in NNLS, KKT and the orthogonality measure | 10 | Numerical thresholds with no behaviour to pin short of a boundary case; the inner NNLS step changes the path to the answer, not the answer |
+| `max(0, repeats)` loop bounds in the determinism and noise-feature checks | 2 | With zero repeats the loop runs once and still ends `nothing_checked` |
+| The `0.5 * common + sqrt(0.75) * idio` sign in `return_panel` | 1 | The idiosyncratic term is symmetric, so its sign does not change the distribution |
+| `rows.shape[0] >= n and rank == n` in `convex_instance` | 2 | `shape[0]` to `shape[1]` is equivalent because the rank test already implies enough rows. `and` to `or` differs only for a rank-deficient active set, which a continuous Gaussian `A` produces with probability zero; this one is almost surely equivalent, not provably |
+| The three-standard-deviation threshold for `placebo_scores_high` | 1 | A tunable statistical threshold, documented, not pinned at its boundary |
+
+A mutation score measures how tightly the tests pin behaviour, not whether the code is right: equivalent mutants cannot be killed and the sampled modules were
+not exhaustively assessed.
+
 ## Limits of this validation
 
 Two solvers, small convex problems (3–8 variables), synthetic data. `solve_lp` was tested only in its `x ≥ 0` form and `solve_portfolio` only
