@@ -114,6 +114,13 @@ patterns locally rather than expecting them to update in place.
   scaffold.
 
 ### Fixed
+- Mutation testing (`0097`) now runs the tests against the mutated copy. With a `src`-layout package that was also installed (an editable
+  install), the tests imported the original, every mutant survived, and the tool reported a score of 0 with no warning. The copy's `src/` and
+  root now come first on `PYTHONPATH`, the tool verifies where the target module resolves from, and it refuses to score
+  (`mutated_file_not_imported`, exit `2`) when it is provably outside the copy.
+- The C++ boundary probe (`0097`) now uses the first installed compiler that can build and run a sanitizer program. An installed `clang++`
+  without the sanitizer runtime used to hide a working `g++` and report `built: false`; the result now lists each compiler tried and why it
+  failed. The CTest path is also tested against a real CMake project.
 - Repaired the dead `agentic_code_tools/powerbi.py` (missing `PowerBIPayload`
   contract) so the Power BI runtime imports.
 

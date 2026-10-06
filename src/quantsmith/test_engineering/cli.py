@@ -129,7 +129,7 @@ def cmd_mutate(a, extra) -> int:
     from .mutation import run_mutation
     res = run_mutation(a.root, a.target, extra, python=a.python, max_mutants=a.max_mutants, env=_env(a.env))
     _emit(res)
-    if res.get("score") is None and res.get("baseline") != "passed":
+    if res.get("error") or (res.get("score") is None and res.get("baseline") != "passed"):
         return 2
     return 1 if res.get("survived") else 0
 

@@ -65,6 +65,10 @@ Choose relations you can justify: a ridge fit is not scale-equivariant, so `chec
 check is evidence, not proof; agreeing implementations can share a bug; KKT certifies a global optimum only for convex problems.
 `validation.md` in `specs/0098-model-testing-helpers/` records what these checks found on `solve_lp` and `solve_portfolio` (no defects).
 
+`mutate` runs your tests against a temporary copy and checks that the tests import that copy rather than an installed one (`import_check` in the
+report); if the mutated file is provably not the one imported it exits `2` with `mutated_file_not_imported` instead of printing a meaningless score.
+`cpp` uses the first installed compiler that can build and run a sanitizer program and lists each one tried (`compilers_tried`).
+
 Limits worth remembering: probing and mutation **execute your code**, so use them only on code you own or may test;
 boundary values find undefined behaviour, not wrong answers; a mutation survivor may be an equivalent mutant; "no
 flakiness observed" is not "deterministic". `coverage` is optional (without it, mutation reports no uncovered split).

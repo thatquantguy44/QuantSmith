@@ -10,19 +10,26 @@ Operators: arithmetic (``+ - * / // % **``), comparison (``< <= > >= == !=``), b
 ``return <expr>`` to ``return None``, and augmented assignment. The project is copied to a temporary
 directory per run so the working tree is never modified. Mutation scores are only as meaningful as the
 test suite's determinism, so run the flakiness check first.
+
+The tests must import the *mutated copy*, not an installed copy of the project (an editable install of a
+``src``-layout package would otherwise hide every mutant and give a false score of 0). Each mutant run puts the copy's
+``src/`` and root first on ``PYTHONPATH``, and the tool asks the interpreter where the target module resolves from;
+if that is provably outside the copy it refuses to score (``error: mutated_file_not_imported``).
 """
 
 from __future__ import annotations
 
 import ast
+import os
 import shutil
 import tempfile
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence, Set, Tuple
+from typing import Any
 
 from .coverage_adapter import coverage_available, run_pytest_with_coverage
-from .runners import run_pytest
+from .runners import run_command, run_pytest
 
 ARITH = {ast.Add: ast.Sub, ast.Sub: ast.Add, ast.Mult: ast.Div, ast.Div: ast.Mult, ast.FloorDiv: ast.Mult, ast.Mod: ast.Mult, ast.Pow: ast.Mult}
 COMPARE = {ast.Lt: ast.GtE, ast.LtE: ast.Gt, ast.Gt: ast.LtE, ast.GtE: ast.Lt, ast.Eq: ast.NotEq, ast.NotEq: ast.Eq}
@@ -47,7 +54,7 @@ class MutantResult:
 class _Mutator(ast.NodeTransformer):
     """Count mutation sites; mutate site number ``target`` (or none, when ``target`` is None)."""
 
-    def __init__(self, target: Optional[int], skip_lines: Set[int] = frozenset()):
+    def __init__(self, target: int | None, skip_lines: set[int] = frozenset()):
         self.target, self.count, self.sites, self.skip_lines = target, 0, [], skip_lines
 
     def _site(self, node: ast.AST, operator: str, description: str) -> bool:
@@ -112,24 +119,22 @@ class _Mutator(ast.NodeTransformer):
 
     def visit_Constant(self, node):
         v = node.value
-        if isinstance(v, bool):
-            if self._site(node, "BOOL", f"{v} -> {not v}"):
-                return ast.copy_location(ast.Constant(value=not v), node)
-        elif isinstance(v, (int, float)) and not isinstance(v, bool):
-            if self._site(node, "CONST", f"{v!r} -> {v + 1!r}"):
-                return ast.copy_location(ast.Constant(value=v + 1), node)
+        if isinstance(v, bool) and self._site(node, "BOOL", f"{v} -> {not v}"):
+            return ast.copy_location(ast.Constant(value=not v), node)
+        if isinstance(v, (int, float)) and not isinstance(v, bool) and self._site(node, "CONST", f"{v!r} -> {v + 1!r}"):
+            return ast.copy_location(ast.Constant(value=v + 1), node)
         return node
 
     def visit_Return(self, node):
         self.generic_visit(node)
-        if node.value is not None and not (isinstance(node.value, ast.Constant) and node.value.value is None):
-            if self._site(node, "RET", "return value -> None"):
-                node.value = ast.copy_location(ast.Constant(value=None), node.value)
+        if (node.value is not None and not (isinstance(node.value, ast.Constant) and node.value.value is None)
+                and self._site(node, "RET", "return value -> None")):
+            node.value = ast.copy_location(ast.Constant(value=None), node.value)
         return node
 
 
-def _docstring_lines(tree: ast.AST) -> Set[int]:
-    lines: Set[int] = set()
+def _docstring_lines(tree: ast.AST) -> set[int]:
+    lines: set[int] = set()
     for n in ast.walk(tree):
         if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Module)) and n.body:
             first = n.body[0]
@@ -138,7 +143,7 @@ def _docstring_lines(tree: ast.AST) -> Set[int]:
     return lines
 
 
-def enumerate_mutants(source: str) -> List[Mutant]:
+def enumerate_mutants(source: str) -> list[Mutant]:
     tree = ast.parse(source)
     m = _Mutator(None, _docstring_lines(tree))
     m.visit(tree)
@@ -158,9 +163,51 @@ def _copy_project(root: Path, dest: Path) -> None:
     shutil.copytree(root, dest, ignore=ignore, symlinks=True, dirs_exist_ok=True)
 
 
-def run_mutation(root: str | Path, target: str, test_args: Sequence[str] = (), python: Optional[str] = None, max_mutants: int = 60,
-                 timeout_s: float = 120.0, use_coverage: bool = True, line_range: Optional[Tuple[int, int]] = None,
-                 env: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
+def _isolating_env(work: Path, env: dict[str, str] | None) -> dict[str, str]:
+    """``env`` with the copy's ``src/`` and root first on ``PYTHONPATH`` so the tests import the mutant, not an installed copy."""
+    out = dict(env or {})
+    front = [str(d) for d in (work / "src", work) if d.is_dir()]
+    rest = out.get("PYTHONPATH") or os.environ.get("PYTHONPATH", "")
+    out["PYTHONPATH"] = os.pathsep.join([*front, *([rest] if rest else [])])
+    return out
+
+
+def _module_candidates(target: str) -> list[str]:
+    parts = list(Path(target).with_suffix("").parts)
+    if parts and parts[-1] == "__init__":
+        parts = parts[:-1]
+    names = [".".join(parts[1:]) if len(parts) > 1 and parts[0] == "src" else "", ".".join(parts)]
+    return [n for i, n in enumerate(names) if n and n not in names[:i]]
+
+
+_ORIGIN_CODE = ("import importlib.util, sys\n"
+                "try:\n    s = importlib.util.find_spec(sys.argv[1])\n"
+                "except Exception as e:\n    print('ERR ' + type(e).__name__); raise SystemExit(0)\n"
+                "print(s.origin if s is not None and s.origin else 'NONE')\n")
+
+
+def _check_importable(work: Path, target: str, python: str | None, env: dict[str, str]) -> tuple[str, str]:
+    """``("verified" | "outside" | "unverified", detail)``: does the target module resolve to a file inside ``work``?"""
+    import sys
+    py = python or sys.executable
+    seen = ""
+    for name in _module_candidates(target):
+        out = run_command([py, "-c", _ORIGIN_CODE, name], work, 60.0, env).stdout.strip().splitlines()
+        origin = out[-1] if out else ""
+        if not origin or origin == "NONE" or origin.startswith("ERR "):
+            continue
+        seen = origin
+        try:
+            if work.resolve() in Path(origin).resolve().parents:
+                return "verified", origin
+        except (OSError, ValueError):
+            pass
+    return ("outside", seen) if seen else ("unverified", "")
+
+
+def run_mutation(root: str | Path, target: str, test_args: Sequence[str] = (), python: str | None = None, max_mutants: int = 60,
+                 timeout_s: float = 120.0, use_coverage: bool = True, line_range: tuple[int, int] | None = None,
+                 env: dict[str, str] | None = None) -> dict[str, Any]:
     """Mutate ``target`` (path relative to ``root``) and run the tests on each mutant."""
     root = Path(root).resolve()
     target_path = (root / target).resolve()
@@ -170,7 +217,15 @@ def run_mutation(root: str | Path, target: str, test_args: Sequence[str] = (), p
     base = run_pytest(root, test_args, timeout_s, python, env_extra=env)
     if base.verdict != "passed":
         return {"target": target, "baseline": base.verdict, "score": None, "mutants": [], "note": "baseline tests do not pass; fix them before mutating"}
-    covered: Optional[Set[int]] = None
+    with tempfile.TemporaryDirectory(prefix="qte-mut-") as tmp:
+        probe = Path(tmp) / "proj"
+        _copy_project(root, probe)
+        import_check, import_detail = _check_importable(probe, target, python, _isolating_env(probe, env))
+    if import_check == "outside":
+        return {"target": target, "baseline": "passed", "score": None, "mutants": [], "import_check": import_check, "error": "mutated_file_not_imported",
+                "note": f"the tests would import {import_detail}, which is not the mutated copy, so every mutant would survive for the wrong reason; "
+                        "run with the project's own interpreter (--python) in an environment that does not shadow the project, or install nothing over it"}
+    covered: set[int] | None = None
     if use_coverage and coverage_available(python):
         cov = run_pytest_with_coverage(root, [str(target_path.parent)], test_args, timeout_s, python, env)
         files = cov.get("files", {})
@@ -184,7 +239,7 @@ def run_mutation(root: str | Path, target: str, test_args: Sequence[str] = (), p
     if truncated:
         step = len(sites) / max_mutants
         sites = [sites[int(i * step)] for i in range(max_mutants)]
-    results: List[MutantResult] = []
+    results: list[MutantResult] = []
     for s in sites:
         if covered is not None and s.line not in covered:
             results.append(MutantResult(s, "uncovered", "no test executes this line"))
@@ -193,7 +248,7 @@ def run_mutation(root: str | Path, target: str, test_args: Sequence[str] = (), p
             work = Path(tmp) / "proj"
             _copy_project(root, work)
             (work / target).write_text(apply_mutant(source, s.index), encoding="utf-8")
-            r = run_pytest(work, [*test_args, "-x", "-q"], timeout_s, python, env_extra=env)
+            r = run_pytest(work, [*test_args, "-x", "-q"], timeout_s, python, env_extra=_isolating_env(work, env))
         if r.verdict == "timeout":
             results.append(MutantResult(s, "timeout", "tests hung; counted as killed"))
         elif r.verdict in ("failed", "error"):
@@ -207,9 +262,10 @@ def run_mutation(root: str | Path, target: str, test_args: Sequence[str] = (), p
     return {
         "target": target, "baseline": "passed", "mutants_total": len(results), "killed": killed, "survived": len(survived),
         "uncovered": len(uncovered), "score": (killed / denom) if denom else None, "truncated_to": max_mutants if truncated else None,
-        "coverage_used": covered is not None,
+        "coverage_used": covered is not None, "import_check": import_check,
         "survivors": [{"line": r.mutant.line, "operator": r.mutant.operator, "change": r.mutant.description} for r in survived],
         "uncovered_mutants": [{"line": r.mutant.line, "operator": r.mutant.operator, "change": r.mutant.description} for r in uncovered],
         "note": "score = killed / (killed + survived); uncovered mutants are excluded and listed as coverage gaps. "
-                "Some survivors are equivalent mutants (no observable change) and need human judgement.",
+                "Some survivors are equivalent mutants (no observable change) and need human judgement."
+                + ("" if import_check == "verified" else " The tool could not verify that the tests import the mutated copy (import_check: unverified), so treat a low score with suspicion."),
     }
