@@ -72,6 +72,21 @@ or whether a pipeline stage may release (`quality-guard-agent`'s job).
   honest "not yet covered" is more useful than an implied "everything's
   fine."
 
+## Model Behaviour Checks
+
+For regressions, ML models and optimizers, prefer a property or an independent oracle to a hand-computed expected value
+(`src/quantsmith/test_engineering/`, spec `0098`):
+
+- **Metamorphic relation** (scaling, translation, permutation, idempotence, monotonicity, symmetry): state the assumption the relation
+  needs. A relation that does not apply to the model (scaling on a ridge fit) is a false alarm, not a finding.
+- **Differential check** against a second implementation or an oracle solver. Agreement is not correctness: shared bugs agree.
+- **Optimality certificate**: KKT residuals at the returned point, with the multipliers, the tolerances and the seed. It certifies a
+  global optimum only for a convex problem; otherwise report a stationary point.
+- **Constructed problems**: choose the answer first (a known optimum, known coefficients) and build the problem around it.
+- **ML placebo checks**: skill must beat a model trained on shuffled labels; evaluate on a chronological holdout unless rows are exchangeable.
+
+Seed everything and report the seed. `inconclusive` and `nothing_checked` are not passes.
+
 ## Scope Boundary
 
 - `test_engineering/*` writes and reviews test/fuzz code and explains how to
@@ -92,3 +107,4 @@ this group exists to prevent (`RISK-003`,
 `specs/0062-test-engineering-agents/`). The fuzzing authorized-target
 boundary traces to `RISK-002` in the same spec and to this environment's
 dual-use security-tooling policy.
+The runtime (`0097`) and the model-behaviour checks (`0098`) trace to the same principles; their `limits` fields are the P10 statement.

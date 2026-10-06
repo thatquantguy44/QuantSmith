@@ -21,11 +21,15 @@ patterns locally rather than expecting them to update in place.
 ## [Unreleased]
 
 ### Added
+- Model testing helpers (spec `0098`): `quantsmith.test_engineering` gains seeded generators (including convex LP/QP instances whose optimum
+  is known by construction), metamorphic relations, a differential runner, KKT optimality certificates with a solver instance runner,
+  regression and ML checks (determinism, label-shuffled placebo, noise features, baseline), and `metamorphic` and `differential`
+  subcommands. numpy only; SciPy is used as a test oracle. Run on `solve_lp` and `solve_portfolio` it found no defect.
 - Test engineering runtime (spec `0097`): `quantsmith.test_engineering` and the `quantsmith-test-engineering`
   command (`detect`, `run`, `edges`, `cpp`, `mutate`, `flaky`) for Python and C++. Zero tests never reads as a pass;
   C++ cases run one per process under AddressSanitizer and UndefinedBehaviorSanitizer; mutation testing reports
   uncovered mutants apart from survivors; flakiness checks name the seed that reproduces an order dependence.
-  `coverage` is added to the `dev` extra. Items 6–9 are scoped in the spec plan.
+  `coverage` is added to the `dev` extra. Items 7–9 are scoped in the spec plan.
 - Venture request routing (spec `0096`): `venture_routing.py` and reviewable rules in `routing.json` turn a
   request into an ordered agent chain with review gates, decision owner, the strictest decision-path class, and
   the clearance it needs; forbidden requests (recommend an investment, designate or attribute, profile a person,

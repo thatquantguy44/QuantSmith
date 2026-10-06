@@ -54,5 +54,9 @@ Spec `0097` (`src/quantsmith/test_engineering/`) gives this agent a real runtime
 - `quantsmith-test-engineering run --tool pytest` for a uniform result; `edges --target pkg.mod:func` to probe a function and
   `--write-tests` for characterization tests; `mutate --target path.py` to find assertions that do not bite;
   `flaky` to find order- or hash-seed-dependent tests.
+- Spec `0098` adds checks for *models*: `metamorphic` and `differential` on any numeric function, and, as Python API, KKT optimality
+  certificates and a solver instance runner, regression and ML checks (determinism, label-shuffled placebo, baseline). Prefer a
+  relation or an independent oracle over a hand-computed expected value when testing a quant function; say which relation you
+  assumed and when it does not apply.
 
 The runtime's reports are evidence for a human; they do not prove correctness.
