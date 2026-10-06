@@ -281,3 +281,128 @@ def test_ac016_mark_reviewed_records_named_review_and_refuses_bad_input(tmp_path
     with pytest.raises(ap.PackValidationError):
         ap.mark_reviewed(tmp_path, "payments", "A Reviewer", "2026-09-24")
     assert json.loads(broken.read_text(encoding="utf-8"))["review"]["status"] == "draft"
+
+
+# --- AC-017..AC-019: distribution — bundled defaults, local shadowing (REQ-013, NFR-004)
+
+_SETUPTOOLS_VERSION = None
+try:  # pragma: no cover - environment probe
+    import setuptools as _setuptools
+
+    _SETUPTOOLS_VERSION = tuple(int(x) for x in _setuptools.__version__.split(".")[:2])
+except Exception:  # noqa: BLE001
+    pass
+
+# setuptools builds wheels natively from 70.1; older ones need the `wheel`
+# package and, on Debian's patched build, fail outright. CI's locked
+# environment carries setuptools 84 (`uv sync --all-extras`).
+_needs_wheel_build = pytest.mark.skipif(
+    _SETUPTOOLS_VERSION is None or _SETUPTOOLS_VERSION < (70, 1),
+    reason="setuptools >= 70.1 is needed to build a wheel in-process",
+)
+
+
+def _repo_hash():
+    files = sorted((p.name, p.read_bytes()) for p in (ROOT / ap.PACKS_DIR).glob("*.json"))
+    return ap._catalog_hash(files)
+
+
+def _build(tmp_path, *, with_packs=True):
+    """Build a wheel from a clean copy of the project; return (returncode, stderr, wheel path)."""
+    import shutil
+
+    proj = tmp_path / "proj"
+    proj.mkdir()
+    for name in ("pyproject.toml", "setup.py", "MANIFEST.in", "README.md"):
+        shutil.copy(ROOT / name, proj / name)
+    shutil.copytree(ROOT / "src" / "quantsmith", proj / "src" / "quantsmith",
+                    ignore=shutil.ignore_patterns("__pycache__", "_bundled", "*.egg-info"))
+    if with_packs:
+        shutil.copytree(ROOT / ap.PACKS_DIR, proj / ap.PACKS_DIR)
+    out = tmp_path / "dist"
+    run = subprocess.run(
+        [sys.executable, "-c", f"import setuptools.build_meta as b; b.build_wheel({str(out)!r})"],
+        cwd=proj, capture_output=True, text=True,
+    )
+    wheels = sorted(out.glob("*.whl")) if out.is_dir() else []
+    return run.returncode, run.stdout + run.stderr, (wheels[0] if wheels else None)
+
+
+@_needs_wheel_build
+def test_ac017_wheel_bundles_catalog_and_loads_outside_repo(tmp_path):
+    """AC-017: the wheel carries the catalog byte for byte and resolves it with no checkout."""
+    import zipfile
+
+    code, log, wheel = _build(tmp_path)
+    assert code == 0 and wheel is not None, log
+    prefix = "quantsmith/_bundled/analytics_packs/"
+    with zipfile.ZipFile(wheel) as z:
+        bundled = {n[len(prefix):]: z.read(n) for n in z.namelist() if n.startswith(prefix)}
+        site = tmp_path / "site"
+        z.extractall(site)
+    repo = {p.name: p.read_bytes() for p in (ROOT / ap.PACKS_DIR).glob("*.json")}
+    assert bundled == repo
+
+    elsewhere = tmp_path / "elsewhere"  # no knowledge/ here, no checkout above it
+    elsewhere.mkdir()
+    probe = (
+        "import json, sys; sys.path.insert(0, sys.argv[1]);"
+        "import quantsmith; from quantsmith.pipelines import analytics_packs as ap;"
+        "packs, src = ap.resolve_packs();"
+        "print(json.dumps({'file': quantsmith.__file__, 'n': len(packs), 'kind': src.kind,"
+        " 'loc': src.location, 'version': src.version, 'hash': src.content_hash}))"
+    )
+    run = subprocess.run([sys.executable, "-I", "-c", probe, str(site)], cwd=elsewhere,
+                         capture_output=True, text=True)
+    assert run.returncode == 0, run.stderr
+    got = json.loads(run.stdout)
+    assert got["file"].startswith(str(site)), got  # really the installed copy, not the checkout
+    assert got["kind"] == "bundled" and got["loc"].startswith(str(site))
+    assert got["n"] == len(repo)
+    assert got["version"] == __import__("quantsmith").__version__
+    assert got["hash"] == _repo_hash()
+
+
+def test_ac018_local_catalog_shadows_bundle_whole(tmp_path, monkeypatch):
+    """AC-018: a local catalog replaces the bundle entirely; without one, the bundle is used."""
+    local = tmp_path / ap.PACKS_DIR
+    local.mkdir(parents=True)
+    (local / "fraud.json").write_bytes((ROOT / ap.PACKS_DIR / "fraud.json").read_bytes())
+
+    monkeypatch.chdir(tmp_path)
+    packs, source = ap.resolve_packs()
+    assert [p["pack_id"] for p in packs] == ["fraud"]  # not merged with the 40 bundled packs
+    assert source.kind == "local" and source.pack_count == 1
+    assert source.location == str(tmp_path / ap.PACKS_DIR)
+
+    packs_explicit, source_explicit = ap.resolve_packs(tmp_path)
+    assert source_explicit.kind == "local" and source_explicit.content_hash == source.content_hash
+
+    empty = tmp_path / "empty"
+    empty.mkdir()
+    monkeypatch.chdir(empty)
+    packs, source = ap.resolve_packs()
+    assert source.kind == "bundled"
+    assert len(packs) == len(list((ROOT / ap.PACKS_DIR).glob("*.json")))
+    assert source.content_hash == _repo_hash()
+    assert "bundled analytics domain packs" in source.describe()
+
+
+def test_ac019_empty_explicit_root_and_empty_build_fail(tmp_path, monkeypatch):
+    """AC-019: an explicit empty root raises (no fallback); a build with no packs fails."""
+    monkeypatch.chdir(ROOT)  # a bundle and a local catalog are both available here
+    with pytest.raises(ap.PackSourceError) as exc:
+        ap.resolve_packs(tmp_path)
+    assert str(tmp_path / ap.PACKS_DIR) in str(exc.value)
+
+    monkeypatch.setattr(ap, "_bundled_catalog", lambda: None)
+    monkeypatch.chdir(tmp_path)
+    with pytest.raises(ap.PackSourceError, match="no bundled catalog"):
+        ap.resolve_packs()
+
+    if _SETUPTOOLS_VERSION is None or _SETUPTOOLS_VERSION < (70, 1):
+        pytest.skip("setuptools >= 70.1 is needed to build a wheel in-process")
+    (tmp_path / "b").mkdir()
+    code, log, wheel = _build(tmp_path / "b", with_packs=False)
+    assert code != 0 and wheel is None
+    assert "refusing to build an empty bundle" in log

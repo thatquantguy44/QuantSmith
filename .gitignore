@@ -102,3 +102,6 @@ agents.zip
 # Root-anchored so templates/knowledge_local/ (placeholders only) stays tracked.
 /knowledge_local/
 
+
+# Build-time copy of knowledge/analytics_packs/ (setup.py); never committed
+src/quantsmith/_bundled/

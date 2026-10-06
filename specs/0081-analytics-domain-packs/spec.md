@@ -4,7 +4,7 @@
 - **Status:** Draft
 - **Author:** Joshua Lutkemuller, CFA
 - **Approver:** — (pending owner review)
-- **Last updated:** 2026-09-24
+- **Last updated:** 2026-10-06
 
 > WHAT and WHY only. Implementation lives in `plan.md`.
 
@@ -71,6 +71,7 @@ data, so `0080` reads each dataset with the right domain knowledge.
 | REQ-010 | The validator shall report which `sources/*.yml` domain tags select no pack, as information. | should |
 | REQ-012 | The SDK shall support review by family: a deterministic Markdown review sheet per family listing every pack, metric (with unit, additivity, and what it permits), convention, insight rule, caveat, chart convention, and golden case; and a command that records a named review on one pack at a time, refusing an empty reviewer, a non-ISO date, an unknown pack, or a pack that fails validation. | must |
 | REQ-011 | Packs shall only restrict interpretation: insight rules suppress, caveats add, conventions constrain. No pack field can enable an insight, widen access, or override `0008` governance. | must |
+| REQ-013 | The installed `quantsmith` package shall carry the catalog as read-only bundled defaults, so packs resolve without a repository checkout. A local catalog (`<root>/knowledge/analytics_packs/`, default root the working directory) shall take precedence over the bundled one as a whole catalog — never merged pack by pack. An explicitly named root with no packs, or no packs anywhere, shall be an error, not an empty catalog. Every resolution shall return its source: kind (`local` or `bundled`), location, package version, and a content hash of the catalog. | must |
 
 ## Non-Functional Requirements
 
@@ -79,6 +80,7 @@ data, so `0080` reads each dataset with the right domain knowledge.
 | NFR-001 | Determinism and dependencies | Standard library only; loading and selection are ordered by file name; identical inputs give identical findings and selections. |
 | NFR-002 | Data handling | No company data, credentials, or personal data in any pack; conventions cite general public practice. |
 | NFR-003 | Evolvability | The pack shape is versioned; a schema change bumps `schema_version` and the validator rejects mismatches. |
+| NFR-004 | Distribution fidelity | The bundled catalog is a byte-identical copy of the repository catalog at build time; a build that finds no packs fails rather than shipping an empty bundle. The bundle is validated in CI, before it is built, not when it is loaded. |
 
 ## Coverage
 
@@ -111,6 +113,9 @@ data, so `0080` reads each dataset with the right domain knowledge.
 | AC-013 | Given an insight rule, when applied, then it can only add suppressed kinds; the pack contract has no field that enables an insight kind or changes access level. | REQ-011 |
 | AC-015 | Given any family, when its review sheet is generated twice, then the output is identical, names the assigned reviewer, and lists every pack id, metric, and item id of that family; an unknown family is rejected. | REQ-012 |
 | AC-016 | Given a pack, when marked reviewed with a name and ISO date, then the file records status, reviewer, and date and the selection becomes write-back eligible; an empty name, a bad date, an unknown pack, or a pack with a validation error is refused and the file is unchanged. | REQ-012, REQ-005 |
+| AC-017 | Given a wheel built from the repository, when it is inspected, then it contains every catalog JSON byte-identical to `knowledge/analytics_packs/`; and when it is imported from a directory with no local catalog, then packs resolve from the bundle with kind `bundled`, the package version, and the same content hash as the repository catalog. | REQ-013, NFR-004 |
+| AC-018 | Given a local catalog with fewer packs than the bundle, when packs resolve from that root, then only the local packs are returned and the source kind is `local`; given no local catalog, then the bundled catalog is returned. | REQ-013 |
+| AC-019 | Given an explicit root with no packs, when packs resolve, then it raises naming the searched directory and never falls back to the bundle; given a build source with no packs, then the build fails. | REQ-013, NFR-004 |
 | AC-014 | Given the validator module, when its imports are scanned, then it imports only the standard library; given every pack, when scanned, then it contains no email address, credential-like token, or URL with credentials. | NFR-001, NFR-002 |
 
 ## Data & Dependencies
@@ -131,6 +136,8 @@ data, so `0080` reads each dataset with the right domain knowledge.
 | RISK-003 | Overlapping packs disagree about a term. | Wrong metric chosen. | Conflicts reported; `0080` clarifies rather than picks (REQ-004). |
 | RISK-004 | Analytics packs drift from the deep packs they build on. | Two sources of truth. | `builds_on` references plus conventions deferring to the deep pack (REQ-007). |
 | RISK-005 | Packs are mistaken for regulatory or accounting guidance. | Misuse. | Non-Goals and README state they are informational. |
+| RISK-006 | Bundled defaults change with each package release, so the same question can be answered differently after an upgrade. | Silent drift in answers. | Every resolution records source, version, and content hash (REQ-013) and `0080` reports it; teams that need stability pin the version or keep a local catalog. |
+| RISK-007 | Someone edits or marks reviewed a bundled pack inside `site-packages`. | Review lost on upgrade; sign-off not traceable. | Bundled packs are read-only defaults; `--mark-reviewed` writes only to a local catalog under `--root`. |
 
 ## Assumptions & Open Questions
 
@@ -139,8 +146,11 @@ data, so `0080` reads each dataset with the right domain knowledge.
 - Resolved (owner, 2026-09-24): Joshua Lutkemuller, CFA reviews all seven
   families, pack by pack, using the review sheet and `--mark-reviewed`
   (REQ-012). Recorded in `analytics_packs.FAMILY_REVIEWERS`.
-- Open question: should adopters override packs by file shadowing in their
-  own repository, or by a declared overlay field?
+- Resolved (owner, 2026-10-06): adopters override by shadowing the whole
+  catalog — a local `knowledge/analytics_packs/` replaces the bundled packs
+  entirely (REQ-013). Per-pack merging was rejected: mixing a team's reviewed
+  packs with newer bundled drafts would make an answer's review status
+  ambiguous. A declared overlay field stays a possible later extension.
 
 ## Exceptions
 

@@ -394,6 +394,8 @@ def _answer_payload(
         "insights": [{"kind": i.kind, "statement": i.statement, "values": i.values} for i in insight_set],
         "response_status": response.status,
         "response_headline": response.headline,
+        "domain_packs": list(response.domain_packs),
+        "domain_pack_source": response.domain_pack_source,
     }
 
 

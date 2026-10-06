@@ -1,0 +1,5 @@
+# The analytics domain pack catalog lives outside src/ but is bundled into the
+# package at build time (setup.py); the sdist must carry it so a wheel built
+# from the sdist bundles it too. Spec 0081 REQ-013.
+include setup.py
+recursive-include knowledge/analytics_packs *.json

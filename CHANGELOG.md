@@ -112,8 +112,24 @@ patterns locally rather than expecting them to update in place.
 - `docs/packaging.md` updated — the Python-package phase is now active (real code
   exists); `docs/adoption_guide.md` rewritten to cover both the package and the
   scaffold.
+- The `quantsmith` package now bundles the analytics domain pack catalog (spec `0081` REQ-013): `setup.py` copies
+  `knowledge/analytics_packs/*.json` into `quantsmith/_bundled/analytics_packs/` at build time, and the build fails if
+  there are none. `analytics_packs.resolve_packs()` uses an explicit root alone, else a local
+  `knowledge/analytics_packs/` as a whole catalog, else the bundle, and returns a `PackSource` (kind, location, version,
+  content hash). NL analytics (spec `0080` REQ-018) cites that source in every answer that applies a pack and in the
+  envelope, raises when domain tags come with no catalog, and the CLI's `--domain` now works from a pip install;
+  `--packs-root` is optional and errors only when it names an empty catalog.
 
 ### Fixed
+- NL analytics insights (spec `0080`, T-021/T-022) no longer sum per-group values for every metric: yields across tenors,
+  VaR across desks, and ratios were summed into a single "level", and percent changes were reported for rates.
+  Levels now use the semantic layer's own ungrouped value. A non-additive metric asked by a dimension reports
+  each group with no total. Contributor and concentration insights need groups that add up to the total. Stocks
+  and rates are read at the latest period, and `pct`/`bps` changes are reported in basis points. Analytics domain
+  packs (`0081`) now apply through `nl_analytics/domain.py` (vocabulary, units, additivity, suppressed insights,
+  caveats, term-conflict clarification, and a write-back refusal while any applied pack is unreviewed), with a
+  stated generic fallback; the CLI gains `--domain`, which exits with an error when no packs are found under
+  `--packs-root` (the packs ship with the repository, not the pip package).
 - The `maintenance` gate no longer treats test files as model code. Its `*model*.py` pattern matched `tests/test_model_*.py` and warned that model code
   changed with no model card; files under `tests/` and `test_*.py` are now skipped, and real model or pipeline code still needs a card or runbook.
 - Mutation testing (`0097`) now runs the tests against the mutated copy. With a `src`-layout package that was also installed (an editable

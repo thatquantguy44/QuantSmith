@@ -1,7 +1,7 @@
 # Tasks: Analytics Domain Packs for Financial Services
 
 - **Spec:** 0081-analytics-domain-packs (`spec.md`, `plan.md`)
-- **Last updated:** 2026-09-24
+- **Last updated:** 2026-10-06
 
 > Ordered, testable units of work. Every task cites the requirement(s) it advances
 > and carries a Definition of Done. No task without a requirement.
@@ -25,6 +25,8 @@
 | T-006 | Acceptance tests AC-001–AC-014, including mutation tests that prove each rejection fires. | REQ-001, NFR-001, NFR-002 | done | |
 | T-007 | Named review of each pack by a domain owner (status → `reviewed`). | REQ-005 | in-progress | Reviewer: Joshua Lutkemuller, CFA, all seven families (resolved 2026-09-24). 0 of 40 reviewed. |
 | T-008 | Review tooling: per-family review sheet, `mark_reviewed` with refusal rules, CLI flags, reviewer assignment. | REQ-012 | done | |
+| T-009 | `resolve_packs` and `PackSource`: explicit root, local, bundled (wheel data or source tree); content hash; errors for an empty explicit root or no packs anywhere. | REQ-013 | done | |
+| T-010 | `setup.py` `build_py` copy into `quantsmith/_bundled/analytics_packs/`, empty-catalog build failure, and `MANIFEST.in`; wheel-content and installed-load tests. | REQ-013, NFR-004 | done | The wheel tests need setuptools >= 70.1 (in-process `build_wheel`); they skip with that reason on older interpreters, and run in CI's locked environment (setuptools 84). |
 
 Status values: `todo` | `in-progress` | `blocked` | `done`.
 
@@ -47,6 +49,9 @@ Status values: `todo` | `in-progress` | `blocked` | `done`.
 | AC-013 | `test_ac013_packs_only_restrict` | done |
 | AC-015 | `test_ac015_review_sheet_covers_every_reviewable_line` | done |
 | AC-016 | `test_ac016_mark_reviewed_records_named_review_and_refuses_bad_input` | done |
+| AC-017 | `test_ac017_wheel_bundles_catalog_and_loads_outside_repo` | done |
+| AC-018 | `test_ac018_local_catalog_shadows_bundle_whole` | done |
+| AC-019 | `test_ac019_empty_explicit_root_and_empty_build_fail` | done |
 | AC-014 | `test_ac014_stdlib_only_and_no_sensitive_content` | done |
 
 ## Follow-ups
@@ -54,6 +59,6 @@ Status values: `todo` | `in-progress` | `blocked` | `done`.
 Tracked work intentionally deferred (no silent "temporary" shortcuts — P8).
 
 - T-007 named review, one pack at a time (owner reviewing all families).
-- Adopter override mechanism (spec open question).
+- ~~Adopter override mechanism~~ — resolved by REQ-013 (whole-catalog shadowing).
 - Jurisdiction variants (e.g., EU/UK capital and conduct terminology) once a
   non-U.S. adopter needs them.
