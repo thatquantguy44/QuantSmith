@@ -18,9 +18,10 @@ from __future__ import annotations
 import re
 import shutil
 import tempfile
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any
 
 from .report import ToolMissing
 from .runners import run_command
@@ -35,7 +36,7 @@ INT_TYPES = {"int": ("INT_MIN", "INT_MAX"), "unsigned": ("0u", "UINT_MAX"), "uns
              "uint64_t": ("0", "UINT64_MAX"), "std::int32_t": ("INT32_MIN", "INT32_MAX"), "std::int64_t": ("INT64_MIN", "INT64_MAX"),
              "std::uint32_t": ("0", "UINT32_MAX"), "std::uint64_t": ("0", "UINT64_MAX"), "char": ("CHAR_MIN", "CHAR_MAX")}
 FLOAT_TYPES = {"float", "double"}
-SIGNATURE = re.compile(r"^\s*(?P<ret>[\w:<>\s\*&,]+?)\s+(?P<name>[A-Za-z_]\w*)\s*\((?P<params>.*)\)\s*(?:const)?\s*;?\s*$", re.S)
+SIGNATURE = re.compile(r"^\s*(?P<ret>[\w:<>\s\*&,]+?)\s+(?P<name>[A-Za-z_]\w*)\s*\((?P<params>.*)\)\s*(?:const)?\s*;?\s*$", re.DOTALL)
 
 
 @dataclass(frozen=True)
@@ -57,13 +58,13 @@ def _norm_type(t: str) -> str:
     return t
 
 
-def parse_signature(sig: str) -> Tuple[str, str, List[CppParam]]:
+def parse_signature(sig: str) -> tuple[str, str, list[CppParam]]:
     """``(return_type, name, params)`` for a simple free-function declaration."""
     m = SIGNATURE.match(sig.strip())
     if not m:
         raise UnsupportedSignature(f"cannot parse signature: {sig!r}")
     ret, name, raw_params = " ".join(m.group("ret").split()), m.group("name"), m.group("params").strip()
-    params: List[CppParam] = []
+    params: list[CppParam] = []
     if raw_params and raw_params != "void":
         depth, cur, parts = 0, "", []
         for ch in raw_params:
@@ -95,7 +96,7 @@ def _supported_types() -> set:
     return set(INT_TYPES) | FLOAT_TYPES | {"bool", "std::string", "const char*", "char*", "std::vector<int>", "std::vector<double>"}
 
 
-def cpp_edge_values(t: str) -> List[Tuple[str, str, str]]:
+def cpp_edge_values(t: str) -> list[tuple[str, str, str]]:
     """``(label, C++ expression, why)`` boundary values for a normalised type."""
     if t in INT_TYPES:
         lo, hi = INT_TYPES[t]
@@ -136,8 +137,8 @@ def _typical(t: str) -> str:
             "std::vector<double>": "std::vector<double>{1.5, 2.5}"}[t]
 
 
-def build_cases(params: Sequence[CppParam]) -> List[Dict[str, Any]]:
-    cases: List[Dict[str, Any]] = []
+def build_cases(params: Sequence[CppParam]) -> list[dict[str, Any]]:
+    cases: list[dict[str, Any]] = []
     for i, p in enumerate(params):
         for label, expr, why in cpp_edge_values(p.type):
             args = [_typical(q.type) for q in params]
@@ -146,7 +147,7 @@ def build_cases(params: Sequence[CppParam]) -> List[Dict[str, Any]]:
     return cases
 
 
-def generate_harness(header: str, ret: str, name: str, params: Sequence[CppParam], cases: Sequence[Dict[str, Any]]) -> str:
+def generate_harness(header: str, ret: str, name: str, params: Sequence[CppParam], cases: Sequence[dict[str, Any]]) -> str:
     """A standalone program: ``./harness <case-index>`` runs one case and prints ``OK <result>`` or ``EXC <what>``."""
     lines = ["#include <climits>", "#include <cstdint>", "#include <cstdlib>", "#include <cstddef>", "#include <iostream>", "#include <limits>",
              "#include <string>", "#include <vector>", "#include <exception>", f'#include "{header}"', "",
@@ -167,11 +168,55 @@ def generate_harness(header: str, ret: str, name: str, params: Sequence[CppParam
     return "\n".join(lines)
 
 
+_SANITIZER_PROBES: dict[tuple[str, tuple[str, ...], str], dict[str, Any]] = {}
+
+
+def _sanitizer_probe(cxx: str, sanitizers: Sequence[str], std: str) -> dict[str, Any]:
+    """Can ``cxx`` build *and run* a trivial program with these sanitizers? Cached per compiler, sanitizers and standard.
+
+    A compiler can be installed yet unable to link the sanitizer runtime (a ``clang++`` without compiler-rt), so
+    "a compiler exists" does not mean "the boundary probe can run".
+    """
+    key = (cxx, tuple(sanitizers), std)
+    if key not in _SANITIZER_PROBES:
+        with tempfile.TemporaryDirectory(prefix="qte-san-") as tmp:
+            src, binary = Path(tmp) / "probe.cpp", Path(tmp) / "probe"
+            src.write_text("int main() { return 0; }\n", encoding="utf-8")
+            build = run_command([cxx, f"-std={std}", f"-fsanitize={','.join(sanitizers)}", str(src), "-o", str(binary)], tmp, 60.0)
+            if build.returncode != 0:
+                result = {"compiler": cxx, "usable": False, "error": build.stderr.strip()[-400:] or f"exit {build.returncode}"}
+            else:
+                run = run_command([str(binary)], tmp, 10.0, {"ASAN_OPTIONS": "detect_leaks=0"})
+                result = {"compiler": cxx, "usable": run.returncode == 0, "error": "" if run.returncode == 0 else run.stderr.strip()[-400:] or f"exit {run.returncode}"}
+        _SANITIZER_PROBES[key] = result
+    return _SANITIZER_PROBES[key]
+
+
+def find_sanitizer_compiler(sanitizers: Sequence[str] = ("address", "undefined"), std: str = "c++17") -> tuple[str | None, list[dict[str, Any]]]:
+    """The first installed compiler (``clang++``, then ``g++``) that can build and run a program with ``sanitizers``.
+
+    Returns ``(path or None, tried)`` where ``tried`` says for each installed compiler whether it was usable and, if not, why.
+    """
+    tried = [_sanitizer_probe(path, sanitizers, std) for path in (shutil.which(name) for name in ("clang++", "g++")) if path]
+    usable = next((t["compiler"] for t in tried if t["usable"]), None)
+    return usable, tried
+
+
 def probe_cpp(header: str, signature: str, include_dirs: Sequence[str] = (), sources: Sequence[str] = (), cwd: str | Path = ".",
-              compiler: Optional[str] = None, std: str = "c++17", timeout_s: float = 10.0, extra_flags: Sequence[str] = (),
-              sanitizers: Sequence[str] = ("address", "undefined"), max_cases: int = 300) -> Dict[str, Any]:
-    """Compile with sanitizers and run each boundary case in its own process. Returns outcomes and findings."""
-    cxx = compiler or shutil.which("clang++") or shutil.which("g++")
+              compiler: str | None = None, std: str = "c++17", timeout_s: float = 10.0, extra_flags: Sequence[str] = (),
+              sanitizers: Sequence[str] = ("address", "undefined"), max_cases: int = 300) -> dict[str, Any]:
+    """Compile with sanitizers and run each boundary case in its own process. Returns outcomes and findings.
+
+    Without ``compiler=``, the first installed compiler that can build and run a sanitizer program is used, so a ``clang++`` that
+    cannot link the sanitizer runtime does not hide a working ``g++``. With ``compiler=``, exactly that compiler is used.
+    If no installed compiler works, the first one is still tried so the real compile error is reported (``built: false``).
+    """
+    tried: list[dict[str, Any]] = []
+    if compiler:
+        cxx: str | None = compiler
+    else:
+        cxx, tried = find_sanitizer_compiler(sanitizers, std)
+        cxx = cxx or shutil.which("clang++") or shutil.which("g++")
     if not cxx:
         raise ToolMissing("no C++ compiler found (install clang++ or g++)")
     ret, name, params = parse_signature(signature)
@@ -186,9 +231,12 @@ def probe_cpp(header: str, signature: str, include_dirs: Sequence[str] = (), sou
                 *(f"-I{d}" for d in include_dirs), f"-I{cwd}", *extra_flags, str(src), *[str(Path(s)) for s in sources], "-o", str(binary)]
         build = run_command(argv, cwd, 180.0)
         if build.returncode != 0:
-            return {"function": name, "signature": signature, "built": False, "compile_errors": build.stderr[-4000:], "cases": 0,
-                    "outcomes": [], "findings": [], "note": "the harness did not compile; check the header path, include dirs, and signature"}
-        outcomes: List[Dict[str, Any]] = []
+            return {"function": name, "signature": signature, "built": False, "compiler": cxx, "compile_errors": build.stderr[-4000:], "cases": 0,
+                    "outcomes": [], "findings": [], "compilers_tried": tried,
+                    "note": "the harness did not compile; check the header path, include dirs, and signature"
+                            + ("" if not tried or any(t["usable"] for t in tried) else
+                               "; no installed compiler can build a sanitizer program (see compilers_tried), so install the compiler's sanitizer runtime")}
+        outcomes: list[dict[str, Any]] = []
         for c in cases:
             run = run_command([str(binary), str(c["id"])], cwd, timeout_s, {"ASAN_OPTIONS": "detect_leaks=0:abort_on_error=0", "UBSAN_OPTIONS": "print_stacktrace=1"})
             findings = parse_sanitizer_output(run.stderr)
@@ -208,5 +256,5 @@ def probe_cpp(header: str, signature: str, include_dirs: Sequence[str] = (), sou
                              "returncode": run.returncode, "stdout": run.stdout.strip()[:200], "sanitizer": findings})
     findings = [o for o in outcomes if o["status"] in ("sanitizer", "crash", "timeout", "nonzero_exit")]
     return {"function": name, "signature": signature, "built": True, "compiler": cxx, "sanitizers": list(sanitizers), "cases": len(outcomes),
-            "outcomes": outcomes, "findings": findings,
+            "outcomes": outcomes, "findings": findings, "compilers_tried": tried,
             "note": "boundary values find undefined behaviour and crashes, not wrong answers; an empty findings list is not proof of correctness"}

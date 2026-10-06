@@ -6,25 +6,54 @@ without one.
 """
 
 import json
+import os
 import shutil
 import stat
+import subprocess
+import sys
 import textwrap
 from pathlib import Path
 
 import pytest
 
 from quantsmith.test_engineering import cli
-from quantsmith.test_engineering.cpp_harness import UnsupportedSignature, build_cases, parse_signature, probe_cpp
+from quantsmith.test_engineering.cpp_harness import (
+    UnsupportedSignature,
+    build_cases,
+    find_sanitizer_compiler,
+    parse_signature,
+    probe_cpp,
+)
 from quantsmith.test_engineering.detect import detect_stack
-from quantsmith.test_engineering.edgecases import edge_values, generate_pytest_source, probe_function
+from quantsmith.test_engineering.edgecases import (
+    edge_values,
+    generate_pytest_source,
+    probe_function,
+)
 from quantsmith.test_engineering.flaky import check_pytest, to_node_id
 from quantsmith.test_engineering.junit import parse_junit
-from quantsmith.test_engineering.mutation import apply_mutant, enumerate_mutants, run_mutation
-from quantsmith.test_engineering.report import RunReport, CommandResult
-from quantsmith.test_engineering.runners import run_command, run_gtest_binary, run_pytest
+from quantsmith.test_engineering.mutation import (
+    apply_mutant,
+    enumerate_mutants,
+    run_mutation,
+)
+from quantsmith.test_engineering.report import CommandResult, RunReport, ToolMissing
+from quantsmith.test_engineering.runners import (
+    run_command,
+    run_ctest,
+    run_gtest_binary,
+    run_pytest,
+)
 from quantsmith.test_engineering.sanitizers import parse_sanitizer_output
 
 HAS_CXX = bool(shutil.which("clang++") or shutil.which("g++"))
+HAS_SANITIZER_CXX = find_sanitizer_compiler()[0] is not None   # a compiler can be installed yet unable to link the sanitizer runtime
+CMAKE_VERSION = (3, 0)
+if shutil.which("cmake"):
+    import re as _re
+    _m = _re.search(r"(\d+)\.(\d+)", subprocess.run(["cmake", "--version"], capture_output=True, text=True, check=False).stdout)
+    CMAKE_VERSION = (int(_m.group(1)), int(_m.group(2))) if _m else (3, 0)
+HAS_CTEST = bool(shutil.which("cmake") and shutil.which("ctest") and HAS_CXX and CMAKE_VERSION >= (3, 21))   # --output-junit needs CMake 3.21
 
 
 def write(path: Path, text: str) -> Path:
@@ -213,6 +242,66 @@ def test_mutation_rejects_target_outside_root(tmp_path):
         run_mutation(tmp_path, "../elsewhere.py")
 
 
+SRC_CALC = "def clamp(x, lo, hi):\n    if x < lo:\n        return lo\n    if x > hi:\n        return hi\n    return x\n"
+SRC_TEST = """\
+    from srcpkg.calc import clamp
+    def test_clamp():
+        assert clamp(5, 0, 10) == 5
+        assert clamp(-1, 0, 10) == 0
+        assert clamp(11, 0, 10) == 10
+"""
+
+
+def make_src_layout(tmp_path):
+    write(tmp_path / "src" / "srcpkg" / "__init__.py", "")
+    write(tmp_path / "src" / "srcpkg" / "calc.py", SRC_CALC)
+    write(tmp_path / "tests" / "test_calc.py", SRC_TEST)
+
+
+def fake_interpreter_that_reports_a_foreign_module(tmp_path):
+    """An interpreter that runs pytest normally but says the target module resolves outside the project copy."""
+    fake = write(tmp_path / "fake_python", f"""\
+        #!/bin/sh
+        if [ "$1" = "-c" ]; then echo /somewhere/else/srcpkg/calc.py; exit 0; fi
+        exec {sys.executable} "$@"
+    """)
+    fake.chmod(fake.stat().st_mode | stat.S_IEXEC)
+    return fake
+
+
+def test_mutation_scores_a_src_layout_project_that_is_also_installed(tmp_path):
+    """Regression: with the original ``src`` on the path (an editable install), the tests used to import the original and every mutant survived."""
+    make_src_layout(tmp_path)
+    res = run_mutation(tmp_path, "src/srcpkg/calc.py", ["tests"], env={"PYTHONPATH": str(tmp_path / "src")})
+    assert res["baseline"] == "passed" and res["import_check"] == "verified"
+    assert res["killed"] >= 5 and res["score"] == pytest.approx(1.0), res["survivors"]
+
+
+def test_mutation_refuses_to_score_when_the_mutant_is_not_what_gets_imported(tmp_path):
+    make_src_layout(tmp_path)
+    fake = fake_interpreter_that_reports_a_foreign_module(tmp_path)
+    res = run_mutation(tmp_path, "src/srcpkg/calc.py", ["tests"], python=str(fake), env={"PYTHONPATH": str(tmp_path / "src")})
+    assert res["error"] == "mutated_file_not_imported" and res["score"] is None and res["mutants"] == []
+    assert "/somewhere/else/srcpkg/calc.py" in res["note"]
+
+
+def test_cli_mutate_exits_two_when_the_mutant_cannot_be_imported(tmp_path, capsys):
+    make_src_layout(tmp_path)
+    fake = fake_interpreter_that_reports_a_foreign_module(tmp_path)
+    code = cli.main(["mutate", "--target", "src/srcpkg/calc.py", "--root", str(tmp_path), "--python", str(fake),
+                    "--env", f"PYTHONPATH={tmp_path / 'src'}", "--", "tests"])
+    assert code == 2 and json.loads(capsys.readouterr().out)["error"] == "mutated_file_not_imported"
+
+
+def test_mutation_reports_unverified_when_the_module_cannot_be_resolved(tmp_path):
+    write(tmp_path / "script_like.py", "def f(x):\n    return x + 1\n")
+    write(tmp_path / "test_f.py", "import runpy\ndef test_f():\n    assert runpy.run_path('script_like.py')['f'](1) == 2\n")
+    res = run_mutation(tmp_path, "script_like.py", ["test_f.py"], use_coverage=False)
+    assert res["import_check"] in ("verified", "unverified")
+    if res["import_check"] == "unverified":
+        assert "could not verify" in res["note"]
+
+
 # ---- flakiness --------------------------------------------------------------------------------
 
 def test_to_node_id_converts_dotted_names(tmp_path):
@@ -261,7 +350,7 @@ def test_cases_vary_one_parameter_at_a_time():
     assert {c["param"] for c in cases} == {"a", "b"} and len({c["id"] for c in cases}) == len(cases)
 
 
-@pytest.mark.skipif(not HAS_CXX, reason="needs a C++ compiler")
+@pytest.mark.skipif(not HAS_SANITIZER_CXX, reason="needs a C++ compiler that can build and run AddressSanitizer and UBSan programs")
 def test_cpp_probe_finds_real_undefined_behaviour(tmp_path):
     write(tmp_path / "lib.hpp", """\
         #pragma once
@@ -282,6 +371,89 @@ def test_cpp_probe_reports_compile_failure_not_success(tmp_path):
     write(tmp_path / "lib.hpp", "#pragma once\n")
     res = probe_cpp("lib.hpp", "int missing(int a)", cwd=tmp_path)
     assert res["built"] is False and res["compile_errors"]
+
+
+def fake_compiler(directory: Path, name: str, message: str) -> Path:
+    """A compiler stand-in that cannot link sanitizers: it fails with ``message`` whenever ``-fsanitize`` is passed."""
+    path = write(directory / name, f"""\
+        #!/bin/sh
+        for a in "$@"; do case "$a" in -fsanitize*) echo "{message}" >&2; exit 1;; esac; done
+        echo "{message}" >&2; exit 1
+    """)
+    path.chmod(path.stat().st_mode | stat.S_IEXEC)
+    return path
+
+
+@pytest.mark.skipif(not any(t["usable"] and t["compiler"].endswith("g++") for t in find_sanitizer_compiler()[1]),
+                    reason="needs a g++ that can build and run sanitizer programs")
+def test_cpp_probe_falls_back_when_the_first_compiler_cannot_link_sanitizers(tmp_path, monkeypatch):
+    """Regression: an installed ``clang++`` without the sanitizer runtime used to hide a working ``g++`` and report ``built: false``."""
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    fake_compiler(bin_dir, "clang++", "ld: cannot find libclang_rt.asan-x86_64.a")
+    monkeypatch.setenv("PATH", f"{bin_dir}{os.pathsep}{os.environ['PATH']}")
+    write(tmp_path / "lib.hpp", "#pragma once\ninline int add(int a, int b) { return a + b; }\n")
+    res = probe_cpp("lib.hpp", "int add(int a, int b)", cwd=tmp_path)
+    assert res["built"] and not res["compiler"].endswith("clang++") and any(f["sanitizer"] for f in res["findings"])
+    assert res["compilers_tried"][0]["usable"] is False and "libclang_rt" in res["compilers_tried"][0]["error"]
+    assert any(t["usable"] for t in res["compilers_tried"])
+
+
+def test_cpp_probe_reports_why_every_compiler_failed(tmp_path, monkeypatch):
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    fake_compiler(bin_dir, "clang++", "clang: no asan runtime")
+    fake_compiler(bin_dir, "g++", "g++: no libasan")
+    monkeypatch.setenv("PATH", str(bin_dir))
+    write(tmp_path / "lib.hpp", "#pragma once\ninline int add(int a, int b) { return a + b; }\n")
+    res = probe_cpp("lib.hpp", "int add(int a, int b)", cwd=tmp_path)
+    assert res["built"] is False and res["findings"] == []
+    assert [t["usable"] for t in res["compilers_tried"]] == [False, False]
+    assert "no asan runtime" in res["compilers_tried"][0]["error"] and "no libasan" in res["compilers_tried"][1]["error"]
+    assert "no installed compiler can build a sanitizer program" in res["note"]
+
+
+def test_an_explicit_compiler_is_respected_without_fallback(tmp_path, monkeypatch):
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    chosen = fake_compiler(bin_dir, "mycxx", "mycxx: broken")
+    write(tmp_path / "lib.hpp", "#pragma once\ninline int add(int a, int b) { return a + b; }\n")
+    res = probe_cpp("lib.hpp", "int add(int a, int b)", cwd=tmp_path, compiler=str(chosen))
+    assert res["built"] is False and res["compiler"] == str(chosen) and res["compilers_tried"] == []
+
+
+def test_find_sanitizer_compiler_with_no_compilers_returns_none(tmp_path, monkeypatch):
+    monkeypatch.setenv("PATH", str(tmp_path))
+    assert find_sanitizer_compiler() == (None, [])
+    with pytest.raises(ToolMissing):
+        probe_cpp("lib.hpp", "int add(int a, int b)", cwd=tmp_path)
+
+
+# ---- real CTest (CMake is installed on most machines; the stand-in tests above stay for those without) ----
+
+@pytest.mark.skipif(not HAS_CTEST, reason="needs cmake and ctest 3.21+ (for --output-junit) and a C++ compiler")
+def test_real_ctest_run_reports_pass_fail_and_never_a_pass_for_zero_tests(tmp_path):
+    write(tmp_path / "src" / "CMakeLists.txt", """\
+        cmake_minimum_required(VERSION 3.10)
+        project(demo CXX)
+        enable_testing()
+        add_executable(ok ok.cpp)
+        add_executable(bad bad.cpp)
+        add_test(NAME ok_test COMMAND ok)
+        add_test(NAME bad_test COMMAND bad)
+    """)
+    write(tmp_path / "src" / "ok.cpp", "int main() { return 0; }\n")
+    write(tmp_path / "src" / "bad.cpp", "int main() { return 1; }\n")
+    build = tmp_path / "build"
+    assert run_command(["cmake", "-S", str(tmp_path / "src"), "-B", str(build)], tmp_path, 120.0).returncode == 0
+    assert run_command(["cmake", "--build", str(build)], tmp_path, 300.0).returncode == 0
+
+    both = run_ctest(build)
+    assert both.verdict == "failed"
+    assert {r.id.split('::')[-1]: r.status for r in both.results} == {"ok_test": "passed", "bad_test": "failed"}
+    assert run_ctest(build, ["-R", "ok_test"]).verdict == "passed"
+    assert run_ctest(build, ["-R", "no_such_test"]).verdict != "passed"            # zero tests is never a pass
+    assert cli.main(["run", "--tool", "ctest", "--root", str(tmp_path), "--build-dir", str(build)]) == 1
 
 
 # ---- CLI --------------------------------------------------------------------------------------
