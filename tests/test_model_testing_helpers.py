@@ -1069,3 +1069,65 @@ def test_differential_does_not_agree_when_one_implementation_overflows_AC_003():
     assert rep["status"] == "disagree" and rep["disagreements"] == 3
     assert compare_implementations({"a": lambda x: float("inf"), "b": lambda x: float("-inf")}, spec="vector:2", cases=2)["status"] == "disagree"
     assert compare_implementations({"a": lambda x: float("inf"), "b": lambda x: float("inf")}, spec="vector:2", cases=2, rtol=0.0, atol=0.0)["status"] == "agree"
+
+
+def test_differential_reports_the_size_of_near_misses_that_still_agree_AC_003():
+    rep = compare_implementations({"a": total, "b": lambda x: total(x) + 1e-12}, spec="vector:4", cases=5, rtol=0.0, atol=1e-9)
+    assert rep["status"] == "agree" and rep["per_implementation"]["b"]["max_deviation"] == pytest.approx(1e-12, abs=1e-14)
+
+
+def test_determinism_notices_a_run_that_differs_in_the_middle_AC_006():
+    def sequence(values):
+        calls = {"n": 0}
+
+        def fit_predict(Xa, ya, Xb):
+            k = calls["n"]
+            calls["n"] += 1
+            return np.array([values[min(k, len(values) - 1)]] * len(Xb))
+        return fit_predict
+
+    assert check_determinism(sequence([0.0, 1.0, 0.0]), ML_X, ML_Y_SIGNAL)["status"] == "violated"
+    assert check_determinism(sequence(["up", "down", "up"]), ML_X, ML_Y_SIGNAL)["status"] == "violated"
+
+
+def test_noise_features_pass_a_small_excess_inside_k_standard_errors_AC_006():
+    test_labels = ML_Y_SIGNAL[TRAIN_ROWS:]
+    nearly_blind = lambda Xa, ya, Xb: np.full(len(Xb), test_labels.mean()) + 0.25 * Xb[:, 0]
+    rep = check_noise_features(nearly_blind, ML_X, ML_Y_SIGNAL)
+    assert rep["standard_error"] > 0 and 0 < rep["excess_over_baseline"] <= 3 * rep["standard_error"] and rep["status"] == "holds"
+    strict = check_noise_features(nearly_blind, ML_X, ML_Y_SIGNAL, k=0.1)                          # the same excess is outside 0.1 standard errors
+    assert strict["status"] == "violated" and strict["excess_over_baseline"] == pytest.approx(rep["excess_over_baseline"])
+
+
+def test_nnls_reports_its_residual_when_it_stops_early_and_empty_problems_are_convex_AC_005():
+    A, b = np.eye(3), np.array([1.0, 2.0, 3.0])
+    x, resid, converged = nonneg_least_squares(A, b, max_iter=1)
+    assert converged is False and resid > 0 and resid == pytest.approx(np.linalg.norm(A @ x - b))
+    empty = kkt_check_quadratic(None, [], [])
+    assert empty["convex"] is True and empty["satisfied"] is True
+
+
+def test_relaxation_tolerance_is_relative_to_the_optimum_AC_005():
+    pytest.importorskip("scipy")
+
+    def a_little_worse_when_relaxed(inst):
+        x, obj = _scipy_lp(inst)
+        return (x, obj + 5e-4 * abs(obj)) if inst.objective_star is None else (x, obj)
+
+    # relax_delta=0 leaves the problem unchanged, so the relaxed optimum equals the original and only the tolerance decides
+    rep = check_solver_on_instances(a_little_worse_when_relaxed, cases=30, seed=5, checks=("relaxation",), rtol=1e-3, atol=0.0, relax_delta=0.0)
+    assert rep["status"] == "holds", rep["failures"]
+    assert check_solver_on_instances(a_little_worse_when_relaxed, cases=30, seed=5, checks=("relaxation",), rtol=1e-4, atol=0.0, relax_delta=0.0)["status"] == "violated"
+
+
+def test_generator_coverage_of_supports_active_sets_and_magnitudes_AC_001():
+    sizes = {int((convex_instance(s, "lp", n_vars=4, nonneg=True).x_star > 0).sum()) for s in range(80)}
+    assert sizes == {1, 2, 3, 4}                                                  # every support size occurs, including a single positive coordinate
+    assert {int((convex_instance(s, "qp", n_vars=4).y_star > 0).sum()) for s in range(80)} == {0, 1, 2, 3}      # m = 3: from none to all rows active
+    assert (convex_instance(1, "lp", n_active=0).y_star == 0).all()
+    instances = [convex_instance(s, "lp", nonneg=True) for s in range(60)]
+    xs = np.concatenate([i.x_star[i.x_star > 0] for i in instances])
+    zs = np.concatenate([i.z_star[i.z_star > 0] for i in instances])
+    assert xs.min() < 0.7 and zs.min() < 0.7 and xs.max() <= 2.0 and zs.max() <= 2.0
+    data = regression_dataset(0)
+    assert data == data and isinstance(hash(data), int)  # noqa: PLR0124 - equality on a dataclass of arrays must not raise
