@@ -25,7 +25,8 @@
 | T-007 | `metamorphic` and `differential` subcommands | REQ-007 | done | |
 | T-008 | Apply to `solve_lp` and `solve_portfolio`; record `validation.md` | REQ-008, NFR-003 | done | |
 | T-009 | Indexes, agents, standards, README, changelog, handoff | REQ-009 | done | Also `docs/sdk_plan.md`, which had no `0097` entry; README spec badge 83 → 84 |
-| T-010 | Gates, ruff, lockfile, full suite | NFR-005 | done | One pre-existing failure, see Acceptance Evidence AC-009 |
+| T-010 | Gates, ruff, lockfile, full suite | NFR-005 | done | One pre-existing failure at the time; fixed by `0097` T-011 |
+| T-011 | Mutation-test the helpers with the `0097` runtime and close the real gaps | REQ-001, REQ-002, REQ-003, REQ-005, NFR-002, NFR-004 | done | Found an infinity comparison bug, a leaked-timer gap, an untested non-convergence branch and a misranked `worst_case`; see `validation.md` |
 
 Status values: `todo` | `in-progress` | `blocked` | `done`.
 

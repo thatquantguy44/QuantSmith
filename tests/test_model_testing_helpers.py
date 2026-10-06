@@ -696,3 +696,376 @@ def test_cli_bad_input_exits_two_with_bad_input_AC_007(demo, capsys):
     ):
         code, out = run_cli(capsys, *argv, "--root", root)
         assert code == 2 and out["error"] == "bad_input", argv
+
+
+# ---- hardening from mutation testing (0097 `mutate` run on these modules; see validation.md) ------------------------------
+# Each test below pins behaviour that a surviving mutant showed was not checked.
+
+import dataclasses
+import signal
+
+from quantsmith.test_engineering import (
+    optimization_checks as optimization_module,
+)
+from quantsmith.test_engineering._compare import (
+    compare_values,
+    to_jsonable,
+)
+from quantsmith.test_engineering._guard import call_guarded
+
+
+def test_call_guarded_leaves_no_timer_and_restores_the_handler_AC_002():
+    """A timer left armed after the call would later raise SIGALRM and kill the host process."""
+    before = signal.getsignal(signal.SIGALRM)
+    assert call_guarded(lambda: 7, timeout_s=5.0) == ("returned", 7)
+    assert signal.getitimer(signal.ITIMER_REAL) == (0.0, 0.0) and signal.getsignal(signal.SIGALRM) is before
+    assert call_guarded(lambda: time.sleep(5), timeout_s=0.1) == ("timeout", None)
+    assert signal.getitimer(signal.ITIMER_REAL) == (0.0, 0.0) and signal.getsignal(signal.SIGALRM) is before
+    kind, exc = call_guarded(lambda: 1 / 0)
+    assert kind == "raised" and isinstance(exc, ZeroDivisionError) and signal.getitimer(signal.ITIMER_REAL) == (0.0, 0.0)
+
+
+def test_compare_values_covers_text_shape_nan_infinity_and_tolerance_AC_003():
+    assert compare_values("a", "a", 0, 0) == (True, 0.0, "")
+    ok, dev, note = compare_values("a", "b", 1e-7, 1e-9)
+    assert not ok and math.isinf(dev) and "non-numeric" in note
+    ok, dev, _ = compare_values(1.0, "text", 1e-7, 1e-9)                      # one numeric, one not: a mismatch, not a crash
+    assert not ok and math.isinf(dev)
+    assert compare_values(np.empty(0), np.empty(0), 1e-7, 1e-9) == (True, 0.0, "")
+    ok, dev, note = compare_values([1, 2], [1, 2, 3], 1e-7, 1e-9)
+    assert not ok and math.isinf(dev) and "shape mismatch" in note
+    for a, b in ((float("nan"), 1.0), (1.0, float("nan")), (float("nan"), float("nan"))):
+        ok, _, note = compare_values(a, b, 1e-7, 1e-9)
+        assert not ok and "NaN" in note
+    assert compare_values(float("nan"), float("nan"), 1e-7, 1e-9, equal_nan=True)[0]
+    ok, _, note = compare_values(float("nan"), 1.0, 1e-7, 1e-9, equal_nan=True)
+    assert not ok and "one value only" in note
+    assert compare_values(math.inf, math.inf, 0, 0)[0] and compare_values(-math.inf, -math.inf, 0, 0)[0]   # rtol=0 used to give 0 * inf = nan
+    for a, b in ((5.0, math.inf), (math.inf, 5.0), (math.inf, -math.inf), (-math.inf, math.inf), (1e300, math.inf)):
+        ok, dev, _ = compare_values(a, b, 1e-7, 1e-9)                      # default tolerances: inf <= inf must not make a finite value agree
+        assert not ok and math.isinf(dev), (a, b)
+    assert not compare_values([1.0, math.inf], [1.0, 5.0], 1e-7, 1e-9)[0]
+    assert compare_values(1e6 + 0.05, 1e6, rtol=1e-7, atol=0.0)[0]            # relative tolerance scales with |expected|: 1e-7 * 1e6 = 0.1
+    assert not compare_values(1e6 + 0.5, 1e6, rtol=1e-7, atol=0.0)[0]
+    assert compare_values(1e-10, 0.0, 0.0, 1e-9)[0] and not compare_values(1e-8, 0.0, 0.0, 1e-9)[0]
+    assert compare_values([1.0, 2.0], [1.0, 2.5], 0, 0)[1] == pytest.approx(0.5)
+
+
+def test_to_jsonable_truncates_converts_and_never_emits_non_finite_AC_002():
+    out = to_jsonable(np.arange(30.0))
+    assert out["shape"] == [30] and len(out["values"]) == 20 and out["truncated"] is True
+    assert to_jsonable(np.arange(20.0))["truncated"] is False and to_jsonable(np.arange(21.0))["truncated"] is True
+    assert to_jsonable(np.arange(6.0), max_items=3)["values"] == [0.0, 1.0, 2.0]
+    matrix = to_jsonable(np.arange(6).reshape(2, 3))
+    assert matrix["shape"] == [2, 3] and len(matrix["values"]) == 6
+    assert to_jsonable(np.float64(1.5)) == 1.5 and type(to_jsonable(np.float64(1.5))) is float and to_jsonable(np.int64(3)) == 3
+    assert to_jsonable(math.inf) == "inf" and to_jsonable(float("nan")) == "nan" and to_jsonable(2.5) == 2.5
+    assert to_jsonable([1, 2, 3]) == [1, 2, 3] and to_jsonable((1, 2)) == [1, 2] and len(to_jsonable(list(range(30)))) == 20
+    assert to_jsonable("s") == "s" and to_jsonable(None) is None and to_jsonable(True) is True and to_jsonable(7) == 7
+
+    class Long:
+        def __repr__(self):
+            return "x" * 500
+
+    assert to_jsonable(Long()) == "x" * 200
+
+
+def test_generator_defaults_ranges_and_statistics_AC_001():
+    assert parse_input_spec("vector:1").shape() == (1,)
+    assert generate_inputs("vector:3", 0) == [] and len(generate_inputs("scalar", 3)) == 3
+    for x in generate_inputs("vector:5", 20, seed=1):
+        assert x.min() >= -1.0 and x.max() <= 1.0
+    spec = parse_input_spec("vector:3")
+    assert (spec.cols, spec.low, spec.high) == (1, -1.0, 1.0)
+
+    panel = return_panel(1, 20000, 3)                                         # one common factor (loading 0.5) plus idiosyncratic noise
+    assert panel.shape == (20000, 3) and panel.mean() == pytest.approx(0.0005, abs=2e-4) and panel.std() == pytest.approx(0.01, rel=0.05)
+    assert 0.2 < np.corrcoef(panel.T)[0, 1] < 0.3                              # 0.5^2 / (0.5^2 + 0.75) = 0.25
+    wide = return_panel(1, 20000, 2, mean=0.01, vol=0.1)
+    assert wide.mean() == pytest.approx(0.01, abs=2e-3) and wide.std() == pytest.approx(0.1, rel=0.05)
+
+
+def test_regression_dataset_semantics_AC_001():
+    d = regression_dataset(0)
+    assert d.X.shape == (200, 4) and d.noise == 0.0 and d.intercept is True and d.coef.shape == (5,)
+    assert np.allclose(d.y, d.intercept_value + d.X @ d.beta, atol=1e-12)     # noiseless data is exactly linear
+    flat = regression_dataset(0, intercept=False)
+    assert flat.intercept_value == 0.0 and np.array_equal(flat.coef, flat.beta) and np.allclose(flat.y, flat.X @ flat.beta)
+    noisy = regression_dataset(0, n_obs=5000, noise=2.0)
+    assert (noisy.y - noisy.intercept_value - noisy.X @ noisy.beta).std() == pytest.approx(2.0, rel=0.05)
+    betas = np.concatenate([regression_dataset(s).beta for s in range(60)])
+    assert np.abs(betas).min() >= 0.5 and np.abs(betas).max() <= 3.0 and np.abs(betas).min() < 0.8 and np.abs(betas).max() > 2.7
+    assert (betas > 0).any() and (betas < 0).any()
+    c0 = np.array([regression_dataset(s).intercept_value for s in range(60)])
+    assert np.abs(c0).max() <= 2.0 and np.abs(c0).max() > 1.5
+    with pytest.raises(dataclasses.FrozenInstanceError):
+        d.noise = 1.0
+
+
+def test_convex_instance_shapes_validation_and_construction_properties_AC_001():
+    assert convex_instance(0, "lp", n_vars=4).A.shape == (5, 4) and convex_instance(0, "qp", n_vars=4).A.shape == (3, 4)
+    assert convex_instance(0, "qp", n_vars=1).A.shape == (1, 1)
+    for kwargs in ({"n_vars": 0}, {"n_ineq": 0}):
+        with pytest.raises(ValueError):
+            convex_instance(0, "lp", **kwargs)
+    positive = []
+    for seed in range(60):
+        for kind in ("lp", "qp"):
+            for nonneg in (False, True):
+                inst = convex_instance(seed, kind, nonneg=nonneg)
+                slack = inst.b - inst.A @ inst.x_star
+                assert (inst.y_star > 0).sum() == (slack < 1e-12).sum()      # every active row has a positive multiplier, every other row slack
+                positive += list(inst.y_star[inst.y_star > 0]) + list(slack[slack > 1e-12]) + list(inst.z_star[inst.z_star > 0])
+                if nonneg:
+                    assert (inst.x_star > 0).any()                              # at least one coordinate off its bound
+                    positive += list(inst.x_star[inst.x_star > 0])
+                assert inst.unique_x is True                                    # the defaults aim for a unique optimum (always, for a QP)
+    assert min(positive) >= 0.5 and max(positive) <= 2.0 and min(positive) < 0.7 and max(positive) > 1.8
+    assert convex_instance(1, "lp", n_active=0).unique_x is False              # no active constraint: the optimum is not a vertex
+    inst = convex_instance(2, "qp")
+    assert inst.relaxed(0.1).unique_x is False and inst.scaled(0.5).objective_star == pytest.approx(0.5 * inst.objective_star)
+    with pytest.raises(dataclasses.FrozenInstanceError):
+        inst.q = inst.q
+    assert inst == inst and isinstance(hash(inst), int)  # noqa: PLR0124 - the point: == on a dataclass of arrays must not raise                          # identity equality: arrays inside never reach a field-wise ==
+
+
+def test_relation_parameters_and_defaults_are_validated_AC_002():
+    for bad in (0, -1, -0.5):
+        with pytest.raises(ValueError):
+            scaling(factor=bad)
+    for bad_step in (0, -1):
+        with pytest.raises(ValueError):
+            monotone(step=bad_step)
+    assert scaling(factor=0.5).params["factor"] == 0.5 and monotone(step=0.5).params["step"] == 0.5
+    for factory in (translation, permutation, symmetry):
+        with pytest.raises(ValueError):
+            factory("sideways")
+    assert monotone().params["increasing"] is True
+    assert permutation().params == {"kind": "invariant", "axis": 0, "symmetric_output": False}
+    with pytest.raises(dataclasses.FrozenInstanceError):
+        scaling().name = "x"
+
+
+def test_permutation_edge_cases_AC_002():
+    scalar = check_relation(lambda x: x, permutation(), spec="scalar", cases=2)
+    assert scalar["status"] == "inconclusive" and "cannot permute" in scalar["errors"][0]["error"]
+    assert check_relation(total, permutation(axis=5), spec="vector:4", cases=2)["status"] == "inconclusive"
+    column_sums_sorted = lambda m: np.sort(np.asarray(m).sum(axis=0))
+    assert check_relation(column_sums_sorted, permutation("invariant", axis=-1), spec="matrix:3x4", cases=5)["status"] == "holds"
+    for fn in (total, lambda x: np.asarray(x)[:2]):                            # a scalar output, and an output that is too short
+        res = check_relation(fn, permutation("equivariant"), spec="vector:4", cases=2)
+        assert res["status"] == "inconclusive" and "first axis" in res["errors"][0]["error"]
+    rowwise = lambda x: np.asarray(x)[:, None] * np.array([1.0, 2.0, 3.0])
+    assert check_relation(rowwise, permutation("equivariant"), spec="vector:3", cases=5)["status"] == "holds"
+    assert check_relation(rowwise, permutation("equivariant", symmetric_output=True), spec="vector:3", cases=5)["status"] == "violated"
+
+
+def test_monotone_edge_cases_and_tolerance_AC_002():
+    assert check_relation(total, monotone(), inputs=[np.array([])])["errors"][0]["error"] == "empty input"
+    assert "out of range" in check_relation(total, monotone(index=7), spec="vector:3", cases=1)["errors"][0]["error"]
+    one = check_relation(total, monotone(), spec="vector:1", cases=6)          # the drawn coordinate can only be index 0
+    assert one["status"] == "holds" and one["evaluated"] == 6 and one["max_deviation"] == 0.0
+    slightly_down = lambda x: 1e6 - 1e-3 * float(np.asarray(x)[0])
+    assert check_relation(slightly_down, monotone(True, index=0, step=0.1), spec="vector:2", cases=3, rtol=1e-7, atol=0.0)["status"] == "holds"
+    strict = check_relation(slightly_down, monotone(True, index=0, step=0.1), spec="vector:2", cases=3, rtol=0.0, atol=1e-9)
+    assert strict["status"] == "violated" and strict["max_deviation"] == pytest.approx(1e-4)
+
+
+def test_relation_counters_report_what_was_evaluated_AC_002():
+    res = check_relation(total, scaling(1), spec="vector:5", cases=20)
+    assert (res["cases"], res["evaluated"], res["violations"], res["error_count"]) == (20, 20, 0, 0) and res["max_deviation"] < 1e-12
+
+    def raises_on_second(x):
+        if raises_on_second.calls == 1:
+            raises_on_second.calls += 2
+            raise ValueError("boom")
+        raises_on_second.calls += 1
+        return float(np.sum(x))
+
+    raises_on_second.calls = 0
+    inputs = [np.ones(3), np.ones(3), np.ones(3)]
+    mixed = check_relation(raises_on_second, scaling(1), inputs=inputs)
+    assert mixed["error_count"] >= 1 and mixed["evaluated"] + mixed["error_count"] == 3 and mixed["evaluated"] >= 1
+
+
+def test_differential_counts_deviations_and_ranks_the_worst_case_AC_003():
+    same = compare_implementations({"a": total, "b": lambda x: float(sum(x))}, spec="vector:4", cases=7)
+    assert same["per_implementation"]["b"] == {"agreements": 7, "disagreements": 0, "inconclusive": 0, "max_deviation": same["per_implementation"]["b"]["max_deviation"]}
+    assert same["per_implementation"]["b"]["max_deviation"] < 1e-12
+    off = compare_implementations({"a": total, "b": lambda x: total(x) + 0.5}, spec="vector:4", cases=6)
+    assert off["per_implementation"]["b"]["disagreements"] == 6 and off["per_implementation"]["b"]["agreements"] == 0
+    assert off["per_implementation"]["b"]["max_deviation"] == pytest.approx(0.5) and off["disagreements"] == 6
+
+    def boom(x):
+        raise ValueError("bad")
+
+    both_raise = compare_implementations({"a": boom, "b": boom}, spec="vector:3", cases=3)
+    assert both_raise["per_implementation"]["b"] == {"agreements": 3, "disagreements": 0, "inconclusive": 0, "max_deviation": 0.0}
+    returned_then_raised = compare_implementations({"a": total, "b": boom}, spec="vector:3", cases=1)["mismatches"][0]["note"]
+    assert returned_then_raised.startswith("a returned, b raised") and "ValueError: bad" in returned_then_raised
+    raised_then_returned = compare_implementations({"a": boom, "b": total}, spec="vector:3", cases=1)["mismatches"][0]["note"]
+    assert raised_then_returned.startswith("a raised, b returned") and "ValueError: bad" in raised_then_returned
+
+    state = {"n": 0}
+
+    def sometimes_off_sometimes_raises(x):
+        state["n"] += 1
+        if state["n"] == 2:
+            raise ValueError("second call")
+        return total(x) + 0.5
+
+    mixed = compare_implementations({"a": total, "b": sometimes_off_sometimes_raises}, spec="vector:3", cases=3)
+    assert mixed["disagreements"] == 3 and math.isinf(mixed["worst_case"]["deviation"]) and mixed["worst_case"]["case"] == 1
+    assert mixed["per_implementation"]["b"]["max_deviation"] == pytest.approx(0.5)      # the infinite one does not poison the finite maximum
+
+
+def test_determinism_details_AC_006():
+    def drifting(offsets):
+        calls = {"n": 0}
+
+        def fit_predict(Xa, ya, Xb):
+            k = calls["n"]
+            calls["n"] += 1
+            return ols_predict(Xa, ya, Xb) + offsets[min(k, len(offsets) - 1)]
+        return fit_predict
+
+    steady = check_determinism(drifting([0.0]), ML_X, ML_Y_SIGNAL)
+    assert steady["status"] == "holds" and steady["runs"] == 3
+    growing = check_determinism(drifting([0.0, 0.5, 1.0]), ML_X, ML_Y_SIGNAL)
+    assert growing["status"] == "violated" and growing["max_deviation"] == pytest.approx(1.0)
+    assert check_determinism(drifting([1.0, 0.0, 0.0]), ML_X, ML_Y_SIGNAL)["status"] == "violated"      # only the first run differs
+
+    def labels(sequence):
+        calls = {"n": 0}
+
+        def fit_predict(Xa, ya, Xb):
+            k = calls["n"]
+            calls["n"] += 1
+            return np.array([sequence[min(k, len(sequence) - 1)]] * len(Xb))
+        return fit_predict
+
+    assert check_determinism(labels(["up", "up", "up"]), ML_X, ML_Y_SIGNAL)["status"] == "holds"
+    assert check_determinism(labels(["down", "up", "up"]), ML_X, ML_Y_SIGNAL)["status"] == "violated"
+    assert check_determinism(lambda a, b, c: 1 / 0, ML_X, ML_Y_SIGNAL)["status"] == "inconclusive"
+
+
+def test_split_validation_and_ragged_predictions_AC_006():
+    for fraction in (0.0, 1.0, -0.1, 1.5):
+        with pytest.raises(ValueError, match="strictly between"):
+            holdout_split(100, fraction)
+    ragged = check_beats_baseline(lambda a, b, c: [[1.0], [1.0, 2.0]], ML_X, ML_Y_SIGNAL)
+    assert ragged["status"] == "inconclusive" and "one prediction per test row" in ragged["error"]
+
+
+def test_placebo_p_value_and_the_smallest_reachable_alpha_AC_006():
+    rep = check_shuffled_label_placebo(ols_predict, ML_X, ML_Y_SIGNAL)
+    assert rep["p_value"] == pytest.approx(1 / 31) and rep["alpha"] == 0.05            # the real score beats all 30 placebo scores
+    exact = check_shuffled_label_placebo(ols_predict, ML_X, ML_Y_SIGNAL, n_placebo=19)   # 1 / 20 = 0.05 is reachable
+    assert exact["status"] == "holds" and exact["p_value"] == pytest.approx(0.05)
+    assert check_shuffled_label_placebo(ols_predict, ML_X, ML_Y_SIGNAL, n_placebo=18)["status"] == "inconclusive"   # 1 / 19 > 0.05
+
+
+def test_noise_feature_statistics_and_both_branches_AC_006():
+    uses_noise = lambda Xa, ya, Xb: Xb[:, 0]
+    rep = check_noise_features(uses_noise, ML_X, ML_Y_SIGNAL, repeats=10)
+    scores = np.array(rep["scores"])
+    assert len(scores) == 10 and rep["runs"] == 10 and scores.std() > 0
+    assert rep["standard_error"] == pytest.approx(scores.std(ddof=1) / np.sqrt(10))
+    assert rep["noise_score_mean"] == pytest.approx(scores.mean()) and rep["excess_over_baseline"] == pytest.approx(scores.mean() - rep["baseline_score"])
+    assert rep["status"] == "holds"
+    assert check_noise_features(uses_noise, ML_X, ML_Y_SIGNAL, repeats=1)["status"] == "nothing_checked"
+    assert check_noise_features(uses_noise, ML_X, ML_Y_SIGNAL, repeats=2)["status"] != "nothing_checked"
+    test_labels = ML_Y_SIGNAL[TRAIN_ROWS:]
+    train_mean = check_noise_features(lambda Xa, ya, Xb: np.full(len(Xb), ya.mean()), ML_X, ML_Y_SIGNAL)
+    assert train_mean["standard_error"] == 0.0 and train_mean["excess_over_baseline"] == pytest.approx(0.0, abs=1e-12) and train_mean["status"] == "holds"
+    knows_test_mean = check_noise_features(lambda Xa, ya, Xb: np.full(len(Xb), test_labels.mean()), ML_X, ML_Y_SIGNAL)
+    assert knows_test_mean["standard_error"] == 0.0 and knows_test_mean["excess_over_baseline"] > 0 and knows_test_mean["status"] == "violated"
+    peeks_with_jitter = check_noise_features(lambda Xa, ya, Xb: test_labels + 0.3 * Xb[:, 0], ML_X, ML_Y_SIGNAL)
+    assert peeks_with_jitter["standard_error"] > 0 and peeks_with_jitter["status"] == "violated"      # skill that no feature can carry
+
+
+def test_nnls_stops_and_reports_when_it_does_not_converge_AC_005(monkeypatch):
+    A, b = np.eye(3), np.array([1.0, 2.0, 3.0])
+    x, _, converged = nonneg_least_squares(A, b, max_iter=1)
+    assert converged is False and (x >= 0).all()
+    assert nonneg_least_squares(A, b)[2] is True and np.allclose(nonneg_least_squares(A, b)[0], b)
+    x0, resid, ok = nonneg_least_squares(np.zeros((3, 0)), b)
+    assert x0.size == 0 and resid == pytest.approx(np.linalg.norm(b)) and ok is True
+    monkeypatch.setattr(optimization_module, "nonneg_least_squares", lambda M, rhs: (np.zeros(M.shape[1]), 0.0, False))
+    rep = kkt_check([0.0], ineq_values=[0.0], ineq_jac=[[1.0]])
+    assert rep["satisfied"] is False and "multiplier_recovery_did_not_converge" in rep["failed"] and rep["status"] == "violated"
+
+
+def test_kkt_with_inequality_and_equality_together_recovers_both_multipliers_AC_005():
+    # min x^2 + y^2  s.t.  x + y = 1,  x <= 0.3   ->   (0.3, 0.7), lambda = 0.8, nu = -1.4
+    rep = kkt_check_quadratic(2 * np.eye(2), [0.0, 0.0], [0.3, 0.7], A_eq=[[1, 1]], b_eq=[1.0], upper=[0.3, math.inf])
+    assert rep["satisfied"] and rep["multipliers"]["inequality"] == pytest.approx([0.8]) and rep["multipliers"]["equality"] == pytest.approx([-1.4])
+
+
+def test_kkt_stationarity_is_relative_to_the_gradient_scale_AC_005():
+    big = 1e6
+    rep = kkt_check([big + 1e-3], ineq_values=[0.0], ineq_jac=[[-1.0]], ineq_multipliers=[big])
+    assert rep["satisfied"] and rep["stationarity_residual"] == pytest.approx(1e-3, rel=1e-2)      # 1e-3 is tiny against a gradient of 1e6
+    assert not kkt_check([1e-3], ineq_values=[0.0], ineq_jac=[[-1.0]], ineq_multipliers=[0.0])["satisfied"]
+
+
+def test_kkt_convexity_uses_a_numerical_tolerance_AC_005():
+    assert kkt_check_quadratic(np.diag([1000.0, -1e-8]), [0.0, 0.0], [0.0, 0.0])["certifies_optimality"] is True      # PSD up to round-off
+    assert kkt_check_quadratic(np.diag([1000.0, -1e-3]), [0.0, 0.0], [0.0, 0.0])["certifies_optimality"] is False
+    with pytest.raises(ValueError, match="multiplier lengths"):
+        kkt_check([1.0], ineq_values=[0.0], ineq_jac=[[1.0]], ineq_multipliers=[1.0, 2.0])
+
+
+def test_runner_caps_failures_and_rejects_malformed_solver_results_AC_005():
+    pytest.importorskip("scipy")
+
+    def lies(inst):
+        x, obj = _scipy_lp(inst)
+        return x, obj + 1.0
+
+    capped = check_solver_on_instances(lies, cases=20, seed=5, checks=("known_optimum",), max_failures=2)
+    assert len(capped["failures"]) == 2 and capped["per_check"]["known_optimum"]["failed"] == 20
+    kkt_only = check_solver_on_instances(lies, cases=10, seed=5, checks=("kkt",))
+    assert kkt_only["per_check"]["kkt"]["failed"] == 10 and kkt_only["failures"][0]["reason"] == "reported_objective_differs_from_objective_at_x"
+    malformed = check_solver_on_instances(lambda inst: 5, cases=2, checks=("known_optimum",))
+    assert malformed["status"] == "violated" and "must be (x, objective)" in malformed["failures"][0]["reason"]
+
+    def a_little_worse_when_relaxed(inst):                                    # within the relative tolerance, so the relaxation check must allow it
+        x, obj = _scipy_lp(inst)
+        return (x, obj + 5e-4 * abs(obj)) if inst.objective_star is None else (x, obj)
+
+    assert check_solver_on_instances(a_little_worse_when_relaxed, cases=10, seed=5, checks=("relaxation",), rtol=1e-3, atol=0.0)["status"] == "holds"
+
+
+def test_regression_checks_pin_counts_caps_and_the_orthogonality_measure_AC_004():
+    rep = check_regression(ols_fit)
+    assert rep["cases"] == 10 and rep["details"]["coefficient_recovery"]["evaluated"] == 10 and rep["details"]["coefficient_recovery"]["worst_measure"] < 1e-8
+    biased = lambda X, y: 0.9 * ols_fit(X, y)
+    many = check_coefficient_recovery(biased, cases=10)
+    assert many["failure_count"] == 10 and len(many["failures"]) == 3 and many["evaluated"] == 10
+    orth = check_residual_orthogonality(biased, cases=3)
+    failure = orth["failures"][0]
+    data = regression_dataset(failure["data_seed"], 200, 4, 0.5, True)
+    est = np.array(failure["estimated"]["values"])
+    Xa = np.hstack([np.ones((200, 1)), data.X])
+    residual = data.y - Xa @ est
+    expected = np.abs(Xa.T @ residual).max() / (np.abs(Xa).max() * np.linalg.norm(data.y))
+    assert failure["measure"] == pytest.approx(expected)                       # a dimensionless measure: independent of the scale of y
+
+
+def test_scaling_check_draws_every_column_including_the_first_AC_004():
+    def standardises_the_first_column_and_forgets_to_undo_it(X, y):
+        X2 = X.copy()
+        X2[:, 0] = X2[:, 0] / X2[:, 0].std()
+        return ols_fit(X2, y)
+
+    res = check_feature_scaling_equivariance(standardises_the_first_column_and_forgets_to_undo_it, cases=30)
+    assert res["status"] == "violated" and any(f["column"] == 0 for f in res["failures"])
+
+
+def test_differential_does_not_agree_when_one_implementation_overflows_AC_003():
+    """Regression: a reference returning inf and an implementation returning 5.0 used to be reported as agreeing."""
+    rep = compare_implementations({"reference": lambda x: float("inf"), "finite": lambda x: 5.0}, spec="vector:2", cases=3)
+    assert rep["status"] == "disagree" and rep["disagreements"] == 3
+    assert compare_implementations({"a": lambda x: float("inf"), "b": lambda x: float("-inf")}, spec="vector:2", cases=2)["status"] == "disagree"
+    assert compare_implementations({"a": lambda x: float("inf"), "b": lambda x: float("inf")}, spec="vector:2", cases=2, rtol=0.0, atol=0.0)["status"] == "agree"

@@ -188,6 +188,6 @@ def check_noise_features(fit_predict: FitPredict, X, y, *, score: Score = r2_sco
     se = float(arr.std(ddof=1) / np.sqrt(arr.size))
     excess = float(arr.mean() - base)
     ok = excess <= k * se if se > 0 else excess <= 1e-12
-    return _result("ml_noise_features", "holds" if ok else "violated", noise_score_mean=float(arr.mean()), baseline_score=base,
+    return _result("ml_noise_features", "holds" if ok else "violated", noise_score_mean=float(arr.mean()), scores=[float(v) for v in arr], baseline_score=base,
                    excess_over_baseline=excess, standard_error=se, k=k, runs=int(arr.size), split=split, seed=seed,
                    note=None if ok else "the model scores above the baseline on pure noise features")
