@@ -750,6 +750,30 @@ PYTHONPATH=src python3 -m quantsmith.pipelines.analytics_packs --report
 PYTHONPATH=src python3 -m pytest tests/test_analytics_packs.py -q
 ```
 
+## `dataset_investigator/` — spec `0099`
+
+On-demand investigation of one tabular dataset. Its own package,
+`src/quantsmith/dataset_investigator/`, needing the optional `investigator`
+extra (`pip install quantsmith[investigator]`); nothing else imports it.
+`analysis/` is the deterministic core and is self-contained, because every run
+exports a byte-for-byte copy of it as the analysis package's `dataset_analysis/`.
+
+| Module | Spec | What it guarantees |
+| --- | --- | --- |
+| `analysis/loading.py`, `roles.py` | REQ-001, REQ-002 | Read-only load of CSV/TSV/Parquet/pandas/Polars; file SHA-256 and a format-independent content hash; semantic roles with evidence; overrides and PII flags. |
+| `analysis/registry.py` + tool modules | REQ-004–REQ-006 | 21 registered, versioned tools; Pydantic parameters; role eligibility per column parameter; PII refusal; content-addressed execution records. |
+| `analysis/planner.py`, `findings.py` | REQ-003, REQ-007 | Rule planner with reasons and seeded sampling; candidate findings by rule; interestingness from magnitude, BH-adjusted support, prevalence, actionability. |
+| `analysis/hypotheses.py`, `validator.py` | REQ-008–REQ-010, REQ-017 | Declarative decision rules, bounded loop with follow-ups, research questions; grounding, causal-wording, role-fit, re-execution, sample-size, significance, duplicate and calibration checks. |
+| `analysis/report.py`, `metadata.py`, `pipeline.py`, `cli.py` | REQ-011–REQ-015 | Fixed-order report and figures from aggregates; `run_metadata.yaml`; `investigate`/`reproduce`/`rerun`; the package's `dataset-investigator`. |
+| `context.py`, `export.py`, `cli.py` | REQ-012, REQ-016, REQ-017 | Aggregates-only context per model role; the package builder; `quantsmith-dataset-investigator` and the step commands the saved workflow `.claude/workflows/dataset-investigator.js` drives. |
+
+Tests: `tests/test_dataset_investigator.py` (22 tests, AC-001–AC-022, including a 1M × 20 benchmark).
+
+```sh
+uv sync --all-extras && uv run python -m pytest tests/test_dataset_investigator.py -q
+uv run quantsmith-dataset-investigator analyze data.csv --out investigation_run
+```
+
 ## `nl_analytics/` — spec `0080`
 
 A question in plain language becomes a governed `QueryPlan` over `0008`
