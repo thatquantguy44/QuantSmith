@@ -510,6 +510,7 @@ dashboard/reporting agents.
 | `analytics/dashboard_design/` | Tool-agnostic dashboard spec (hierarchy, chart selection, drill paths, accessibility) | Dashboards, Reporting |
 | `analytics/data_visualization/` | Single-chart encoding — chart-type form rule, color, sort, units/labels, accessibility, for one chart at a time | Dashboards, `nl_analytics` |
 | `analytics/nl_analytics/` | Natural-language question → governed `QueryPlan` → chart + grounded insights → chat response and/or reversible database write-back | Reporting, Dashboards |
+| `analytics/dataset_investigator/` | On-demand investigation of one dataset — registered deterministic tools, ranked findings, a hypothesis loop that can reject a tempting reading, a validator, and an exported package that reproduces every finding (`0099`; saved workflow `dataset-investigator`) | Data quality, Modeling, Reporting |
 
 The last four are the communication layer (specs `0014-data-analyst-storytelling`,
 `0080-nl-analytics-insights`) — they

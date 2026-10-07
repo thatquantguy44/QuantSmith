@@ -39,6 +39,7 @@ nl_analytics (interpret -> validate -> authorize -> execute)
 | `dashboard_design/` | Produces a tool-agnostic dashboard spec (hierarchy, chart selection, drill paths, accessibility) rendered by the tool-specific dashboard agents. |
 | `data_visualization/` | Single-chart encoding — chart-type form rule, color, sort, units/labels, and accessibility for one chart at a time; the narrow counterpart to `dashboard_design`. |
 | `nl_analytics/` | Turns a natural-language question into a governed `QueryPlan`, a chart (via `data_visualization`), grounded insights, and a chat response and/or a reversible database write-back. |
+| `dataset_investigator/` | Investigates one tabular dataset on demand: registered deterministic tools across six families, ranked findings, a bounded hypothesis loop, a validator, a fixed-order report, and an exported package containing the modules that ran (spec `0099`; runs as the `dataset-investigator` workflow or `quantsmith-dataset-investigator`). |
 
 The four communication-layer agents (specs `0014-data-analyst-storytelling`,
 `0080-nl-analytics-insights`) compose existing governed outputs and hand off to

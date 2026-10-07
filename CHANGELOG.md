@@ -21,6 +21,15 @@ patterns locally rather than expecting them to update in place.
 ## [Unreleased]
 
 ### Added
+- Dataset Investigator (spec `0099`): `quantsmith.dataset_investigator` and the `quantsmith-dataset-investigator` command
+  investigate one CSV/TSV/Parquet/pandas/Polars dataset with 21 registered, versioned, deterministic tools (quality,
+  distributions, relationships, segmentation, temporal, anomalies), rank findings with Benjamini–Hochberg-adjusted
+  support, test hypotheses with declarative decision rules in a bounded loop, validate every claim (grounded numbers,
+  no causal wording, re-execution, sample size), and write a fixed-order report plus an analysis package whose
+  `dataset_analysis/` is the code that ran, with `reproduce` and `rerun` that need no language model. On demand as the
+  saved Claude Code workflow `dataset-investigator` (`.claude/workflows/`) and the agent
+  `agents/analytics/dataset_investigator/`. New optional `investigator` extra (pandas, scipy, scikit-learn, pyarrow,
+  pydantic, PyYAML, Matplotlib).
 - Model testing helpers (spec `0098`): `quantsmith.test_engineering` gains seeded generators (including convex LP/QP instances whose optimum
   is known by construction), metamorphic relations, a differential runner, KKT optimality certificates with a solver instance runner,
   regression and ML checks (determinism, label-shuffled placebo, noise features, baseline), and `metamorphic` and `differential`

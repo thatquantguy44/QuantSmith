@@ -10,7 +10,7 @@
 > direction included. See item 1 of *What's Next* and items 29–30.
 
 The SDK has a working v1: a **spec-driven engineering framework** over the six
-software-development stages, **206 agents** in `agents/`,
+software-development stages, **207 agents** in `agents/`,
 **35 quality gates**, **38 instruction standards**, and CI that
 enforces the deterministic gates. It remains primarily a scaffold to be copied
 into quant repos, with `src/quantsmith/pipelines/`, `src/quantsmith/orchestration/`,
@@ -35,7 +35,7 @@ it via stable IDs (`REQ`/`NFR`/`AC`/`RISK`/`T`).
 - `specs/NNNN-slug/{spec,plan,tasks}.md` from `templates/spec/`; worked example at
   `specs/0001-daily-momentum-signal/`.
 
-**Agents (206, verified by the `agent-catalog` gate — treat `agents/README.md`
+**Agents (207, verified by the `agent-catalog` gate — treat `agents/README.md`
 as the live count, not the number here)** — all on the four-file contract
 (`README`/`prompt`/`instructions`/`tasks`) with a `Spec-Driven Role`:
 
@@ -295,7 +295,7 @@ designs**: create and
 approve one only when the foundation it consumes — `0063` or `0072` — has frozen
 that contract and the prior dependency named above is satisfied. Do not add
 agents merely to fill the map; prefer a canonical knowledge artifact or tested
-runtime that an existing agent can use. **Next unreserved spec number: `0099`** (`0083`–`0092` are the venture-intelligence foundation and its reserved children, item 32; `0093` is the visualization packs spec; `0094` is the Asian-language NLP foundation; `0095` is the venture predictive-model baselines; `0096` is request routing; `0097` is the test-engineering runtime; `0098` is the model testing helpers).
+runtime that an existing agent can use. **Next unreserved spec number: `0100`** (`0083`–`0092` are the venture-intelligence foundation and its reserved children, item 32; `0093` is the visualization packs spec; `0094` is the Asian-language NLP foundation; `0095` is the venture predictive-model baselines; `0096` is request routing; `0097` is the test-engineering runtime; `0098` is the model testing helpers; `0099` is the Dataset Investigator).
 Reserving a number here does not create the directory; copy `templates/spec/`
 only when that slice becomes active.
 
@@ -718,7 +718,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
     to populate `sources/` as real sources come into use.
 
 14. **P1 Generalization & Team Onboarding — making QuantSmith self-serve across
-    domains.** QuantSmith is now a comprehensive framework (206 agents, 69 specs,
+    domains.** QuantSmith is now a comprehensive framework (207 agents, 69 specs,
     33 gates, 35 standards); the next phase is reducing discovery friction and
     enabling team-intuitive adoption without deep codebase reading.
     - **P0 Phase 1a: Role profiles** (`roles/{portfolio_manager,risk_manager,quant_researcher,data_engineer,compliance_officer}.md`):
@@ -1616,6 +1616,13 @@ manual-task persistence question stays deferred until a real consumer needs it.
     certificates and a solver instance runner, regression and ML checks (determinism, label-shuffled placebo, noise
     features, baseline), and `metamorphic`/`differential` subcommands. numpy only; SciPy is a test oracle. Run on
     `solve_lp` and `solve_portfolio` it found no defect (see `0098/validation.md`). Hypothesis was not added.
+    `0099` (Draft, built) adds the Dataset Investigator: `quantsmith.dataset_investigator` (needs the new
+    `investigator` extra), the `quantsmith-dataset-investigator` command, the saved Claude Code workflow
+    `.claude/workflows/dataset-investigator.js`, and `agents/analytics/dataset_investigator/`. 21 registered tools,
+    ranked findings with BH-adjusted support, a bounded hypothesis loop (it rejects the overnight "more fraud" reading
+    as a denominator effect on the synthetic fixture), a validator that re-executes every finding, and an exported
+    package (`dataset_analysis/` byte-identical to `analysis/`) with `reproduce` and `rerun`. 1M × 20 in ~60 s.
+    Next: run the workflow on a real dataset; v2 controlled tool generation needs its own spec.
     Proof of concept: no legal collection limits set yet; they must be set
     before operational use. The `0083` knowledge pack and validator are built
     (per-record review sign-off; all records still `draft`). Next: `0091` (fund analytics), the deferred regions in `0087`, and
@@ -1658,7 +1665,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
       `specs/0083-venture-intelligence-foundation/run_card.md` (see
       `docs/gate_runbook.md`); every `knowledge/venture_intelligence/` record is
       `draft` and most cite `unverified`; `agents/agent_registry.yaml` was incomplete (6 of
-      206 agents, with broken `skills_library/` paths); it is now generated from the
+      207 agents, with broken `skills_library/` paths); it is now generated from the
       agents by `scripts/build_agent_registry.py` and guarded by a test and the
       `agent-catalog` gate.
 
@@ -1690,7 +1697,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
 
 ## Risks
 
-- Breadth: 206 agents is useful only if each stays narrow and inspectable.
+- Breadth: 207 agents is useful only if each stays narrow and inspectable.
 - Heuristic gates (`leakage`, `backtest`, `secret-scan` fallback) can false-positive
   or miss; keep them advisory unless a repo's layout makes them reliable.
 - Docs can drift from the code; the `docs-link`, `agent-catalog`, and `spec-index` gates help, but
