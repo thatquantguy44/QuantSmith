@@ -1,0 +1,91 @@
+{
+  "schema": 1,
+  "_doc": "Allowlist for the vendored agent-skills subset (spec 0100). Edit groups/enabled_groups/excluded here, then re-run `quantsmith-agent-skills sync`. Never edit vendor/agent-skills/ by hand. See instructions/agent_skills.md.",
+  "upstream": "addyosmani/agent-skills",
+  "fork": "thatquantguy44/agent-skills",
+  "plugin_name": "agent-skills",
+  "marketplace": "quantsmith-local",
+  "vendor_dir": "vendor/agent-skills",
+  "lock": "vendor/agent-skills.lock.json",
+  "max_file_bytes": 262144,
+  "max_tree_bytes": 1048576,
+  "review_days": 92,
+  "always": ["LICENSE"],
+  "enabled_groups": ["core", "define", "personas", "references", "review", "ship"],
+  "groups": {
+    "core": {
+      "skills": [
+        "test-driven-development",
+        "incremental-implementation",
+        "debugging-and-error-recovery",
+        "source-driven-development",
+        "doubt-driven-development",
+        "context-engineering",
+        "api-and-interface-design"
+      ]
+    },
+    "review": {
+      "skills": [
+        "code-review-and-quality",
+        "code-simplification",
+        "security-and-hardening",
+        "performance-optimization"
+      ],
+      "commands": ["review", "code-simplify", "test"]
+    },
+    "ship": {
+      "skills": [
+        "git-workflow-and-versioning",
+        "ci-cd-and-automation",
+        "documentation-and-adrs",
+        "observability-and-instrumentation",
+        "deprecation-and-migration",
+        "shipping-and-launch"
+      ]
+    },
+    "define": {
+      "skills": ["interview-me", "idea-refine"]
+    },
+    "personas": {
+      "agents": ["code-reviewer", "test-engineer", "security-auditor"]
+    },
+    "references": {
+      "references": [
+        "definition-of-done.md",
+        "observability-checklist.md",
+        "orchestration-patterns.md",
+        "performance-checklist.md",
+        "security-checklist.md",
+        "testing-patterns.md"
+      ]
+    },
+    "web": {
+      "skills": ["frontend-ui-engineering", "browser-testing-with-devtools"],
+      "commands": ["webperf"],
+      "agents": ["web-performance-auditor"],
+      "references": ["accessibility-checklist.md"]
+    }
+  },
+  "excluded": {
+    "skills/spec-driven-development/": "Writes a root SPEC.md with its own ID scheme, bypassing specs/NNNN-slug/ and the spec-check gate (P1, P2).",
+    "skills/planning-and-task-breakdown/": "Writes plan/task artifacts outside specs/NNNN-slug/ and without REQ-/T- traceability (P1, P2).",
+    "skills/using-agent-skills/": "Meta-router that sends work to the excluded /spec, /plan, /build and /ship commands; QuantSmith routing is workflow_orchestrator plus instructions/agent_skills.md.",
+    "skills/idea-refine/scripts/": "Executable that creates docs/ideas/; QuantSmith routes all Specify output into specs/NNNN-slug/spec.md, and vendored content is never executed (NFR-003).",
+    ".claude/commands/spec.md": "Same as spec-driven-development.",
+    ".claude/commands/plan.md": "Same as planning-and-task-breakdown.",
+    ".claude/commands/build.md": "Commits after every task and may generate its own plan; QuantSmith commits only when asked and takes tasks from tasks.md.",
+    ".claude/commands/ship.md": "Fans out to a go/no-go outside QuantSmith's release gates (deployment_release, deployment-check).",
+    "hooks/": "Session-start hook injects the excluded meta-router and needs jq; the other hooks execute shell from vendored content (NFR-003)."
+  },
+  "citing_agents": [
+    "agents/implementation/instructions.md",
+    "agents/testing_validation/instructions.md",
+    "agents/git_release/instructions.md",
+    "agents/quality-guard-agent/instructions.md",
+    "agents/test_engineering/test_engineering_orchestrator/instructions.md",
+    "agents/test_engineering/python_test_engineer/instructions.md",
+    "agents/test_engineering/cpp_test_fuzz_engineer/instructions.md",
+    "agents/test_engineering/javascript_test_engineer/instructions.md",
+    "agents/test_engineering/typescript_test_engineer/instructions.md"
+  ]
+}

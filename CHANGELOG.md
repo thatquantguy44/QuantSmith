@@ -21,6 +21,18 @@ patterns locally rather than expecting them to update in place.
 ## [Unreleased]
 
 ### Added
+- agent-skills as a pinned, offline upstream (spec `0100`): `quantsmith.agent_skills` and the `quantsmith-agent-skills`
+  command (`sync`, `diff`, `verify`, `status`, `install`) vendor an allowlisted subset of `addyosmani/agent-skills`
+  (via the fork `thatquantguy44/agent-skills`) from a *local* clone, directory or `git archive` tarball only, with a
+  per-file SHA-256 lock. Sync refuses URL sources, symlinks, executables and oversize files and prints a change summary
+  before writing. Conflicting upstream items (`spec-driven-development`, `planning-and-task-breakdown`,
+  `using-agent-skills`, `/spec`, `/plan`, `/build`, `/ship`, hooks) are excluded by `config/agent_skills.json`. Claude
+  Code loads the subset as the namespaced plugin `agent-skills@quantsmith-local` from the local marketplace
+  `.claude-plugin/marketplace.json` after a one-time per-machine opt-in (`install --scope project`); `.claude/settings.json`
+  carries only the `enabledPlugins` kill switch. The wheel bundles the subset and config for `install --scope user`
+  with no checkout. New gate `agent-skills` (enforced in CI) checks the tree against the lock, the allowlist,
+  manifests and agent citations. New standard `instructions/agent_skills.md`; nine coding-stage agents cite the skills
+  they use. The first vendored sync lands in its own PR.
 - Dataset Investigator (spec `0099`): `quantsmith.dataset_investigator` and the `quantsmith-dataset-investigator` command
   investigate one CSV/TSV/Parquet/pandas/Polars dataset with 21 registered, versioned, deterministic tools (quality,
   distributions, relationships, segmentation, temporal, anomalies), rank findings with Benjamini–Hochberg-adjusted

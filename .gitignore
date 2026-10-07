@@ -105,3 +105,6 @@ agents.zip
 
 # Build-time copy of knowledge/analytics_packs/ (setup.py); never committed
 src/quantsmith/_bundled/
+
+# Per-machine Claude Code settings (agent-skills opt-in writes an absolute path here; spec 0100)
+.claude/settings.local.json

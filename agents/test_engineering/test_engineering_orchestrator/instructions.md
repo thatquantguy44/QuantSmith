@@ -38,3 +38,7 @@ specialists is a `RISK-*` this agent exists to prevent. Backed by
 `specs/0062-test-engineering-agents/`. Feeds `python_test_engineer`,
 `cpp_test_fuzz_engineer`, `javascript_test_engineer`,
 `typescript_test_engineer`, `testing_validation`, and `quality-guard-agent`.
+
+## agent-skills
+
+Vendored engineering skills this agent may follow (spec `0100`; precedence, stage map and overrides in `instructions/agent_skills.md`): `vendor/agent-skills/skills/test-driven-development/SKILL.md`, `vendor/agent-skills/skills/debugging-and-error-recovery/SKILL.md`. This agent routes test work before the upstream `test-engineer` persona, which is used only for generic test design.

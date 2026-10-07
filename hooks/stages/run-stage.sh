@@ -13,7 +13,7 @@
 #   (quant-specific checks; heuristic and advisory, run after the SDLC stages)
 # Repo gates: secret-scan docs-link agent-catalog spec-index readme-sync doc-counts
 #   quantsmith-version agent-attribution handoff-sync upstream-drift ownership
-#   persistent-knowledge
+#   persistent-knowledge agent-skills
 #   (security, documentation-integrity, consumer-pin, authorship, roadmap,
 #    distribution-drift, ownership, and knowledge-guide checks)
 # Knowledge gate: knowledge
@@ -33,7 +33,7 @@
 
 DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 
-ALL="spec planning design implementation testing deployment maintenance leakage backtest repro orchestration text-intelligence data-contract pipeline-contract alert-contract monitoring-coverage secret-scan docs-link agent-catalog spec-index readme-sync doc-counts quantsmith-version agent-attribution handoff-sync upstream-drift ownership persistent-knowledge knowledge memory access role-context data-provenance model-plugin source-catalog"
+ALL="spec planning design implementation testing deployment maintenance leakage backtest repro orchestration text-intelligence data-contract pipeline-contract alert-contract monitoring-coverage secret-scan docs-link agent-catalog spec-index readme-sync doc-counts quantsmith-version agent-attribution handoff-sync upstream-drift ownership persistent-knowledge knowledge memory access role-context data-provenance model-plugin source-catalog agent-skills"
 stages="$*"
 [ -z "$stages" ] && stages="$ALL"
 
