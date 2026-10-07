@@ -28,6 +28,12 @@ Every agent follows the same contract: `README.md`, `prompt.md`, `instructions.m
 Cross-cutting: the `spec-check` hook enforces the traceability chain across all
 stages.
 
+Engineering technique (spec `0100`): the coding-stage agents (`implementation`, `testing_validation`, `git_release`,
+`quality-guard-agent`, `test_engineering/*`) cite skills from the vendored agent-skills subset by path
+(`vendor/agent-skills/skills/<name>/SKILL.md`), and Claude Code loads the same subset as the namespaced plugin
+`agent-skills@quantsmith-local`, with three reviewer personas (`code-reviewer`, `security-auditor`, `test-engineer`).
+QuantSmith agents and rules take precedence; see `instructions/agent_skills.md`.
+
 ## Domain Agents (quant expertise)
 
 | Agent | Supplies | Feeds mainly |

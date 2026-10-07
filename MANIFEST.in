@@ -3,3 +3,8 @@
 # from the sdist bundles it too. Spec 0081 REQ-013.
 include setup.py
 recursive-include knowledge/analytics_packs *.json
+# The vendored agent-skills subset and its lock are bundled the same way
+# (spec 0100 REQ-012); graft keeps its dot-directories (.claude-plugin, .claude).
+graft vendor/agent-skills
+include vendor/agent-skills.lock.json
+include config/agent_skills.json

@@ -47,3 +47,7 @@ an acceptance-only type test presented as complete verification is a
 `specs/0062-test-engineering-agents/`). Backed by
 `instructions/test_engineering.md`. Feeds `testing_validation` and, when a
 release decision is in play, `quality-guard-agent`.
+
+## agent-skills
+
+Vendored engineering skills this agent may follow (spec `0100`; precedence, stage map and overrides in `instructions/agent_skills.md`): `vendor/agent-skills/skills/test-driven-development/SKILL.md`, `vendor/agent-skills/skills/debugging-and-error-recovery/SKILL.md`. Browser testing (`browser-testing-with-devtools`) is in the opt-in `web` group.

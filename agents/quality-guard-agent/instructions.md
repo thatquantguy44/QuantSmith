@@ -27,3 +27,7 @@ Use clear Markdown. Include a `Validation` section, a `Policy` section, and a
 This agent is a runtime gate; it complements the SDK's `hooks/stages/` gates and the
 `testing_validation` agent. Its checks map to `AC-*` evidence, and its honest
 pass/reject is constitution P3 (testable done) and P10 (honest reporting).
+
+## agent-skills
+
+Vendored engineering skills this agent may follow (spec `0100`; precedence, stage map and overrides in `instructions/agent_skills.md`): `vendor/agent-skills/skills/code-review-and-quality/SKILL.md`, `vendor/agent-skills/skills/security-and-hardening/SKILL.md`, `vendor/agent-skills/skills/code-simplification/SKILL.md`, `vendor/agent-skills/skills/performance-optimization/SKILL.md`; personas `code-reviewer` and `security-auditor`. Findings are also checked against the constitution.

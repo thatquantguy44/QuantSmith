@@ -14,7 +14,7 @@ signal and model **reproducible, leakage-safe, and traceable to a spec**.
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](pyproject.toml)
 [![Approach: Spec-Driven](https://img.shields.io/badge/Approach-Spec--Driven-ff6f00)](instructions/spec_driven_development.md)
 [![Agents: 207](https://img.shields.io/badge/Agents-207-6f42c1)](agents/README.md)
-[![Quality Gates: 35](https://img.shields.io/badge/Quality%20Gates-35-2ea44f)](hooks/README.md)
+[![Quality Gates: 36](https://img.shields.io/badge/Quality%20Gates-36-2ea44f)](hooks/README.md)
 [![Specs: 86](https://img.shields.io/badge/Specs-86-0969da)](specs/README.md)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](.github/GIT_GUIDELINES.md)
 
@@ -66,7 +66,7 @@ signal and model **reproducible, leakage-safe, and traceable to a spec**.
 | 🔎 Catch leakage & time-alignment bugs | Point-in-time standards + `leakage`/`backtest` gates |
 | 📝 Document features, models, backtests | Templates, cards, and reproducible run artifacts |
 | 🤖 Reuse research workflows | 207 narrow, inspectable agent roles across the stack |
-| 🚦 Stop mistakes before commit/push | 35 quality gates, advisory by default, CI-enforceable |
+| 🚦 Stop mistakes before commit/push | 36 quality gates, advisory by default, CI-enforceable |
 | 🗣️ Share a common vocabulary | An [agentic dictionary](agentic_dictionary.md) for the team |
 
 ---
@@ -388,6 +388,7 @@ Reusable standards and behavioral rules that agents follow.
 - [`reproducibility.md`](instructions/reproducibility.md) — P4 operationalized; backs the `repro` gate
 - [`workflow_memory.md`](instructions/workflow_memory.md)
 - [`git_workflow.md`](instructions/git_workflow.md)
+- [`agent_skills.md`](instructions/agent_skills.md) — vendored agent-skills: precedence, stage map, exclusions (spec `0100`)
 - [`documentation.md`](instructions/documentation.md)
 
 </td><td>
@@ -560,6 +561,7 @@ the [spec index](specs/README.md).
 | [`0036`](specs/0036-multi-period-rebalancing/) | Multi-period rebalancing — a discretized single-position DP via `0013`'s `solve_dp`, trading transaction cost against tracking-error cost over a horizon | `multi_period_rebalancing.py` |
 | [`0038`](specs/0038-factor-risk-model/) | Factor risk model — variance decomposition, Euler risk attribution, concentration, linear stress loss; operationalizes `instructions/risk_management.md` | `factor_risk_model.py` |
 | [`0039`](specs/0039-ingestion-data-contract/) | Ingestion data contract emission — validates a pulled row set against a declared schema/key/quality-rule contract, renders a `data_contract.md` populated with real computed results | `ingestion_data_contract.py` |
+| [`0100`](specs/0100-agent-skills-upstream-integration/) | agent-skills as a pinned, offline upstream — allowlisted subset vendored from a local source with a per-file hash lock, loaded as a namespaced local Claude Code plugin after a per-machine opt-in, bundled in the wheel; `quantsmith-agent-skills` (`sync`/`diff`/`verify`/`status`/`install`) and the `agent-skills` gate | `src/quantsmith/agent_skills/` |
 
 **Themed chains**
 

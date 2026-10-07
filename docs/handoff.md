@@ -11,7 +11,7 @@
 
 The SDK has a working v1: a **spec-driven engineering framework** over the six
 software-development stages, **207 agents** in `agents/`,
-**35 quality gates**, **38 instruction standards**, and CI that
+**36 quality gates**, **39 instruction standards**, and CI that
 enforces the deterministic gates. It remains primarily a scaffold to be copied
 into quant repos, with `src/quantsmith/pipelines/`, `src/quantsmith/orchestration/`,
 and `src/quantsmith/text_intelligence/` holding runnable, dependency-light
@@ -52,7 +52,7 @@ as the live count, not the number here)** — all on the four-file contract
   per-group membership and counts, which change more often than this file is
   refreshed.
 
-**Gates (35)** in `hooks/stages/`, driven by `run-stage.sh`; advisory by default,
+**Gates (36)** in `hooks/stages/`, driven by `run-stage.sh`; advisory by default,
 `QF_STAGE_ENFORCE=1` blocks:
 
 - Cross-cutting: `spec`, `orchestration`, `text-intelligence`. Per stage: `planning`, `design`, `implementation`,
@@ -62,9 +62,9 @@ as the live count, not the number here)** — all on the four-file contract
   `monitoring-coverage`, `data-provenance`.
 - Repo: `secret-scan`, `docs-link`, `agent-catalog`, `spec-index`, `readme-sync`,
   `doc-counts`, `quantsmith-version`, `agent-attribution`, `handoff-sync`, `upstream-drift`, `ownership`, `persistent-knowledge`, `knowledge`, `memory`, `access`, `role-context`,
-  `model-plugin`, `source-catalog`.
+  `model-plugin`, `source-catalog`, `agent-skills`.
 
-**Instructions (38)** — constitution, SDD method, point-in-time, and the domain
+**Instructions (39)** — constitution, SDD method, point-in-time, and the domain
 standards; see `README.md`'s "Public Instructions" table for the current list
 (this file lists categories, not every filename, to avoid drifting again).
 
@@ -103,7 +103,7 @@ advisory-by-default deployment decision. The chain builds on
 ## Quality Gates — Enforced vs Advisory
 
 - **Enforced in CI:** required docs, agent contract, shell syntax, `spec`,
-  `backtest`, `secret-scan`, `role-context`, `docs-link`, `agent-catalog`, `spec-index`, and the pytest suite
+  `backtest`, `secret-scan`, `role-context`, `docs-link`, `agent-catalog`, `spec-index`, `agent-skills`, and the pytest suite
   (`tests/`, run against the package's declared dependencies).
 - **Advisory:** `leakage` (heuristic by design) and the per-stage/quant gates not
   listed above. Graduate a gate to enforced per repo as discipline matures.
@@ -1623,6 +1623,13 @@ manual-task persistence question stays deferred until a real consumer needs it.
     as a denominator effect on the synthetic fixture), a validator that re-executes every finding, and an exported
     package (`dataset_analysis/` byte-identical to `analysis/`) with `reproduce` and `rerun`. 1M × 20 in ~60 s.
     Next: run the workflow on a real dataset; v2 controlled tool generation needs its own spec.
+    `0100` (Draft, building; PR #110) makes agent-skills a pinned, offline upstream: `quantsmith.agent_skills` and the
+    `quantsmith-agent-skills` command (`sync`/`diff`/`verify`/`status`/`install`), `config/agent_skills.json`
+    (allowlist, exclusions), the `agent-skills` gate (CI-enforced), the local marketplace
+    `.claude-plugin/marketplace.json`, `instructions/agent_skills.md`, and skill citations in nine coding-stage agents.
+    T-001 confirmed on Claude Code 2.1.292, offline, that the subset loads only after a one-time per-machine opt-in
+    (`0100/validation.md`). **agent-skills pin:** not vendored yet; the first sync (fork `f63ec56`, plugin `0.6.7`)
+    lands in its own PR (T-006). Record each quarterly review here with its date (REQ-014).
     Proof of concept: no legal collection limits set yet; they must be set
     before operational use. The `0083` knowledge pack and validator are built
     (per-record review sign-off; all records still `draft`). Next: `0091` (fund analytics), the deferred regions in `0087`, and
