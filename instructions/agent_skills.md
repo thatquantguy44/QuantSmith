@@ -61,6 +61,17 @@ re-enabled or vendored.
 | Upstream hooks | The session-start hook injects the excluded meta-router and needs `jq`; the others run shell from vendored content. |
 | Web group (`frontend-ui-engineering`, `browser-testing-with-devtools`, `/webperf`, `web-performance-auditor`) | Off by default. Enable the `web` group for work under `web/` or `apps/`. |
 
+### References to excluded items inside vendored files
+
+Some vendored files still name excluded items. Map them; never go looking for the upstream originals:
+
+| Vendored text says | Do this in QuantSmith |
+| --- | --- |
+| `interview-me`: hand off to `spec-driven-development` / `planning-and-task-breakdown` | Write the confirmed intent into `specs/NNNN-slug/spec.md` (`planning_requirements`), then `plan.md` and `tasks.md` per `instructions/spec_driven_development.md`. |
+| `idea-refine`: run `scripts/idea-refine.sh`, save to `docs/ideas/` | Skip the script (not vendored); record the refined idea in the spec's Problem & Context. |
+| `references/orchestration-patterns.md`: `/spec`, `/plan`, `/build`, `/ship` | Those commands are not available; route through `workflow_orchestrator` and the stage agents. |
+| `definition-of-done.md` / `using-agent-skills` mentions | QuantSmith's Definition of Done is in each spec's `tasks.md` and the constitution (P3). |
+
 ## Connecting
 
 All three routes are offline. Run `quantsmith-agent-skills status` to see which copy is in effect.
