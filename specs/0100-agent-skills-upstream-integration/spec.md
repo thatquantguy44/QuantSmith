@@ -64,6 +64,9 @@ only by a deliberate, reviewed sync — and subordinate to QuantSmith's constitu
 | REQ-009 | The coding-stage agents (`implementation`, `testing_validation`, `git_release`, `test_engineering/*`, and the review path) shall cite the agent-skills skills they use by vendored path, and `agents/README.md` shall note the integration. | should |
 | REQ-010 | The adoption guide shall describe carrying `vendor/agent-skills/`, the lock, the allowlist and the settings into a consuming repo, and `vendor/agent-skills` shall be a supported `QF_UPSTREAM_SURFACES` entry for the existing upstream-drift gate. | should |
 | REQ-011 | Web-only skills (`frontend-ui-engineering`, `browser-testing-with-devtools`, `/webperf`) shall be available as an opt-in allowlist group for work under `web/` and `apps/`, off by default. | could |
+| REQ-012 | The `quantsmith` package shall bundle the vendored tree and lock as read-only defaults, so `pip install quantsmith` followed by `quantsmith-agent-skills install --scope user` makes the skills available on a machine with no QuantSmith checkout and no network; a repo-local `vendor/agent-skills/` shall take precedence over the bundled copy, and `status` shall say which is in effect. | must |
+| REQ-013 | All three upstream reviewer personas (`code-reviewer`, `test-engineer`, `security-auditor`) shall be available as Claude Code subagents. `test-engineer` shall be subordinate to the QuantSmith `test_engineering` agents: the usage standard routes test work to `test_engineering_orchestrator` first, and any test the persona writes must name the `AC-*` it proves. | must |
+| REQ-014 | Refresh shall be on demand, plus a quarterly review: `status` shall flag a lock older than 92 days as due for review, and the review (run `diff` against the local clone, then sync or record "no change") shall be recorded with its date in `docs/handoff.md`. | should |
 
 ## Non-Functional Requirements
 
@@ -96,6 +99,9 @@ only by a deliberate, reviewed sync — and subordinate to QuantSmith's constitu
 | AC-013 | Given a consumer repo with `QF_UPSTREAM_SURFACES` including `vendor/agent-skills`, when the upstream-drift gate runs, then local divergence from QuantSmith's copy is reported. | REQ-010 |
 | AC-014 | Given the `web` allowlist group off, then `frontend-ui-engineering`, `browser-testing-with-devtools` and `/webperf` are not vendored; turned on, they are, and the lock records the group. | REQ-011 |
 | AC-015 | Given the vendored tree, then `LICENSE` matches upstream byte for byte, and the tree is under 1 MiB. | NFR-005, NFR-007 |
+| AC-016 | Given a wheel built from the repo, when it is installed into a clean virtualenv with no network and `install --scope user` runs, then the user settings register the bundled copy, and its hashes match the repo lock. Given a repo with its own `vendor/agent-skills/`, then `status` reports the repo copy as in effect. | REQ-012 |
+| AC-017 | Given the default allowlist, then `code-reviewer`, `test-engineer` and `security-auditor` are vendored and loaded as subagents, and `instructions/agent_skills.md` routes test work to `test_engineering_orchestrator` before `test-engineer`. | REQ-013 |
+| AC-018 | Given a lock with `synced_on` 93 days before today, when `status` runs, then it reports the review as due; at 91 days it does not. | REQ-014 |
 
 ## Data & Dependencies
 
@@ -127,11 +133,11 @@ only by a deliberate, reviewed sync — and subordinate to QuantSmith's constitu
   user action is needed beyond trusting the project. To confirm in T-001; fallback designed.
 - Assumption: the fork remains MIT and tracks `addyosmani/agent-skills`; QuantSmith pins the fork, not the canonical repo, so our
   fixes are available without waiting for upstream.
-- Open question: should the vendored tree live in the scaffold (copied into every consumer) or ship in the `quantsmith` package as
-  bundled read-only defaults like the analytics packs (spec `0081`)? Proposed: scaffold now; revisit with the Copier CLI.
-- Open question: include upstream reviewer personas (`code-reviewer`, `test-engineer`, `security-auditor`) as Claude Code subagents?
-  Proposed: yes, they are narrow and do not conflict; `web-performance-auditor` joins the web group.
-- Open question: refresh cadence. Proposed: on demand, plus a quarterly reminder in `docs/handoff.md`.
+### Decisions (2026-10-07)
+
+- **Bundle in the wheel: yes** (REQ-012). This makes the "installed" connection work without a checkout. The analytics packs set the precedent (spec `0081`): copied at build time and overridden by a local copy.
+- **Personas: all three** (REQ-013). `test-engineer` is included but ranks below the QuantSmith `test_engineering` agents, so test routing stays unambiguous.
+- **Refresh: on demand + quarterly review** (REQ-014). The fork's skills last changed 2026-08-27, so a fixed sync schedule would mostly produce empty updates.
 
 ## Exceptions
 
