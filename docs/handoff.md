@@ -122,6 +122,9 @@ advisory-by-default deployment decision. The chain builds on
 > no Claude Code where it will run); knowledge candidates are opt-in per publish;
 > approval is per-request confirmation plus a recorded, optionally role-gated
 > approver. Start with T-024 (the API backend), which `0099` can reuse.
+> **Pick up here:** `specs/0080-nl-analytics-insights/tasks.md` →
+> *Start Here Next Session* has the task order, file layout, house pattern to
+> follow, tests to write, and commands.
 
 > ### New direction — Credit Risk Domain Foundation (spec `0072`, Approved)
 >
