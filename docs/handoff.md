@@ -117,14 +117,21 @@ advisory-by-default deployment decision. The chain builds on
 > one thing moves, it is this: build `0080` T-024–T-029 and get the spec
 > approved. T-001–T-023 are built. The owner resolved the open questions on
 > 2026-10-07: the first surface is the `0057` Knowledge Console backed by model
-> **APIs** through a configured, provider-neutral backend (OpenAI-compatible,
-> Anthropic, generic HTTP/JSON, or any callable — no gateway assumed; there is
-> no Claude Code where it will run); knowledge candidates are opt-in per publish;
+> **APIs** through a configured, provider-neutral backend that reads
+> QuantMeridian's `llm-profiles/1` format unchanged (Anthropic, OpenAI, or any
+> OpenAI-compatible gateway or self-hosted server — no gateway assumed; there
+> is no Claude Code where it will run); knowledge candidates are opt-in per publish;
 > approval is per-request confirmation plus a recorded, optionally role-gated
 > approver. Start with T-024 (the API backend), which `0099` can reuse.
 > **Pick up here:** `specs/0080-nl-analytics-insights/tasks.md` →
 > *Start Here Next Session* has the task order, file layout, house pattern to
 > follow, tests to write, and commands.
+> **Consumer:** QuantMeridian spec009 (module agent panels) runs `nl_analytics`
+> in its local agent worker and pins QuantSmith by content digest
+> (`contracts/agent/quantsmith-pin.json` there, re-pinned to `c234119` on
+> 2026-10-07). Its companion items Q-1/Q-2 are done here; Q-5 is partly done;
+> Q-6 is T-024. A QuantSmith change in a pinned area needs a QuantMeridian
+> re-pin before its worker will run it.
 
 > ### New direction — Credit Risk Domain Foundation (spec `0072`, Approved)
 >
@@ -1499,8 +1506,12 @@ manual-task persistence question stays deferred until a real consumer needs it.
     Knowledge Console, with model calls through an injected, API-backed
     callable, because the environments that will run this have model APIs
     but no Claude Code. No gateway is assumed: the backend is a configured
-    profile (OpenAI-compatible, Anthropic, generic HTTP/JSON, or an
-    import-path callable for SDK-based providers such as Bedrock or Vertex);
+    profile in QuantMeridian's `llm-profiles/1` format, read unchanged so
+    one settings file serves both repositories (`anthropic_messages`,
+    `openai_chat_completions` for OpenAI, Azure, gateways, and self-hosted
+    servers, or `none`); generic HTTP/JSON, import-path callables (Bedrock,
+    Vertex), and token commands go to QuantMeridian as a proposed additive
+    `llm-profiles` revision;
     Slack stays out (it needs a hosted bot); (2) insights become `0048`
     knowledge candidates only on opt-in per publish, after a committed write
     with every pack reviewed, never auto-promoted; (3) approval is
