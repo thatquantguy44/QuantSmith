@@ -7,6 +7,7 @@ and writes ``RUN_DIR/state.json`` and prints JSON on stdout::
 
     profile DATA --out RUN_DIR [...]          load, roles, deterministic plan
     context RUN_DIR --role ROLE               what a model role may see (aggregates only)
+    catalog                                   the registered tools and their parameter schemas
     plan RUN_DIR --analyses JSON|-            a model-chosen plan (validated)
     run-plan RUN_DIR [--analyses JSON|-] [--templates]   execute the plan; derive and score findings
     hypotheses RUN_DIR [--templates] [--add JSON|-]       templated loop and/or model proposals
@@ -18,6 +19,9 @@ and writes ``RUN_DIR/state.json`` and prints JSON on stdout::
 
 Step commands accept ``--context ROLE`` to print ``{"result": ..., "context": ...}``
 — the step's output plus the next role's context — so one call does one step.
+That output is compact JSON and leaves the static tool catalog out of the
+investigator's context (``catalog`` prints it once), so each step's output stays
+small enough to pass through an executor agent intact.
 
 Exit codes: 0 ok, 2 usage error, 3 mismatch, 4 wrong dataset, 5 narrative rejected.
 """
@@ -47,7 +51,7 @@ from .analysis.pipeline import (
     start,
     write_bundle,
 )
-from .analysis.registry import ToolError, execute
+from .analysis.registry import ToolError, catalog, execute
 from .analysis.report import key_findings
 from .analysis.utils import jsonable
 from .analysis.validator import (
@@ -74,8 +78,11 @@ def _json_arg(value: str) -> Any:
         raise ValueError(f"not valid JSON: {exc}") from exc
 
 
-def _emit(obj: Any) -> None:
-    print(json.dumps(jsonable(obj), indent=1, sort_keys=True))
+def _emit(obj: Any, *, compact: bool = False) -> None:
+    if compact:
+        print(json.dumps(jsonable(obj), separators=(",", ":"), sort_keys=True))
+    else:
+        print(json.dumps(jsonable(obj), indent=1, sort_keys=True))
 
 
 def _load(run_dir: str):
@@ -102,7 +109,7 @@ def _summary(state: InvestigationState) -> dict:
 
 
 def _with_context(out: Any, state: InvestigationState, role: Optional[str]) -> Any:
-    return {"result": out, "context": build_context(state, role)} if role else out
+    return {"result": out, "context": build_context(state, role, tools=False)} if role else out
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
@@ -118,6 +125,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     pr.add_argument("--context")
     c = sub.add_parser("context", help="the context a model role may see")
     c.add_argument("run"); c.add_argument("--role", required=True)
+    sub.add_parser("catalog", help="the registered tools and their parameter schemas")
     pl = sub.add_parser("plan", help="replace the plan with a model-chosen, validated one")
     pl.add_argument("run"); pl.add_argument("--analyses", required=True)
     rp = sub.add_parser("run-plan", help="execute the plan; derive and score candidate findings")
@@ -153,13 +161,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             state.plan = PL.plan(df, state)
             Path(args.out).mkdir(parents=True, exist_ok=True)
             _save(state, args.out)
-            _emit(_with_context({"run": args.out, **_summary(state)}, state, args.context))
+            _emit(_with_context({"run": args.out, **_summary(state)}, state, args.context), compact=bool(args.context))
             return 0
         if cmd == "reproduce":
             m = json.loads((Path(args.run) / "analysis_package" / "manifest.json").read_text(encoding="utf-8"))
             outcome = reproduce(m, args.finding_id, args.data)
             print("\n".join(outcome.lines))
             return outcome.code
+        if cmd == "catalog":
+            _emit({"tools": catalog()}, compact=True)
+            return 0
         if cmd == "context":
             _emit(build_context(load_state(Path(args.run) / "state.json"), args.role))
             return 0
@@ -183,7 +194,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 props = _json_arg(args.add)
                 props = props.get("hypotheses", props) if isinstance(props, dict) else props
                 new = add_model_hypotheses(state, df, list(props), ground)
-            out = {"tested": [h.model_dump(mode="json") for h in new], **_summary(state)}
+            # The context lists each hypothesis in full; here only the outcome.
+            out = {"tested": [{"hypothesis_id": h.hypothesis_id, "status": h.status, "explanation": h.explanation}
+                              for h in new], **_summary(state)}
         elif cmd == "run-tool":
             record, result = execute(args.tool, df, _json_arg(args.params), tool_context(state),
                                      input_fingerprint=state.dataset.content_sha256, origin="model",
@@ -226,7 +239,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             out = {"package": str(build_package(state, Path(args.run)))}
         if cmd != "export":
             _save(state, args.run)
-        _emit(_with_context(out, state, getattr(args, "context", None)))
+        role = getattr(args, "context", None)
+        _emit(_with_context(out, state, role), compact=bool(role))
         return 0
     except LookupError as exc:
         print(f"error: {exc}", file=sys.stderr)

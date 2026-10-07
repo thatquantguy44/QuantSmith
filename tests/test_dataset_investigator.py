@@ -543,6 +543,10 @@ def test_ac018_on_demand_entry_points(tmp_path):
     assert p["context"]["role"] == "planner" and p["context"]["deterministic_plan"]
     r = _cli("run-plan", run_dir, "--templates", "--context", "investigator", cwd=tmp_path)
     ctx = json.loads(r.stdout)["context"]
+    # Step output passes through an executor agent: one compact line, the static catalog printed separately.
+    assert r.stdout.count("\n") == 1 and "tools" not in ctx
+    tools = json.loads(_cli("catalog", cwd=tmp_path).stdout)["tools"]
+    assert "stratified_target_rates" in {t["name"] for t in tools}
     gap = next(f for f in ctx["findings"] if f["kind"] == "target_rate_gap")
     proposal = {"hypotheses": [
         {"statement": f"The `{gap['subject']['by']}` gap persists within `velocity_24h` bands.", "from_findings": [gap["key"]],
@@ -580,7 +584,7 @@ def test_ac018_on_demand_entry_points(tmp_path):
     assert meta_phases == called
     assert not re.search(r"Date\.now|Math\.random|new Date\(\)", src)
     commands = re.findall(r"`\$\{CLI\} ([a-z-]+)", src)
-    assert set(commands) <= {"profile", "run-plan", "hypotheses", "validate", "report"}
+    assert set(commands) <= {"profile", "catalog", "run-plan", "hypotheses", "validate", "report"}
     assert "quantsmith-dataset-investigator" in src and "exactly the one shell" in src
     reasoning = re.findall(r"agent\(\s*'You are the (planner|investigator|validation reviewer|report writer)", src)
     assert set(reasoning) == {"planner", "investigator", "validation reviewer", "report writer"}

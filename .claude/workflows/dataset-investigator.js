@@ -108,7 +108,9 @@ const analyses = plan && plan.analyses && plan.analyses.length ? [...new Set(pla
 const p1 = parsed(await run(`${CLI} run-plan ${quote(OUT)} --templates --context investigator` +
   (analyses ? ' --analyses -' : ''), analyses ? { analyses } : undefined, 'run-plan', 'Analyze'), 'run-plan')
 log(`${p1.result.executions} tool executions, ${p1.result.candidate_findings} candidate findings`)
-let ctx = p1.context
+// Step output leaves the static tool catalog out of the context to stay small; fetch it once.
+const TOOLS = parsed(await run(`${CLI} catalog`, undefined, 'catalog', 'Analyze'), 'catalog').tools
+let ctx = { ...p1.context, tools: TOOLS }
 
 // --- Investigate --------------------------------------------------------------
 phase('Investigate')
@@ -159,7 +161,7 @@ for (let round = 1; round <= ROUNDS; round++) {
     { hypotheses: proposal.hypotheses }, `hypotheses:${round}`, 'Investigate'), `hypotheses:${round}`)
   const tested = r.result.tested || []
   log(`Round ${round}: ` + tested.map(h => `${h.hypothesis_id} ${h.status}`).join(', '))
-  ctx = r.context
+  ctx = { ...r.context, tools: TOOLS }
   if (proposal.done) break
 }
 
