@@ -17,14 +17,14 @@
 
 | ID | Task | Covers | Status | Notes |
 | --- | --- | --- | --- | --- |
-| T-001 | Spike: confirm Claude Code project-local directory marketplace + `enabledPlugins` keys against current docs, offline; choose plugin route or `.claude/skills` fallback and record it in `plan.md` | REQ-005 | todo | Gates T-008; resolves RISK-004 |
+| T-001 | Spike: confirm Claude Code project-local directory marketplace + `enabledPlugins` keys against current docs, offline; choose plugin route or `.claude/skills` fallback and record it in `plan.md` | REQ-005 | done | Confirmed on Claude Code 2.1.292, offline; design adjusted (per-machine opt-in, no committed marketplace path, no `agents` key, version stamp). Evidence: `validation.md` |
 | T-002 | `config/agent_skills.yml`: groups, defaults (incl. all three personas), exclusions with reasons, size cap | REQ-007, REQ-011, REQ-013 | todo | |
-| T-003 | `src/quantsmith/agent_skills/` `sync` + `lock`: read local dir / clone ref (`git archive`) / tarball, copy allowlist, deterministic lock; console script | REQ-001, REQ-002, REQ-003, NFR-002, NFR-004 | todo | |
+| T-003 | `src/quantsmith/agent_skills/` `sync` + `lock`: read local dir / clone ref (`git archive`) / tarball, copy allowlist, deterministic lock, stamp overlay `plugin.json` version `<upstream>+<sha7>.<tree-hash8>`; console script | REQ-001, REQ-002, REQ-003, NFR-002, NFR-004 | todo | |
 | T-004 | Sync safety and reporting: reject URL sources, symlinks, executables, oversize, out-of-allowlist; change summary; `diff` and `--dry-run` | REQ-003, REQ-011, NFR-001, NFR-003 | todo | |
-| T-005 | `status` and `install --scope user|project`; `QS_AGENT_SKILLS_PATH`; detect duplicate user-level installs | REQ-006 | todo | RISK-008 |
+| T-005 | `status` and `install --scope user|project`; `QS_AGENT_SKILLS_PATH` via `--plugin-dir`; detect duplicate user-level installs | REQ-006 | todo | RISK-008. Project opt-in = `marketplace add --scope local`, never `plugin install` (plan: Settings) |
 | T-006 | First sync at fork `f63ec56` (v0.6.7); QuantSmith-owned `README.md` (provenance, credit) and overlay `plugin.json`; verbatim `LICENSE` | REQ-001, NFR-007 | todo | Separate PR (plan: Rollout) |
 | T-007 | `hooks/stages/agent-skills-check.sh`: hashes vs lock, frontmatter, allowlist/exclusions, URL sources, agent citations, registry name collisions, size; wire into `run-stage.sh` and CI | REQ-004, REQ-007, NFR-004, NFR-005 | todo | |
-| T-008 | Root `.claude-plugin/marketplace.json` and `.claude/settings.json` entries (keep existing SessionStart hook) | REQ-005, NFR-006 | todo | Depends on T-001 |
+| T-008 | Root `.claude-plugin/marketplace.json`; `enabledPlugins` only in `.claude/settings.json` (keep existing SessionStart hook); add `.claude/settings.local.json` to `.gitignore` | REQ-005, NFR-006 | todo | Shape fixed by T-001 |
 | T-009 | `instructions/agent_skills.md`: precedence, stage map (incl. persona routing), exclusions, overrides, refresh runbook, kill switch and removal | REQ-008, REQ-013, NFR-006 | todo | |
 | T-010 | Cite skills in `implementation`, `testing_validation`, `git_release`, `test_engineering/*`, `quality-guard-agent` instructions; note in `agents/README.md`; regenerate registry | REQ-009 | todo | |
 | T-011 | `docs/adoption_guide.md` section; `vendor/agent-skills` as a `QF_UPSTREAM_SURFACES` example; `docs/handoff.md` pin line | REQ-010 | todo | |

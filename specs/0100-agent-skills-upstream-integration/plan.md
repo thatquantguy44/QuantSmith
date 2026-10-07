@@ -19,11 +19,13 @@ not just Claude Code — can read them as plain files.
 
 Three ways to "connect", in resolution order:
 
-1. **Override** — `QS_AGENT_SKILLS_PATH=/path/to/local/agent-skills` (a working clone of the fork). For developing skills. Not pinned;
-   `status` says so.
+1. **Override** — `QS_AGENT_SKILLS_PATH=/path/to/local/agent-skills` (a working clone of the fork), loaded for one session with
+   `claude --plugin-dir "$QS_AGENT_SKILLS_PATH"` (verified in T-001). For developing skills. Not pinned; `status` says so.
 2. **Installed (user level)** — `quantsmith-agent-skills install --scope user` registers the *vendored* copy (or the override) as a
    local-directory marketplace in the user's Claude Code settings, for use outside the QuantSmith checkout.
-3. **Vendored (default)** — `vendor/agent-skills/` in the repo, loaded via project settings. Works in any clone, offline.
+3. **Vendored (default)** — `vendor/agent-skills/` in the repo. Works in any clone, offline, after a **one-time per-machine opt-in**
+   (`quantsmith-agent-skills install --scope project`). Claude Code never activates a plugin enabled only by repo-authored settings
+   (T-001), so a fresh clone cannot install third-party prompts silently.
 4. **Bundled** — the same tree shipped read-only inside the `quantsmith` wheel (`quantsmith/_bundled/agent_skills/`), used by
    `install --scope user` when there is no checkout (REQ-012). A repo-local `vendor/agent-skills/` always wins over it.
 
@@ -62,7 +64,8 @@ Three ways to "connect", in resolution order:
 | `vendor/agent-skills.lock.json` | Provenance and integrity record (REQ-002). Sorted keys, two-space indent, trailing newline (NFR-002). |
 | `setup.py` bundling | Copies `vendor/agent-skills/` and the lock into `quantsmith/_bundled/agent_skills/` at build time, as it already does for analytics packs; the build fails if the copy does not match the lock. |
 | `.claude-plugin/marketplace.json` (root) | Local marketplace `quantsmith-local` with one plugin `agent-skills`, source `./vendor/agent-skills`. No URL sources anywhere. |
-| `.claude/settings.json` | Adds the marketplace and `enabledPlugins: {"agent-skills@quantsmith-local": true}`. Flipping to `false` is the kill switch (NFR-006). Existing SessionStart hook untouched. |
+| `.claude/settings.json` (committed) | Only `enabledPlugins: {"agent-skills@quantsmith-local": true}`; `false` is the kill switch (NFR-006). No `extraKnownMarketplaces` (see Settings). Existing SessionStart hook untouched. |
+| `.claude/settings.local.json` (per machine, gitignored) | Written by the opt-in: the marketplace registration with this checkout's absolute path. Never `enabledPlugins`. |
 | `hooks/stages/agent-skills-check.sh` | Gate (REQ-004, AC-004/006/007/012). Recomputes hashes with `sha256sum`/`shasum`, parses frontmatter with `sed`, greps manifests for URL sources, checks agent citations resolve, checks names against `agents/agent_registry.yaml`. Wired into `run-stage.sh` and CI. |
 | `instructions/agent_skills.md` | Usage standard (REQ-008). |
 
@@ -136,21 +139,45 @@ quantsmith-agent-skills install --scope user|project [--path <dir>]
 
 The source path is deliberately not stored (it is a machine-local path); `source_kind` is.
 
-**Settings** (to confirm in T-001 against current Claude Code docs; shape as expected):
+**Settings** (confirmed in T-001 on Claude Code 2.1.292; evidence in `validation.md`):
+
+Committed `.claude/settings.json` holds only the switch:
 
 ```json
-{
-  "extraKnownMarketplaces": {
-    "quantsmith-local": { "source": { "source": "directory", "path": "./" } }
-  },
-  "enabledPlugins": { "agent-skills@quantsmith-local": true }
-}
+{ "enabledPlugins": { "agent-skills@quantsmith-local": true } }
 ```
 
-**Fallback if T-001 shows a project-relative directory marketplace is unsupported:** `install --scope project` materializes the
-allowlisted skills as `.claude/skills/agent-skills-<name>/SKILL.md` and commands as `.claude/commands/agent-skills/<name>.md`
-(gitignored, generated from the vendored copy, verified by the same hashes), and rewrites nothing else. Same kill switch via a
-generated-or-not flag in `config/agent_skills.yml`.
+The per-machine opt-in (`quantsmith-agent-skills install --scope project`) runs, from the repo root:
+
+```sh
+claude plugin marketplace add "$(git rev-parse --show-toplevel)" --scope local
+```
+
+That registers the marketplace and writes `.claude/settings.local.json`
+(`{"extraKnownMarketplaces": {"quantsmith-local": {"source": {"source": "directory", "path": "<absolute repo path>"}}}}`).
+It deliberately does **not** run `claude plugin install`: that writes `enabledPlugins: true` at local scope, which overrides a
+committed `false` and would defeat the kill switch.
+
+Rules the implementation must follow, each observed in T-001:
+
+- Repo-declared marketplaces and plugins are not activated on their own (`Skipped auto-recording … enabled only by repo-authored
+  settings`). The opt-in is required, and hand-writing `settings.local.json` is not enough: the CLI must register the marketplace.
+- Sessions read a directory marketplace's plugin **live from `vendor/agent-skills/`**; the plugin cache only feeds
+  `claude plugin details`. A hand edit therefore reaches sessions immediately, so the integrity gate (T-007) is the control that
+  catches it.
+- The cache is keyed by `version`, so sync stamps the overlay `plugin.json` version as `<upstream>+<sha7>.<tree-hash8>`. Then
+  `claude plugin details` shows the pin actually in use.
+- The overlay `plugin.json` must **not** declare `agents`: an explicit `.md` list validated but loaded 0 agents; a directory value
+  fails validation (`must end with ".md"`); default discovery of `agents/` loads them. `commands: ["./.claude/commands"]` works.
+- `claude plugin validate`, `marketplace add`, `install` and `details` all succeed with networking disabled (`unshare -n`).
+
+**User scope (bundled or vendored copy):** `install --scope user` runs `claude plugin marketplace add <copy> --scope user` followed by
+`claude plugin install agent-skills@quantsmith-local --scope user`. The bundled copy therefore ships with its own
+`.claude-plugin/marketplace.json` wrapper.
+
+**Fallback** (kept in case a future Claude Code release removes directory marketplaces): `install --scope project --mode skills`
+materializes the allowlisted skills as `.claude/skills/agent-skills-<name>/SKILL.md` (gitignored, generated from the vendored copy,
+verified by the same hashes).
 
 ## Constitution Check
 
@@ -227,4 +254,6 @@ generated-or-not flag in `config/agent_skills.yml`.
 
 ## Open Questions
 
-- Confirm the settings keys for a project-local directory marketplace (T-001) — the main design uncertainty.
+- Resolved by T-001: settings keys, opt-in, live loading, kill-switch precedence (see Settings and `validation.md`).
+- Not yet verified: the interactive (TTY) session start, which may offer to install the repo-declared plugin; macOS and Windows path
+  handling for the absolute local registration. Both are checked manually under AC-001.
