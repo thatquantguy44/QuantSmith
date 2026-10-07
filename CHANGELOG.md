@@ -138,6 +138,10 @@ patterns locally rather than expecting them to update in place.
   "No internet service" add-ons) merge into one; more than 5% Mahalanobis-flagged rows is reported as likely
   regimes, not outliers; band edges start at the data minimum; tiny values keep three significant digits; and the
   planner names two-valued columns that could serve as `--target`.
+- Dataset Investigator workflow: a live run broke when a step's 65 KB output was summarized by the executor agent
+  instead of copied. Step output with `--context` is now compact JSON without the static tool catalog (new `catalog`
+  command, fetched once), with floats to 6 significant digits, empty fields dropped, and the investigator shown its 20
+  highest-ranked findings; the workflow also tolerates text an executor adds around the JSON.
 - NL analytics insights (spec `0080`, T-021/T-022) no longer sum per-group values for every metric: yields across tenors,
   VaR across desks, and ratios were summed into a single "level", and percent changes were reported for rates.
   Levels now use the semantic layer's own ungrouped value. A non-additive metric asked by a dimension reports
