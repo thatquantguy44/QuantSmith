@@ -1,0 +1,14 @@
+{
+  "name": "quantsmith-local",
+  "description": "Local, offline marketplace for QuantSmith's pinned agent-skills subset (spec 0100). Register once per machine with: quantsmith-agent-skills install --scope project",
+  "owner": {
+    "name": "QuantSmith"
+  },
+  "plugins": [
+    {
+      "name": "agent-skills",
+      "source": "./vendor/agent-skills",
+      "description": "Pinned, allowlisted subset of addyosmani/agent-skills (via thatquantguy44/agent-skills). See instructions/agent_skills.md."
+    }
+  ]
+}

@@ -36,3 +36,7 @@ in the task's test coverage map. For quant models and signals, follow the
 standardized `instructions/model_development.md`. The `Reproducibility Notes`
 output section and this agent's reproducibility operating rules follow
 `instructions/reproducibility.md`, which also backs the `repro` gate.
+
+## agent-skills
+
+Vendored engineering skills this agent may follow (spec `0100`; precedence, stage map and overrides in `instructions/agent_skills.md`): `vendor/agent-skills/skills/incremental-implementation/SKILL.md`, `vendor/agent-skills/skills/test-driven-development/SKILL.md`, `vendor/agent-skills/skills/source-driven-development/SKILL.md`, `vendor/agent-skills/skills/api-and-interface-design/SKILL.md`. Tasks still come from `tasks.md`, tests name `AC-*`, and leakage rules are never relaxed.

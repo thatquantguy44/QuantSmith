@@ -35,7 +35,7 @@ Three ways to "connect", in resolution order:
  local clone / mirror / tarball of the fork        (maintainer machine; only place GitHub is ever involved)
             │  quantsmith-agent-skills sync --source <path> --ref <sha>
             ▼
- config/agent_skills.yml ──► sync (allowlist, safety checks, change summary)
+ config/agent_skills.json ──► sync (allowlist, safety checks, change summary)
                                   │
                                   ▼
  vendor/agent-skills/                                  vendor/agent-skills.lock.json
@@ -58,7 +58,7 @@ Three ways to "connect", in resolution order:
 
 | Component | Responsibility |
 | --- | --- |
-| `config/agent_skills.yml` | Allowlist by group (`core`, `review`, `ship`, `personas`, `web`), enabled groups, explicit exclusions with reasons, size cap. Tracked; the single place a human changes scope. |
+| `config/agent_skills.json` | Allowlist by group (`core`, `review`, `ship`, `personas`, `web`), enabled groups, explicit exclusions with reasons, size cap. Tracked; the single place a human changes scope. |
 | `src/quantsmith/agent_skills/` (`sync.py`, `lock.py`, `cli.py`) | `sync`, `verify`, `status`, `diff`, `install` subcommands; console script `quantsmith-agent-skills`. Stdlib only. Never executes vendored content. |
 | `vendor/agent-skills/` | The pinned subset plus two QuantSmith-owned files (`.claude-plugin/plugin.json`, `README.md`), marked `owned: quantsmith` in the lock and excluded from upstream hash comparison. |
 | `vendor/agent-skills.lock.json` | Provenance and integrity record (REQ-002). Sorted keys, two-space indent, trailing newline (NFR-002). |
@@ -66,7 +66,8 @@ Three ways to "connect", in resolution order:
 | `.claude-plugin/marketplace.json` (root) | Local marketplace `quantsmith-local` with one plugin `agent-skills`, source `./vendor/agent-skills`. No URL sources anywhere. |
 | `.claude/settings.json` (committed) | Only `enabledPlugins: {"agent-skills@quantsmith-local": true}`; `false` is the kill switch (NFR-006). No `extraKnownMarketplaces` (see Settings). Existing SessionStart hook untouched. |
 | `.claude/settings.local.json` (per machine, gitignored) | Written by the opt-in: the marketplace registration with this checkout's absolute path. Never `enabledPlugins`. |
-| `hooks/stages/agent-skills-check.sh` | Gate (REQ-004, AC-004/006/007/012). Recomputes hashes with `sha256sum`/`shasum`, parses frontmatter with `sed`, greps manifests for URL sources, checks agent citations resolve, checks names against `agents/agent_registry.yaml`. Wired into `run-stage.sh` and CI. |
+| `hooks/stages/agent-skills-check.sh` | Gate (REQ-004, AC-004/006/007/012). Runs `python3 -m quantsmith.agent_skills verify`, so there is one implementation of the checks (hashes vs lock, frontmatter, allowlist/exclusions, URL sources, agent citations, names against `agents/agent_registry.yaml`), and prints each finding. Wired into `run-stage.sh` and CI. |
+| `src/quantsmith/agent_skills/bundle.py` | Builds the wheel bundle (REQ-012). Stdlib-only with no package imports, so `setup.py` can load it by file path during the build. |
 | `instructions/agent_skills.md` | Usage standard (REQ-008). |
 
 ### Default allowlist
@@ -107,7 +108,7 @@ Three ways to "connect", in resolution order:
 **CLI** (exit `0` ok, `1` findings, `2` could not run; JSON on stdout with `--json`):
 
 ```
-quantsmith-agent-skills sync   --source <dir|clone|tarball> [--ref <sha|tag>] [--dry-run] [--config config/agent_skills.yml]
+quantsmith-agent-skills sync   --source <dir|clone|tarball> [--ref <sha|tag>] [--dry-run] [--root .]
 quantsmith-agent-skills verify                       # same checks as the gate, from Python
 quantsmith-agent-skills status                       # copy in effect (override/repo/bundled), commit, matches-lock, duplicate installs, review due
 quantsmith-agent-skills diff   --source <...> [--ref ...]   # change summary only
@@ -179,6 +180,17 @@ Rules the implementation must follow, each observed in T-001:
 materializes the allowlisted skills as `.claude/skills/agent-skills-<name>/SKILL.md` (gitignored, generated from the vendored copy,
 verified by the same hashes).
 
+## Deviations Recorded During the Build
+
+| Planned | Built | Why |
+| --- | --- | --- |
+| `config/agent_skills.yml` | `config/agent_skills.json` | The core package is standard-library only (NFR-004); a YAML parser would add a dependency. |
+| Gate hashes with `sha256sum`, parses with `sed` | Gate calls `quantsmith.agent_skills verify` | One implementation of the checks instead of two that can disagree. Same pattern as `orchestration-check.sh`. |
+| `define` group vendors `idea-refine` whole | `skills/idea-refine/scripts/` excluded; the rest kept | Upstream ships an executable that creates `docs/ideas/` (NFR-003, and Specify output belongs in `specs/`). |
+| Bundle = tree + lock | Bundle also carries `config/agent_skills.json` | Found while testing AC-016: with no checkout there is no config, so `status`/`install` could not run. `load_config` falls back to the bundled copy. |
+| Diff on a one-skill change is "that skill and the lock" (AC-009) | Also the two generated files | The overlay `plugin.json` version and the README carry the commit. AC-009 amended. |
+| `install --scope project --mode skills` fallback | Not built | T-001 confirmed the plugin route; the fallback stays a design note until a Claude Code release needs it. |
+
 ## Constitution Check
 
 | Principle | Upheld? | Notes |
@@ -201,7 +213,7 @@ verified by the same hashes).
 | REQ-004 | `agent-skills-check.sh`, `verify` | T-007 |
 | REQ-005 | root marketplace, `.claude/settings.json`, overlay `plugin.json` | T-001, T-008 |
 | REQ-006 | `QS_AGENT_SKILLS_PATH`, `status`, `install --scope user` | T-005 |
-| REQ-007 | `config/agent_skills.yml` exclusions; gate conflict check | T-002, T-007 |
+| REQ-007 | `config/agent_skills.json` exclusions; gate conflict check | T-002, T-007 |
 | REQ-008 | `instructions/agent_skills.md` | T-009 |
 | REQ-009 | agent `instructions.md` citations; `agents/README.md` | T-010 |
 | REQ-010 | `docs/adoption_guide.md`; drift surface | T-011 |

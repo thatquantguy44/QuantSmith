@@ -102,6 +102,25 @@ cp    quantsmith/CLAUDE.md       your-repo/    # optional but recommended
 
 (Or use the SDK repo as a GitHub template / `degit` source — see `docs/packaging.md`.)
 
+**Engineering skills (optional, spec `0100`).** To give your coding agents the vendored agent-skills subset, offline,
+also copy:
+
+```sh
+cp -R quantsmith/vendor/agent-skills       your-repo/vendor/
+cp    quantsmith/vendor/agent-skills.lock.json your-repo/vendor/
+cp    quantsmith/config/agent_skills.json   your-repo/config/
+cp -R quantsmith/.claude-plugin             your-repo/        # local marketplace manifest
+# add "enabledPlugins": {"agent-skills@quantsmith-local": true} to your-repo/.claude/settings.json
+# add .claude/settings.local.json to your-repo/.gitignore
+```
+
+Then each developer opts in once per machine: `quantsmith-agent-skills install --scope project` (the command ships
+with the `quantsmith` package). The `agent-skills` gate verifies the copy against its lock. To see when your copy
+drifts from QuantSmith's, add `vendor/agent-skills` to `QF_UPSTREAM_SURFACES` in `quantsmith.conf` for the
+`upstream-drift` gate. Without a checkout, `pip install quantsmith` followed by
+`quantsmith-agent-skills install --scope user` uses the copy bundled in the package. Details:
+`instructions/agent_skills.md`.
+
 ### 5. Wire the gates into CI
 
 The portable gates live in `hooks/stages/` and run via `run-stage.sh`. Add to your

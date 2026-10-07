@@ -92,7 +92,7 @@ only by a deliberate, reviewed sync — and subordinate to QuantSmith's constitu
 | AC-006 | Given an allowlist that re-enables `spec-driven-development`, when the gate runs, then it reports the re-enabled conflicting item. | REQ-007, REQ-004 |
 | AC-007 | Given a marketplace or plugin manifest in the integration with a `github` or URL source, when the gate runs, then it reports it. | REQ-004, NFR-001 |
 | AC-008 | Given `QS_AGENT_SKILLS_PATH` pointing at a local clone, when `status` runs, then it reports that path as in effect, its commit, and whether it matches the lock; with the variable unset it reports the vendored copy. | REQ-006 |
-| AC-009 | Given a new upstream commit with one changed skill, when `sync` runs, then it prints that skill as modified with its changed files before writing, and the resulting diff is limited to that skill and the lock. | REQ-003 |
+| AC-009 | Given a new upstream commit with one changed skill, when `sync` runs, then it prints that skill as modified with its changed files before writing, and the resulting diff is limited to that skill, the lock and the two generated files (overlay `plugin.json`, `README.md`). | REQ-003 |
 | AC-010 | Given `instructions/agent_skills.md`, then it contains the precedence order, a stage-to-skill table covering Implement, Verify, Review and Ship, and an exclusion table naming every item in REQ-007 with its reason. | REQ-008 |
 | AC-011 | Given the project setting disabled, when a session starts, then no agent-skills skill is loaded and no QuantSmith gate fails. | REQ-005, NFR-006 |
 | AC-012 | Given the coding-stage agents, then each cites at least one vendored skill path that exists, checked by the gate. | REQ-009 |

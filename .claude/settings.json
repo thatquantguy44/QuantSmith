@@ -10,5 +10,8 @@
         ]
       }
     ]
+  },
+  "enabledPlugins": {
+    "agent-skills@quantsmith-local": true
   }
 }
