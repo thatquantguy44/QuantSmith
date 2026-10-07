@@ -4,7 +4,7 @@
 - **Status:** Draft
 - **Author:** Joshua Lutkemuller, CFA
 - **Approver:** — (pending owner review)
-- **Last updated:** 2026-10-06
+- **Last updated:** 2026-10-07
 
 > WHAT and WHY only. Implementation lives in `plan.md`.
 
@@ -73,9 +73,9 @@ It supports two decisions: *what does the data say about my question right now*
   target.
 - **Causal claims.** Interpretation describes levels, changes, contributions,
   and outliers; it does not assert why something happened.
-- **A new chat UI or hosted service.** Chat delivery is a returned payload; the
-  surface that shows it (Claude chat, Slack, the `0057` Knowledge Console) is an
-  adapter concern.
+- **A new chat UI or hosted service.** Chat delivery is a returned payload. The
+  first surface is a route in the existing, local `0057` Knowledge Console
+  (REQ-021); Slack and any hosted service stay out of scope.
 - **Forecasting or model fitting** on the queried data.
 - **New dashboard renderers.** A chart spec *may* be promoted to a
   `DashboardSpec` panel; rendering stays with `0015`–`0018`.
@@ -101,6 +101,11 @@ It supports two decisions: *what does the data say about my question right now*
 | REQ-016 | When any applied pack is not `reviewed`, the response shall carry an "unreviewed domain pack" caveat naming it, and database write-back shall be refused; write-back is eligible only when every applied pack is `reviewed` (`0081` REQ-005). | must |
 | REQ-017 | When no pack matches, the system shall use generic behavior (unit and additivity taken from the `0008` definition only) and say so in the response; packs may only restrict interpretation, never widen access or enable an insight the generic rules forbid. | must |
 | REQ-018 | When any pack is applied, the response and its `0070` envelope shall record where the pack catalog came from (`0081` REQ-013: local or bundled, location, package version, content hash). Domain tags supplied with no pack catalog at all shall be a configuration error, never a silent generic answer. | must |
+| REQ-019 | Language-model calls shall go through a caller-injected completion callable that follows the `adapters/llm_runtime/` contract, so the runtime package stays free of network code. The SDK shall ship a standard-library reference backend outside `src/quantsmith/nl_analytics/` for OpenAI-compatible chat-completion endpoints (self-hosted servers such as vLLM or Ollama, and gateways that speak that API), configured by endpoint URL, model name, and the *name* of the environment variable holding the key. The run envelope records provider, model, and token usage; no key or authorization header is ever logged or persisted. Other gateways plug in by supplying their own callable. | must |
+| REQ-020 | The SDK shall provide an LLM interpreter and an LLM narrator on that backend. The interpreter asks for a `QueryPlan` as JSON; malformed output or a plan the validator rejects yields `clarification_needed` with the reason and no execution. The narrator's output passes the REQ-008 grounding check; a rejected narrative is replaced by the template narrative and the response carries a caveat saying so. | must |
+| REQ-021 | The `0057` Knowledge Console shall gain an analytics question route that calls `answer()` under the console's own viewer-clearance resolution (`0058`, including `preview-access` overrides) and shows the headline, chart (Vega-Lite), insights, plan echo, caveats, and citations. It binds to localhost by default; any write-back it starts follows REQ-010, REQ-011, and REQ-023. | must |
+| REQ-022 | A publish request may opt in to proposing its insights as a `0048` knowledge candidate. A candidate is created only after a committed (not dry-run) write succeeds and every applied domain pack is `reviewed`; it cites the run id, plan hash, record keys, metric-definition versions, and as-of; it enters review as a candidate and is never promoted automatically. A dry run shows the candidate it would propose. When no candidate is created, the response states why. | should |
+| REQ-023 | A committed write shall record the approver's pseudonymous handle (`0049`) alongside the author's. Per-request confirmation stays required unless the contract declares `auto_approve: true`. A contract may declare `approver_roles` (checked against an optional `roles` list on `access/roster.yml` entries) and `require_distinct_approver`. A target that declares `approver_roles` is refused while the roster has no entries, and a refused approval returns `write_rejected` with the reason. | must |
 | REQ-014 | The SDK shall add two narrow agents: `agents/analytics/data_visualization/` (chart choice, encoding, color, accessibility — promoting the `proposed` backlog row) and `agents/analytics/nl_analytics/` (question → plan → response orchestration, clarification, write-back request), each handing off to `metrics_semantic_layer`, `data_storytelling`, and `sql-integration-agent` rather than duplicating them. | must |
 
 ## Non-Functional Requirements
@@ -144,6 +149,11 @@ It supports two decisions: *what does the data say about my question right now*
 | AC-025 | Given only `draft` packs applied, when answered, then the unreviewed caveat names each pack and a write-back request is rejected with that reason; with all applied packs `reviewed`, the same write-back proceeds to its normal checks. | REQ-016 |
 | AC-026 | Given a dataset whose tags select no pack, when answered, then the response states generic behavior was used; given any pack, the set of permitted insights is a subset of the generic set. | REQ-017 |
 | AC-027 | Given packs resolved from the bundle and a question that applies one, when answered, then the response citations and the envelope's answer payload name the source kind, package version, and catalog hash; given domain tags with no pack catalog supplied, then `answer()` raises. | REQ-018 |
+| AC-028 | Given a local stub server speaking the OpenAI-compatible chat-completions API, when the reference backend is called, then it sends the configured model and messages, returns the completion text, and records provider, model, and token usage; the key is read from the named environment variable and appears in no envelope, log, or exception text; and the AC-019 scan of `src/quantsmith/nl_analytics/` still passes. | REQ-019, NFR-003 |
+| AC-029 | Given a stub completion callable returning (a) a valid plan, (b) malformed JSON, and (c) a plan naming an undeclared dimension, when interpreted, then (a) executes and (b) and (c) return `clarification_needed` with the reason and no execution; given a narrator returning a number absent from the insight set, then the response uses the template narrative and carries the fallback caveat. | REQ-020, REQ-008 |
+| AC-030 | Given the Console analytics route and a viewer at `internal` clearance, when they ask about a `restricted` metric, then the answer is indistinguishable from a nonexistent metric (as in AC-005); when they ask a permitted question, then the page payload carries the chart, insights, plan echo, caveats, and citations; and the server's default bind address is localhost. | REQ-021, REQ-004 |
+| AC-031 | Given a publish request that opts in to a knowledge candidate, when it is committed with every applied pack `reviewed`, then exactly one candidate is created with the required citations and a review status; when it is a dry run, then the would-be candidate is returned and nothing is created; when a pack is unreviewed or the write is refused, then no candidate is created and the reason is stated. | REQ-022, REQ-016 |
+| AC-032 | Given committed writes, then each records the approver handle; given a target declaring `approver_roles`, then an approver without the role, or any approval while the roster is empty, returns `write_rejected` with the reason before the writer is called; given `require_distinct_approver`, then an approver equal to the author is rejected. | REQ-023, REQ-011 |
 | AC-022 | Given each failure path (clarification, masked, empty result, stale data, write rejected), when a response is returned, then it carries a typed status and a non-empty reason, and no chart spec is attached to a non-answer. | NFR-006 |
 
 ## Data & Dependencies
@@ -204,12 +214,25 @@ It supports two decisions: *what does the data say about my question right now*
   `SQLDataSource` classes in `quant/agentic_quant/sql_data.py`, or a
   warehouse) is deferred until a team needs one; the contract stays
   target-neutral so that adapter plugs in without changing callers.
-- Open question: which chat surface ships first — Claude chat (returned
-  Markdown + Vega-Lite), Slack, or the `0057` Knowledge Console's query seam?
-- Open question: should persisted insights become `0048`/`0056` knowledge
-  candidates (reviewed, promotable) as well as rows in an analytics table?
-- Open question: approval — per-request human confirmation only, or a
-  role-based allowlist in `access/roster.yml`?
+- Resolved (owner, 2026-10-07): the first surface is the **`0057` Knowledge
+  Console**, backed by language-model **APIs**, not Claude Code — the
+  environments that will run this have API access to models but no Claude
+  Code. The available endpoints are self-hosted / OpenAI-compatible and
+  another gateway (REQ-019–REQ-021). The CLI stays for scripts. Slack is out
+  of scope: two-way chat there needs a hosted bot; it may later *receive*
+  published insights through `adapters/alert_delivery/`.
+- Resolved (owner, 2026-10-07): persisted insights become `0048` knowledge
+  candidates **only on opt-in per publish**, never automatically, and only
+  from committed writes whose packs are all reviewed (REQ-022). Insights are
+  point-in-time numbers; promoting every write would flood review with
+  values that go stale.
+- Resolved (owner, 2026-10-07): approval is **per-request confirmation plus
+  a named approver** — the approver's handle is recorded, and a target may
+  require approver roles from the roster and a second person (REQ-023).
+  Today's anonymous yes/no gave no record of who approved.
+- Open question: which gateway besides the OpenAI-compatible endpoints
+  (Bedrock, Vertex, or an internal gateway) — it decides whether a second
+  reference backend is worth shipping, or the adopter supplies the callable.
 
 ## Exceptions
 

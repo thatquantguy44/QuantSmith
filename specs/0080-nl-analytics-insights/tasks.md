@@ -1,7 +1,7 @@
 # Tasks: Natural-Language Analytics — Visualization, Interpretation, and Write-Back
 
 - **Spec:** 0080-nl-analytics-insights (`spec.md`, `plan.md`)
-- **Last updated:** 2026-10-06
+- **Last updated:** 2026-10-07
 
 > Ordered, testable units of work. Every task cites the requirement(s) it advances
 > and carries a Definition of Done. No task without a requirement.
@@ -46,6 +46,12 @@
 | T-021 | `domain.py`: apply `0081` packs (vocabulary, units, additivity, insight suppression, caveats, chart conventions), term-conflict clarification, and generic fallback. | REQ-015, REQ-017, AC-023, AC-024, AC-026 | done | Fixes insights summing groups for every metric (yields across tenors, VaR across desks). `execute.Result` now carries the layer's own ungrouped `total`/`period_totals`; `insights.py` reads those, never a sum of groups, under a `domain.MetricPolicy`. Generic additivity comes from the `0008` definition only (`sum`/`count` additive; `mean`/ratio non-additive); packs can only make it stricter and only add suppressed kinds. A grouped question on a non-additive metric reports per-group levels and changes with no total; contributor/concentration also require the groups to reconcile to the total, so a direct `compute_insights` call without a policy cannot decompose a mean either. Non-time-summable metrics (stocks, rates) read the latest period, and the chart follows (`snapshot`). `pct`/`bps` changes are in basis points with no percent change. Grounding now treats digits in dimension labels (`10y`) as backed. CLI gains `--domain`/`--packs-root`. |
 | T-022 | Unreviewed-pack caveat and write-back refusal unless every applied pack is reviewed. | REQ-016, AC-025 | done | Gate is `domain.writeback_refusal`, not `Selection.all_reviewed` as `plan.md` sketched: `all_reviewed` is false with zero packs, which would refuse every generic (no-pack) write-back; REQ-016 governs *applied* packs only. |
 | T-023 | Pack source in the response and envelope; `answer()` raises on domain tags with no catalog; CLI resolves packs via `0081` `resolve_packs` (local, then bundled) and errors only for an explicit empty `--packs-root` or no packs anywhere. | REQ-018, AC-027 | done | |
+| T-024 | `adapters/llm_runtime/openai_compatible.py`: standard-library reference backend (`urllib.request`) for OpenAI-compatible chat completions — endpoint URL, model, key env-var name, timeout, retries on 429/5xx; returns text plus provider/model/usage; never logs the key. Document the callable contract in `adapters/llm_runtime/adapter_contract.md`. | REQ-019, NFR-003, AC-028 | todo | Lives outside `src/quantsmith/nl_analytics/` so AC-019's scan still holds. The Dataset Investigator (`0099`) can reuse it for its model roles outside Claude Code. |
+| T-025 | `interpret.py`: `LLMInterpreter` (prompt carries the governed vocabulary and plan schema; strict JSON parse; validator gate; clarification on failure), registered via `register_interpreter`. `narrate.py`: `LLMNarrator` with grounding and template fallback plus caveat. Envelope records the model call. | REQ-020, REQ-003, REQ-008, REQ-013, AC-029 | todo | Tests use a stub callable; no network in tests. |
+| T-026 | `0057` Console analytics route (`/api/analytics/ask`) and a page that renders the Vega-Lite spec, insights, plan echo, caveats, and citations; viewer clearance via the console's resolver; localhost bind by default. | REQ-021, REQ-004, AC-030 | todo | Separate from the console's `QueryEngine`, which answers over memory records, not datasets. |
+| T-027 | `writeback.py`: `approver_handle` on the request and records; contract fields `approver_roles` and `require_distinct_approver`; optional `roles` on roster entries (`access_control.py` parser, validator, `access/roster.yml` template comment). | REQ-023, REQ-011, AC-032 | todo | Roster stays empty by default; a target declaring roles is refused until it has entries. |
+| T-028 | Opt-in knowledge candidate on publish (`propose_knowledge`): `0048` candidate record with citations, review status, dry-run preview, and stated reasons when none is created. | REQ-022, REQ-016, AC-031 | todo | |
+| T-029 | CLI flags (`--llm-endpoint`, `--llm-model`, `--llm-key-env`, `--approver`, `--propose-knowledge`), `examples/nl_analytics/` update, and the README section on running without Claude Code. | REQ-019, REQ-020, REQ-022, REQ-023 | todo | |
 
 Status values: `todo` | `in-progress` | `blocked` | `done`.
 
@@ -81,6 +87,11 @@ Every acceptance criterion must be named by at least one test.
 | AC-025 | `test_ac025_draft_pack_caveat_and_writeback_gate` | done |
 | AC-026 | `test_ac026_generic_fallback_and_restrict_only` | done |
 | AC-027 | `test_ac027_pack_source_reported_and_missing_catalog_raises` | done |
+| AC-028 | `test_ac028_openai_compatible_backend_against_stub_server` | todo |
+| AC-029 | `test_ac029_llm_interpreter_and_narrator_gated` | todo |
+| AC-030 | `test_ac030_console_analytics_route_masks_and_renders` | todo |
+| AC-031 | `test_ac031_opt_in_knowledge_candidate` | todo |
+| AC-032 | `test_ac032_named_approver_and_roles` | todo |
 | AC-022 | `test_ac022_typed_status_on_every_failure_path` | done |
 
 ## Follow-ups
