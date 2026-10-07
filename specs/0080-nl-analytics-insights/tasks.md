@@ -36,16 +36,21 @@
    by default. `result.py` has `assert_no_secret`, `redact_text`, and
    `TransportError` — reuse them or mirror them.
 3. Create `src/quantsmith/adapters/llm_runtime/`:
-   - `profiles.py` — load a named profile from `config/llm_profiles.json`
-     (path overridable; profile name from an argument or
-     `QUANTSMITH_LLM_PROFILE`). Fields: `kind`, `endpoint`, `model`,
-     `credential` (`{"env": "NAME"}` or `{"command": [...]}`), `timeout_s`,
-     `max_retries`, plus kind-specific fields. A profile never holds a secret
-     value; reject one that does.
+   - `profiles.py` — read QuantMeridian's `llm-profiles/1` format unchanged
+     (see QuantMeridian `contracts/agent/llm-profiles.schema.json` and
+     `settings/llm_profiles.json`; vendor a copy of the schema and record its
+     source and digest). Path overridable; profile from an argument, the
+     file's `default_profile_env`, or `default_profile`. Endpoints, models,
+     and keys come only from the `*_env` variables. Validate with the
+     standard library (no `jsonschema` dependency): unknown fields, a
+     disabled profile, or a missing variable is a typed error.
    - `backends.py` — one pure *request builder* and *response parser* per
-     kind: `openai_compatible`, `anthropic`, `http_json` (declared body
-     template, response field path, headers), and `callable` (`module:function`
-     imported at call time). Builders are deterministic and network-free.
+     `api_style`: `anthropic_messages` and `openai_chat_completions`; `none`
+     selects the keyword interpreter and template narrator. Apply `auth`
+     (`provider_default`, `bearer`, `header`, `none`) and `header_envs`.
+     Builders are deterministic and network-free. Generic HTTP/JSON and
+     import-path callables are *not* in `llm-profiles/1`; propose them to
+     QuantMeridian as an additive revision before building them.
    - `transport.py` — the one module allowed to open a connection: a
      `urllib.request` transport with timeout and retries on 429/5xx. Callers
      may inject their own transport instead.
@@ -53,9 +58,10 @@
      profile, provider, model, usage (when reported). Errors are typed:
      unknown profile, missing credential, missing response field, transport
      failure. None of them carries a credential.
-4. Tests (`tests/test_llm_runtime.py`, AC-028): stand up a stub server with
-   `http.server` on localhost for each wire format; a stub callable for the
-   import-path kind; `monkeypatch` the environment variable; assert no
+4. Tests (`tests/test_llm_runtime.py`, AC-028): copy QuantMeridian's
+   `settings/llm_profiles.json` as a fixture; stand up a stub server with
+   `http.server` on localhost for each wire format; test `uses`,
+   `fallback_profile`, and `limits`; `monkeypatch` the environment variable; assert no
    credential appears in results, errors, or `repr`. Keep AC-019 green: the
    scan covers `src/quantsmith/nl_analytics/` only, and nothing there may
    import the new transport. `nl_analytics` receives a plain callable.
@@ -102,7 +108,7 @@ and `QF_STAGE_ENFORCE=1 hooks/stages/run-stage.sh spec`.
 | T-021 | `domain.py`: apply `0081` packs (vocabulary, units, additivity, insight suppression, caveats, chart conventions), term-conflict clarification, and generic fallback. | REQ-015, REQ-017, AC-023, AC-024, AC-026 | done | Fixes insights summing groups for every metric (yields across tenors, VaR across desks). `execute.Result` now carries the layer's own ungrouped `total`/`period_totals`; `insights.py` reads those, never a sum of groups, under a `domain.MetricPolicy`. Generic additivity comes from the `0008` definition only (`sum`/`count` additive; `mean`/ratio non-additive); packs can only make it stricter and only add suppressed kinds. A grouped question on a non-additive metric reports per-group levels and changes with no total; contributor/concentration also require the groups to reconcile to the total, so a direct `compute_insights` call without a policy cannot decompose a mean either. Non-time-summable metrics (stocks, rates) read the latest period, and the chart follows (`snapshot`). `pct`/`bps` changes are in basis points with no percent change. Grounding now treats digits in dimension labels (`10y`) as backed. CLI gains `--domain`/`--packs-root`. |
 | T-022 | Unreviewed-pack caveat and write-back refusal unless every applied pack is reviewed. | REQ-016, AC-025 | done | Gate is `domain.writeback_refusal`, not `Selection.all_reviewed` as `plan.md` sketched: `all_reviewed` is false with zero packs, which would refuse every generic (no-pack) write-back; REQ-016 governs *applied* packs only. |
 | T-023 | Pack source in the response and envelope; `answer()` raises on domain tags with no catalog; CLI resolves packs via `0081` `resolve_packs` (local, then bundled) and errors only for an explicit empty `--packs-root` or no packs anywhere. | REQ-018, AC-027 | done | |
-| T-024 | `src/quantsmith/adapters/llm_runtime/` (code; docs stay in `adapters/llm_runtime/`): profile loader (`config/llm_profiles.json` or `QUANTSMITH_LLM_PROFILE`/env), and standard-library backends (`urllib.request`) for OpenAI-compatible chat completions, the Anthropic Messages API, a generic HTTP/JSON shape (body template, response path, headers), and an import-path callable; credentials from an env-var name or token command; timeout and retries on 429/5xx; returns text plus profile/provider/model/usage; never logs a credential. Document the callable contract and profile format in `adapters/llm_runtime/adapter_contract.md`, with example profiles for vLLM/Ollama, Azure OpenAI, Anthropic, Bedrock (callable), and Vertex (token command). | REQ-019, NFR-003, AC-028 | todo | Lives outside `src/quantsmith/nl_analytics/` so AC-019's scan still holds. The Dataset Investigator (`0099`) can reuse it for its model roles outside Claude Code. |
+| T-024 | `src/quantsmith/adapters/llm_runtime/` (code; docs stay in `adapters/llm_runtime/`): read QuantMeridian's `llm-profiles/1` files unchanged (vendored schema copy with its source and digest recorded; profile from an argument, `default_profile_env`, or `default_profile`); standard-library backends (`urllib.request`) for `anthropic_messages` and `openai_chat_completions`, and `none`; `auth` schemes `provider_default`, `bearer`, `header`, `none`; `header_envs`; `limits` (timeout, retries on 429/5xx, output tokens, per-answer token cap); `uses` per role; `fallback_profile` on transport failure; returns text plus profile/`api_style`/model/usage; never logs a credential. Document the callable contract and the profile format in `adapters/llm_runtime/adapter_contract.md`, with example profiles for Anthropic, OpenAI, Azure OpenAI, vLLM/Ollama, and a LiteLLM-style gateway. | REQ-019, NFR-003, AC-028 | todo | Lives outside `src/quantsmith/nl_analytics/` so AC-019's scan still holds. QuantMeridian's spec009 worker (T-014) can use it or inject its own callable; the Dataset Investigator (`0099`) can reuse it outside Claude Code. Generic HTTP/JSON, import-path callables, and token commands wait for an `llm-profiles` revision in QuantMeridian (see spec *Assumptions*). |
 | T-025 | `interpret.py`: `LLMInterpreter` (prompt carries the governed vocabulary and plan schema; strict JSON parse; validator gate; clarification on failure), registered via `register_interpreter`. `narrate.py`: `LLMNarrator` with grounding and template fallback plus caveat. Envelope records the model call. | REQ-020, REQ-003, REQ-008, REQ-013, AC-029 | todo | Tests use a stub callable; no network in tests. |
 | T-026 | `0057` Console analytics route (`/api/analytics/ask`) and a page that renders the Vega-Lite spec, insights, plan echo, caveats, and citations; viewer clearance via the console's resolver; localhost bind by default. | REQ-021, REQ-004, AC-030 | todo | Separate from the console's `QueryEngine`, which answers over memory records, not datasets. |
 | T-027 | `writeback.py`: `approver_handle` on the request and records; contract fields `approver_roles` and `require_distinct_approver`; optional `roles` on roster entries (`access_control.py` parser, validator, `access/roster.yml` template comment). | REQ-023, REQ-011, AC-032 | todo | Roster stays empty by default; a target declaring roles is refused until it has entries. |
