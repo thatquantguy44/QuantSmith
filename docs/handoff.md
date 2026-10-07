@@ -1623,7 +1623,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
     as a denominator effect on the synthetic fixture), a validator that re-executes every finding, and an exported
     package (`dataset_analysis/` byte-identical to `analysis/`) with `reproduce` and `rerun`. 1M × 20 in ~60 s.
     **Real-data validation (2026-10-07, branch `claude/dataset-investigator-real-data`):** run deterministically
-    on IBM Telco churn (7,043 × 21) and UCI Occupancy, and as the live workflow (12 agents) on Telco. It fixed
+    on IBM Telco churn (7,043 × 21) and UCI Occupancy, and as the live workflow (12 subagent calls) on Telco. It fixed
     eight analysis defects (numbers stored as text, protective gaps rejected, the stratified test matching band
     labels against raw values, duplicate findings through another column, regimes called outliers, band edges,
     tiny-value formatting, target hints), made step output small enough for an executor agent to relay (it broke
