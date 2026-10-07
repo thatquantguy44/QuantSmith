@@ -57,7 +57,7 @@ Every acceptance criterion must be named by at least one test.
 | AC-013 | `test_ac013_report_structure_and_schemas` | done |
 | AC-014 | `test_ac014_exported_package_is_what_ran` | done |
 | AC-015 | `test_ac015_reproduce_finding_cli` | done |
-| AC-016 | `test_ac016_rerun_without_model_is_identical` | done |
+| AC-016 | `test_ac016_rerun_without_model_is_identical`, `test_ac016_model_assisted_run_reruns_without_model` | done |
 | AC-017 | `test_ac017_run_metadata_fields` | done |
 | AC-018 | `test_ac018_on_demand_entry_points` | done |
 | AC-019 | `test_ac019_model_context_has_no_rows_or_pii` | done |
@@ -70,6 +70,7 @@ reproducing the defect: `test_ac002_numbers_stored_as_text_are_numeric`,
 `test_ac003_planner_names_candidate_targets`,
 `test_ac007_regimes_are_not_called_outliers`,
 `test_ac010_protective_gap_tested_in_its_own_direction`,
+`test_ac010_groups_that_never_share_a_stratum_say_so`,
 `test_ac012_same_rows_through_another_column_are_merged`,
 `test_ac013_small_values_keep_their_digits`.
 

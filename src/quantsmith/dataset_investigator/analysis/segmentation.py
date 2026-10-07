@@ -235,6 +235,7 @@ def stratified_target_rates(df: pd.DataFrame, p: StratifiedParams, ctx: ToolCont
     num = den = 0.0
     cmh_num = cmh_var = 0.0
     shown, ratios = [], []
+    both = 0
     for s_lab in _group_order([str(v) for v in frame["s"].unique()]):
         part = frame[frame["s"] == s_lab]
         e, r = part[part["e"] == 1], part[part["e"] == 0]
@@ -243,6 +244,7 @@ def stratified_target_rates(df: pd.DataFrame, p: StratifiedParams, ctx: ToolCont
         N = n1 + n0
         if n1 == 0 or n0 == 0:
             continue
+        both += 1
         num += a * n0 / N
         den += c * n1 / N
         m1, m0 = a + c, N - (a + c)
@@ -270,5 +272,8 @@ def stratified_target_rates(df: pd.DataFrame, p: StratifiedParams, ctx: ToolCont
             "exposed": exp_label, "reference": ref_label, "n_exposed": int(len(e_all)), "n_reference": int(len(r_all)),
             "crude_ratio": crude, "mh_rate_ratio": mh, "mh_strength": strength,
             "same_direction_as_crude": same_direction, "cmh_p_value": pval, "strata": shown,
+            "strata_with_both_groups": both,
+            **({"note": f"no stratum of `{p.strata}` contains both groups, so the gap cannot be compared within "
+                        f"its strata (the groups do not overlap on `{p.strata}`)"} if both == 0 else {}),
             "share_strata_ratio_above_1": (sum(r > 1 for r in ratios) / len(ratios)) if ratios else None,
             "tests": ([{"name": "cmh", "p_value": pval}] if pval is not None else [])}
