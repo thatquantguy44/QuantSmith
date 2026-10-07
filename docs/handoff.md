@@ -1623,13 +1623,14 @@ manual-task persistence question stays deferred until a real consumer needs it.
     as a denominator effect on the synthetic fixture), a validator that re-executes every finding, and an exported
     package (`dataset_analysis/` byte-identical to `analysis/`) with `reproduce` and `rerun`. 1M × 20 in ~60 s.
     Next: run the workflow on a real dataset; v2 controlled tool generation needs its own spec.
-    `0100` (Draft, building; PR #110) makes agent-skills a pinned, offline upstream: `quantsmith.agent_skills` and the
+    `0100` (Draft, built; PR #110, first sync T-006) makes agent-skills a pinned, offline upstream: `quantsmith.agent_skills` and the
     `quantsmith-agent-skills` command (`sync`/`diff`/`verify`/`status`/`install`), `config/agent_skills.json`
     (allowlist, exclusions), the `agent-skills` gate (CI-enforced), the local marketplace
     `.claude-plugin/marketplace.json`, `instructions/agent_skills.md`, and skill citations in nine coding-stage agents.
     T-001 confirmed on Claude Code 2.1.292, offline, that the subset loads only after a one-time per-machine opt-in
-    (`0100/validation.md`). **agent-skills pin:** not vendored yet; the first sync (fork `f63ec56`, plugin `0.6.7`)
-    lands in its own PR (T-006). Record each quarterly review here with its date (REQ-014).
+    (`0100/validation.md`). **agent-skills pin:** fork `f63ec56` (plugin `0.6.7`), vendored 2026-10-07 as
+    `0.6.7+f63ec56.53469383` (35 files, 366 KB). Next quarterly review due after 2027-01-07 (`status` flags it).
+    Record each review here with its date (REQ-014).
     Proof of concept: no legal collection limits set yet; they must be set
     before operational use. The `0083` knowledge pack and validator are built
     (per-record review sign-off; all records still `draft`). Next: `0091` (fund analytics), the deferred regions in `0087`, and

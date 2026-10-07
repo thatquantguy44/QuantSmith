@@ -9,6 +9,9 @@
 # (node_modules) or generated (dist), not repo docs, and its intra-package
 # relative links are not this gate's concern. They are also gitignored, so CI
 # never sees them; excluding them keeps a local run after `npm install` honest.
+# vendor/agent-skills/ is third-party too (spec 0100) but tracked: its files are
+# byte-identical to upstream and may link to upstream docs that are not vendored.
+# It cannot be edited here; the agent-skills gate checks it against its lock.
 
 set -e
 DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
@@ -21,6 +24,7 @@ md_files=$(find . -type f -name '*.md' \
   -not -path './.git/*' \
   -not -path './knowledge_local/*' \
   -not -path '*/node_modules/*' \
+  -not -path './vendor/agent-skills/*' \
   -not -path '*/dist/*' \
   -not -path '*/dist-single/*' | sort)
 checked=0
