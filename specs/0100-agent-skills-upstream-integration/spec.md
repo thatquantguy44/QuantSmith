@@ -84,7 +84,7 @@ only by a deliberate, reviewed sync — and subordinate to QuantSmith's constitu
 
 | ID | Given / When / Then | Covers |
 | --- | --- | --- |
-| AC-001 | Given a fresh clone with the network disabled, when a Claude Code session starts in QuantSmith, then the allowlisted agent-skills skills are listed under their namespace and none of the excluded ones are. | REQ-001, REQ-005, REQ-007, NFR-001 |
+| AC-001 | Given a fresh clone with the network disabled, when a Claude Code session starts before the one-time opt-in, then no agent-skills component loads; after `quantsmith-agent-skills install --scope project`, the allowlisted skills, commands and personas load under the `agent-skills:` namespace and none of the excluded ones do. | REQ-001, REQ-005, REQ-007, NFR-001 |
 | AC-002 | Given a local clone of the fork at commit `X`, when `sync --source <clone> --ref X` runs, then `vendor/agent-skills/` holds exactly the allowlisted files at `X`, the lock records `X`, the plugin version and a hash per file, and a second run produces no diff. | REQ-001, REQ-002, REQ-003, NFR-002 |
 | AC-003 | Given `--source https://…` or `git@…`, when `sync` runs, then it exits non-zero without writing and says only local sources are accepted. | REQ-003, NFR-001 |
 | AC-004 | Given a vendored `SKILL.md` edited by hand, when the gate runs, then it reports that file as modified against the lock (advisory; blocking under `QF_STAGE_ENFORCE=1`). | REQ-004 |
@@ -121,7 +121,7 @@ only by a deliberate, reviewed sync — and subordinate to QuantSmith's constitu
 | RISK-001 | Upstream skills contradict QuantSmith (SDD artifacts, ID scheme, attribution footers, commit style) and an agent follows the upstream one. | Untraceable work; gate failures; policy breach. | REQ-007 exclusions, REQ-008 precedence, override notes in the stage table; gate flags re-enabled conflicts. |
 | RISK-002 | A malicious or careless upstream change rides in on a sync (prompt injection in a `SKILL.md`, a script). | Agents follow hostile instructions. | Local-only, manual sync; change summary; reviewed PR per refresh; no executables or hooks vendored (NFR-003). |
 | RISK-003 | Vendored copy is edited in place and silently diverges from upstream. | Fork and QuantSmith disagree; fixes lost on next sync. | Per-file hashes; gate reports modified files; policy: fix in the fork, then re-sync. |
-| RISK-004 | Claude Code's local plugin/marketplace configuration changes or does not support a directory source as assumed. | Skills not loaded automatically. | T-001 spike confirms first; fallback is project skills materialized under `.claude/skills/` with a name prefix (plan). |
+| RISK-004 | Claude Code's local plugin/marketplace configuration changes or drops directory sources. | Skills not loaded. | Confirmed working on 2.1.292 (T-001); `status` reports when the plugin is registered but not loading; fallback is project skills materialized under `.claude/skills/` (plan). |
 | RISK-005 | Namespace collision: an upstream skill or command has the same name as a QuantSmith agent or command. | Wrong guidance invoked. | Plugin namespacing (`agent-skills:<name>`); gate checks collisions against `agents/agent_registry.yaml`. |
 | RISK-006 | Context bloat: too many skills loaded into every session. | Worse routing, higher cost. | Allowlist of coding-relevant skills only; web group opt-in; no meta-skill injection. |
 | RISK-007 | Consumer repos get stale copies. | Old guidance used for years. | Upstream-drift gate surface (REQ-010) and lock date shown by `status`. |
@@ -129,8 +129,9 @@ only by a deliberate, reviewed sync — and subordinate to QuantSmith's constitu
 
 ## Assumptions & Open Questions
 
-- Assumption: Claude Code accepts a project-declared local-directory plugin marketplace and an `enabledPlugins` entry for it, so no
-  user action is needed beyond trusting the project. To confirm in T-001; fallback designed.
+- Resolved (T-001): Claude Code loads the vendored plugin from a local-directory marketplace offline, but only after a **one-time
+  per-machine opt-in**. Plugins enabled only by repo-authored settings are never activated on their own. This is accepted: it is
+  also a supply-chain safeguard (RISK-002). See `plan.md` Settings and `validation.md`.
 - Assumption: the fork remains MIT and tracks `addyosmani/agent-skills`; QuantSmith pins the fork, not the canonical repo, so our
   fixes are available without waiting for upstream.
 ### Decisions (2026-10-07)
