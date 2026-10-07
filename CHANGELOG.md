@@ -21,6 +21,11 @@ patterns locally rather than expecting them to update in place.
 ## [Unreleased]
 
 ### Added
+- First vendored agent-skills sync (spec `0100` T-006): `vendor/agent-skills/` (35 files, 366 KB) and
+  `vendor/agent-skills.lock.json`, pinned at fork `thatquantguy44/agent-skills@f63ec56` (plugin `0.6.7`, version stamp
+  `0.6.7+f63ec56.53469383`). Content reviewed before sync; `instructions/agent_skills.md` maps the vendored files'
+  references to excluded items onto QuantSmith equivalents. Opt in once per machine with
+  `quantsmith-agent-skills install --scope project`.
 - agent-skills as a pinned, offline upstream (spec `0100`): `quantsmith.agent_skills` and the `quantsmith-agent-skills`
   command (`sync`, `diff`, `verify`, `status`, `install`) vendor an allowlisted subset of `addyosmani/agent-skills`
   (via the fork `thatquantguy44/agent-skills`) from a *local* clone, directory or `git archive` tarball only, with a

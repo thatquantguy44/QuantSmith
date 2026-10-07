@@ -57,3 +57,18 @@ vendored into the repository; the first sync is T-006, in its own PR.
 Suite: `tests/test_agent_skills.py` has 32 tests; the full suite (`uv run --frozen --all-extras pytest tests/`, as CI
 runs it) passes with 1410 tests. Gates: `QF_STAGE_ENFORCE=1 hooks/stages/run-stage.sh` passes, including the new
 `agent-skills` gate. `ruff` is clean on the changed Python files.
+
+## T-006: first vendored sync (2026-10-07)
+
+`quantsmith-agent-skills diff`, then `sync --source <fork clone> --ref f63ec56`. 32 items added (35 files,
+366,512 bytes), with no problems and no warnings. `verify` is clean and `status` reports `repo`, `matches_lock: true`,
+`pinned: true`. Version stamp `0.6.7+f63ec56.53469383`, identical to the build checks above.
+
+**Content review** of every vendored file at `f63ec56`, as third-party prompt text that agents will follow:
+
+| Check | Result |
+| --- | --- |
+| Piped installs, destructive shell, injection directives, exfiltration | None. The only hit is `source-driven-development` warning agents *against* "ignore previous instructions" in fetched content |
+| Attribution, co-author trailers, `--no-verify`, force-push advice | None that conflicts. Upstream advises against force-pushing shared branches; the "attribution" hits are web-vitals API names |
+| References to excluded items | `interview-me` hands off to `spec-driven-development` / `planning-and-task-breakdown`; `idea-refine` points at its unvendored script and `docs/ideas/`; `references/orchestration-patterns.md` describes `/spec`, `/plan`, `/build`, `/ship`. All are mapped to QuantSmith equivalents in `instructions/agent_skills.md` |
+| Reference docs linked by vendored files | Every vendored reference is linked by at least one vendored skill (`orchestration-patterns` by `doubt-driven-development`), so none was dropped |
