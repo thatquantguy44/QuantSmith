@@ -34,7 +34,8 @@ to sync reference content without clobbering local tuning.
 ### Package specifics (as shipped)
 
 - Name `quantsmith`; core depends only on `numpy`. Extras: `quant` (scipy),
-  `data` (pandas), `dev` (pytest, openpyxl). Most `pipelines/*` runtimes are
+  `data` (pandas), `investigator` (the Dataset Investigator, spec `0099`: pandas, scipy,
+  scikit-learn, pyarrow, pydantic, PyYAML, Matplotlib), `dev` (pytest, openpyxl). Most `pipelines/*` runtimes are
   standard-library-only and need no extras.
 - Console scripts under `[project.scripts]` for the agentic-quant CLIs.
 - One piece of scaffold ships inside the package: the analytics domain pack
