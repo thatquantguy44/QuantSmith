@@ -21,7 +21,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import pandas as pd
 
-from .findings import pct, ranked
+from .findings import dedupe_keys, pct, ranked
 from .models import (
     Condition,
     DecisionRule,
@@ -83,8 +83,10 @@ def evaluate(rule: DecisionRule, result: Dict[str, Any]) -> Tuple[str, str, Dict
         return "supported", "; ".join(describe(c) for c in rule.supported), evidence
     if rej and all(r is True for r in rej):
         return "rejected", "; ".join(describe(c) for c in rule.rejected), evidence
-    missing = [c.path for c, h in zip(rule.supported + rule.rejected, sup + rej) if h is None]
+    missing = list(dict.fromkeys(c.path for c, h in zip(rule.supported + rule.rejected, sup + rej) if h is None))
     why = f"no value for {', '.join(missing)}" if missing else "neither the supported nor the rejected conditions all hold"
+    if missing and isinstance(result.get("note"), str):
+        why += f": {result['note']}"
     return "inconclusive", why, evidence
 
 
@@ -123,9 +125,11 @@ def _t_gap(f: Finding, st: InvestigationState) -> List[Template]:
                     "statement": f"The `{s['by']}` = `{s['exposed']}` vs `{s['reference']}` gap in `{s['target']}` rate persists within bands of `{strata}`.",
                     "tool": "stratified_target_rates",
                     "params": {"target": s["target"], "by": s["by"], "strata": strata,
-                               "exposed": s["exposed"], "reference": s["reference"]},
-                    "prediction": "The Mantel–Haenszel rate ratio stays at or above 1.5.",
-                    "rule": rule([("mh_rate_ratio", ">=", 1.5), ("cmh_p_value", "<", a)], [("mh_rate_ratio", "<", 1.2)])})
+                               "exposed": s["exposed"], "reference": s["reference"],
+                               "by_bins": f.params.get("bins", 5)},
+                    "prediction": "The Mantel–Haenszel rate ratio stays at least 1.5× in the same direction.",
+                    "rule": rule([("mh_strength", ">=", 1.5), ("same_direction_as_crude", "==", True), ("cmh_p_value", "<", a)],
+                                 [("mh_strength", "<", 1.2)])})
     ent = _entity(st)
     if ent and _role(st, s["by"]) in ("categorical", "boolean"):
         out.append({"template": "gap_entity",
@@ -147,8 +151,9 @@ def _t_missing(f: Finding, st: InvestigationState) -> List[Template]:
              "statement": f"The higher `{s['target']}` rate where `{s['column']}` is missing persists within bands of `{strata}`.",
              "tool": "stratified_target_rates",
              "params": {"target": s["target"], "by": s["column"], "strata": strata, "missing_indicator": True},
-             "prediction": "The Mantel–Haenszel rate ratio stays at or above 1.5.",
-             "rule": rule([("mh_rate_ratio", ">=", 1.5), ("cmh_p_value", "<", a)], [("mh_rate_ratio", "<", 1.2)])}]
+             "prediction": "The Mantel–Haenszel rate ratio stays at least 1.5× in the same direction.",
+             "rule": rule([("mh_strength", ">=", 1.5), ("same_direction_as_crude", "==", True), ("cmh_p_value", "<", a)],
+                          [("mh_strength", "<", 1.2)])}]
 
 
 def _t_window(f: Finding, st: InvestigationState) -> List[Template]:
@@ -281,8 +286,17 @@ def _add(state: InvestigationState, t: Template, round_: int, from_findings: Lis
 
 
 def candidates_for_hypotheses(state: InvestigationState) -> List[Finding]:
+    """The top findings worth testing, skipping any that duplicate a higher-ranked one (same rows)."""
     reportable = [f for f in state.findings if not f.quality and f.status != "REJECTED" and f.merged_into is None]
-    return ranked(reportable)[: state.config.top_n]
+    seen: set = set()
+    out: List[Finding] = []
+    for f in ranked(reportable):
+        keys = dedupe_keys(f)
+        if any(k in seen for k in keys):
+            continue
+        seen.update(keys)
+        out.append(f)
+    return out[: state.config.top_n]
 
 
 def run_loop(state: InvestigationState, df: pd.DataFrame) -> None:

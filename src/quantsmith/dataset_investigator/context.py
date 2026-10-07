@@ -10,11 +10,13 @@ from __future__ import annotations
 
 from typing import Any, Dict, List
 
+from .analysis.findings import ranked
 from .analysis.models import InvestigationState
 from .analysis.planner import ANALYSES
 from .analysis.registry import catalog
 
 ROLES = ("planner", "investigator", "validator", "writer")
+INVESTIGATOR_FINDINGS = 20  # the highest-ranked candidates; keeps each step's output small
 
 ANALYSIS_DESCRIPTIONS = {
     "profile": "shape, roles, missingness, cardinality",
@@ -45,29 +47,53 @@ NUMBERS_RULE = ("State only numbers that appear in the evidence shown to you (ro
                 "never causes: no 'because', 'due to', 'caused by', 'drives', 'leads to'.")
 
 
+def _round(v: Any) -> Any:
+    """Floats to 6 significant digits: what a role reads, without 16-digit noise (grounding allows rounding)."""
+    if isinstance(v, float):
+        return float(f"{v:.6g}")
+    if isinstance(v, dict):
+        return {k: _round(x) for k, x in v.items()}
+    if isinstance(v, list):
+        return [_round(x) for x in v]
+    return v
+
+
 def _columns(state: InvestigationState) -> List[Dict[str, Any]]:
     return [{"name": c.name, "role": c.role, "dtype": c.dtype, "missing_pct": round(c.missing_pct, 6),
              "n_unique": c.n_unique, "pii": c.pii} for c in state.columns]
 
 
+def _set(d: Dict[str, Any]) -> Dict[str, Any]:
+    """Only the fields that carry something: a missing key reads as null, empty, or false."""
+    return {k: v for k, v in d.items() if v not in (None, [], {}, False)}
+
+
 def _finding(f) -> Dict[str, Any]:
-    return {"id": f.finding_id, "key": f.key, "kind": f.kind, "claim": f.claim, "subject": f.subject,
+    return _set({"id": f.finding_id, "key": f.key, "kind": f.kind, "claim": f.claim, "subject": f.subject,
             "evidence": f.evidence, "status": f.status, "confidence": f.confidence, "issues": f.issues,
             "interestingness": f.score.I if f.score else None, "p_adjusted": f.p_adjusted, "n": f.n,
-            "quality": f.quality, "merged_into": f.merged_into}
+            "quality": f.quality, "merged_into": f.merged_into})
 
 
 def _hypothesis(h) -> Dict[str, Any]:
-    return {"id": h.hypothesis_id, "round": h.round, "statement": h.statement, "tool": h.tool, "params": h.params,
+    return _set({"id": h.hypothesis_id, "round": h.round, "statement": h.statement, "tool": h.tool, "params": h.params,
             "status": h.status, "explanation": h.explanation, "evidence": h.evidence, "from_findings": h.from_findings,
-            "origin": h.origin}
+            "origin": h.origin})
 
 
-def build(state: InvestigationState, role: str) -> Dict[str, Any]:
-    """The context for ``role`` — aggregates and evidence only (REQ-017)."""
+def build(state: InvestigationState, role: str, *, tools: bool = True) -> Dict[str, Any]:
+    """The context for ``role`` — aggregates and evidence only (REQ-017).
+
+    ``tools=False`` leaves the (static) tool catalog out of the investigator's
+    context, for a caller that already holds it from an earlier step.
+    """
     if role not in ROLES:
         raise ValueError(f"unknown role {role!r}; use one of {ROLES}")
-    base = {"role": role, "run_id": state.run_id,
+    return _round(_build(state, role, tools))
+
+
+def _build(state: InvestigationState, role: str, tools: bool) -> Dict[str, Any]:
+    base = {"role": role, "run_id": state.run_id, "omitted_fields": "null, empty, or false",
             "dataset": {"rows": state.dataset.rows, "columns": state.dataset.columns, "format": state.dataset.format},
             "columns": _columns(state)}
     if role == "planner":
@@ -78,12 +104,17 @@ def build(state: InvestigationState, role: str) -> Dict[str, Any]:
     live = [f for f in state.findings if f.merged_into is None]
     if role == "investigator":
         used = sum(1 for e in state.executions if e.origin in ("hypothesis", "model"))
-        return {**base, "findings": [_finding(f) for f in live if not f.quality],
-                "hypotheses": [_hypothesis(h) for h in state.hypotheses],
-                "tools": catalog(), "decision_rules": DECISION_RULES, "numbers": NUMBERS_RULE,
+        candidates = ranked([f for f in live if not f.quality])
+        out = {**base, "findings": [_finding(f) for f in candidates[:INVESTIGATOR_FINDINGS]],
+               "findings_not_shown": max(0, len(candidates) - INVESTIGATOR_FINDINGS),
+               "hypotheses": [_hypothesis(h) for h in state.hypotheses],
+               "tools": catalog(), "decision_rules": DECISION_RULES, "numbers": NUMBERS_RULE,
                 "budget": {"tool_calls_left": max(0, state.config.max_tool_calls - used),
                            "rounds_used": max((h.round for h in state.hypotheses), default=0),
                            "max_rounds": state.config.max_rounds}}
+        if not tools:
+            del out["tools"]
+        return out
     if role == "validator":
         return {**base, "findings": [_finding(f) for f in live],
                 "instructions": ("Check each claim against its evidence. You may only downgrade: return "

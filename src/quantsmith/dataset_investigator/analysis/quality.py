@@ -74,10 +74,10 @@ def _mixed_type_share(s: pd.Series) -> Optional[float]:
     if not len(values) or pd.api.types.is_numeric_dtype(s) or pd.api.types.is_datetime64_any_dtype(s):
         return None
     probe = values if len(values) <= 5000 else values.sample(n=5000, random_state=0)
-    share = float(pd.to_numeric(probe.astype(str), errors="coerce").notna().mean())
-    if share == 0.0 or share == 1.0:
-        return share  # a sample that is all text or all numbers: not worth a full pass
-    return float(pd.to_numeric(values.astype(str), errors="coerce").notna().mean())
+    share = float(pd.to_numeric(probe.astype(str).str.strip(), errors="coerce").notna().mean())
+    if share == 0.0:
+        return share  # a sample of pure text: not worth a full pass
+    return float(pd.to_numeric(values.astype(str).str.strip(), errors="coerce").notna().mean())
 
 
 @analysis_tool(name="analyze_column_quality", category="quality", version="1.0.0", params=ColumnQualityParams)
@@ -101,9 +101,9 @@ def analyze_column_quality(df: pd.DataFrame, p: ColumnQualityParams, ctx: ToolCo
             if neg:
                 negatives.append({"column": col, "negative": neg, "negative_pct": neg / rows})
         share = _mixed_type_share(s)
-        if share is not None and 0.05 <= share <= 0.95:
-            mixed.append({"column": col, "numeric_like_share": share,
-                          "non_numeric": int(round((1 - share) * len(values)))})
+        non_numeric = int(round((1 - share) * len(values))) if share is not None else 0
+        if share is not None and share >= 0.05 and non_numeric >= 1:
+            mixed.append({"column": col, "numeric_like_share": share, "non_numeric": non_numeric})
         if role == "categorical" and len(values) and values.nunique() > 50 and values.nunique() / len(values) > 0.5:
             high_card.append({"column": col, "n_unique": int(values.nunique()),
                               "unique_ratio": float(values.nunique() / len(values))})

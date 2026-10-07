@@ -1622,7 +1622,38 @@ manual-task persistence question stays deferred until a real consumer needs it.
     ranked findings with BH-adjusted support, a bounded hypothesis loop (it rejects the overnight "more fraud" reading
     as a denominator effect on the synthetic fixture), a validator that re-executes every finding, and an exported
     package (`dataset_analysis/` byte-identical to `analysis/`) with `reproduce` and `rerun`. 1M × 20 in ~60 s.
-    Next: run the workflow on a real dataset; v2 controlled tool generation needs its own spec.
+    **Real-data validation (2026-10-07, branch `claude/dataset-investigator-real-data`):** run deterministically
+    on IBM Telco churn (7,043 × 21) and UCI Occupancy, and as the live workflow (12 subagent calls) on Telco. It fixed
+    eight analysis defects (numbers stored as text, protective gaps rejected, the stratified test matching band
+    labels against raw values, duplicate findings through another column, regimes called outliers, band edges,
+    tiny-value formatting, target hints), made step output small enough for an executor agent to relay (it broke
+    at 65 KB), and made a model-assisted run rerun with no model by recording and replaying the model's inputs
+    (`ModelInputs` in the state and manifest; AC-016 extended). Telco result: month-to-month churn is 15.08× two-year
+    and holds within tenure and internet-service levels; the `Partner` gap is explained by tenure. Live run cost:
+    about 750k subagent tokens and 8.5 minutes for 7k rows. The datasets are not in the repo; each defect has a
+    synthetic regression test.
+    **Next for `0099`, in order:**
+    1. Run the live workflow on a dataset with a timestamp (Occupancy: drift, period patterns, trends), on a wide
+       or 1M-row file, and on Parquet. Only the Telco path (no timestamp) has run live.
+    2. Multivariate anomalies on non-elliptical data: on Telco, Mahalanobis flagged 33.90% of rows, and the
+       deterministic validator passed it as a regime finding. Only the model reviewer caught that
+       `TotalCharges` ≈ `tenure` × `MonthlyCharges` breaks the elliptical assumption. Detect derived or
+       near-collinear columns before MCD, or check the assumption, so this does not depend on the model.
+    3. Untestable as its own outcome: a stratified test whose groups never share a stratum now says so
+       (`strata_with_both_groups`, `note`), but it is still `inconclusive`. Consider a `not_testable` status, and
+       check overlap before the investigator proposes such a test.
+    4. Evidence names in `target_rate_gap`: the claim is high-to-low, but the evidence keeps `rate_extreme` and
+       `rate_reference`. On Telco, `rate_extreme` is the *lower* rate (Two year, 2.83%), which reads backwards in
+       the report's evidence table. Rename to match the claim and keep a migration note.
+    5. Workflow transport: each step's JSON passes through an executor agent, which is fragile and costly. The
+       workflow now tolerates text around the JSON and keeps output under about 30 KB, but a direct path would be
+       better. Options: reasoning agents run the read-only `context` command themselves, or a non-model runner.
+       This is a design decision for the owner.
+    6. Before the first release, decide the tool-version policy: `stratified_target_rates` changed output
+       (`by_bins`, `mh_strength`, `strata_with_both_groups`) and is still `1.0.0`.
+    7. The `0099` files carry about 160 typing-style ruff findings (`List` → `list`, `Optional` → `X | None`), which
+       the advisory implementation gate flags. Fold them into item 33's deferred lint review in one pass.
+    8. Approve `0099` (still Draft, built). v2 controlled tool generation needs its own spec.
     `0100` (Draft, built; PR #110, first sync T-006) makes agent-skills a pinned, offline upstream: `quantsmith.agent_skills` and the
     `quantsmith-agent-skills` command (`sync`/`diff`/`verify`/`status`/`install`), `config/agent_skills.json`
     (allowlist, exclusions), the `agent-skills` gate (CI-enforced), the local marketplace
