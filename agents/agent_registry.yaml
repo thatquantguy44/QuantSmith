@@ -76,6 +76,17 @@ agents:
       - "Encodings: axes, series, sort order, zero-baseline decision, units/labels."
       - "A finding-first title, a footnote for anything caveated, and alt text."
       - "A minimal Vega-Lite spec and a Markdown table rendering of the same chart."
+  - name: "analytics/dataset_investigator"
+    category: "analytics"
+    purpose: "Investigates one tabular dataset (CSV, TSV, Parquet, or a pandas/Polars frame) on demand: semantic column roles, a rule planner, registered deterministic tools across six families (quality, distributions, relationships, segmentation, temporal, anomalies), ranked findings, a bounded hypothesis-testing loop, a validator, a fixed-order report, and an exported analysis package containing the modules that actually ran, so every finding can be reproduced from the command line without a language model."
+    path: "agents/analytics/dataset_investigator/"
+    inputs:
+      - "A dataset path (CSV, TSV, Parquet); optionally the target and timestamp columns, role overrides, PII-flagged columns, an as-of date, and a seed."
+      - "Optionally a time budget for the hypothesis loop (rounds, tool calls)."
+    outputs:
+      - "`investigation_run/report/` — `investigation_report.md`, `findings.json`, `hypotheses.json`, figures."
+      - "`investigation_run/analysis_package/` — the executed modules (`dataset_analysis/`), `manifest.json` with module hashes and finding → function → parameters → evidence, tests, `requirements.lock`, config, an example, and…"
+      - "`investigation_run/run_metadata.yaml` — run id, versions, seed, dataset fingerprint, every tool call with its parameters."
   - name: "analytics/experimentation"
     category: "analytics"
     purpose: "The Experimentation Agent designs and reads out controlled experiments (A/B tests) with statistical discipline."

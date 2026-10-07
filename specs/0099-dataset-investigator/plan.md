@@ -1,9 +1,9 @@
 # Plan: Dataset Investigator
 
 - **Spec:** 0099-dataset-investigator (`spec.md`)
-- **Status:** Draft
+- **Status:** Draft (built)
 - **Author:** Joshua Lutkemuller, CFA
-- **Last updated:** 2026-10-06
+- **Last updated:** 2026-10-07
 
 > HOW. Every requirement in the spec appears in the traceability matrix below.
 
@@ -32,7 +32,7 @@ only registered tools with schema-valid parameters (RISK-008).
 ## Architecture & Components
 
 ```
-dataset ─▶ io.load + fingerprint ─▶ schema.inspect (roles) ─▶ planner.plan ─┐
+dataset ─▶ loading.load + fingerprint ─▶ roles.infer ─▶ planner.plan ────────┐
                                                                               ▼
           registry (TOOL_REGISTRY, @analysis_tool) ◀── executor.run(plan) ── executions[]
                                                                               ▼
@@ -43,25 +43,27 @@ dataset ─▶ io.load + fingerprint ─▶ schema.inspect (roles) ─▶ planne
 
 | Component | Responsibility |
 | --- | --- |
-| `io.py` | Load CSV, Parquet (pyarrow, optional), pandas, Polars (`to_pandas`, optional); SHA-256 file fingerprint or canonical frame hash; read-only. |
-| `schema.py` | Column roles with evidence (REQ-002); caller overrides; PII flags. |
-| `registry.py` | `@analysis_tool(name, category, version, params)` decorator; `TOOL_REGISTRY`; parameter-schema validation; `ToolExecution` records with result hash. |
-| `tools/profile.py`, `quality.py`, `distributions.py`, `relationships.py`, `segmentation.py`, `anomalies.py`, `temporal.py` | The registered tools (REQ-004, REQ-006). **Self-contained**: they import only the standard library, numpy, pandas, scipy, guarded optional libraries, and each other relatively, so they can be copied verbatim into the exported package. |
-| `planner.py` | Deterministic rule planner with reasons; `validate_plan()` for a model-proposed plan (REQ-003, REQ-017). |
-| `findings.py` | Rules that turn results into candidate findings; I-score components; BH adjustment; top-N (REQ-007). |
-| `hypotheses.py` | Hypothesis records, templates per finding type, decision rules, the bounded loop, research questions (REQ-008, REQ-009). Copied into the package too. |
-| `validator.py` | The REQ-010 checks; reuses `nl_analytics.narrate`'s number grounding and causal-phrase list. |
-| `report.py` | Markdown in fixed section order, `findings.json`, `hypotheses.json`, Vega-Lite figures (REQ-011). |
-| `export.py` | Builds `analysis_package/` (REQ-012): copies tool modules byte for byte, generates `pipeline.py`, `manifest.json`, tests, `requirements.lock`, README, config, example, and the package's `dataset-investigator` command with `analyze`/`reproduce`/`rerun` (REQ-013, REQ-014). |
-| `metadata.py` | `run_metadata.yaml` (REQ-015); minimal JSON-compatible YAML emitter. |
-| `context.py` | Builds the language-model context: profile, roles, evidence only; masks PII; enforces minimum cell size (REQ-017, NFR-002). |
-| `cli.py` | `quantsmith-dataset-investigator` (REQ-016). |
+| `analysis/` | The whole deterministic core, **self-contained**: its modules import only the standard library, the `investigator` extra's libraries, and each other relatively. Export copies this directory byte for byte as the package's `dataset_analysis/`, so the exported code is exactly what ran (REQ-012). |
+| `analysis/models.py` | Pydantic models: column profile, dataset info, tool execution, finding, hypothesis, question, validation, config, `InvestigationState`. |
+| `analysis/loading.py` | Load CSV, Parquet, pandas, Polars (`to_pandas`, optional); SHA-256 file fingerprint and a content hash; read-only (REQ-001). |
+| `analysis/roles.py` | Column roles with evidence; overrides; PII flags (REQ-002). |
+| `analysis/registry.py` | `@analysis_tool(name, category, version, params=PydanticModel)`; `TOOL_REGISTRY`; parameter validation; content-addressed `ToolExecution` (REQ-004, REQ-005). |
+| `analysis/profile.py`, `quality.py`, `distributions.py`, `relationships.py`, `segmentation.py`, `anomalies.py`, `temporal.py` | The registered tools (REQ-004, REQ-006). Results hold aggregates only; groups below the minimum cell size are pooled. |
+| `analysis/planner.py` | Deterministic rule planner with reasons; `validate_plan()` for a model-proposed plan (REQ-003, REQ-017). |
+| `analysis/findings.py` | Rules turning results into candidate findings; I-score components; BH adjustment; top-N (REQ-007). |
+| `analysis/hypotheses.py` | Hypotheses with declarative decision rules, templates per finding kind, the bounded loop, follow-ups, research questions (REQ-008, REQ-009). |
+| `analysis/validator.py` | The REQ-010 checks, including number grounding and causal-phrase rejection (same approach as `0080`'s grounding, reimplemented so the package stays self-contained). |
+| `analysis/report.py`, `metadata.py` | Fixed-order Markdown, `findings.json`, `hypotheses.json`, Matplotlib figures from recorded aggregates; `run_metadata.yaml` via PyYAML (REQ-011, REQ-015). |
+| `analysis/pipeline.py`, `cli.py` | `investigate()` (the whole deterministic run), `reproduce()`, `rerun()`; the package's `dataset-investigator` command (REQ-013, REQ-014). |
+| `context.py` | Language-model context: profile, roles, evidence only; PII masked (REQ-017, NFR-002). Runtime only. |
+| `export.py` | Builds `analysis_package/` around a copy of `analysis/`: manifest with module hashes, generated tests, `requirements.lock`, README, config, example, expected outputs (REQ-012). Runtime only. |
+| `cli.py` | `quantsmith-dataset-investigator` (REQ-016): the full run plus the step commands the workflow drives. |
 | `.claude/workflows/dataset-investigator.js` | On-demand workflow (REQ-016). |
-| `agents/analytics/dataset_investigator/` | Agent contract (`prompt.md`, `README.md`, `instructions.md`, `tasks.md`) and role prompts for planner, investigator, validator, writer. |
+| `agents/analytics/dataset_investigator/` | Agent contract (`prompt.md`, `README.md`, `instructions.md`, `tasks.md`) including the four role briefs. |
 
 ## Interfaces & Data Contracts
 
-**State** (stdlib dataclasses, JSON round-trip): `InvestigationState(dataset,
+**State** (Pydantic models, JSON round-trip): `InvestigationState(dataset,
 profile, column_roles, plan, executions, findings, hypotheses, questions,
 validations, config)`.
 
@@ -115,12 +117,12 @@ timestamps or randomness in the script (resume-safe); the run id comes from
 
 | Requirement | Design element | Tasks |
 | --- | --- | --- |
-| REQ-001 | `io.py` | T-001 |
-| REQ-002 | `schema.py` | T-002 |
+| REQ-001 | `analysis/loading.py` | T-001 |
+| REQ-002 | `analysis/roles.py` | T-002 |
 | REQ-003 | `planner.py` | T-003 |
-| REQ-004 | `tools/*`, registry results | T-004, T-005 |
+| REQ-004 | analysis tools, registry results | T-004, T-005 |
 | REQ-005 | `registry.py` | T-004 |
-| REQ-006 | `tools/*` six families | T-005, T-006 |
+| REQ-006 | analysis tools across six families | T-005, T-006 |
 | REQ-007 | `findings.py` | T-007 |
 | REQ-008 | `hypotheses.py` loop | T-008 |
 | REQ-009 | `hypotheses.py` questions | T-008 |
@@ -145,9 +147,9 @@ timestamps or randomness in the script (resume-safe); the run id comes from
 | Location | `src/quantsmith/dataset_investigator/` in this repo | Separate `dataset-investigator` repository | Reuses `0080` grounding, `0070` envelopes, packaging, CI, and gates. The exported package is the standalone artifact. |
 | Model role | Claude Code workflow subagents | Runtime calls an LLM API directly | No credentials in the runtime; the deterministic path stays model-free; the API backend can come later through `adapters/llm_runtime/`. |
 | Exported code | Byte-identical copies of the executed modules | Generated or templated code | The spec's core promise; hashes make drift detectable. |
-| Data models | stdlib dataclasses | Pydantic | No new core dependency; repository convention. |
-| Figures | Vega-Lite JSON | Matplotlib PNGs | No dependency; renders in the repository's existing chart paths. |
-| Heavy anomaly methods | Optional extra | Core dependency | scikit-learn is large and only two methods need it. |
+| Data models | Pydantic | stdlib dataclasses | Owner allowed heavy libraries; Pydantic gives validated, JSON-schema-described tool parameters that model roles can be shown and held to. |
+| Figures | Matplotlib PNG from recorded aggregates | Vega-Lite JSON | Readable in any Markdown viewer; drawn from results, never from raw rows. |
+| Dependencies | One optional `investigator` extra | Core dependencies | The rest of `quantsmith` stays light; CI installs all extras. |
 | Many tests | BH adjustment across the run | Unadjusted p-values | Investigation runs dozens of tests; unadjusted support inflates findings. |
 
 ## Validation Strategy
@@ -168,5 +170,5 @@ rollback is deleting it; the runtime never touches the source.
 
 ## Open Questions
 
-- Owner confirmation of the optional `investigator` extra (pyarrow, scikit-learn).
+- ~~Optional extra and heavy libraries~~ — resolved 2026-10-07 (spec Assumptions).
 - Whether `0081` domain packs should supply column semantics.
