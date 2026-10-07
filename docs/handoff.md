@@ -117,8 +117,9 @@ advisory-by-default deployment decision. The chain builds on
 > one thing moves, it is this: build `0080` T-024–T-029 and get the spec
 > approved. T-001–T-023 are built. The owner resolved the open questions on
 > 2026-10-07: the first surface is the `0057` Knowledge Console backed by model
-> **APIs** (self-hosted OpenAI-compatible plus another gateway — there is no
-> Claude Code where it will run); knowledge candidates are opt-in per publish;
+> **APIs** through a configured, provider-neutral backend (OpenAI-compatible,
+> Anthropic, generic HTTP/JSON, or any callable — no gateway assumed; there is
+> no Claude Code where it will run); knowledge candidates are opt-in per publish;
 > approval is per-request confirmation plus a recorded, optionally role-gated
 > approver. Start with T-024 (the API backend), which `0099` can reuse.
 
@@ -178,8 +179,8 @@ time:
    rather than adding a new foundation. **Next:** build T-024–T-029 in order
    (API backend, LLM interpreter and narrator, Console route, named approver,
    opt-in knowledge candidates, CLI and docs), then approve the spec. Open
-   questions resolved 2026-10-07 (see item 29); still open: which gateway
-   besides OpenAI-compatible endpoints is in use. First write-back target:
+   questions resolved 2026-10-07 (see item 29), including the gateway: none
+   assumed, backends are configured profiles. First write-back target:
    SQLite (local, gitignored file).
 2. **Short-term-markets domain foundation (item 21, spec `0063`, Approved).**
    Build the shared expert contract before adding more agents or isolated
@@ -1494,7 +1495,9 @@ manual-task persistence question stays deferred until a real consumer needs it.
     **Decisions (owner, 2026-10-07):** (1) first surface is the `0057`
     Knowledge Console, with model calls through an injected, API-backed
     callable, because the environments that will run this have model APIs
-    (self-hosted OpenAI-compatible and another gateway) but no Claude Code;
+    but no Claude Code. No gateway is assumed: the backend is a configured
+    profile (OpenAI-compatible, Anthropic, generic HTTP/JSON, or an
+    import-path callable for SDK-based providers such as Bedrock or Vertex);
     Slack stays out (it needs a hosted bot); (2) insights become `0048`
     knowledge candidates only on opt-in per publish, after a committed write
     with every pack reviewed, never auto-promoted; (3) approval is
@@ -1502,8 +1505,6 @@ manual-task persistence question stays deferred until a real consumer needs it.
     optional approver roles from the roster and a second-person rule per
     target. These add REQ-019–REQ-023, AC-028–AC-032, and T-024–T-029.
     **Remaining:** T-024–T-029, T-019 (ship docs), and owner approval.
-    **Open question:** which gateway besides OpenAI-compatible endpoints
-    (Bedrock, Vertex, internal) is in use.
 
 30. **Analytics domain packs (spec `0081`, Draft; packs drafted, validator
     built) — the domain knowledge behind item 29.** Forty JSON packs in
