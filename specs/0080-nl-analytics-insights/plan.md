@@ -158,6 +158,11 @@ derived from the plan window and re-filtered by the same bound;
 | REQ-016 | draft-pack caveat + write-back gate on `Selection.all_reviewed` | T-022 |
 | REQ-017 | generic fallback + restrict-only merge | T-021 |
 | REQ-018 | `AnswerContext.domain_pack_source` (`0081` `PackSource`) echoed in citations, `ChatResponse.domain_pack_source`, and the envelope answer payload | T-023 |
+| REQ-019 | injected completion callable; profile-selected stdlib backends (OpenAI-compatible, Anthropic, generic HTTP/JSON, import-path callable) in `adapters/llm_runtime/` | T-024 |
+| REQ-020 | `LLMInterpreter` (JSON plan, validator gate, clarification on failure); `LLMNarrator` (grounding, template fallback) | T-025 |
+| REQ-021 | `0057` Console analytics route under the console's viewer clearance | T-026 |
+| REQ-022 | opt-in `0048` knowledge candidate after a committed, all-reviewed write | T-028 |
+| REQ-023 | recorded approver handle; contract `approver_roles` / `require_distinct_approver`; roster `roles` | T-027 |
 | NFR-001 | canonical JSON hashing; no clock reads in stages | T-006, T-014 |
 | NFR-002 | as-of bound in execute and prior-insight lookup | T-006, T-013 |
 | NFR-003 | stdlib-only package; injected I/O; import scan test | T-016 |
@@ -213,8 +218,18 @@ derived from the plan window and re-filtered by the same bound;
 - ~~First write-back target~~ — resolved 2026-09-24: SQLite
   (`writeback_sqlite.py`, stdlib `sqlite3`, local gitignored file). A shared
   database adapter is deferred until a team needs one.
-- First chat surface; whether the `0057` console hosts it through its existing
-  `QueryEngine` seam.
-- Whether insight records also become `0048`/`0056` knowledge candidates.
+- ~~First chat surface~~ — resolved 2026-10-07: the `0057` Console, through a
+  new analytics route (T-026), not its `QueryEngine` seam (that answers over
+  memory records). Model calls go through an injected, API-backed callable
+  (T-024/T-025), because the target environments have model APIs but no
+  Claude Code.
+- ~~Knowledge candidates~~ — resolved 2026-10-07: opt-in per publish, after a
+  committed write with all packs reviewed, never auto-promoted (T-028).
+- ~~Approval model~~ — resolved 2026-10-07: per-request confirmation plus a
+  recorded approver handle; optional approver roles and a second-person rule
+  per target (T-027).
+- ~~Which gateway~~ — resolved 2026-10-07: none assumed. Backends are
+  configured profiles: OpenAI-compatible, Anthropic, generic HTTP/JSON, or an
+  import-path callable (T-024).
 - Multi-metric plans beyond a two-measure scatter — defer until a real
   question set shows demand.
