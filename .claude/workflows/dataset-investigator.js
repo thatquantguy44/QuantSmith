@@ -49,7 +49,8 @@ async function run(command, stdin, label, phaseTitle) {
   const r = await agent(
     'You are the executor step of the Dataset Investigator. From the repository root, run exactly the one shell ' +
     'command below with the Bash tool. Do not change it, run anything else, retry it, or open the data or any ' +
-    'output file. Return its exit code, its complete stdout, and its stderr.\n\n' + full,
+    'output file. Return its exit code, its complete stdout, and its stderr. Copy stdout exactly as printed: do not ' +
+    'reformat, shorten, summarize, or add notes to it.\n\n' + full,
     { label, phase: phaseTitle, schema: RESULT, effort: 'low' })
   if (!r) throw new Error(`${label}: the executor returned nothing`)
   return r
@@ -57,7 +58,15 @@ async function run(command, stdin, label, phaseTitle) {
 
 function parsed(r, label) {
   if (r.exit_code !== 0) throw new Error(`${label} failed (exit ${r.exit_code}): ${(r.stderr || r.stdout || '').slice(0, 2000)}`)
-  return JSON.parse(r.stdout)
+  // The executor copies stdout through a model; tolerate text around the JSON object, never inside it.
+  const out = r.stdout || ''
+  const i = out.indexOf('{'), j = out.lastIndexOf('}')
+  if (i < 0 || j < i) throw new Error(`${label}: no JSON object in stdout: ${out.slice(0, 500)}`)
+  try {
+    return JSON.parse(out.slice(i, j + 1))
+  } catch (e) {
+    throw new Error(`${label}: stdout is not valid JSON (${e.message}): ${out.slice(0, 500)}`)
+  }
 }
 
 const NUMBERS = 'State only numbers that appear in the evidence you were given. Put column names, group labels and ' +

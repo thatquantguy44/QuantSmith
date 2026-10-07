@@ -180,7 +180,10 @@ def band(s: pd.Series, bins: int) -> pd.Series:
         cats = pd.qcut(x, q=bins, duplicates="drop")
     except ValueError:
         return labels(x)
-    names = np.array([f"[{iv.left:.4g}, {iv.right:.4g}]" for iv in cats.cat.categories] + ["(missing)"], dtype=object)
+    edges = [(iv.left, iv.right) for iv in cats.cat.categories]
+    if edges:
+        edges[0] = (float(x.min()), edges[0][1])  # qcut widens the first edge by 0.1%; show the real minimum
+    names = np.array([f"[{lo:.4g}, {hi:.4g}]" for lo, hi in edges] + ["(missing)"], dtype=object)
     codes = cats.cat.codes.to_numpy()
     return pd.Series(names[np.where(codes < 0, len(names) - 1, codes)], index=s.index, dtype=object)
 

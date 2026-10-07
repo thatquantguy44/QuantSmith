@@ -209,6 +209,7 @@ class StratifiedParams(Params):
     reference: Optional[str] = None
     missing_indicator: bool = False
     bins: int = 4
+    by_bins: int = 5
     positive: Optional[str] = None
 
 
@@ -225,7 +226,7 @@ def stratified_target_rates(df: pd.DataFrame, p: StratifiedParams, ctx: ToolCont
         reference = df[p.by].notna()
         exp_label, ref_label = f"{p.by} missing", f"{p.by} present"
     else:
-        lab = labels(df[p.by])
+        lab = groups_for(df, p.by, ctx, p.by_bins)  # the same groups (or bands) the gap was measured on
         exposed, reference = lab == str(p.exposed), lab == str(p.reference)
         exp_label, ref_label = str(p.exposed), str(p.reference)
     strata = groups_for(df, p.strata, ctx, p.bins)
@@ -259,12 +260,15 @@ def stratified_target_rates(df: pd.DataFrame, p: StratifiedParams, ctx: ToolCont
     if len(e_all) and len(r_all) and r_all["y"].mean() > 0:
         crude = float(e_all["y"].mean() / r_all["y"].mean())
     mh = (num / den) if den > 0 else None
+    strength = None if not mh else max(mh, 1 / mh)
+    same_direction = None if mh is None or crude is None else ((mh >= 1) == (crude >= 1))
     pval = None
     if cmh_var > 0:
         stat = (abs(cmh_num) - 0.5) ** 2 / cmh_var
         pval = float(stats.chi2.sf(stat, 1))
     return {"target": p.target, "by": p.by, "strata_column": p.strata, "positive": positive,
             "exposed": exp_label, "reference": ref_label, "n_exposed": int(len(e_all)), "n_reference": int(len(r_all)),
-            "crude_ratio": crude, "mh_rate_ratio": mh, "cmh_p_value": pval, "strata": shown,
+            "crude_ratio": crude, "mh_rate_ratio": mh, "mh_strength": strength,
+            "same_direction_as_crude": same_direction, "cmh_p_value": pval, "strata": shown,
             "share_strata_ratio_above_1": (sum(r > 1 for r in ratios) / len(ratios)) if ratios else None,
             "tests": ([{"name": "cmh", "p_value": pval}] if pval is not None else [])}

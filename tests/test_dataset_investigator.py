@@ -694,3 +694,96 @@ def test_ac022_imports():
     r = subprocess.run(check=False, args=[sys.executable, "-c", probe], capture_output=True, text=True,
                        env={**os.environ, "PYTHONPATH": str(ROOT / "src")})
     assert r.stdout.strip() == "False", r.stderr
+
+
+# --- Regressions found by running real data (IBM Telco churn; UCI Occupancy) ------------------------
+
+
+def _telco_like(n=4_000, seed=5):
+    """A small table with the shapes the real Telco churn data has: a protective contract, a numeric-as-text
+    column with blanks, and one 'No internet service' group repeated across several add-on columns."""
+    rng = np.random.default_rng(seed)
+    contract = rng.choice(["Month-to-month", "One year", "Two year"], size=n, p=[0.55, 0.2, 0.25])
+    tenure = np.where(contract == "Two year", rng.integers(30, 72, n), rng.integers(0, 40, n))
+    internet = rng.choice(["Fiber optic", "DSL", "No"], size=n, p=[0.45, 0.35, 0.2])
+    base = np.select([contract == "Month-to-month", contract == "One year"], [0.40, 0.12], 0.03)
+    base = base * np.where(internet == "No", 0.25, 1.0) * np.where(tenure < 12, 1.3, 1.0)
+    churn = np.where(rng.random(n) < np.clip(base, 0, 1), "Yes", "No")
+    monthly = np.round(np.where(internet == "No", 20, 70) + rng.normal(0, 8, n), 2)
+    total = (monthly * np.maximum(tenure, 1)).round(2).astype(str).astype(object)
+    total[:5] = " "                                   # blanks, as in the real TotalCharges
+    df = pd.DataFrame({"customerID": [f"{i:04d}-AB{i % 97:02d}" for i in range(n)], "Contract": contract,
+                       "tenure": tenure, "InternetService": internet, "MonthlyCharges": monthly,
+                       "TotalCharges": total, "Churn": churn})
+    for addon in ("OnlineSecurity", "TechSupport", "OnlineBackup"):
+        df[addon] = np.where(internet == "No", "No internet service", rng.choice(["Yes", "No"], size=n))
+    return df
+
+
+@pytest.fixture(scope="module")
+def telco_like():
+    df = _telco_like()
+    return df, investigate(df, Config(), None, figures=False)
+
+
+def test_ac002_numbers_stored_as_text_are_numeric(telco_like):
+    """AC-002 regression: a numeric column with a few blank strings is numeric, with the blanks counted."""
+    _df, st = telco_like
+    col = next(c for c in st.columns if c.name == "TotalCharges")
+    assert col.role == "continuous_numeric" and col.evidence["non_numeric_entries"] == 5
+    assert any(f.kind == "mixed_types" and f.subject["column"] == "TotalCharges" and f.evidence["non_numeric"] == 5
+               for f in st.findings)
+
+
+def test_ac010_protective_gap_tested_in_its_own_direction(telco_like):
+    """AC-010 regression: a gap where the group has a lower rate is stated high-to-low and its stratified
+    test passes when the gap persists, instead of being rejected for not exceeding 1.5."""
+    _, st = telco_like
+    gap = next(f for f in st.findings if f.kind == "target_rate_gap" and f.subject["by"] == "Contract")
+    assert gap.subject["exposed"] == "Month-to-month" and gap.subject["reference"] == "Two year"
+    assert gap.evidence["ratio_high_to_low"] > 5 and "Month-to-month` is" in gap.claim
+    h = next(h for h in st.hypotheses if h.template == "gap_stratified" and h.params["by"] == "Contract")
+    assert h.status == "supported", h.explanation
+    banded = [h for h in st.hypotheses if h.template == "gap_stratified" and h.params["by"] in ("tenure", "MonthlyCharges")]
+    assert banded and all(h.evidence.get("mh_strength") is not None for h in banded), [h.explanation for h in banded]
+
+
+def test_ac012_same_rows_through_another_column_are_merged(telco_like):
+    """AC-012 regression: gaps whose group is the same rows seen through another column merge into one."""
+    _, st = telco_like
+    gaps = [f for f in st.findings if f.kind == "target_rate_gap" and
+            ("No internet service" in (f.subject["exposed"], f.subject["reference"]) or f.subject["by"] == "InternetService")]
+    survivors = [f for f in gaps if f.merged_into is None and f.status != "REJECTED"]
+    assert len(gaps) >= 3 and len(survivors) == 1, [(f.finding_id, f.merged_into) for f in gaps]
+    tested = {h.params.get("by") for h in st.hypotheses if h.template == "gap_stratified"}
+    assert len(tested & {"OnlineSecurity", "TechSupport", "OnlineBackup", "InternetService"}) <= 1
+
+
+def test_ac007_regimes_are_not_called_outliers():
+    """AC-007 regression: a mixture flagged far beyond the expected share is reported as regimes, not outliers."""
+    rng = np.random.default_rng(2)
+    n = 3_000
+    on = rng.random(n) < 0.25
+    df = pd.DataFrame({"light": np.where(on, rng.normal(450, 40, n), rng.normal(5, 2, n)),
+                       "co2": np.where(on, rng.normal(900, 80, n), rng.normal(450, 20, n)),
+                       "temp": rng.normal(21, 0.5, n)})
+    st = investigate(df, Config(), None, figures=False)
+    kinds = {f.kind for f in st.findings}
+    assert "multivariate_regimes" in kinds and "multivariate_outliers" not in kinds
+    f = next(f for f in st.findings if f.kind == "multivariate_regimes")
+    assert "more than one regime" in f.claim and f.status == "VALIDATED"
+
+
+def test_ac013_small_values_keep_their_digits():
+    """AC-013 regression: tiny values print with significant figures, and the claim stays grounded."""
+    assert F.num(0.0033612) == "0.00336" and F.num(21.6612) == "21.66" and F.num(1037.23) == "1,037.23"
+    assert ground(f"mean {F.num(0.0033612)} vs {F.num(0.0045601)}", [{"a": 0.0033612, "b": 0.0045601}]) == []
+
+
+def test_ac003_planner_names_candidate_targets():
+    """AC-003 regression: with no target, the plan says which two-valued columns could be one."""
+    df = pd.DataFrame({"temp": np.random.default_rng(0).normal(size=500), "Occupancy": np.arange(500) % 2})
+    _, st = start(df, Config())
+    plan = PL.plan(df, st)
+    reason = next(s.reason for s in plan.skipped if s.analysis == "target_balance")
+    assert "Occupancy" in reason and "--target" in reason
