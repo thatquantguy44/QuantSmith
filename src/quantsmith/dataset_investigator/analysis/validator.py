@@ -30,7 +30,7 @@ from typing import Any, Dict, Iterable, List, Sequence, Set
 
 import pandas as pd
 
-from .findings import derive, ranked, score
+from .findings import dedupe_keys, derive, ranked, score
 from .hypotheses import tool_context
 from .models import Finding, InvestigationState
 from .registry import ToolError, execute, validate_params
@@ -126,11 +126,6 @@ def evidence_matches(expected: Dict[str, Any], actual: Dict[str, Any]) -> bool:
     return _same(expected, actual)
 
 
-def dedupe_key(f: Finding) -> str:
-    cols = sorted(str(v) for v in labels_in([f.subject]))
-    return f"{f.kind}|{'|'.join(cols)}"
-
-
 def finding_labels(f: Finding, state: InvestigationState) -> List[str]:
     return sorted(labels_in([f.subject])) + [c.name for c in state.columns]
 
@@ -196,12 +191,14 @@ def validate(state: InvestigationState, df: pd.DataFrame) -> None:
             worse("WEAK_EVIDENCE", "effect size is negligible")
         issues = [why for _, why in verdicts]
         status = max((s for s, _ in verdicts), key=SEVERITY.__getitem__, default="VALIDATED")
-        dk = dedupe_key(f)
-        if status != "REJECTED" and dk in seen:
-            f.merged_into = seen[dk]
-            issues.append(f"duplicate of {seen[dk]}")
+        keys = dedupe_keys(f)
+        match = next((seen[k] for k in keys if k in seen), None)
+        if status != "REJECTED" and match:
+            f.merged_into = match
+            issues.append(f"duplicate of {match}")
         elif status != "REJECTED":
-            seen[dk] = f.key
+            for k in keys:
+                seen.setdefault(k, f.key)
         computed = _calibrated(status, f)
         if f.confidence and CONFIDENCE_RANK[f.confidence] > CONFIDENCE_RANK[computed]:
             issues.append(f"confidence lowered from {f.confidence} to {computed}")

@@ -130,6 +130,14 @@ patterns locally rather than expecting them to update in place.
   `--packs-root` is optional and errors only when it names an empty catalog.
 
 ### Fixed
+- Dataset Investigator (spec `0099`), from runs on real data (IBM Telco churn, UCI Occupancy): numbers stored as text
+  (blanks among numbers) are numeric with a mixed-type quality finding; a target gap is stated high-to-low and its
+  stratified (Mantel–Haenszel) test is judged on strength in the gap's own direction, so protective gaps are no
+  longer rejected; the stratified test groups by the same bands the gap was measured on (it previously matched band
+  labels against raw values and found no rows); findings over the same rows through another column (e.g. six
+  "No internet service" add-ons) merge into one; more than 5% Mahalanobis-flagged rows is reported as likely
+  regimes, not outliers; band edges start at the data minimum; tiny values keep three significant digits; and the
+  planner names two-valued columns that could serve as `--target`.
 - NL analytics insights (spec `0080`, T-021/T-022) no longer sum per-group values for every metric: yields across tenors,
   VaR across desks, and ratios were summed into a single "level", and percent changes were reported for rates.
   Levels now use the semantic layer's own ungrouped value. A non-additive metric asked by a dimension reports

@@ -65,6 +65,14 @@ Every acceptance criterion must be named by at least one test.
 | AC-021 | `test_ac021_benchmark_1m_rows` | done |
 | AC-022 | `test_ac022_imports` | done |
 
+Real-data regressions (IBM Telco churn, UCI Occupancy), each a synthetic fixture
+reproducing the defect: `test_ac002_numbers_stored_as_text_are_numeric`,
+`test_ac003_planner_names_candidate_targets`,
+`test_ac007_regimes_are_not_called_outliers`,
+`test_ac010_protective_gap_tested_in_its_own_direction`,
+`test_ac012_same_rows_through_another_column_are_merged`,
+`test_ac013_small_values_keep_their_digits`.
+
 ## Follow-ups
 
 Tracked work intentionally deferred (no silent "temporary" shortcuts — P8).
