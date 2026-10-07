@@ -38,6 +38,9 @@ jobs:
       - name: Enforce spec-driven traceability
         run: |
           QF_STAGE_ENFORCE=1 sh hooks/stages/run-stage.sh spec
+      - name: Enforce agent-skills upstream integrity (spec 0100)
+        run: |
+          QF_STAGE_ENFORCE=1 sh hooks/stages/run-stage.sh agent-skills
       - name: Enforce backtest integrity (only when a report exists)
         run: |
           QF_STAGE_ENFORCE=1 sh hooks/stages/run-stage.sh backtest

@@ -46,3 +46,7 @@ run-scope reporting traces to constitution P10 and `RISK-003` in the same
 spec. Backed by `instructions/test_engineering.md`. Feeds
 `testing_validation` and, when a release decision is in play,
 `quality-guard-agent`.
+
+## agent-skills
+
+Vendored engineering skills this agent may follow (spec `0100`; precedence, stage map and overrides in `instructions/agent_skills.md`): `vendor/agent-skills/skills/test-driven-development/SKILL.md`, `vendor/agent-skills/skills/debugging-and-error-recovery/SKILL.md`, `vendor/agent-skills/skills/security-and-hardening/SKILL.md`.

@@ -35,3 +35,7 @@ and report any `AC-*` without a real test as uncovered — a passing test that
 proves nothing does not close a criterion. "Deterministic" here follows
 `instructions/reproducibility.md` — seeded randomness, pinned inputs, no hidden
 state — the same standard the `repro` gate checks for.
+
+## agent-skills
+
+Vendored engineering skills this agent may follow (spec `0100`; precedence, stage map and overrides in `instructions/agent_skills.md`): `vendor/agent-skills/skills/test-driven-development/SKILL.md`, `vendor/agent-skills/skills/debugging-and-error-recovery/SKILL.md`, `vendor/agent-skills/skills/doubt-driven-development/SKILL.md`. AC-to-test traceability and quant validation remain this agent's gate.
