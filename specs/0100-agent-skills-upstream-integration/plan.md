@@ -24,6 +24,8 @@ Three ways to "connect", in resolution order:
 2. **Installed (user level)** — `quantsmith-agent-skills install --scope user` registers the *vendored* copy (or the override) as a
    local-directory marketplace in the user's Claude Code settings, for use outside the QuantSmith checkout.
 3. **Vendored (default)** — `vendor/agent-skills/` in the repo, loaded via project settings. Works in any clone, offline.
+4. **Bundled** — the same tree shipped read-only inside the `quantsmith` wheel (`quantsmith/_bundled/agent_skills/`), used by
+   `install --scope user` when there is no checkout (REQ-012). A repo-local `vendor/agent-skills/` always wins over it.
 
 ## Architecture & Components
 
@@ -58,6 +60,7 @@ Three ways to "connect", in resolution order:
 | `src/quantsmith/agent_skills/` (`sync.py`, `lock.py`, `cli.py`) | `sync`, `verify`, `status`, `diff`, `install` subcommands; console script `quantsmith-agent-skills`. Stdlib only. Never executes vendored content. |
 | `vendor/agent-skills/` | The pinned subset plus two QuantSmith-owned files (`.claude-plugin/plugin.json`, `README.md`), marked `owned: quantsmith` in the lock and excluded from upstream hash comparison. |
 | `vendor/agent-skills.lock.json` | Provenance and integrity record (REQ-002). Sorted keys, two-space indent, trailing newline (NFR-002). |
+| `setup.py` bundling | Copies `vendor/agent-skills/` and the lock into `quantsmith/_bundled/agent_skills/` at build time, as it already does for analytics packs; the build fails if the copy does not match the lock. |
 | `.claude-plugin/marketplace.json` (root) | Local marketplace `quantsmith-local` with one plugin `agent-skills`, source `./vendor/agent-skills`. No URL sources anywhere. |
 | `.claude/settings.json` | Adds the marketplace and `enabledPlugins: {"agent-skills@quantsmith-local": true}`. Flipping to `false` is the kill switch (NFR-006). Existing SessionStart hook untouched. |
 | `hooks/stages/agent-skills-check.sh` | Gate (REQ-004, AC-004/006/007/012). Recomputes hashes with `sha256sum`/`shasum`, parses frontmatter with `sed`, greps manifests for URL sources, checks agent citations resolve, checks names against `agents/agent_registry.yaml`. Wired into `run-stage.sh` and CI. |
@@ -71,7 +74,7 @@ Three ways to "connect", in resolution order:
 | `review` | `code-review-and-quality`, `code-simplification`, `security-and-hardening`, `performance-optimization`; commands `/review`, `/code-simplify`, `/test` | on |
 | `ship` | `git-workflow-and-versioning`, `ci-cd-and-automation`, `documentation-and-adrs`, `observability-and-instrumentation`, `deprecation-and-migration`, `shipping-and-launch` | on |
 | `define` | `interview-me`, `idea-refine` (technique only; output goes into `specs/NNNN-*/spec.md`) | on |
-| `personas` | agents `code-reviewer`, `test-engineer`, `security-auditor` | on |
+| `personas` | agents `code-reviewer`, `test-engineer`, `security-auditor` (`test-engineer` ranks below `test_engineering/*`; see stage map) | on |
 | `references` | `references/*.md` except `accessibility-checklist.md` (with `web`) | on |
 | `web` | `frontend-ui-engineering`, `browser-testing-with-devtools`, command `/webperf`, agent `web-performance-auditor`, `accessibility-checklist.md` | off (REQ-011) |
 
@@ -92,8 +95,8 @@ Three ways to "connect", in resolution order:
 | --- | --- | --- | --- |
 | Specify | `planning_requirements` | `interview-me`, `idea-refine` | Output only into `spec.md` with QuantSmith IDs. |
 | Implement | `implementation` | `incremental-implementation`, `test-driven-development`, `source-driven-development`, `api-and-interface-design`, `context-engineering` | Tests must name `AC-*` IDs; no leakage rules relaxed. |
-| Verify | `testing_validation`, `test_engineering/*` | `test-driven-development`, `debugging-and-error-recovery`, `doubt-driven-development` | Quant validation (`backtest_review`, leakage) still required. |
-| Review | `quality-guard-agent`, review path | `code-review-and-quality`, `code-simplification`, `security-and-hardening`, `performance-optimization` | Findings also checked against the constitution. |
+| Verify | `testing_validation`, `test_engineering/*` | `test-driven-development`, `debugging-and-error-recovery`, `doubt-driven-development`; persona `test-engineer` | Route to `test_engineering_orchestrator` first; `test-engineer` only for generic test design, and its tests must name `AC-*`. Quant validation (`backtest_review`, leakage) still required. |
+| Review | `quality-guard-agent`, review path | `code-review-and-quality`, `code-simplification`, `security-and-hardening`, `performance-optimization`; personas `code-reviewer`, `security-auditor` | Findings also checked against the constitution. |
 | Ship / Operate | `git_release`, `deployment_release`, `maintenance_monitoring` | `git-workflow-and-versioning`, `ci-cd-and-automation`, `documentation-and-adrs`, `observability-and-instrumentation`, `deprecation-and-migration`, `shipping-and-launch` | `instructions/git_workflow.md`, Conventional Commits, commit only when asked, **no attribution footers** (CLAUDE.md) win. |
 
 ## Interfaces & Data Contracts
@@ -103,7 +106,7 @@ Three ways to "connect", in resolution order:
 ```
 quantsmith-agent-skills sync   --source <dir|clone|tarball> [--ref <sha|tag>] [--dry-run] [--config config/agent_skills.yml]
 quantsmith-agent-skills verify                       # same checks as the gate, from Python
-quantsmith-agent-skills status                       # copy in effect, commit, matches-lock, duplicate installs
+quantsmith-agent-skills status                       # copy in effect (override/repo/bundled), commit, matches-lock, duplicate installs, review due
 quantsmith-agent-skills diff   --source <...> [--ref ...]   # change summary only
 quantsmith-agent-skills install --scope user|project [--path <dir>]
 ```
@@ -176,6 +179,9 @@ generated-or-not flag in `config/agent_skills.yml`.
 | REQ-009 | agent `instructions.md` citations; `agents/README.md` | T-010 |
 | REQ-010 | `docs/adoption_guide.md`; drift surface | T-011 |
 | REQ-011 | `web` group | T-002, T-004 |
+| REQ-012 | `setup.py` bundling; resolution order in `status`/`install` | T-005, T-014 |
+| REQ-013 | `personas` group; stage-map routing | T-002, T-009 |
+| REQ-014 | review-due check in `status`; handoff record | T-015 |
 | NFR-001 | no-network test; URL rejection | T-004, T-012 |
 | NFR-002 | deterministic writer; idempotence test | T-003, T-012 |
 | NFR-003 | sync safety checks | T-004 |
@@ -214,10 +220,11 @@ generated-or-not flag in `config/agent_skills.yml`.
   its own. Gate advisory first; CI enforcing once the second PR lands.
 - **Observability:** `status` output and gate findings; lock `synced_on` and `commit` shown in `docs/handoff.md`.
 - **Refresh runbook:** update local clone of the fork → `diff` → review → `sync` → PR containing only `vendor/` and the lock.
+- **Quarterly review:** when `status` says the review is due (lock older than 92 days), run the runbook; if nothing is worth taking,
+  record "reviewed, no change" with the date in `docs/handoff.md` (REQ-014).
 - **Rollback:** set `enabledPlugins` entry to `false` (instant); revert the sync PR to return to the previous pin; full removal per
   NFR-006.
 
 ## Open Questions
 
 - Confirm the settings keys for a project-local directory marketplace (T-001) — the main design uncertainty.
-- Whether to also bundle the vendored tree into the `quantsmith` wheel (deferred; see spec).
