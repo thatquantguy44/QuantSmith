@@ -38,7 +38,7 @@ from .analysis import planner as PL
 from .analysis.cli import _config, add_analyze_args
 from .analysis.hypotheses import add_model_hypotheses, run_loop, tool_context
 from .analysis.loading import load_dataset
-from .analysis.models import InvestigationState
+from .analysis.models import InvestigationState, ModelInputs
 from .analysis.pipeline import (
     EXIT_USAGE,
     EXIT_WRONG_DATA,
@@ -180,20 +180,24 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             names = PL.validate_plan(_json_arg(args.analyses))
             state.plan = PL.plan(df, state, names, source="model")
             state.executions, state.results, state.findings, state.hypotheses = [], {}, [], []
+            state.model_inputs = ModelInputs(analyses=names)
             out = state.plan.model_dump(mode="json")
         if cmd == "run-plan":
             run_plan(state, df)
             if args.templates:
                 run_loop(state, df)
+                state.model_inputs.steps.append({"templates": True})
             out = _summary(state)
         elif cmd == "hypotheses":
             new = []
             if args.templates:
                 run_loop(state, df)
+                state.model_inputs.steps.append({"templates": True})
             if args.add:
                 props = _json_arg(args.add)
-                props = props.get("hypotheses", props) if isinstance(props, dict) else props
-                new = add_model_hypotheses(state, df, list(props), ground)
+                props = list(props.get("hypotheses", props) if isinstance(props, dict) else props)
+                new = add_model_hypotheses(state, df, props, ground)
+                state.model_inputs.steps.append({"proposals": props})
             # The context lists each hypothesis in full; here only the outcome.
             out = {"tested": [{"hypothesis_id": h.hypothesis_id, "status": h.status, "explanation": h.explanation}
                               for h in new], **_summary(state)}
@@ -213,6 +217,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 reviews = _json_arg(args.review)
                 reviews = reviews.get("reviews", reviews) if isinstance(reviews, dict) else reviews
                 notes = apply_review(state, list(reviews))
+            # Validation starts afresh each time, so the latest review is the one that stands.
+            state.model_inputs.reviews = list(reviews) if args.review else []
             out = {**_summary(state), "review_notes": notes,
                    "statuses": {f.finding_id: f.status for f in state.findings}}
         elif cmd == "report":
@@ -230,6 +236,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     _emit({"accepted": False, "unbacked": unbacked, "causal": causal})
                     return EXIT_NARRATIVE
                 state.narrative = text
+                state.model_inputs.narrative = text
             write_bundle(state, args.run, figures=not args.no_figures, data_hint=state.dataset.source)
             out = {"accepted": True, "report": str(Path(args.run) / "report" / "investigation_report.md")}
             if args.export:

@@ -6,6 +6,9 @@ plan → tools → candidate findings → hypothesis loop → validation → que
 → report. The same code runs inside an exported package, where
 :func:`reproduce` re-executes one recorded finding and :func:`rerun` repeats
 the investigation and compares its outputs byte for byte with the recorded ones.
+A run that language-model roles took part in records what they contributed
+(:class:`ModelInputs`); :func:`replay` feeds it back through the same
+validation, so that run too reruns with no model.
 """
 
 from __future__ import annotations
@@ -25,12 +28,13 @@ from .metadata import NON_DETERMINISTIC_FIELDS, write_run_metadata
 from .models import (
     Config,
     InvestigationState,
+    ModelInputs,
     ToolExecution,
 )
 from .registry import execute
 from .report import write_report
 from .roles import infer_columns
-from .validator import validate
+from .validator import apply_review, ground, validate
 
 EXIT_OK, EXIT_USAGE, EXIT_MISMATCH, EXIT_WRONG_DATA = 0, 2, 3, 4
 TOLERANCE = {"rel": 1e-6, "abs": 1e-9}
@@ -74,14 +78,32 @@ def investigate(source: Source, config: Optional[Config] = None, out_dir: Union[
                 run_id: Optional[str] = None, created_at: Optional[str] = None, figures: bool = True,
                 data_hint: Optional[str] = None) -> InvestigationState:
     """Run a whole investigation with no language model (REQ-014); write the bundle if ``out_dir`` is set."""
-    df, state = start(source, config, run_id=run_id, created_at=created_at)
-    state.plan = P.plan(df, state)
-    run_plan(state, df)
-    H.run_loop(state, df)
-    finish(state, df)
+    state = replay(source, config, ModelInputs(steps=[{"templates": True}]), run_id=run_id, created_at=created_at)
     if out_dir is not None:
         write_bundle(state, out_dir, figures=figures,
                      data_hint=data_hint or (str(source) if isinstance(source, (str, Path)) else "<dataset>"))
+    return state
+
+
+def replay(source: Source, config: Optional[Config], inputs: ModelInputs, *, run_id: Optional[str] = None,
+           created_at: Optional[str] = None) -> InvestigationState:
+    """Run the investigation with recorded model contributions in place of the model (REQ-014, REQ-017)."""
+    df, state = start(source, config, run_id=run_id, created_at=created_at)
+    if inputs.analyses is None:
+        state.plan = P.plan(df, state)
+    else:
+        state.plan = P.plan(df, state, P.validate_plan(list(inputs.analyses)), source="model")
+    run_plan(state, df)
+    for step in inputs.steps:
+        if step.get("templates"):
+            H.run_loop(state, df)
+        if step.get("proposals"):
+            H.add_model_hypotheses(state, df, list(step["proposals"]), ground)
+    finish(state, df)
+    if inputs.reviews:
+        apply_review(state, list(inputs.reviews))
+    state.narrative = inputs.narrative
+    state.model_inputs = inputs
     return state
 
 
@@ -127,6 +149,7 @@ def manifest(state: InvestigationState, module_hashes: Dict[str, str]) -> Dict[s
         "roles": {c.name: c.role for c in state.columns},
         "modules": dict(sorted(module_hashes.items())),
         "non_deterministic_fields": list(NON_DETERMINISTIC_FIELDS),
+        "model_inputs": state.model_inputs.model_dump(mode="json"),
         "findings": entries,
     }
 
@@ -197,14 +220,17 @@ def _close(e: Any, a: Any, tol: Dict[str, float]) -> bool:
 
 
 def rerun(package_root: Union[str, Path], data: Union[str, Path], out_dir: Union[str, Path]) -> Outcome:
-    """Repeat the whole investigation from the package and compare outputs with the recorded ones (REQ-014)."""
+    """Repeat the whole investigation from the package — replaying any recorded model contributions — and
+    compare its outputs with the recorded ones (REQ-014)."""
     root = Path(package_root)
     m = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
     ok, _, info = _same_dataset(m, data)
     if not ok:
         return Outcome(EXIT_WRONG_DATA, [f"Wrong dataset: content hash {info.content_sha256[:16]}… does not match the recording."])
     config = Config.model_validate(m["config"])
-    state = investigate(data, config, out_dir, run_id=m["run_id"], data_hint=str(data))
+    inputs = ModelInputs.model_validate(m.get("model_inputs") or {"steps": [{"templates": True}]})
+    state = replay(data, config, inputs, run_id=m["run_id"])
+    write_bundle(state, out_dir, data_hint=str(data))
     out = Outcome(EXIT_OK, [f"Re-ran {len(state.executions)} tool executions; {len(state.findings)} candidate findings."])
     for name in ("findings.json", "hypotheses.json"):
         recorded = (root / "expected" / name).read_bytes()

@@ -505,6 +505,43 @@ def test_ac016_rerun_without_model_is_identical(run, tmp_path):
     assert out.code == EXIT_OK, "\n".join(out.lines)
 
 
+def test_ac016_model_assisted_run_reruns_without_model(tmp_path, capsys):
+    """AC-016 / REQ-014: a run the model roles took part in records what they contributed, and the package
+    reruns it — plan, proposals, review, narrative replayed — with byte-identical outputs and no model."""
+    from quantsmith.dataset_investigator.cli import main
+
+    def step(*argv):
+        assert main([str(a) for a in argv]) == 0
+        return json.loads(capsys.readouterr().out)
+
+    data = tmp_path / "small.csv"
+    synthetic.transactions(4_000).to_csv(data, index=False)
+    run_dir = tmp_path / "run"
+    step("profile", data, "--out", run_dir, "--created-at", "2026-10-07T00:00:00Z")
+    analyses = ["profile", "data_quality", "target_balance", "target_relationships", "anomaly_detection"]
+    ctx = step("run-plan", run_dir, "--templates", "--analyses", json.dumps(analyses), "--context", "investigator")["context"]
+    gap = next(f for f in ctx["findings"] if f["kind"] == "target_rate_gap")
+    proposal = {"statement": f"The `{gap['subject']['by']}` gap persists within `velocity_24h` bands.",
+                "from_findings": [gap["key"]], "tool": "stratified_target_rates", "prediction": "",
+                "params": {"target": "is_fraud", "by": gap["subject"]["by"], "strata": "velocity_24h",
+                           "exposed": gap["subject"]["exposed"], "reference": gap["subject"]["reference"]},
+                "decision_rule": {"supported": [{"path": "mh_strength", "op": ">=", "value": 1.5}],
+                                  "rejected": [{"path": "mh_strength", "op": "<", "value": 1.2}]}}
+    step("hypotheses", run_dir, "--add", json.dumps([proposal, {**proposal, "tool": "exec_python"}]))
+    statuses = step("validate", run_dir)["statuses"]
+    target = next(fid for fid, s in statuses.items() if s == "VALIDATED")
+    step("validate", run_dir, "--review", json.dumps([{"finding": target, "status": "WEAK_EVIDENCE", "note": "thin"}]))
+    step("report", run_dir, "--narrative", f"The investigation covers `{gap['subject']['by']}`.", "--export", "--no-figures")
+
+    m = json.loads((run_dir / "analysis_package" / "manifest.json").read_text(encoding="utf-8"))
+    mi = m["model_inputs"]
+    assert mi["analyses"] == analyses and mi["reviews"][0]["finding"] == target and mi["narrative"]
+    assert [list(s) for s in mi["steps"]] == [["templates"], ["proposals"]] and len(mi["steps"][1]["proposals"]) == 2
+    assert m["findings"][target]["status"] == "WEAK_EVIDENCE"
+    out = rerun(run_dir / "analysis_package", str(data), tmp_path / "again")
+    assert out.code == EXIT_OK, "\n".join(out.lines)
+
+
 def test_ac017_run_metadata_fields(run):
     """AC-017: run_metadata.yaml records every REQ-015 field."""
     import yaml
@@ -750,6 +787,24 @@ def test_ac010_protective_gap_tested_in_its_own_direction(telco_like):
     assert h.status == "supported", h.explanation
     banded = [h for h in st.hypotheses if h.template == "gap_stratified" and h.params["by"] in ("tenure", "MonthlyCharges")]
     assert banded and all(h.evidence.get("mh_strength") is not None for h in banded), [h.explanation for h in banded]
+
+
+def test_ac010_groups_that_never_share_a_stratum_say_so():
+    """AC-010 regression: when no stratum holds both groups, the outcome says the gap cannot be compared
+    within strata, instead of a bare "no value" that reads like a failed run."""
+    rng = np.random.default_rng(4)
+    n = 2_000
+    fiber = np.arange(n) >= n // 2  # the median band edge falls in the gap between the groups' charges
+    df = pd.DataFrame({"service": np.where(fiber, "Fiber", "None"),
+                       "charges": np.where(fiber, rng.uniform(70, 110, n), rng.uniform(18, 26, n)),
+                       "churn": (rng.random(n) < np.where(fiber, 0.4, 0.08)).astype(int)})
+    _, st = start(df, Config(target="churn"))
+    _, res = execute("stratified_target_rates", df, {"target": "churn", "by": "service", "strata": "charges",
+                                                      "exposed": "Fiber", "reference": "None"},
+                     H.tool_context(st), input_fingerprint="x")
+    assert res["strata_with_both_groups"] == 0 and res["mh_strength"] is None
+    status, why, _ = H.evaluate(H.rule([("mh_strength", ">=", 1.5)], [("mh_strength", "<", 1.2)]), res)
+    assert status == "inconclusive" and why.count("mh_strength") == 1 and "do not overlap on `charges`" in why
 
 
 def test_ac012_same_rows_through_another_column_are_merged(telco_like):

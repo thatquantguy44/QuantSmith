@@ -83,8 +83,10 @@ def evaluate(rule: DecisionRule, result: Dict[str, Any]) -> Tuple[str, str, Dict
         return "supported", "; ".join(describe(c) for c in rule.supported), evidence
     if rej and all(r is True for r in rej):
         return "rejected", "; ".join(describe(c) for c in rule.rejected), evidence
-    missing = [c.path for c, h in zip(rule.supported + rule.rejected, sup + rej) if h is None]
+    missing = list(dict.fromkeys(c.path for c, h in zip(rule.supported + rule.rejected, sup + rej) if h is None))
     why = f"no value for {', '.join(missing)}" if missing else "neither the supported nor the rejected conditions all hold"
+    if missing and isinstance(result.get("note"), str):
+        why += f": {result['note']}"
     return "inconclusive", why, evidence
 
 

@@ -142,6 +142,11 @@ patterns locally rather than expecting them to update in place.
   instead of copied. Step output with `--context` is now compact JSON without the static tool catalog (new `catalog`
   command, fetched once), with floats to 6 significant digits, empty fields dropped, and the investigator shown its 20
   highest-ranked findings; the workflow also tolerates text an executor adds around the JSON.
+- Dataset Investigator: a package from a run the model roles took part in failed its own `rerun` (the rerun was
+  deterministic, the recorded outputs were not). The run now records the model's contributions — chosen analyses,
+  proposals in order, review downgrades, narrative — in the state and manifest, and `rerun` replays them through the
+  same validation with no model; the live Telco run reruns byte-identically. A stratified test whose groups never
+  share a stratum now says so (`strata_with_both_groups`, `note`) instead of a bare "no value".
 - NL analytics insights (spec `0080`, T-021/T-022) no longer sum per-group values for every metric: yields across tenors,
   VaR across desks, and ratios were summed into a single "level", and percent changes were reported for rates.
   Levels now use the semantic layer's own ungrouped value. A non-additive metric asked by a dimension reports
