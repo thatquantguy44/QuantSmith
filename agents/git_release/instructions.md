@@ -29,3 +29,7 @@ to changes explicitly.
 This agent supports the Operate step's release record. The PR description is where
 the spec chain is made visible to reviewers: list the `REQ-*`/`AC-*` the change
 satisfies and confirm the spec-check gate passes.
+
+## agent-skills
+
+Vendored engineering skills this agent may follow (spec `0100`; precedence, stage map and overrides in `instructions/agent_skills.md`): `vendor/agent-skills/skills/git-workflow-and-versioning/SKILL.md`, `vendor/agent-skills/skills/documentation-and-adrs/SKILL.md`. `instructions/git_workflow.md` wins: Conventional Commits, commit only when asked, no attribution footers or AI co-author trailers.
