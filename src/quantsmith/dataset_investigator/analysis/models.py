@@ -201,6 +201,19 @@ class Question(_Model):
     needs_new_tool: bool = False
 
 
+class ModelInputs(_Model):
+    """What language-model roles contributed, recorded so a rerun can replay it with no model (REQ-014).
+
+    ``steps`` keeps the order of the hypothesis stage: ``{"templates": true}`` for the templated loop,
+    ``{"proposals": [...]}`` for one batch of investigator proposals exactly as submitted.
+    """
+
+    analyses: Optional[List[str]] = None
+    steps: List[Dict[str, Any]] = Field(default_factory=list)
+    reviews: List[Dict[str, Any]] = Field(default_factory=list)
+    narrative: Optional[str] = None
+
+
 class InvestigationState(_Model):
     spec_version: str = SPEC_VERSION
     run_id: str
@@ -216,6 +229,7 @@ class InvestigationState(_Model):
     questions: List[Question] = Field(default_factory=list)
     narrative: Optional[str] = None
     notes: List[str] = Field(default_factory=list)
+    model_inputs: ModelInputs = Field(default_factory=ModelInputs)
 
     def roles(self) -> Dict[str, str]:
         return {c.name: c.role for c in self.columns}

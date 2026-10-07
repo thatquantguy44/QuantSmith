@@ -29,6 +29,7 @@ from .utils import sha256_json
 ACTIONABILITY = {
     "target_rate_gap": 0.9, "missingness_target": 0.8, "period_rate_window": 0.8, "distribution_shift": 0.8,
     "trend": 0.7, "entity_concentration": 0.7, "segment_gap": 0.6, "multivariate_outliers": 0.6,
+    "multivariate_regimes": 0.5,
     "correlation": 0.5, "outlier_heavy": 0.4, "skewed_distribution": 0.3,
     "target_imbalance": 0.6, "duplicate_rows": 0.6, "duplicate_ids": 0.7, "missing_values": 0.6,
     "constant_column": 0.4, "near_constant_column": 0.3, "negative_values": 0.7, "mixed_types": 0.5,
@@ -36,6 +37,7 @@ ACTIONABILITY = {
 }
 DESCRIPTIVE_SUPPORT = 0.5
 RATIO_MIN = 1.5
+REGIME_SHARE = 0.05  # above this share, "outliers" are a second population, not anomalies
 
 
 def pct(x: float, d: int = 2) -> str:
@@ -43,6 +45,9 @@ def pct(x: float, d: int = 2) -> str:
 
 
 def num(x: float, d: int = 2) -> str:
+    """Fixed decimals with thousands separators; three significant figures when that would print zero."""
+    if x != 0 and abs(x) < 0.5 * 10 ** (-d):
+        return f"{x:.3g}"
     return f"{x:,.{d}f}"
 
 
@@ -193,6 +198,15 @@ def _r_multivariate(ex, res, st):
     expected = res["expected_pct"]
     if res["outliers"] < st.config.min_cell or res["outlier_pct"] < 5 * expected:
         return []
+    if res["outlier_pct"] > REGIME_SHARE:
+        return [_finding(ex, "multivariate_regimes", "anomalies",
+                         f"{res['outliers']:,} rows ({pct(res['outlier_pct'])}) lie outside the robust core of "
+                         f"{len(res['columns'])} numeric columns: too many to be isolated outliers, so the rows "
+                         f"likely come from more than one regime.",
+                         {"columns": res["columns"]},
+                         {"outliers": res["outliers"], "outlier_pct": res["outlier_pct"], "n": res["n"],
+                          "n_columns": len(res["columns"]), "regime_share_threshold": REGIME_SHARE},
+                         n=res["n"], magnitude=min(1, res["outlier_pct"] * 2), prevalence=res["outlier_pct"])]
     return [_finding(ex, "multivariate_outliers", "anomalies",
                      f"{res['outliers']:,} rows ({pct(res['outlier_pct'])}) are multivariate outliers across "
                      f"{len(res['columns'])} numeric columns (robust Mahalanobis distance), "
@@ -225,11 +239,15 @@ def _r_target_rates(ex, res, st):
     e, r = res["extreme"], res["reference"]
     if e["n"] < st.config.min_n or "(missing)" in (e["group"], r["group"]):
         return []  # missing versus present is the missingness rule's finding
-    claim = (f"The `{res['target']}` rate for `{res['by']}` = `{e['group']}` is {num(ratio)}× that for "
-             f"`{res['by']}` = `{r['group']}` ({pct(e['rate'])} vs {pct(r['rate'])}).")
+    hi, lo = (e, r) if ratio >= 1 else (r, e)
+    high_to_low = hi["rate"] / lo["rate"] if lo["rate"] else ratio
+    claim = (f"The `{res['target']}` rate for `{res['by']}` = `{hi['group']}` is {num(high_to_low)}× that for "
+             f"`{res['by']}` = `{lo['group']}` ({pct(hi['rate'])} vs {pct(lo['rate'])}).")
+    # The subject names the higher-rate group "exposed", so every test of this gap expects a ratio above 1.
     return [_finding(ex, "target_rate_gap", "segmentation", claim,
-                     {"target": res["target"], "by": res["by"], "exposed": e["group"], "reference": r["group"]},
+                     {"target": res["target"], "by": res["by"], "exposed": hi["group"], "reference": lo["group"]},
                      {"rate_extreme": e["rate"], "rate_reference": r["rate"], "ratio": ratio,
+                      "ratio_high_to_low": high_to_low,
                       "n_extreme": e["n"], "n_reference": r["n"], "positives_extreme": e["positives"],
                       "positives_reference": r["positives"], "overall_rate": res["overall_rate"]},
                      n=e["n"] + r["n"], magnitude=_ratio_magnitude(ratio), prevalence=e["share"],
@@ -419,6 +437,30 @@ def derive_all(state: InvestigationState) -> List[Finding]:
                 seen.add(f.key)
                 out.append(f)
     return out
+
+
+def _strings(value: Any) -> List[str]:
+    if isinstance(value, str):
+        return [value]
+    if isinstance(value, dict):
+        return [s for v in value.values() for s in _strings(v)]
+    if isinstance(value, (list, tuple)):
+        return [s for v in value for s in _strings(v)]
+    return []
+
+
+def dedupe_keys(f: Finding) -> List[str]:
+    """Findings sharing a key say the same thing. A target-rate gap is also keyed by each of its two
+    groups' size and positive count: a group identical in both to a group of a higher-ranked gap is the
+    same rows seen through another column (every add-on column's "no internet service" group, say), so
+    the lower-ranked gap adds nothing and is merged into it."""
+    cols = sorted(_strings(f.subject))
+    keys = [f"{f.kind}|{'|'.join(cols)}"]
+    if f.kind == "target_rate_gap":
+        e, target = f.evidence, f.subject.get("target")
+        for side in ("extreme", "reference"):
+            keys.append(f"gap-group|{target}|{e.get('n_' + side)}|{e.get('positives_' + side)}")
+    return keys
 
 
 # --- multiple testing and scores ----------------------------------------------

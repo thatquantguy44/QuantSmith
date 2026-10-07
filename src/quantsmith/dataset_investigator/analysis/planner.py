@@ -77,7 +77,9 @@ def _rules(df: pd.DataFrame, state: InvestigationState) -> Dict[str, object]:
         R["target_balance"] = (calls(("analyze_target_balance", {"target": target})),
                                f"target `{target}` ({target_role}): class balance")
     else:
-        R["target_balance"] = "no target column detected or supplied"
+        two_valued = [c.name for c in state.columns if c.role == "boolean" and not c.pii]
+        hint = f"; two-valued column(s) that could be one (pass --target): {', '.join(two_valued)}" if two_valued else ""
+        R["target_balance"] = "no target column detected or supplied" + hint
     R["numeric_distributions"] = ((calls(("analyze_distributions", {})), f"{len(numeric)} numeric column(s)")
                                   if numeric else "no numeric columns")
     R["categorical_distributions"] = ((calls(("analyze_categories", {})), f"{len(cats)} categorical column(s)")

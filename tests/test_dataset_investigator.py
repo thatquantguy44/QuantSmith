@@ -505,6 +505,43 @@ def test_ac016_rerun_without_model_is_identical(run, tmp_path):
     assert out.code == EXIT_OK, "\n".join(out.lines)
 
 
+def test_ac016_model_assisted_run_reruns_without_model(tmp_path, capsys):
+    """AC-016 / REQ-014: a run the model roles took part in records what they contributed, and the package
+    reruns it — plan, proposals, review, narrative replayed — with byte-identical outputs and no model."""
+    from quantsmith.dataset_investigator.cli import main
+
+    def step(*argv):
+        assert main([str(a) for a in argv]) == 0
+        return json.loads(capsys.readouterr().out)
+
+    data = tmp_path / "small.csv"
+    synthetic.transactions(4_000).to_csv(data, index=False)
+    run_dir = tmp_path / "run"
+    step("profile", data, "--out", run_dir, "--created-at", "2026-10-07T00:00:00Z")
+    analyses = ["profile", "data_quality", "target_balance", "target_relationships", "anomaly_detection"]
+    ctx = step("run-plan", run_dir, "--templates", "--analyses", json.dumps(analyses), "--context", "investigator")["context"]
+    gap = next(f for f in ctx["findings"] if f["kind"] == "target_rate_gap")
+    proposal = {"statement": f"The `{gap['subject']['by']}` gap persists within `velocity_24h` bands.",
+                "from_findings": [gap["key"]], "tool": "stratified_target_rates", "prediction": "",
+                "params": {"target": "is_fraud", "by": gap["subject"]["by"], "strata": "velocity_24h",
+                           "exposed": gap["subject"]["exposed"], "reference": gap["subject"]["reference"]},
+                "decision_rule": {"supported": [{"path": "mh_strength", "op": ">=", "value": 1.5}],
+                                  "rejected": [{"path": "mh_strength", "op": "<", "value": 1.2}]}}
+    step("hypotheses", run_dir, "--add", json.dumps([proposal, {**proposal, "tool": "exec_python"}]))
+    statuses = step("validate", run_dir)["statuses"]
+    target = next(fid for fid, s in statuses.items() if s == "VALIDATED")
+    step("validate", run_dir, "--review", json.dumps([{"finding": target, "status": "WEAK_EVIDENCE", "note": "thin"}]))
+    step("report", run_dir, "--narrative", f"The investigation covers `{gap['subject']['by']}`.", "--export", "--no-figures")
+
+    m = json.loads((run_dir / "analysis_package" / "manifest.json").read_text(encoding="utf-8"))
+    mi = m["model_inputs"]
+    assert mi["analyses"] == analyses and mi["reviews"][0]["finding"] == target and mi["narrative"]
+    assert [list(s) for s in mi["steps"]] == [["templates"], ["proposals"]] and len(mi["steps"][1]["proposals"]) == 2
+    assert m["findings"][target]["status"] == "WEAK_EVIDENCE"
+    out = rerun(run_dir / "analysis_package", str(data), tmp_path / "again")
+    assert out.code == EXIT_OK, "\n".join(out.lines)
+
+
 def test_ac017_run_metadata_fields(run):
     """AC-017: run_metadata.yaml records every REQ-015 field."""
     import yaml
@@ -543,6 +580,10 @@ def test_ac018_on_demand_entry_points(tmp_path):
     assert p["context"]["role"] == "planner" and p["context"]["deterministic_plan"]
     r = _cli("run-plan", run_dir, "--templates", "--context", "investigator", cwd=tmp_path)
     ctx = json.loads(r.stdout)["context"]
+    # Step output passes through an executor agent: one compact line, the static catalog printed separately.
+    assert r.stdout.count("\n") == 1 and "tools" not in ctx
+    tools = json.loads(_cli("catalog", cwd=tmp_path).stdout)["tools"]
+    assert "stratified_target_rates" in {t["name"] for t in tools}
     gap = next(f for f in ctx["findings"] if f["kind"] == "target_rate_gap")
     proposal = {"hypotheses": [
         {"statement": f"The `{gap['subject']['by']}` gap persists within `velocity_24h` bands.", "from_findings": [gap["key"]],
@@ -580,7 +621,7 @@ def test_ac018_on_demand_entry_points(tmp_path):
     assert meta_phases == called
     assert not re.search(r"Date\.now|Math\.random|new Date\(\)", src)
     commands = re.findall(r"`\$\{CLI\} ([a-z-]+)", src)
-    assert set(commands) <= {"profile", "run-plan", "hypotheses", "validate", "report"}
+    assert set(commands) <= {"profile", "catalog", "run-plan", "hypotheses", "validate", "report"}
     assert "quantsmith-dataset-investigator" in src and "exactly the one shell" in src
     reasoning = re.findall(r"agent\(\s*'You are the (planner|investigator|validation reviewer|report writer)", src)
     assert set(reasoning) == {"planner", "investigator", "validation reviewer", "report writer"}
@@ -694,3 +735,114 @@ def test_ac022_imports():
     r = subprocess.run(check=False, args=[sys.executable, "-c", probe], capture_output=True, text=True,
                        env={**os.environ, "PYTHONPATH": str(ROOT / "src")})
     assert r.stdout.strip() == "False", r.stderr
+
+
+# --- Regressions found by running real data (IBM Telco churn; UCI Occupancy) ------------------------
+
+
+def _telco_like(n=4_000, seed=5):
+    """A small table with the shapes the real Telco churn data has: a protective contract, a numeric-as-text
+    column with blanks, and one 'No internet service' group repeated across several add-on columns."""
+    rng = np.random.default_rng(seed)
+    contract = rng.choice(["Month-to-month", "One year", "Two year"], size=n, p=[0.55, 0.2, 0.25])
+    tenure = np.where(contract == "Two year", rng.integers(30, 72, n), rng.integers(0, 40, n))
+    internet = rng.choice(["Fiber optic", "DSL", "No"], size=n, p=[0.45, 0.35, 0.2])
+    base = np.select([contract == "Month-to-month", contract == "One year"], [0.40, 0.12], 0.03)
+    base = base * np.where(internet == "No", 0.25, 1.0) * np.where(tenure < 12, 1.3, 1.0)
+    churn = np.where(rng.random(n) < np.clip(base, 0, 1), "Yes", "No")
+    monthly = np.round(np.where(internet == "No", 20, 70) + rng.normal(0, 8, n), 2)
+    total = (monthly * np.maximum(tenure, 1)).round(2).astype(str).astype(object)
+    total[:5] = " "                                   # blanks, as in the real TotalCharges
+    df = pd.DataFrame({"customerID": [f"{i:04d}-AB{i % 97:02d}" for i in range(n)], "Contract": contract,
+                       "tenure": tenure, "InternetService": internet, "MonthlyCharges": monthly,
+                       "TotalCharges": total, "Churn": churn})
+    for addon in ("OnlineSecurity", "TechSupport", "OnlineBackup"):
+        df[addon] = np.where(internet == "No", "No internet service", rng.choice(["Yes", "No"], size=n))
+    return df
+
+
+@pytest.fixture(scope="module")
+def telco_like():
+    df = _telco_like()
+    return df, investigate(df, Config(), None, figures=False)
+
+
+def test_ac002_numbers_stored_as_text_are_numeric(telco_like):
+    """AC-002 regression: a numeric column with a few blank strings is numeric, with the blanks counted."""
+    _df, st = telco_like
+    col = next(c for c in st.columns if c.name == "TotalCharges")
+    assert col.role == "continuous_numeric" and col.evidence["non_numeric_entries"] == 5
+    assert any(f.kind == "mixed_types" and f.subject["column"] == "TotalCharges" and f.evidence["non_numeric"] == 5
+               for f in st.findings)
+
+
+def test_ac010_protective_gap_tested_in_its_own_direction(telco_like):
+    """AC-010 regression: a gap where the group has a lower rate is stated high-to-low and its stratified
+    test passes when the gap persists, instead of being rejected for not exceeding 1.5."""
+    _, st = telco_like
+    gap = next(f for f in st.findings if f.kind == "target_rate_gap" and f.subject["by"] == "Contract")
+    assert gap.subject["exposed"] == "Month-to-month" and gap.subject["reference"] == "Two year"
+    assert gap.evidence["ratio_high_to_low"] > 5 and "Month-to-month` is" in gap.claim
+    h = next(h for h in st.hypotheses if h.template == "gap_stratified" and h.params["by"] == "Contract")
+    assert h.status == "supported", h.explanation
+    banded = [h for h in st.hypotheses if h.template == "gap_stratified" and h.params["by"] in ("tenure", "MonthlyCharges")]
+    assert banded and all(h.evidence.get("mh_strength") is not None for h in banded), [h.explanation for h in banded]
+
+
+def test_ac010_groups_that_never_share_a_stratum_say_so():
+    """AC-010 regression: when no stratum holds both groups, the outcome says the gap cannot be compared
+    within strata, instead of a bare "no value" that reads like a failed run."""
+    rng = np.random.default_rng(4)
+    n = 2_000
+    fiber = np.arange(n) >= n // 2  # the median band edge falls in the gap between the groups' charges
+    df = pd.DataFrame({"service": np.where(fiber, "Fiber", "None"),
+                       "charges": np.where(fiber, rng.uniform(70, 110, n), rng.uniform(18, 26, n)),
+                       "churn": (rng.random(n) < np.where(fiber, 0.4, 0.08)).astype(int)})
+    _, st = start(df, Config(target="churn"))
+    _, res = execute("stratified_target_rates", df, {"target": "churn", "by": "service", "strata": "charges",
+                                                      "exposed": "Fiber", "reference": "None"},
+                     H.tool_context(st), input_fingerprint="x")
+    assert res["strata_with_both_groups"] == 0 and res["mh_strength"] is None
+    status, why, _ = H.evaluate(H.rule([("mh_strength", ">=", 1.5)], [("mh_strength", "<", 1.2)]), res)
+    assert status == "inconclusive" and why.count("mh_strength") == 1 and "do not overlap on `charges`" in why
+
+
+def test_ac012_same_rows_through_another_column_are_merged(telco_like):
+    """AC-012 regression: gaps whose group is the same rows seen through another column merge into one."""
+    _, st = telco_like
+    gaps = [f for f in st.findings if f.kind == "target_rate_gap" and
+            ("No internet service" in (f.subject["exposed"], f.subject["reference"]) or f.subject["by"] == "InternetService")]
+    survivors = [f for f in gaps if f.merged_into is None and f.status != "REJECTED"]
+    assert len(gaps) >= 3 and len(survivors) == 1, [(f.finding_id, f.merged_into) for f in gaps]
+    tested = {h.params.get("by") for h in st.hypotheses if h.template == "gap_stratified"}
+    assert len(tested & {"OnlineSecurity", "TechSupport", "OnlineBackup", "InternetService"}) <= 1
+
+
+def test_ac007_regimes_are_not_called_outliers():
+    """AC-007 regression: a mixture flagged far beyond the expected share is reported as regimes, not outliers."""
+    rng = np.random.default_rng(2)
+    n = 3_000
+    on = rng.random(n) < 0.25
+    df = pd.DataFrame({"light": np.where(on, rng.normal(450, 40, n), rng.normal(5, 2, n)),
+                       "co2": np.where(on, rng.normal(900, 80, n), rng.normal(450, 20, n)),
+                       "temp": rng.normal(21, 0.5, n)})
+    st = investigate(df, Config(), None, figures=False)
+    kinds = {f.kind for f in st.findings}
+    assert "multivariate_regimes" in kinds and "multivariate_outliers" not in kinds
+    f = next(f for f in st.findings if f.kind == "multivariate_regimes")
+    assert "more than one regime" in f.claim and f.status == "VALIDATED"
+
+
+def test_ac013_small_values_keep_their_digits():
+    """AC-013 regression: tiny values print with significant figures, and the claim stays grounded."""
+    assert F.num(0.0033612) == "0.00336" and F.num(21.6612) == "21.66" and F.num(1037.23) == "1,037.23"
+    assert ground(f"mean {F.num(0.0033612)} vs {F.num(0.0045601)}", [{"a": 0.0033612, "b": 0.0045601}]) == []
+
+
+def test_ac003_planner_names_candidate_targets():
+    """AC-003 regression: with no target, the plan says which two-valued columns could be one."""
+    df = pd.DataFrame({"temp": np.random.default_rng(0).normal(size=500), "Occupancy": np.arange(500) % 2})
+    _, st = start(df, Config())
+    plan = PL.plan(df, st)
+    reason = next(s.reason for s in plan.skipped if s.analysis == "target_balance")
+    assert "Occupancy" in reason and "--target" in reason

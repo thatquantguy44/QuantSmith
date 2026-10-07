@@ -66,6 +66,15 @@ def _infer(name: str, s: pd.Series, rows: int, config: Config, target_taken: boo
             return "discrete_numeric", ev("integer with at most 20 distinct values"), False
         return "continuous_numeric", ev("numeric"), False
 
+    probe = non_null if n <= TEXT_SAMPLE else non_null.sample(n=TEXT_SAMPLE, random_state=0)
+    looks_numeric = n and pd.to_numeric(probe.astype(str).str.strip(), errors="coerce").notna().mean() >= 0.9
+    numeric_text = pd.to_numeric(non_null.astype(str).str.strip(), errors="coerce") if looks_numeric else None
+    parsed = int(numeric_text.notna().sum()) if numeric_text is not None else 0
+    if numeric_text is not None and parsed / n >= 0.95:
+        values = numeric_text.dropna()
+        integer = bool((values % 1 == 0).all())
+        role = "discrete_numeric" if integer and values.nunique() <= 20 else "continuous_numeric"
+        return role, ev("numbers stored as text", non_numeric_entries=n - parsed), False
     sample = non_null if n <= TEXT_SAMPLE else non_null.sample(n=TEXT_SAMPLE, random_state=0)
     text = sample.astype(str)
     lengths = text.str.len()
