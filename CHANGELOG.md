@@ -21,6 +21,10 @@ patterns locally rather than expecting them to update in place.
 ## [Unreleased]
 
 ### Added
+- Named approver for natural-language analytics write-back (spec `0080` T-027): every committed record carries
+  `approver_handle`; an approved commit naming no approver records its author as approver. Write-back contracts may
+  set `approver_roles` (checked against the new optional `roles` on `access/roster.yml` entries; refused while the
+  roster is empty) and `require_distinct_approver`. Existing SQLite write-back tables gain the column on open.
 - Model-backed interpretation and narration for natural-language analytics (spec `0080` T-025):
   `nl_analytics.interpret.LLMInterpreter` and `nl_analytics.narrate.LLMNarrator`, plugged in through
   `AnswerContext.interpreter` and `.narrator`. They take a plain `complete(prompt, system)` callable

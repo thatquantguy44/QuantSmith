@@ -17,6 +17,7 @@ from pathlib import Path
 import pytest
 
 from quantsmith.pipelines.dashboard_spec import DashboardSpec
+from quantsmith.pipelines.access_control import Roster, _parse_roster_text, roles_for, validate_roster
 from quantsmith.pipelines.metrics_semantic_layer import Fact, SemanticLayer
 from quantsmith.pipelines.powerbi_profile import render_powerbi
 from quantsmith.nl_analytics.plan import (
@@ -502,6 +503,7 @@ def test_ac022_typed_status_on_every_failure_path(layer):
 
 
 from quantsmith.nl_analytics.writeback import (
+    SCHEMA_COLUMNS,
     WriteBackContract,
     WriteBackError,
     build_records,
@@ -1504,3 +1506,97 @@ def test_ac029_rejected_model_narrative_falls_back_to_the_template_with_a_caveat
 def test_default_answer_reports_the_template_narrative(layer):
     response = answer("funding cost", _context(layer, reader=lambda p: _rows()))
     assert response.narrative_mode == "template" and response.narrative == template_narrative(response.insights)
+
+
+# --- AC-032: named approver, approver roles, distinct approver (T-027, REQ-023) --
+
+
+
+class _NoWriteWriter(_RecordingWriter):
+    def write(self, records):
+        raise AssertionError("a refused commit must never reach the writer")
+
+
+def test_ac032_every_commit_records_its_approver(layer):
+    _, _, records = _built_records(layer)
+    contract = default_contract("approvals")
+    by_author = publish(records, contract, _RecordingWriter(), dry_run=False, approved=True)
+    assert {r["approver_handle"] for r in by_author.records} == {"anon-1"}       # the author approved
+    named = publish(records, contract, _RecordingWriter(), dry_run=False, approved=True, approver_handle="anon-2")
+    assert {r["approver_handle"] for r in named.records} == {"anon-2"}
+    dry = publish(records, contract, _RecordingWriter())
+    assert {r["approver_handle"] for r in dry.records} == {None}
+    auto = publish(records, default_contract("auto", auto_approve=True), _RecordingWriter(), dry_run=False)
+    assert auto.status == "committed" and {r["approver_handle"] for r in auto.records} == {None}
+
+
+def test_ac032_approver_roles_and_distinct_approver_are_enforced_before_writing(layer):
+    _, _, records = _built_records(layer)
+    gated = default_contract("gated", approver_roles=("desk-lead",))
+    with pytest.raises(WriteBackError, match="no entries"):
+        publish(records, gated, _NoWriteWriter(), dry_run=False, approved=True, approver_handle="anon-2")
+    with pytest.raises(WriteBackError, match="holds none of the roles"):
+        publish(records, gated, _NoWriteWriter(), dry_run=False, approved=True, approver_handle="anon-2",
+                approver_roles=("analyst",), roster_has_entries=True)
+    ok = publish(records, gated, _RecordingWriter(), dry_run=False, approved=True, approver_handle="anon-2",
+                 approver_roles=("analyst", "desk-lead"), roster_has_entries=True)
+    assert ok.status == "committed"
+
+    four_eyes = default_contract("four-eyes", require_distinct_approver=True)
+    with pytest.raises(WriteBackError, match="other than the author"):
+        publish(records, four_eyes, _NoWriteWriter(), dry_run=False, approved=True)
+    with pytest.raises(WriteBackError, match="other than the author"):
+        publish(records, four_eyes, _NoWriteWriter(), dry_run=False, approved=True, approver_handle="anon-1")
+    assert publish(records, four_eyes, _RecordingWriter(), dry_run=False, approved=True,
+                   approver_handle="anon-2").status == "committed"
+
+
+def test_ac032_answer_returns_write_rejected_with_the_reason(layer):
+    rows = [Fact(period=p, dims={"desk": "rates"}, measures={"cost": float(p)}) for p in range(6, 11)]
+    request = WriteBackRequest(contract=default_contract("gated", approver_roles=("desk-lead",)),
+                               writer=_NoWriteWriter(), author_handle="anon-1", dry_run=False, approved=True)
+    response = answer("funding cost", _context(layer, reader=lambda p: rows, run_id="run-gated", writeback=request))
+    assert response.status == "write_rejected" and "roster.yml has no entries" in response.reason
+
+
+def test_ac032_contract_file_declares_roles_and_distinct_approver(tmp_path):
+    text = (_REPO_ROOT / "templates" / "data" / "writeback_contract.md").read_text(encoding="utf-8")
+    text = text.replace("- **Name:** <target-name>", "- **Name:** desk_insights", 1)
+    text = text.replace("`<role, role>`", "`desk-lead, risk`", 1)
+    text = text.replace("- **`require_distinct_approver`:** `false`", "- **`require_distinct_approver`:** `true`", 1)
+    path = tmp_path / "contract.md"
+    path.write_text(text, encoding="utf-8")
+    contract = load_contract(str(path))
+    assert contract.approver_roles == ("desk-lead", "risk") and contract.require_distinct_approver
+    untouched = tmp_path / "plain.md"
+    untouched.write_text(text.replace("`desk-lead, risk`", "`<role, role>`"), encoding="utf-8")
+    assert load_contract(str(untouched)).approver_roles == ()
+
+
+def test_ac032_roster_roles_parse_validate_and_resolve():
+    text = ("people:\n"
+            "  - handle: u-aaaaaaaaaaaaaaaaaaaaaaaa\n    label: lead\n    clearance: internal\n    roles: [desk-lead, risk]\n"
+            "  - handle: u-bbbbbbbbbbbbbbbbbbbbbbbb\n    label: analyst\n    clearance: internal\n    roles: analyst\n"
+            "  - handle: u-cccccccccccccccccccccccc\n    label: other\n    clearance: public\n    roles: [Bad Role]\n")
+    entries, _ = _parse_roster_text(text, "roster.yml")
+    roster = Roster(entries=tuple(entries), enforced=True, source_file="roster.yml")
+    assert roles_for(roster, "u-aaaaaaaaaaaaaaaaaaaaaaaa") == ("desk-lead", "risk")
+    assert roles_for(roster, "u-bbbbbbbbbbbbbbbbbbbbbbbb") == ("analyst",)
+    assert roles_for(roster, "u-unknown") == () and roles_for(roster, None) == ()
+    assert [f.message for f in validate_roster(roster) if "role" in f.message] == [
+        "role 'Bad Role' must be lowercase letters, digits, and hyphens"]
+
+
+def test_ac032_sqlite_table_from_before_the_approver_column_is_migrated(layer):
+    conn = sqlite3.connect(":memory:")
+    old_columns = [c for c in SCHEMA_COLUMNS if c != "approver_handle"]
+    cols = ", ".join(f'"{c}" TEXT' for c in old_columns if c != "record_key")
+    conn.execute(f'CREATE TABLE "nl_analytics_writeback_legacy" ("record_key" TEXT PRIMARY KEY, {cols})')
+    conn.execute('INSERT INTO "nl_analytics_writeback_legacy" ("record_key", "metric", "dimensions_json") '
+                 "VALUES ('old', 'funding_cost', '[]')")
+    writer = SQLiteWriter(conn, default_contract("legacy"))
+    _, _, records = _built_records(layer)
+    publish(records, default_contract("legacy"), writer, dry_run=False, approved=True, approver_handle="anon-2")
+    rows = {r["record_key"]: r for r in writer.read("funding_cost")}
+    assert rows["old"]["approver_handle"] is None
+    assert {r["approver_handle"] for k, r in rows.items() if k != "old"} == {"anon-2"}
