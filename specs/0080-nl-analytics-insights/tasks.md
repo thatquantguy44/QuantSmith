@@ -20,54 +20,37 @@
 
 ## Start Here Next Session
 
-> Updated 2026-10-08. T-001–T-024 are built. Remaining, in order:
-> **T-025 → T-027 → T-028 → T-026 → T-029 → T-019**, then owner approval.
+> Updated 2026-10-08. T-001–T-025 are built. Remaining, in order:
+> **T-027 → T-028 → T-026 → T-029 → T-019**, then owner approval.
 
-**Done in T-024:** `quantsmith.adapters.llm_runtime` reads QuantMeridian's
-`llm-profiles/1` files unchanged and resolves them with spec009's rules and
-error codes. It sends single-turn completions for `anthropic_messages` and
-`openai_chat_completions`, with retries, `retry-after`, a one-hop fallback,
-and a per-answer `TokenBudget`; `none` returns a `skipped` completion. See
-`adapters/llm_runtime/README.md`. Shared conformance cases are in
-`tests/fixtures/llm_profiles/conformance.json`; QuantMeridian spec009 T-005
-can load the same file.
+**Built so far for model use:**
+- **T-024** (`quantsmith.adapters.llm_runtime`): reads `llm-profiles/1` and
+  calls Anthropic or OpenAI-compatible endpoints; `as_callable()` turns a
+  profile into a plain `complete(prompt, system)`.
+- **T-025** (`nl_analytics.interpret.LLMInterpreter`,
+  `nl_analytics.narrate.LLMNarrator`): plug in through
+  `AnswerContext.interpreter` and `AnswerContext.narrator`. Both are gated:
+  a bad plan becomes a clarification, and a bad narrative falls back to the
+  template with a caveat. Wiring example: `tests/test_llm_runtime.py`,
+  `test_end_to_end_profile_backed_interpreter_and_narrator`.
 
-**T-025 — `LLMInterpreter` and `LLMNarrator`. First steps:**
+**T-027 — the named approver. First steps:**
 
-1. Branch from the latest `main`. `src/quantsmith/nl_analytics/` must not
-   import `llm_runtime` (AC-019; `test_ac019_nl_analytics_never_imports_the_network_adapter`
-   enforces it). Both classes take a plain callable
-   `complete(prompt: str, system: str) -> str`, and the caller builds it:
-
-   ```python
-   from quantsmith.adapters import llm_runtime as llm
-   config, budget = llm.load_profiles(path), llm.TokenBudget()
-   def interpret_call(prompt, system):
-       out = llm.complete(prompt, system=system, config=config, use="interpreter",
-                          data_classes=["public_market_data"], budget=budget)
-       if out.status == "skipped":          # api_style none
-           raise LookupError("no model; use the keyword interpreter")
-       return out.output_text
-   ```
-
-2. `LLMInterpreter` (in `interpret.py`) implements the `Interpreter` protocol
-   (`name`, `interpret(question, layer, context)`) and registers with
-   `register_interpreter`. The prompt carries the governed vocabulary
-   (metrics, dimensions, synonyms, allowed windows) and the `QueryPlan`
-   field list. Parse strict JSON, build the plan, and run the existing
-   validator. Malformed JSON, a validator rejection, any `LLMRuntimeError`,
-   or a `skipped` completion returns a `Clarification` with the reason;
-   it never guesses.
-3. `LLMNarrator` (in `narrate.py`) asks for a narrative over the insight set,
-   checks it with `ground()`, and on any unbacked number or causal phrase
-   falls back to `template_narrative()` with a caveat (AC-029).
-4. Record the model call in the `0070` envelope:
-   `Completion.to_contract()` has profile, model, usage, attempts, and
-   `fallback_from`.
-5. Tests (`tests/test_nl_analytics.py`, AC-029) use stub callables only, with
-   no network: (a) a valid plan executes; (b) malformed JSON and (c) an
-   undeclared dimension return `clarification_needed`; (d) an unbacked
-   narrative number falls back to the template with the caveat.
+1. Branch from the latest `main`. Read `writeback.py`'s `publish()`: today a
+   commit needs `approved=True` unless `contract.auto_approve`, and nothing
+   records who approved.
+2. `WriteBackRequest` and `publish()` gain `approver_handle` (a `0049`
+   pseudonymous handle). Records gain an `approver_handle` provenance
+   column next to `author_handle`. Update the SQLite schema in
+   `writeback_sqlite.py`, and keep reading old rows that lack it.
+3. Contract fields `approver_roles` (list) and `require_distinct_approver`
+   (bool), both optional. `access_control.py`'s roster parser gains an
+   optional `roles` list per entry; update the validator and the template
+   comment in `access/roster.yml`. A target that declares `approver_roles`
+   is refused while the roster is empty.
+4. Every refusal returns `write_rejected` with its reason before the writer
+   is called (AC-032). Existing AC-014/015 behavior is unchanged when none of
+   the new fields are set.
 
 **Commands:** `.venv/bin/python -m pytest -q tests/test_nl_analytics.py tests/test_llm_runtime.py`
 and `QF_STAGE_ENFORCE=1 hooks/stages/run-stage.sh spec`.
@@ -101,7 +84,7 @@ and `QF_STAGE_ENFORCE=1 hooks/stages/run-stage.sh spec`.
 | T-022 | Unreviewed-pack caveat and write-back refusal unless every applied pack is reviewed. | REQ-016, AC-025 | done | Gate is `domain.writeback_refusal`, not `Selection.all_reviewed` as `plan.md` sketched: `all_reviewed` is false with zero packs, which would refuse every generic (no-pack) write-back; REQ-016 governs *applied* packs only. |
 | T-023 | Pack source in the response and envelope; `answer()` raises on domain tags with no catalog; CLI resolves packs via `0081` `resolve_packs` (local, then bundled) and errors only for an explicit empty `--packs-root` or no packs anywhere. | REQ-018, AC-027 | done | |
 | T-024 | `src/quantsmith/adapters/llm_runtime/` (code; docs stay in `adapters/llm_runtime/`): read QuantMeridian's `llm-profiles/1` files unchanged (vendored schema copy with its source and digest recorded; profile from an argument, `default_profile_env`, or `default_profile`); standard-library backends (`urllib.request`) for `anthropic_messages` and `openai_chat_completions`, and `none`; `auth` schemes `provider_default`, `bearer`, `header`, `none`; `header_envs`; `limits` (timeout, retries on 429/5xx, output tokens, per-answer token cap); `uses` per role; `fallback_profile` on transport failure; returns text plus profile/`api_style`/model/usage; never logs a credential. Document the callable contract and the profile format in `adapters/llm_runtime/adapter_contract.md`, with example profiles for Anthropic, OpenAI, Azure OpenAI, vLLM/Ollama, and a LiteLLM-style gateway. | REQ-019, NFR-003, AC-028 | done | Built 2026-10-08: `profiles.py` (stdlib `llm-profiles/1` validator, at least as strict as the vendored schema, with URL and secret-literal checks the schema can't express), `backends.py` (pure request builders and response parsers), `transport.py` (the only module that opens a connection), `client.py` (`complete()`, retries, `retry-after`, one-hop fallback on provider errors only, `TokenBudget`); refusals are `LLM_REFUSAL` and never fall back. `jsonschema` joined the `dev` extra so CI runs the schema cross-check. Lives outside `src/quantsmith/nl_analytics/` so AC-019's scan still holds. QuantMeridian's spec009 worker (T-014) can use it or inject its own callable; the Dataset Investigator (`0099`) can reuse it outside Claude Code. Generic HTTP/JSON, import-path callables, and token commands wait for an `llm-profiles` revision in QuantMeridian (see spec *Assumptions*). |
-| T-025 | `interpret.py`: `LLMInterpreter` (prompt carries the governed vocabulary and plan schema; strict JSON parse; validator gate; clarification on failure), registered via `register_interpreter`. `narrate.py`: `LLMNarrator` with grounding and template fallback plus caveat. Envelope records the model call. | REQ-020, REQ-003, REQ-008, REQ-013, AC-029 | todo | Tests use a stub callable; no network in tests. |
+| T-025 | `interpret.py`: `LLMInterpreter` (prompt carries the governed vocabulary and plan schema; strict JSON parse; validator gate; clarification on failure), registered via `register_interpreter`. `narrate.py`: `LLMNarrator` with grounding and template fallback plus caveat. Envelope records the model call. | REQ-020, REQ-003, REQ-008, REQ-013, AC-029 | done | Built 2026-10-08. Both take a plain `complete(prompt, system) -> str`; `llm_runtime.as_callable()` builds one from a profile (it raises `LookupError` for `api_style: none`). `LLMInterpreter` sends the governed vocabulary and plan schema and accepts one JSON object with known fields only (one fenced block tolerated). A window ending after today, an unknown field, or an ungoverned metric, dimension, or grain becomes a `Clarification`, as does any model failure unless a `fallback` interpreter is given; the plan records which interpreter produced it. A model's own clarification keeps only governed candidates, and masking still applies. `LLMNarrator` returns a `Narration` (text, mode, caveat); `ChatResponse` gains `narrative` and `narrative_mode`, and the envelope's narrate event names a model narrator. Tests use stub callables, plus one end-to-end test through a local stub server. |
 | T-026 | `0057` Console analytics route (`/api/analytics/ask`) and a page that renders the Vega-Lite spec, insights, plan echo, caveats, and citations; viewer clearance via the console's resolver; localhost bind by default. | REQ-021, REQ-004, AC-030 | todo | Separate from the console's `QueryEngine`, which answers over memory records, not datasets. |
 | T-027 | `writeback.py`: `approver_handle` on the request and records; contract fields `approver_roles` and `require_distinct_approver`; optional `roles` on roster entries (`access_control.py` parser, validator, `access/roster.yml` template comment). | REQ-023, REQ-011, AC-032 | todo | Roster stays empty by default; a target declaring roles is refused until it has entries. |
 | T-028 | Opt-in knowledge candidate on publish (`propose_knowledge`): `0048` candidate record with citations, review status, dry-run preview, and stated reasons when none is created. | REQ-022, REQ-016, AC-031 | todo | |
@@ -142,7 +125,7 @@ Every acceptance criterion must be named by at least one test.
 | AC-026 | `test_ac026_generic_fallback_and_restrict_only` | done |
 | AC-027 | `test_ac027_pack_source_reported_and_missing_catalog_raises` | done |
 | AC-028 | `test_ac028_conformance_resolution` (14 shared cases), `test_ac028_invalid_configs_fail_with_a_typed_error`, `test_ac028_quantmeridian_settings_parse_unchanged`, `test_ac028_anthropic_wire_format_and_usage`, `test_ac028_openai_wire_format`, `test_ac028_retries_honor_retry_after_then_succeed`, `test_ac028_fallback_profile_after_retries_records_fallback_from`, `test_ac028_refusal_is_typed_and_never_falls_back`, `test_ac028_token_cap_across_one_answer`, `test_ac028_credentials_never_appear_in_repr_or_errors`, `test_ac019_nl_analytics_never_imports_the_network_adapter` | done |
-| AC-029 | `test_ac029_llm_interpreter_and_narrator_gated` | todo |
+| AC-029 | `test_ac029_valid_llm_plan_executes_through_the_same_gate`, `test_ac029_bad_llm_output_is_a_clarification_with_no_execution` (7 cases), `test_ac029_fenced_json_and_null_window_use_the_declared_default`, `test_ac029_model_clarification_keeps_only_governed_permitted_candidates`, `test_ac029_model_failure_is_a_clarification_or_the_keyword_fallback`, `test_ac029_grounded_model_narrative_ships`, `test_ac029_rejected_model_narrative_falls_back_to_the_template_with_a_caveat` (4 cases); end to end: `test_end_to_end_profile_backed_interpreter_and_narrator`, `test_end_to_end_no_llm_profile_falls_back_to_keyword_and_template` | done |
 | AC-030 | `test_ac030_console_analytics_route_masks_and_renders` | todo |
 | AC-031 | `test_ac031_opt_in_knowledge_candidate` | todo |
 | AC-032 | `test_ac032_named_approver_and_roles` | todo |

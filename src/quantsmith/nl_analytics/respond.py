@@ -31,7 +31,7 @@ from .domain import (
 from .execute import Reader, execute
 from .insights import Insight, compute_insights
 from .interpret import Interpreter, InterpretContext, interpret
-from .narrate import default_caveats, ground, template_narrative
+from .narrate import Narration, default_caveats, ground, template_narrative
 from .plan import Clarification, PlanError, QueryPlan, TimeWindow, describe_plan, validate_plan
 from .writeback import (
     WriteBackContract,
@@ -101,6 +101,11 @@ class ChatResponse:
     # Where the applied packs' catalog came from (``PackSource.describe()``,
     # REQ-018); empty when no pack applied.
     domain_pack_source: str = ""
+    # The narrative delivered with the answer and how it was produced:
+    # "template", or a narrator label such as "llm/1" when a model-written
+    # narrative passed grounding (REQ-008, REQ-020).
+    narrative: str = ""
+    narrative_mode: str = ""
 
     def __post_init__(self) -> None:
         if self.status not in RESPONSE_STATUSES:
@@ -123,6 +128,11 @@ class AnswerContext:
     viewer_clearance: str = "public"
     access_policy: AccessPolicy = field(default_factory=AccessPolicy)
     interpreter: Optional[Interpreter] = None
+    # Optional model-written narrative (``narrate.LLMNarrator`` or anything
+    # with the same ``narrate(insights, result, plan_echo=)`` method). Its
+    # output ships only if it grounds; otherwise the template does, with a
+    # caveat (REQ-020, AC-029).
+    narrator: Optional[object] = None
     synthetic: bool = False
     min_sample_rows: int = 10
     staleness_caveat_periods: int = 2
@@ -251,10 +261,12 @@ def answer(question: str, context: AnswerContext) -> ChatResponse:
         # deliver an unbacked number (RISK-002).
         raise ResponseError(f"template narrative is not grounded: {grounding.unbacked_numbers}")
 
+    narration = (context.narrator.narrate(insight_set, result, plan_echo=describe_plan(plan))
+                 if context.narrator is not None else Narration(narrative, "template"))
     caveats = default_caveats(
         result, synthetic=context.synthetic, min_sample_rows=context.min_sample_rows,
         staleness_periods=context.staleness_caveat_periods,
-    ) + domain_caveats(selection, policy, plan)
+    ) + domain_caveats(selection, policy, plan) + ((narration.caveat,) if narration.caveat else ())
     citations = (
         f"{plan.metric} — owner: {context.layer.definition(plan.metric).owner}",
         f"as of period {context.as_of}",
@@ -271,7 +283,7 @@ def answer(question: str, context: AnswerContext) -> ChatResponse:
         insights=insight_set, chart=chart, vega_lite=to_vega_lite(chart),
         markdown_table=to_markdown_table(chart), plan_echo=describe_plan(plan),
         caveats=caveats, citations=citations, domain_packs=selection.pack_ids,
-        domain_pack_source=pack_source,
+        domain_pack_source=pack_source, narrative=narration.text, narrative_mode=narration.mode,
     )
 
     if context.writeback is not None:

@@ -142,3 +142,26 @@ def _complete_resolved(resolved: ResolvedProfile, prompt: str, *, config: Profil
     if budget is not None:
         budget.charge(completion)
     return completion
+
+
+def as_callable(*, config: ProfilesConfig, use: str, data_classes: Sequence[str] = (),
+                requested: str | None = None, module_default: str | None = None,
+                budget: TokenBudget | None = None, transport: Transport | None = None,
+                env: Mapping[str, str] | None = None,
+                on_completion: Callable[[Completion], None] | None = None) -> Callable[[str, str], str]:
+    """A plain ``complete(prompt, system) -> text`` for network-free consumers (``nl_analytics``).
+
+    Raises :class:`LookupError` when the resolved profile is ``api_style: none``,
+    so an ``LLMInterpreter`` with a keyword fallback uses it. ``on_completion``
+    receives every :class:`Completion` (profile, model, usage) for the run envelope.
+    """
+    def complete_text(prompt: str, system: str) -> str:
+        out = complete(prompt, config=config, use=use, data_classes=data_classes, system=system,
+                       requested=requested, module_default=module_default, budget=budget,
+                       transport=transport, env=env)
+        if on_completion is not None:
+            on_completion(out)
+        if out.status == "skipped":
+            raise LookupError(f"profile {out.profile!r} has no model (api_style none)")
+        return out.output_text or ""
+    return complete_text

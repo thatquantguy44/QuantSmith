@@ -16,7 +16,7 @@ from .backends import (
     build_request,
     parse_response,
 )
-from .client import TokenBudget, complete
+from .client import TokenBudget, as_callable, complete
 from .errors import LLMRuntimeError
 from .profiles import (
     API_STYLES,
@@ -32,8 +32,25 @@ from .profiles import (
 from .transport import TransportFailure, urllib_transport
 
 __all__ = [
-    "API_STYLES", "SCHEMA_VERSION", "Completion", "HttpRequest", "HttpResponse", "LLMRuntimeError",
-    "Profile", "ProfilesConfig", "ResolvedProfile", "TokenBudget", "TransportFailure", "Usage",
-    "build_request", "complete", "load_profiles", "parse_profiles", "parse_response", "resolve",
-    "resolve_named", "urllib_transport",
+    "API_STYLES",
+    "SCHEMA_VERSION",
+    "Completion",
+    "HttpRequest",
+    "HttpResponse",
+    "LLMRuntimeError",
+    "Profile",
+    "ProfilesConfig",
+    "ResolvedProfile",
+    "TokenBudget",
+    "TransportFailure",
+    "Usage",
+    "as_callable",
+    "build_request",
+    "complete",
+    "load_profiles",
+    "parse_profiles",
+    "parse_response",
+    "resolve",
+    "resolve_named",
+    "urllib_transport",
 ]
