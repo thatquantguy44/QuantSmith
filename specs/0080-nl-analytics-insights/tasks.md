@@ -20,37 +20,39 @@
 
 ## Start Here Next Session
 
-> Updated 2026-10-08. T-001–T-025 are built. Remaining, in order:
-> **T-027 → T-028 → T-026 → T-029 → T-019**, then owner approval.
+> Updated 2026-10-08. T-001–T-025 and T-027 are built. Remaining, in order:
+> **T-028 → T-026 → T-029 → T-019**, then owner approval.
 
-**Built so far for model use:**
-- **T-024** (`quantsmith.adapters.llm_runtime`): reads `llm-profiles/1` and
-  calls Anthropic or OpenAI-compatible endpoints; `as_callable()` turns a
-  profile into a plain `complete(prompt, system)`.
-- **T-025** (`nl_analytics.interpret.LLMInterpreter`,
-  `nl_analytics.narrate.LLMNarrator`): plug in through
-  `AnswerContext.interpreter` and `AnswerContext.narrator`. Both are gated:
-  a bad plan becomes a clarification, and a bad narrative falls back to the
-  template with a caveat. Wiring example: `tests/test_llm_runtime.py`,
-  `test_end_to_end_profile_backed_interpreter_and_narrator`.
+**Built for model use and governance:**
+- **T-024:** `quantsmith.adapters.llm_runtime`, the profile-backed LLM calls;
+  `as_callable()` gives a plain `complete(prompt, system)`.
+- **T-025:** `LLMInterpreter` and `LLMNarrator`, through
+  `AnswerContext.interpreter` and `.narrator`.
+- **T-027:** the named approver. Records carry `approver_handle`; contracts
+  may set `approver_roles` and `require_distinct_approver`; roster entries
+  may carry `roles`.
 
-**T-027 — the named approver. First steps:**
+**T-028 — opt-in knowledge candidates. First steps:**
 
-1. Branch from the latest `main`. Read `writeback.py`'s `publish()`: today a
-   commit needs `approved=True` unless `contract.auto_approve`, and nothing
-   records who approved.
-2. `WriteBackRequest` and `publish()` gain `approver_handle` (a `0049`
-   pseudonymous handle). Records gain an `approver_handle` provenance
-   column next to `author_handle`. Update the SQLite schema in
-   `writeback_sqlite.py`, and keep reading old rows that lack it.
-3. Contract fields `approver_roles` (list) and `require_distinct_approver`
-   (bool), both optional. `access_control.py`'s roster parser gains an
-   optional `roles` list per entry; update the validator and the template
-   comment in `access/roster.yml`. A target that declares `approver_roles`
-   is refused while the roster is empty.
-4. Every refusal returns `write_rejected` with its reason before the writer
-   is called (AC-032). Existing AC-014/015 behavior is unchanged when none of
-   the new fields are set.
+1. Branch from the latest `main`. Use `0049`'s write path in
+   `quantsmith.pipelines.workflow_memory`:
+   - `CandidateSpec`: `scope`, `type`, `statement`, `confidence`,
+     `pit_scope`, `evidence`, `target_catalog`, `access_level`.
+   - `propose_records(specs, workflow=, source_run=, proposed_at=)`: pure;
+     ids are deterministic.
+   - `stage_candidates(candidates, root=)`: writes `memory/inbox/`.
+   - Only a human's `promote()` makes a `Record`. Never call it.
+2. `WriteBackRequest` gains `propose_knowledge: bool`. After a committed
+   (not dry-run) write succeeds and `domain.writeback_refusal(selection)`
+   is clear, build one `CandidateSpec` from the headline insight. Its
+   `evidence` cites the run id, plan hash, record keys, metric-definition
+   hash, and as-of. Return it on `ChatResponse` (a new
+   `knowledge_candidate` field) with `propose_records`.
+3. Keep `answer()` free of file writes: staging into `memory/inbox/` is the
+   caller's step (the CLI in T-029, behind `--propose-knowledge`).
+4. On a dry run, return the would-be candidate with nothing staged. When no
+   candidate is created (refused write, unreviewed pack, opt-out), say why in
+   a `knowledge_candidate_reason` field (AC-031).
 
 **Commands:** `.venv/bin/python -m pytest -q tests/test_nl_analytics.py tests/test_llm_runtime.py`
 and `QF_STAGE_ENFORCE=1 hooks/stages/run-stage.sh spec`.
@@ -86,7 +88,7 @@ and `QF_STAGE_ENFORCE=1 hooks/stages/run-stage.sh spec`.
 | T-024 | `src/quantsmith/adapters/llm_runtime/` (code; docs stay in `adapters/llm_runtime/`): read QuantMeridian's `llm-profiles/1` files unchanged (vendored schema copy with its source and digest recorded; profile from an argument, `default_profile_env`, or `default_profile`); standard-library backends (`urllib.request`) for `anthropic_messages` and `openai_chat_completions`, and `none`; `auth` schemes `provider_default`, `bearer`, `header`, `none`; `header_envs`; `limits` (timeout, retries on 429/5xx, output tokens, per-answer token cap); `uses` per role; `fallback_profile` on transport failure; returns text plus profile/`api_style`/model/usage; never logs a credential. Document the callable contract and the profile format in `adapters/llm_runtime/adapter_contract.md`, with example profiles for Anthropic, OpenAI, Azure OpenAI, vLLM/Ollama, and a LiteLLM-style gateway. | REQ-019, NFR-003, AC-028 | done | Built 2026-10-08: `profiles.py` (stdlib `llm-profiles/1` validator, at least as strict as the vendored schema, with URL and secret-literal checks the schema can't express), `backends.py` (pure request builders and response parsers), `transport.py` (the only module that opens a connection), `client.py` (`complete()`, retries, `retry-after`, one-hop fallback on provider errors only, `TokenBudget`); refusals are `LLM_REFUSAL` and never fall back. `jsonschema` joined the `dev` extra so CI runs the schema cross-check. Lives outside `src/quantsmith/nl_analytics/` so AC-019's scan still holds. QuantMeridian's spec009 worker (T-014) can use it or inject its own callable; the Dataset Investigator (`0099`) can reuse it outside Claude Code. Generic HTTP/JSON, import-path callables, and token commands wait for an `llm-profiles` revision in QuantMeridian (see spec *Assumptions*). |
 | T-025 | `interpret.py`: `LLMInterpreter` (prompt carries the governed vocabulary and plan schema; strict JSON parse; validator gate; clarification on failure), registered via `register_interpreter`. `narrate.py`: `LLMNarrator` with grounding and template fallback plus caveat. Envelope records the model call. | REQ-020, REQ-003, REQ-008, REQ-013, AC-029 | done | Built 2026-10-08. Both take a plain `complete(prompt, system) -> str`; `llm_runtime.as_callable()` builds one from a profile (it raises `LookupError` for `api_style: none`). `LLMInterpreter` sends the governed vocabulary and plan schema and accepts one JSON object with known fields only (one fenced block tolerated). A window ending after today, an unknown field, or an ungoverned metric, dimension, or grain becomes a `Clarification`, as does any model failure unless a `fallback` interpreter is given; the plan records which interpreter produced it. A model's own clarification keeps only governed candidates, and masking still applies. `LLMNarrator` returns a `Narration` (text, mode, caveat); `ChatResponse` gains `narrative` and `narrative_mode`, and the envelope's narrate event names a model narrator. Tests use stub callables, plus one end-to-end test through a local stub server. |
 | T-026 | `0057` Console analytics route (`/api/analytics/ask`) and a page that renders the Vega-Lite spec, insights, plan echo, caveats, and citations; viewer clearance via the console's resolver; localhost bind by default. | REQ-021, REQ-004, AC-030 | todo | Separate from the console's `QueryEngine`, which answers over memory records, not datasets. |
-| T-027 | `writeback.py`: `approver_handle` on the request and records; contract fields `approver_roles` and `require_distinct_approver`; optional `roles` on roster entries (`access_control.py` parser, validator, `access/roster.yml` template comment). | REQ-023, REQ-011, AC-032 | todo | Roster stays empty by default; a target declaring roles is refused until it has entries. |
+| T-027 | `writeback.py`: `approver_handle` on the request and records; contract fields `approver_roles` and `require_distinct_approver`; optional `roles` on roster entries (`access_control.py` parser, validator, `access/roster.yml` template comment). | REQ-023, REQ-011, AC-032 | done | Built 2026-10-08. `SCHEMA_COLUMNS` gains `approver_handle` after `author_handle`; `SQLiteWriter` adds missing columns to an existing table on open, so old rows read it as NULL. `publish()` takes `approver_handle`, `approver_roles` (the roles the caller resolved from the roster), and `roster_has_entries`. An approved commit that names no approver records the request's author as approver, explicitly. `access_control.RosterEntry.roles` (`roles: [a, b]` or `roles: a, b`) with `roles_for()` and role-name validation. `load_contract` reads the two new bullets from the template. Roster stays empty by default; a target declaring roles is refused until it has entries. |
 | T-028 | Opt-in knowledge candidate on publish (`propose_knowledge`): `0048` candidate record with citations, review status, dry-run preview, and stated reasons when none is created. | REQ-022, REQ-016, AC-031 | todo | |
 | T-029 | CLI flags (`--llm-profile`, `--approver`, `--propose-knowledge`), `examples/nl_analytics/` update, and the README section on running without Claude Code. | REQ-019, REQ-020, REQ-022, REQ-023 | todo | |
 
@@ -128,7 +130,7 @@ Every acceptance criterion must be named by at least one test.
 | AC-029 | `test_ac029_valid_llm_plan_executes_through_the_same_gate`, `test_ac029_bad_llm_output_is_a_clarification_with_no_execution` (7 cases), `test_ac029_fenced_json_and_null_window_use_the_declared_default`, `test_ac029_model_clarification_keeps_only_governed_permitted_candidates`, `test_ac029_model_failure_is_a_clarification_or_the_keyword_fallback`, `test_ac029_grounded_model_narrative_ships`, `test_ac029_rejected_model_narrative_falls_back_to_the_template_with_a_caveat` (4 cases); end to end: `test_end_to_end_profile_backed_interpreter_and_narrator`, `test_end_to_end_no_llm_profile_falls_back_to_keyword_and_template` | done |
 | AC-030 | `test_ac030_console_analytics_route_masks_and_renders` | todo |
 | AC-031 | `test_ac031_opt_in_knowledge_candidate` | todo |
-| AC-032 | `test_ac032_named_approver_and_roles` | todo |
+| AC-032 | `test_ac032_every_commit_records_its_approver`, `test_ac032_approver_roles_and_distinct_approver_are_enforced_before_writing`, `test_ac032_answer_returns_write_rejected_with_the_reason`, `test_ac032_contract_file_declares_roles_and_distinct_approver`, `test_ac032_roster_roles_parse_validate_and_resolve`, `test_ac032_sqlite_table_from_before_the_approver_column_is_migrated` | done |
 | AC-022 | `test_ac022_typed_status_on_every_failure_path` | done |
 
 ## Follow-ups

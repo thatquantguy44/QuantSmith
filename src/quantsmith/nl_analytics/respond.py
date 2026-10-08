@@ -76,6 +76,13 @@ class WriteBackRequest:
     # Caller-supplied, like every other timestamp in this package — never a
     # clock. Defaults to the request's own as_of when unset.
     created_at: Optional[int] = None
+    # REQ-023: who approved (a 0049 pseudonymous handle; defaults to the
+    # author when approved without naming anyone), the roles the caller
+    # resolved for that approver from access/roster.yml, and whether that
+    # roster has any entries. See writeback.publish.
+    approver_handle: Optional[str] = None
+    approver_roles: Tuple[str, ...] = ()
+    roster_has_entries: bool = False
 
 
 @dataclass(frozen=True)
@@ -305,6 +312,8 @@ def answer(question: str, context: AnswerContext) -> ChatResponse:
             outcome = publish(
                 records, request.contract, request.writer,
                 dry_run=request.dry_run, approved=request.approved,
+                approver_handle=request.approver_handle, approver_roles=request.approver_roles,
+                roster_has_entries=request.roster_has_entries,
             )
         except WriteBackError as exc:
             # A refused commit is a typed non-answer, never a raised

@@ -26,6 +26,7 @@
 #   - handle: u-xxxxxxxxxxxxxxxxxxxxxxxx
 #     label: "descriptive-role-not-a-real-name"
 #     clearance: internal
+#     roles: [desk-lead]   # optional (spec 0080 REQ-023): write-back targets may require an approver role
 
 default_clearance: public
 
