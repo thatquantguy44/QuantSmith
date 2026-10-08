@@ -21,6 +21,13 @@ patterns locally rather than expecting them to update in place.
 ## [Unreleased]
 
 ### Added
+- Model-backed interpretation and narration for natural-language analytics (spec `0080` T-025):
+  `nl_analytics.interpret.LLMInterpreter` and `nl_analytics.narrate.LLMNarrator`, plugged in through
+  `AnswerContext.interpreter` and `.narrator`. They take a plain `complete(prompt, system)` callable
+  (`llm_runtime.as_callable()` builds one from a profile), so `nl_analytics` stays network-free. A malformed reply,
+  an unknown field, an ungoverned plan, or a window past today becomes a clarification. A model narrative ships only
+  if every number grounds and it has no causal wording; otherwise the template ships with a caveat. `ChatResponse`
+  gains `narrative` and `narrative_mode`.
 - Provider-neutral LLM backend (spec `0080` T-024): `quantsmith.adapters.llm_runtime` reads QuantMeridian's
   `llm-profiles/1` profile files unchanged (standard-library validator, cross-checked against the vendored schema) and
   resolves a profile per call with spec009's precedence and error codes. `complete()` sends single-turn completions

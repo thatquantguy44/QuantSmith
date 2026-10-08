@@ -22,7 +22,7 @@ ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / "tests" / "fixtures" / "llm_profiles"
 CONFORMANCE = json.loads((FIXTURES / "conformance.json").read_text(encoding="utf-8"))
 SCHEMA = ROOT / "adapters" / "llm_runtime" / "llm-profiles.schema.json"
-SECRET = "k-live-DO-NOT-LEAK-7f3a"
+SECRET = "fake-credential-canary-7f3a"  # a unique value the leak checks look for
 
 
 def _config(spec, enable=()):
@@ -301,3 +301,67 @@ def test_only_transport_opens_connections():
         source = path.read_text(encoding="utf-8")
         if path.name != "transport.py":
             assert "urllib.request" not in source and "socket" not in source and "http.client" not in source, path
+
+
+# --- end to end: llm_runtime -> nl_analytics (0080 T-025) ------------------------------------------
+
+def _nl_layer_and_rows():
+    from quantsmith.pipelines.metrics_semantic_layer import Fact, SemanticLayer
+    layer = SemanticLayer()
+    layer.define(name="funding_cost", owner="treasury", grain="day", dimensions=("desk",), source="cost", agg="sum")
+    rows = [Fact(period=p, dims={"desk": d}, measures={"cost": float(p)}) for p in range(6, 11) for d in ("rates", "fx")]
+    return layer, rows
+
+
+def test_end_to_end_profile_backed_interpreter_and_narrator():
+    from quantsmith.nl_analytics.interpret import (
+        InterpretContext,
+        KeywordInterpreter,
+        LLMInterpreter,
+    )
+    from quantsmith.nl_analytics.narrate import LLMNarrator
+    from quantsmith.nl_analytics.respond import AnswerContext, answer
+
+    plan = {"metric": "funding_cost", "dimensions": ["desk"], "filters": [],
+            "window": {"start_period": 6, "end_period": 10, "grain": "day"}, "comparison": None, "rank": None}
+    reply_plan = {**ANTHROPIC_OK, "content": [{"type": "text", "text": json.dumps(plan)}]}
+    reply_text = {**ANTHROPIC_OK, "content": [{"type": "text", "text": "Funding cost was reported by desk."}]}
+    seen = []
+    with _Stub([(200, reply_plan, {}), (200, reply_text, {})]) as stub:
+        budget = L.TokenBudget()
+        common = {"config": _profiles(), "data_classes": ["public_market_data"], "budget": budget,
+                  "env": _env(a=stub.url), "on_completion": seen.append}
+        layer, rows = _nl_layer_and_rows()
+        ctx = AnswerContext(
+            layer=layer, reader=lambda p: rows, as_of=10,
+            interpret_context=InterpretContext(today_period=10, default_window_periods=5),
+            interpreter=LLMInterpreter(L.as_callable(use="interpreter", **common), fallback=KeywordInterpreter()),
+            narrator=LLMNarrator(L.as_callable(use="narrator", **common)),
+        )
+        response = answer("how did funding cost move by desk", ctx)
+    assert response.status == "answered" and "by desk" in response.plan_echo
+    assert response.narrative == "Funding cost was reported by desk." and response.narrative_mode == "llm/1"
+    assert [c.profile for c in seen] == ["claude-gw", "claude-gw"] and budget.spent == 36
+    assert len(stub.requests) == 2
+
+
+def test_end_to_end_no_llm_profile_falls_back_to_keyword_and_template():
+    from quantsmith.nl_analytics.interpret import (
+        InterpretContext,
+        KeywordInterpreter,
+        LLMInterpreter,
+    )
+    from quantsmith.nl_analytics.narrate import LLMNarrator
+    from quantsmith.nl_analytics.respond import AnswerContext, answer
+
+    common = {"config": _profiles(), "requested": "deterministic", "env": {}}
+    layer, rows = _nl_layer_and_rows()
+    ctx = AnswerContext(
+        layer=layer, reader=lambda p: rows, as_of=10,
+        interpret_context=InterpretContext(today_period=10, default_window_periods=5),
+        interpreter=LLMInterpreter(L.as_callable(use="interpreter", **common), fallback=KeywordInterpreter()),
+        narrator=LLMNarrator(L.as_callable(use="narrator", **common)),
+    )
+    response = answer("funding cost by desk", ctx)
+    assert response.status == "answered" and response.narrative_mode == "template"
+    assert any("unavailable" in c for c in response.caveats)

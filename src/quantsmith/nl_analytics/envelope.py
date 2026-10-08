@@ -473,7 +473,9 @@ def _audit_events(
             payload_extra={"provider": "python", "deterministic": True, "tool_name": "quantsmith.nl_analytics.chart.choose_chart"}),
         evt(5, insights_id, "tool_plugin_call", [chart_id], "Insight set computed from the result and any comparison.",
             payload_extra={"provider": "python", "deterministic": True, "tool_name": "quantsmith.nl_analytics.insights.compute_insights"}),
-        evt(6, narrate_id, "gate_result", [insights_id], "Narrative grounded against the insight set; ungrounded numbers rejected.",
+        evt(6, narrate_id, "gate_result", [insights_id],
+            "Narrative grounded against the insight set; ungrounded numbers rejected."
+            + (f" Narrative written by {response.narrative_mode}." if response.narrative_mode not in ("", "template") else ""),
             payload_extra={"provider": "python", "deterministic": True}),
         evt(7, deliver_id, "release_decision", [narrate_id], f"ChatResponse delivered with status '{response.status}'.",
             reason=f"answer() returned status={response.status}."),

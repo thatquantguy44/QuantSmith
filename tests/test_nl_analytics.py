@@ -31,6 +31,8 @@ from quantsmith.nl_analytics.plan import (
 )
 from quantsmith.nl_analytics.interpret import (
     InterpretContext,
+    KeywordInterpreter,
+    LLMInterpreter,
     interpret,
     register_interpreter,
 )
@@ -38,7 +40,7 @@ from quantsmith.nl_analytics.authorize import AccessPolicy, authorize_clarificat
 from quantsmith.nl_analytics.execute import execute
 from quantsmith.nl_analytics.chart import ChartError, choose_chart, is_minimal_vega_lite, to_markdown_table, to_panel, to_vega_lite
 from quantsmith.nl_analytics.insights import compute_insights
-from quantsmith.nl_analytics.narrate import default_caveats, ground
+from quantsmith.nl_analytics.narrate import LLMNarrator, default_caveats, ground
 from quantsmith.nl_analytics.respond import AnswerContext, ChatResponse, ResponseError, WriteBackRequest, answer
 
 
@@ -1386,3 +1388,119 @@ def test_ac027_pack_source_reported_and_missing_catalog_raises(tmp_path, monkeyp
 
     with pytest.raises(ResponseError, match="domain_packs is empty"):
         answer("yield yoy", replace(ctx, domain_packs=(), domain_pack_source=None))
+
+
+# --- AC-029: LLM interpreter and narrator, gated (T-025, REQ-020) -----------
+
+
+
+class _Model:
+    """A stub completion callable: returns a fixed reply (or raises), recording each call."""
+
+    def __init__(self, reply):
+        self.reply = reply
+        self.calls = []
+
+    def __call__(self, prompt, system):
+        self.calls.append((prompt, system))
+        if isinstance(self.reply, Exception):
+            raise self.reply
+        return self.reply(prompt) if callable(self.reply) else self.reply
+
+
+def _rows():
+    return [Fact(period=p, dims={"desk": d}, measures={"cost": float(p) + (2.0 if d == "fx" else 0.0)})
+            for p in range(6, 11) for d in ("rates", "fx")]
+
+
+def _no_read(plan):
+    raise AssertionError("nothing may execute for an ungoverned or unparsed plan")
+
+
+_GOOD_PLAN = {"metric": "funding_cost", "dimensions": ["desk"], "filters": [],
+              "window": {"start_period": 6, "end_period": 10, "grain": "day"}, "comparison": None, "rank": None}
+
+
+def test_ac029_valid_llm_plan_executes_through_the_same_gate(layer):
+    model = _Model(json.dumps(_GOOD_PLAN))
+    response = answer("what did funding cost do by desk this week", _context(layer, reader=lambda p: _rows(),
+                      interpreter=LLMInterpreter(model)))
+    assert response.status == "answered", response.reason
+    assert "funding_cost" in response.plan_echo and "by desk" in response.plan_echo
+    prompt, system = model.calls[0]
+    vocab = json.loads(prompt)["vocabulary"]
+    assert {m["name"] for m in vocab["metrics"]} == {"funding_cost", "revenue"} and vocab["today_period"] == 10
+    assert "JSON" in system and "never write SQL" in system
+
+
+@pytest.mark.parametrize("reply, reason", [
+    ("Sure! Here is the plan: funding_cost by desk", "not a valid plan"),
+    ("```json\n{\"metric\": \"funding_cost\"", "not a valid plan"),
+    (json.dumps({**_GOOD_PLAN, "dimensions": ["counterparty"]}), "not declared"),
+    (json.dumps({**_GOOD_PLAN, "sql": "SELECT 1"}), "unknown field"),
+    (json.dumps({**_GOOD_PLAN, "metric": "secret_pnl"}), "undefined metric"),
+    (json.dumps({**_GOOD_PLAN, "window": {"start_period": 9, "end_period": 12, "grain": "day"}}), "after today"),
+    (json.dumps({**_GOOD_PLAN, "window": {"start_period": 6, "end_period": 10, "grain": "hourly"}}), "grain"),
+])
+def test_ac029_bad_llm_output_is_a_clarification_with_no_execution(layer, reply, reason):
+    response = answer("funding cost by desk", _context(layer, reader=_no_read, interpreter=LLMInterpreter(_Model(reply))))
+    assert response.status == "clarification_needed"
+    assert reason in response.reason and response.chart is None
+
+
+def test_ac029_fenced_json_and_null_window_use_the_declared_default(layer):
+    reply = "```json\n" + json.dumps({**_GOOD_PLAN, "window": None}) + "\n```"
+    plan = interpret("funding cost by desk", layer, InterpretContext(today_period=10, default_window_periods=5),
+                     interpreter=LLMInterpreter(_Model(reply)))
+    assert isinstance(plan, QueryPlan)
+    assert (plan.window.start_period, plan.window.end_period) == (6, 10) and plan.defaults_applied == ("window",)
+    assert plan.interpreter == "llm/1"
+
+
+def test_ac029_model_clarification_keeps_only_governed_permitted_candidates(layer):
+    reply = json.dumps({"clarification": {"reason": "cost could mean two metrics",
+                                          "candidates": ["funding_cost", "revenue", "made_up_metric"]}})
+    response = answer("cost", _context(layer, reader=_no_read, interpreter=LLMInterpreter(_Model(reply)),
+                                       access_policy=AccessPolicy(metric_levels={"revenue": "restricted"})))
+    assert response.status == "clarification_needed"
+    assert "funding_cost" in response.reason
+    assert "made_up_metric" not in response.reason and "revenue" not in response.reason   # masked (AC-005)
+
+
+def test_ac029_model_failure_is_a_clarification_or_the_keyword_fallback(layer):
+    ctx = InterpretContext(today_period=10, default_window_periods=5)
+    down = LLMInterpreter(_Model(LookupError("no model")))
+    result = interpret("funding cost", layer, ctx, interpreter=down)
+    assert isinstance(result, Clarification) and "LookupError" in result.reason
+    with_fallback = LLMInterpreter(_Model(LookupError("no model")), fallback=KeywordInterpreter())
+    plan = interpret("funding cost", layer, ctx, interpreter=with_fallback)
+    assert isinstance(plan, QueryPlan) and plan.interpreter == "keyword/1"
+
+
+def _echo_statements(prompt):
+    return " ".join(i["statement"] for i in json.loads(prompt)["insights"])
+
+
+def test_ac029_grounded_model_narrative_ships(layer):
+    response = answer("funding cost", _context(layer, reader=lambda p: _rows(), narrator=LLMNarrator(_Model(_echo_statements))))
+    assert response.status == "answered" and response.narrative_mode == "llm/1"
+    assert response.narrative == template_narrative(response.insights)
+    assert not any("template" in c for c in response.caveats)
+
+
+@pytest.mark.parametrize("reply, caveat", [
+    ("Funding cost rose to 9999 this week.", "not in the computed results"),
+    (lambda prompt: _echo_statements(prompt) + " This happened because of rate hikes.", "causal wording"),
+    ("", "returned no text"),
+    (RuntimeError("provider down"), "unavailable"),
+])
+def test_ac029_rejected_model_narrative_falls_back_to_the_template_with_a_caveat(layer, reply, caveat):
+    response = answer("funding cost", _context(layer, reader=lambda p: _rows(), narrator=LLMNarrator(_Model(reply))))
+    assert response.status == "answered"
+    assert response.narrative_mode == "template" and response.narrative == template_narrative(response.insights)
+    assert any(caveat in c for c in response.caveats), response.caveats
+
+
+def test_default_answer_reports_the_template_narrative(layer):
+    response = answer("funding cost", _context(layer, reader=lambda p: _rows()))
+    assert response.narrative_mode == "template" and response.narrative == template_narrative(response.insights)

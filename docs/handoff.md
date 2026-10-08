@@ -114,17 +114,18 @@ advisory-by-default deployment decision. The chain builds on
 >
 > **The owner has made this the single highest priority, ahead of everything
 > below — including the credit-risk direction and the ranked list.** If only
-> one thing moves, it is this: build `0080` T-025–T-029 and get the spec
-> approved. T-001–T-024 are built (T-024, the provider-neutral LLM backend
-> `quantsmith.adapters.llm_runtime`, on 2026-10-08). The owner resolved the open questions on
+> one thing moves, it is this: build `0080` T-026–T-029 and get the spec
+> approved. T-001–T-025 are built: on 2026-10-08, T-024 added the
+> provider-neutral LLM backend `quantsmith.adapters.llm_runtime`, and T-025
+> added the gated `LLMInterpreter` and `LLMNarrator` on top of it. The owner resolved the open questions on
 > 2026-10-07: the first surface is the `0057` Knowledge Console backed by model
 > **APIs** through a configured, provider-neutral backend that reads
 > QuantMeridian's `llm-profiles/1` format unchanged (Anthropic, OpenAI, or any
 > OpenAI-compatible gateway or self-hosted server — no gateway assumed; there
 > is no Claude Code where it will run); knowledge candidates are opt-in per publish;
 > approval is per-request confirmation plus a recorded, optionally role-gated
-> approver. Next is T-025 (the LLM interpreter and narrator on that backend);
-> `0099` can reuse the backend too.
+> approver. Next is T-027 (the named approver for write-back); `0099` can
+> reuse the backend too.
 > **Pick up here:** `specs/0080-nl-analytics-insights/tasks.md` →
 > *Start Here Next Session* has the task order, file layout, house pattern to
 > follow, tests to write, and commands.
@@ -191,10 +192,10 @@ time:
    the insights published to a database so tomorrow's "what changed since
    yesterday" can compare against them. It reuses what is already built
    (`0008` metrics, `0058` access, `0014`–`0018` dashboards, `0070` replay)
-   rather than adding a new foundation. **Next:** build T-025–T-029 in order
-   (LLM interpreter and narrator, named approver, opt-in knowledge candidates,
-   Console route, CLI and docs), then approve the spec. T-024 (the LLM backend)
-   is built. Open
+   rather than adding a new foundation. **Next:** build T-027, T-028, T-026,
+   and T-029 in order (named approver, opt-in knowledge candidates, Console
+   route, CLI and docs), then approve the spec. T-024 (the LLM backend) and
+   T-025 (the LLM interpreter and narrator) are built. Open
    questions resolved 2026-10-07 (see item 29), including the gateway: none
    assumed, backends are configured profiles. First write-back target:
    SQLite (local, gitignored file).
@@ -1530,7 +1531,13 @@ manual-task persistence question stays deferred until a real consumer needs it.
     with the standard library, with retries, a one-hop fallback, and a
     per-answer token cap; it is checked against 14 shared conformance cases
     and QuantMeridian's own settings file.
-    **Remaining:** T-025–T-029, T-019 (ship docs), and owner approval.
+    **T-025 built (2026-10-08):** `LLMInterpreter` and `LLMNarrator` take a
+    plain completion callable (`llm_runtime.as_callable()` builds one).
+    A malformed reply, an unknown field, an ungoverned plan, or a window past
+    today becomes a clarification, never a guess. A narrative ships only if
+    every number grounds and it has no causal wording; otherwise the template
+    ships with a caveat. `ChatResponse` gains `narrative` and `narrative_mode`.
+    **Remaining:** T-026–T-029, T-019 (ship docs), and owner approval.
 
 30. **Analytics domain packs (spec `0081`, Draft; packs drafted, validator
     built) — the domain knowledge behind item 29.** Forty JSON packs in
