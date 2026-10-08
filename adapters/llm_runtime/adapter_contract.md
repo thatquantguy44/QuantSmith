@@ -48,3 +48,15 @@ error_message_redacted: string | null
 - Do not send restricted fields to providers unless a workflow explicitly permits
   the model profile.
 - Return outputs as artifacts rather than relying only on chat transcripts.
+
+## Executable Callable (spec `0080` T-024)
+
+`quantsmith.adapters.llm_runtime.complete(prompt, *, config, use, data_classes,
+system=None, requested=None, module_default=None, max_output_tokens=None,
+budget=None, transport=None, env=None) -> Completion` implements this contract for
+`llm-profiles/1` profiles. `Completion.to_contract()` returns the output fields
+above, plus `provider_style`, `model_profile`, `stop_reason`, `latency_ms`,
+`attempts`, and `fallback_from`. Failures raise `LLMRuntimeError` with `code`,
+`retryable`, `profile`, and `status`; no credential or provider free text appears in
+them. Consumers that must stay network-free, such as `quantsmith.nl_analytics`,
+receive a `Callable[[str], str]` built from it rather than importing the package.

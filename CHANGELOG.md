@@ -21,6 +21,13 @@ patterns locally rather than expecting them to update in place.
 ## [Unreleased]
 
 ### Added
+- Provider-neutral LLM backend (spec `0080` T-024): `quantsmith.adapters.llm_runtime` reads QuantMeridian's
+  `llm-profiles/1` profile files unchanged (standard-library validator, cross-checked against the vendored schema) and
+  resolves a profile per call with spec009's precedence and error codes. `complete()` sends single-turn completions
+  to the Anthropic Messages API or any OpenAI-compatible endpoint (OpenAI, Azure OpenAI v1, gateways, vLLM, Ollama),
+  with retries honoring `retry-after`, a one-hop fallback on provider errors, and a per-answer token cap. Credentials
+  come only from environment variables and never appear in errors or `repr`. Shared conformance cases in
+  `tests/fixtures/llm_profiles/conformance.json`. `jsonschema` joins the `dev` extra.
 - First vendored agent-skills sync (spec `0100` T-006): `vendor/agent-skills/` (35 files, 366 KB) and
   `vendor/agent-skills.lock.json`, pinned at fork `thatquantguy44/agent-skills@f63ec56` (plugin `0.6.7`, version stamp
   `0.6.7+f63ec56.53469383`). Content reviewed before sync; `instructions/agent_skills.md` maps the vendored files'

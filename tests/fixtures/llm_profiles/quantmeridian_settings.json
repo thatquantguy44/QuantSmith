@@ -1,0 +1,160 @@
+{
+  "schema_version": "llm-profiles/1",
+  "default_profile": "anthropic-direct",
+  "default_profile_env": "LLM_PROFILE_DEFAULT",
+  "profiles": {
+    "anthropic-direct": {
+      "enabled": true,
+      "label": "Anthropic (direct)",
+      "api_style": "anthropic_messages",
+      "model": "claude-opus-4-8",
+      "auth": {
+        "scheme": "provider_default",
+        "credential_env": "ANTHROPIC_API_KEY"
+      },
+      "limits": {
+        "max_output_tokens": 1500,
+        "timeout_ms": 60000,
+        "max_retries": 2,
+        "per_job_token_cap": 20000,
+        "daily_token_budget": 500000
+      },
+      "data_classes": [
+        "public_market_data",
+        "module_context",
+        "desk_simulated"
+      ],
+      "uses": [
+        "copilot",
+        "interpreter",
+        "narrator",
+        "drafter"
+      ]
+    },
+    "openai-direct": {
+      "enabled": false,
+      "label": "OpenAI (direct)",
+      "api_style": "openai_chat_completions",
+      "model_env": "OPENAI_MODEL",
+      "auth": {
+        "scheme": "provider_default",
+        "credential_env": "OPENAI_API_KEY"
+      },
+      "limits": {
+        "max_output_tokens": 1500,
+        "timeout_ms": 60000,
+        "max_retries": 2,
+        "per_job_token_cap": 20000,
+        "daily_token_budget": 500000
+      },
+      "data_classes": [
+        "public_market_data",
+        "module_context",
+        "desk_simulated"
+      ],
+      "uses": [
+        "interpreter",
+        "narrator",
+        "drafter"
+      ]
+    },
+    "gateway-openai": {
+      "enabled": false,
+      "label": "Gateway (OpenAI-compatible)",
+      "api_style": "openai_chat_completions",
+      "base_url_env": "LLM_GATEWAY_BASE_URL",
+      "model_env": "LLM_GATEWAY_MODEL",
+      "auth": {
+        "scheme": "bearer",
+        "credential_env": "LLM_GATEWAY_API_KEY"
+      },
+      "header_envs": {},
+      "limits": {
+        "max_output_tokens": 1500,
+        "timeout_ms": 90000,
+        "max_retries": 2,
+        "per_job_token_cap": 20000,
+        "daily_token_budget": 500000
+      },
+      "data_classes": [
+        "public_market_data",
+        "module_context",
+        "desk_simulated"
+      ],
+      "uses": [
+        "interpreter",
+        "narrator",
+        "drafter"
+      ],
+      "fallback_profile": null
+    },
+    "gateway-anthropic": {
+      "enabled": false,
+      "label": "Gateway (Anthropic-compatible)",
+      "api_style": "anthropic_messages",
+      "base_url_env": "ANTHROPIC_GATEWAY_BASE_URL",
+      "model_env": "ANTHROPIC_GATEWAY_MODEL",
+      "auth": {
+        "scheme": "bearer",
+        "credential_env": "ANTHROPIC_GATEWAY_API_KEY"
+      },
+      "limits": {
+        "max_output_tokens": 1500,
+        "timeout_ms": 90000,
+        "max_retries": 2,
+        "per_job_token_cap": 20000,
+        "daily_token_budget": 500000
+      },
+      "data_classes": [
+        "public_market_data",
+        "module_context",
+        "desk_simulated"
+      ],
+      "uses": [
+        "interpreter",
+        "narrator",
+        "drafter"
+      ]
+    },
+    "local-openai": {
+      "enabled": false,
+      "label": "Local server (OpenAI-compatible)",
+      "api_style": "openai_chat_completions",
+      "base_url_env": "LOCAL_LLM_BASE_URL",
+      "model_env": "LOCAL_LLM_MODEL",
+      "auth": {
+        "scheme": "none"
+      },
+      "limits": {
+        "max_output_tokens": 1500,
+        "timeout_ms": 120000,
+        "max_retries": 0,
+        "per_job_token_cap": 20000,
+        "daily_token_budget": null
+      },
+      "data_classes": [
+        "public_market_data",
+        "module_context",
+        "desk_simulated"
+      ],
+      "uses": [
+        "interpreter",
+        "narrator"
+      ]
+    },
+    "deterministic": {
+      "enabled": true,
+      "label": "No LLM (deterministic)",
+      "api_style": "none",
+      "data_classes": [
+        "public_market_data",
+        "module_context",
+        "desk_simulated"
+      ],
+      "uses": [
+        "interpreter",
+        "narrator"
+      ]
+    }
+  }
+}
