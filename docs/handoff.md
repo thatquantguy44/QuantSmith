@@ -114,15 +114,17 @@ advisory-by-default deployment decision. The chain builds on
 >
 > **The owner has made this the single highest priority, ahead of everything
 > below — including the credit-risk direction and the ranked list.** If only
-> one thing moves, it is this: build `0080` T-024–T-029 and get the spec
-> approved. T-001–T-023 are built. The owner resolved the open questions on
+> one thing moves, it is this: build `0080` T-025–T-029 and get the spec
+> approved. T-001–T-024 are built (T-024, the provider-neutral LLM backend
+> `quantsmith.adapters.llm_runtime`, on 2026-10-08). The owner resolved the open questions on
 > 2026-10-07: the first surface is the `0057` Knowledge Console backed by model
 > **APIs** through a configured, provider-neutral backend that reads
 > QuantMeridian's `llm-profiles/1` format unchanged (Anthropic, OpenAI, or any
 > OpenAI-compatible gateway or self-hosted server — no gateway assumed; there
 > is no Claude Code where it will run); knowledge candidates are opt-in per publish;
 > approval is per-request confirmation plus a recorded, optionally role-gated
-> approver. Start with T-024 (the API backend), which `0099` can reuse.
+> approver. Next is T-025 (the LLM interpreter and narrator on that backend);
+> `0099` can reuse the backend too.
 > **Pick up here:** `specs/0080-nl-analytics-insights/tasks.md` →
 > *Start Here Next Session* has the task order, file layout, house pattern to
 > follow, tests to write, and commands.
@@ -130,8 +132,11 @@ advisory-by-default deployment decision. The chain builds on
 > in its local agent worker and pins QuantSmith by content digest
 > (`contracts/agent/quantsmith-pin.json` there, re-pinned to `c234119` on
 > 2026-10-07). Its companion items Q-1/Q-2 are done here; Q-5 is partly done;
-> Q-6 is T-024. A QuantSmith change in a pinned area needs a QuantMeridian
-> re-pin before its worker will run it.
+> Q-6 is T-024 (built). A QuantSmith change in a pinned area needs a QuantMeridian
+> re-pin before its worker will run it; T-024 adds Python files under
+> `src/quantsmith/`, so it changes the pinned code digest. The shared
+> conformance cases (`tests/fixtures/llm_profiles/conformance.json`) are
+> ready for QuantMeridian spec009 T-005.
 
 > ### New direction — Credit Risk Domain Foundation (spec `0072`, Approved)
 >
@@ -186,9 +191,10 @@ time:
    the insights published to a database so tomorrow's "what changed since
    yesterday" can compare against them. It reuses what is already built
    (`0008` metrics, `0058` access, `0014`–`0018` dashboards, `0070` replay)
-   rather than adding a new foundation. **Next:** build T-024–T-029 in order
-   (API backend, LLM interpreter and narrator, Console route, named approver,
-   opt-in knowledge candidates, CLI and docs), then approve the spec. Open
+   rather than adding a new foundation. **Next:** build T-025–T-029 in order
+   (LLM interpreter and narrator, named approver, opt-in knowledge candidates,
+   Console route, CLI and docs), then approve the spec. T-024 (the LLM backend)
+   is built. Open
    questions resolved 2026-10-07 (see item 29), including the gateway: none
    assumed, backends are configured profiles. First write-back target:
    SQLite (local, gitignored file).
@@ -1518,7 +1524,13 @@ manual-task persistence question stays deferred until a real consumer needs it.
     per-request confirmation plus the approver's recorded handle, with
     optional approver roles from the roster and a second-person rule per
     target. These add REQ-019–REQ-023, AC-028–AC-032, and T-024–T-029.
-    **Remaining:** T-024–T-029, T-019 (ship docs), and owner approval.
+    **T-024 built (2026-10-08):** `quantsmith.adapters.llm_runtime` reads
+    `llm-profiles/1` unchanged and resolves profiles with spec009's rules and
+    error codes. It calls `anthropic_messages` and `openai_chat_completions`
+    with the standard library, with retries, a one-hop fallback, and a
+    per-answer token cap; it is checked against 14 shared conformance cases
+    and QuantMeridian's own settings file.
+    **Remaining:** T-025–T-029, T-019 (ship docs), and owner approval.
 
 30. **Analytics domain packs (spec `0081`, Draft; packs drafted, validator
     built) — the domain knowledge behind item 29.** Forty JSON packs in

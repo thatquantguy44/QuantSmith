@@ -1,0 +1,360 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://quantmeridian.invalid/contracts/agent/llm-profiles.schema.json",
+  "title": "LlmProfilesConfig",
+  "description": "settings/llm_profiles.json: named LLM access profiles. Only *_env fields may reference secrets or endpoints (llm-profiles/1).",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "llm-profiles/1"
+    },
+    "default_profile": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9\\-]*$"
+    },
+    "default_profile_env": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9_]*$",
+      "maxLength": 64
+    },
+    "profiles": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "pattern": "^[a-z][a-z0-9\\-]*$"
+      },
+      "additionalProperties": {
+        "$ref": "#/definitions/Profile"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "default_profile",
+    "profiles"
+  ],
+  "definitions": {
+    "Profile": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "api_style": {
+          "type": "string",
+          "enum": [
+            "anthropic_messages",
+            "openai_chat_completions",
+            "none"
+          ]
+        },
+        "model": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/@\\-]*$"
+        },
+        "model_env": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]*$",
+          "maxLength": 64
+        },
+        "base_url_env": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]*$",
+          "maxLength": 64
+        },
+        "auth": {
+          "$ref": "#/definitions/Auth"
+        },
+        "header_envs": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[A-Za-z0-9\\-]+$"
+          },
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_]*$",
+            "maxLength": 64
+          }
+        },
+        "limits": {
+          "$ref": "#/definitions/ProfileLimits"
+        },
+        "data_classes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "public_market_data",
+              "module_context",
+              "desk_simulated"
+            ]
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "uses": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "copilot",
+              "interpreter",
+              "narrator",
+              "drafter"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "fallback_profile": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9\\-]*$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "api_style": {
+                "const": "none"
+              }
+            },
+            "required": [
+              "api_style"
+            ]
+          },
+          "then": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "model"
+                  ]
+                },
+                {
+                  "required": [
+                    "model_env"
+                  ]
+                },
+                {
+                  "required": [
+                    "base_url_env"
+                  ]
+                },
+                {
+                  "required": [
+                    "auth"
+                  ]
+                },
+                {
+                  "required": [
+                    "limits"
+                  ]
+                }
+              ]
+            }
+          },
+          "else": {
+            "required": [
+              "auth",
+              "limits"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "enabled": {
+                "const": true
+              },
+              "api_style": {
+                "enum": [
+                  "anthropic_messages",
+                  "openai_chat_completions"
+                ]
+              }
+            },
+            "required": [
+              "enabled",
+              "api_style"
+            ]
+          },
+          "then": {
+            "anyOf": [
+              {
+                "required": [
+                  "model"
+                ]
+              },
+              {
+                "required": [
+                  "model_env"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "auth": {
+                "type": "object",
+                "properties": {
+                  "scheme": {
+                    "const": "header"
+                  }
+                },
+                "required": [
+                  "scheme"
+                ]
+              }
+            },
+            "required": [
+              "auth"
+            ]
+          },
+          "then": {
+            "properties": {
+              "auth": {
+                "type": "object",
+                "required": [
+                  "scheme",
+                  "header_name",
+                  "credential_env"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "auth": {
+                "type": "object",
+                "properties": {
+                  "scheme": {
+                    "enum": [
+                      "provider_default",
+                      "bearer"
+                    ]
+                  }
+                },
+                "required": [
+                  "scheme"
+                ]
+              }
+            },
+            "required": [
+              "auth"
+            ]
+          },
+          "then": {
+            "properties": {
+              "auth": {
+                "type": "object",
+                "required": [
+                  "scheme",
+                  "credential_env"
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "required": [
+        "enabled",
+        "label",
+        "api_style",
+        "data_classes",
+        "uses"
+      ]
+    },
+    "Auth": {
+      "type": "object",
+      "properties": {
+        "scheme": {
+          "type": "string",
+          "enum": [
+            "provider_default",
+            "bearer",
+            "header",
+            "none"
+          ]
+        },
+        "credential_env": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]*$",
+          "maxLength": 64
+        },
+        "header_name": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9\\-]+$",
+          "maxLength": 64
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "scheme"
+      ]
+    },
+    "ProfileLimits": {
+      "type": "object",
+      "properties": {
+        "max_output_tokens": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 32000
+        },
+        "timeout_ms": {
+          "type": "integer",
+          "minimum": 1000,
+          "maximum": 600000
+        },
+        "max_retries": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 5
+        },
+        "per_job_token_cap": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "daily_token_budget": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "max_output_tokens",
+        "timeout_ms",
+        "max_retries",
+        "per_job_token_cap",
+        "daily_token_budget"
+      ]
+    }
+  }
+}
