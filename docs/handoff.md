@@ -114,19 +114,20 @@ advisory-by-default deployment decision. The chain builds on
 >
 > **The owner has made this the single highest priority, ahead of everything
 > below — including the credit-risk direction and the ranked list.** If only
-> one thing moves, it is this: build `0080` T-028, T-026, and T-029 and get the
-> spec approved. T-001–T-025 and T-027 are built. On 2026-10-08:
+> one thing moves, it is this: build `0080` T-026 and T-029 and get the spec
+> approved. T-001–T-025, T-027, and T-028 are built. On 2026-10-08:
 > - T-024 added the provider-neutral LLM backend `quantsmith.adapters.llm_runtime`;
 > - T-025 added the gated `LLMInterpreter` and `LLMNarrator` on top of it;
-> - T-027 added the named approver for write-back. The owner resolved the open questions on
+> - T-027 added the named approver for write-back;
+> - T-028 added opt-in knowledge candidates. The owner resolved the open questions on
 > 2026-10-07: the first surface is the `0057` Knowledge Console backed by model
 > **APIs** through a configured, provider-neutral backend that reads
 > QuantMeridian's `llm-profiles/1` format unchanged (Anthropic, OpenAI, or any
 > OpenAI-compatible gateway or self-hosted server — no gateway assumed; there
 > is no Claude Code where it will run); knowledge candidates are opt-in per publish;
 > approval is per-request confirmation plus a recorded, optionally role-gated
-> approver. Next is T-028 (opt-in knowledge candidates); `0099` can reuse the
-> backend too.
+> approver. Next is T-026 (the Knowledge Console analytics route); `0099` can
+> reuse the backend too.
 > **Pick up here:** `specs/0080-nl-analytics-insights/tasks.md` →
 > *Start Here Next Session* has the task order, file layout, house pattern to
 > follow, tests to write, and commands.
@@ -193,10 +194,10 @@ time:
    the insights published to a database so tomorrow's "what changed since
    yesterday" can compare against them. It reuses what is already built
    (`0008` metrics, `0058` access, `0014`–`0018` dashboards, `0070` replay)
-   rather than adding a new foundation. **Next:** build T-028, T-026, and
-   T-029 in order (opt-in knowledge candidates, Console route, CLI and docs),
-   then approve the spec. T-024 (the LLM backend), T-025 (the LLM interpreter
-   and narrator), and T-027 (the named approver) are built. Open
+   rather than adding a new foundation. **Next:** build T-026 and T-029 in
+   order (Console route, CLI and docs), then approve the spec. T-024 (the LLM
+   backend), T-025 (the LLM interpreter and narrator), T-027 (the named
+   approver), and T-028 (knowledge candidates) are built. Open
    questions resolved 2026-10-07 (see item 29), including the gateway: none
    assumed, backends are configured profiles. First write-back target:
    SQLite (local, gitignored file).
@@ -1543,7 +1544,13 @@ manual-task persistence question stays deferred until a real consumer needs it.
     author, explicitly. Contracts may require an approver role from
     `access/roster.yml` (refused while the roster is empty) and a second
     person. Existing SQLite tables gain the column on open.
-    **Remaining:** T-028, T-026, T-029, T-019 (ship docs), and owner approval.
+    **T-028 built (2026-10-08):** a publish request may opt in to a `0049`
+    knowledge candidate. It is built from the headline insight, with
+    evidence citing the run, plan hash, record keys, metric definition, and
+    as-of, and returned on `ChatResponse`. `answer()` never stages it; only
+    a human's `promote` makes a record. A refused write, including an
+    unreviewed pack, yields no candidate, with the reason stated.
+    **Remaining:** T-026, T-029, T-019 (ship docs), and owner approval.
 
 30. **Analytics domain packs (spec `0081`, Draft; packs drafted, validator
     built) — the domain knowledge behind item 29.** Forty JSON packs in
