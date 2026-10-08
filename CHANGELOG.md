@@ -21,6 +21,11 @@ patterns locally rather than expecting them to update in place.
 ## [Unreleased]
 
 ### Added
+- Opt-in knowledge candidates for natural-language analytics (spec `0080` T-028): a publish request with
+  `propose_knowledge` gets a `0049` `workflow_memory` candidate built from its headline insight, with evidence citing
+  run, plan hash, record keys, metric definition, and as-of (`ChatResponse.knowledge_candidate`, or
+  `knowledge_candidate_reason` when there is none). `answer()` never stages it; staging into `memory/inbox/` is the
+  caller's step, and only a human's `promote` makes a record.
 - Named approver for natural-language analytics write-back (spec `0080` T-027): every committed record carries
   `approver_handle`; an approved commit naming no approver records its author as approver. Write-back contracts may
   set `approver_roles` (checked against the new optional `roles` on `access/roster.yml` entries; refused while the

@@ -7,6 +7,7 @@ proves.
 
 from __future__ import annotations
 
+import datetime
 import json
 import os
 import sqlite3
@@ -1600,3 +1601,72 @@ def test_ac032_sqlite_table_from_before_the_approver_column_is_migrated(layer):
     rows = {r["record_key"]: r for r in writer.read("funding_cost")}
     assert rows["old"]["approver_handle"] is None
     assert {r["approver_handle"] for k, r in rows.items() if k != "old"} == {"anon-2"}
+
+
+# --- AC-031: opt-in knowledge candidates (T-028, REQ-022) -------------------
+
+
+_PROPOSED = datetime.date(2026, 10, 8)
+
+
+def _publish_ctx(layer, **request):
+    rows = [Fact(period=p, dims={"desk": "rates"}, measures={"cost": float(p)}) for p in range(6, 11)]
+    wb = WriteBackRequest(contract=default_contract("insights"), writer=_RecordingWriter(), author_handle="anon-1",
+                          propose_knowledge=True, knowledge_proposed_at=_PROPOSED, **request)
+    return _context(layer, reader=lambda p: rows, run_id="run-k1", writeback=wb)
+
+
+def test_ac031_committed_publish_proposes_one_reviewable_candidate(layer, tmp_path):
+    from quantsmith.pipelines import workflow_memory as wm
+
+    response = answer("funding cost", _publish_ctx(layer, dry_run=False, approved=True))
+    assert response.status == "answered" and response.writeback.status == "committed"
+    candidate = response.knowledge_candidate
+    assert isinstance(candidate, wm.Candidate) and response.knowledge_candidate_reason == ""
+    assert candidate.workflow == "nl_analytics" and candidate.source_run == "run-k1"
+    assert candidate.proposed_at == _PROPOSED and candidate.candidate_id == "nl_analytics/run-k1/001"
+    spec = candidate.spec
+    assert spec.scope == "metric:funding_cost" and spec.type == "metric" and spec.confidence == "low"
+    assert spec.statement == response.insights[0].statement
+    evidence = spec.evidence[0]
+    keys = {r["record_key"] for r in response.writeback.records}
+    assert evidence["source_run"] == "run-k1" and set(evidence["record_keys"].split(",")) == keys
+    assert evidence["plan_hash"] and evidence["metric_definition_hash"].startswith("sha256:")
+    assert evidence["as_of_period"] == "10"
+    # Staging is the caller's step, and it only ever writes the inbox: nothing is promoted.
+    path = wm.stage_candidates([candidate], root=tmp_path / "memory")
+    assert "inbox" in path.parts
+    assert [p.relative_to(tmp_path / "memory").parts[0] for p in (tmp_path / "memory").rglob("*") if p.is_file()] == ["inbox"]
+
+
+def test_ac031_dry_run_returns_the_would_be_candidate_without_staging(layer, tmp_path):
+    response = answer("funding cost", _publish_ctx(layer))
+    assert response.writeback.status == "dry_run"
+    assert response.knowledge_candidate is not None and "dry run" in response.knowledge_candidate_reason
+    assert not (tmp_path / "memory").exists()
+
+
+def test_ac031_no_candidate_when_the_write_is_refused_or_not_requested(layer):
+    refused = answer("funding cost", _publish_ctx(layer, dry_run=False, approved=False))
+    assert refused.status == "write_rejected" and refused.knowledge_candidate is None
+    assert refused.knowledge_candidate_reason == "no knowledge candidate: the write-back was refused"
+
+    rows = [Fact(period=p, dims={"desk": "rates"}, measures={"cost": float(p)}) for p in range(6, 11)]
+    plain = answer("funding cost", _context(layer, reader=lambda p: rows, run_id="run-k2", writeback=WriteBackRequest(
+        contract=default_contract("insights"), writer=_RecordingWriter(), dry_run=False, approved=True)))
+    assert plain.knowledge_candidate is None and plain.knowledge_candidate_reason == ""
+
+    no_date = answer("funding cost", _context(layer, reader=lambda p: rows, run_id="run-k3", writeback=WriteBackRequest(
+        contract=default_contract("insights"), writer=_RecordingWriter(), dry_run=False, approved=True,
+        propose_knowledge=True)))
+    assert no_date.knowledge_candidate is None and "knowledge_proposed_at is required" in no_date.knowledge_candidate_reason
+
+
+def test_ac031_unreviewed_pack_blocks_the_candidate_with_the_write():
+    layer = _rates_layer()
+    wb = WriteBackRequest(contract=default_contract("cli_default"), writer=_RecordingWriter(),
+                          propose_knowledge=True, knowledge_proposed_at=_PROPOSED)
+    ctx = _yearly_context(layer, _curve_rows(("2y",)), dataset_domains=("fixed_income_rates",), domain_packs=_PACKS)
+    refused = answer("yield yoy", replace(ctx, run_id="run-pack-k", writeback=wb))
+    assert refused.status == "write_rejected" and "rates_fixed_income" in refused.reason
+    assert refused.knowledge_candidate is None and "write-back was refused" in refused.knowledge_candidate_reason
