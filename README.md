@@ -3,11 +3,12 @@
 # 🧮 QuantSmith
 
 
+ ```text
    ____                    __  _____           _ __  __
   / __ \__  ______ _____  / /_/ ___/____ ___  (_) /_/ /_
  / / / / / / / __ `/ __ \/ __/\__ \/ __ `__ \/ / __/ __ \
 / /_/ / /_/ / /_/ / / / / /_ ___/ / / / / / / / /_/ / / /
-\___\_\__,_/\__,_/_/ /_/\__//____/_/ /_/ /_/_/\__/_/ /_/
+\___\_\__,_/\__,_/_/ /_/\__//____/_/ /_/ /_/\__/_/ /_/
 
            QUANTITATIVE INTELLIGENCE ENGINE
        ───────────────────────────────────────
@@ -22,6 +23,7 @@
                   ⟨EXECUTION⟩
 
          Research → Optimize → Automate
+```
 
 ### *Build quant models the way you'd defend them — spec-driven, agentic, reproducible.*
 
