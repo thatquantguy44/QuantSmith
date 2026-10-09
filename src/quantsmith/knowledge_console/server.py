@@ -19,6 +19,10 @@ Routes:
   tree is always shown fresh)
 - ``POST /api/query``  → ``{"question", "k"}`` → grounded answer via the active
   :class:`~quantsmith.knowledge_console.query.QueryEngine`
+- ``POST /api/analytics/ask`` → ``{"question"}`` → a governed data answer from
+  ``nl_analytics`` (spec ``0080`` T-026), when an
+  :class:`~quantsmith.knowledge_console.analytics.AnalyticsService` is configured;
+  read-only like every other route (no write-back, envelope, or knowledge candidate)
 """
 
 from __future__ import annotations
@@ -44,9 +48,10 @@ class ConsoleConfig:
     """What one server instance serves."""
 
     def __init__(self, memory_root: str | os.PathLike = "memory",
-                 static_dir: Optional[str | os.PathLike] = None) -> None:
+                 static_dir: Optional[str | os.PathLike] = None, analytics=None) -> None:
         self.memory_root = str(memory_root)
         self.static_dir = Path(static_dir).resolve() if static_dir else None
+        self.analytics = analytics  # an analytics.AnalyticsService, or None
 
 
 class ConsoleHandler(BaseHTTPRequestHandler):
@@ -132,8 +137,37 @@ class ConsoleHandler(BaseHTTPRequestHandler):
     def do_HEAD(self) -> None:  # noqa: N802
         self.do_GET()
 
+    def _read_json_body(self):
+        try:
+            length = int(self.headers.get("Content-Length", 0))
+        except (TypeError, ValueError):
+            length = 0
+        raw = self.rfile.read(length) if length > 0 else b""
+        try:
+            return json.loads(raw.decode("utf-8")) if raw else {}
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            return None
+
+    def _analytics_ask(self) -> None:
+        if self.config.analytics is None:
+            self._send_json({"error": "analytics is not configured on this server "
+                                      "(start it with --analytics-registry and --analytics-data)"}, status=404)
+            return
+        payload = self._read_json_body()
+        if not isinstance(payload, dict):
+            self._send_json({"error": "invalid JSON body"}, status=400)
+            return
+        question = str(payload.get("question", "")).strip()
+        if not question:
+            self._send_json({"error": "missing 'question'"}, status=400)
+            return
+        self._send_json(self.config.analytics.ask_json(question))
+
     def do_POST(self) -> None:  # noqa: N802
         route = urlparse(self.path).path
+        if route == "/api/analytics/ask":
+            self._analytics_ask()
+            return
         if route != "/api/query":
             self._not_found()
             return
@@ -183,13 +217,14 @@ then restart the server, or query the API directly:</p>
 
 def make_server(memory_root: str | os.PathLike = "memory",
                 static_dir: Optional[str | os.PathLike] = None,
-                host: str = "127.0.0.1", port: int = 8765) -> ThreadingHTTPServer:
+                host: str = "127.0.0.1", port: int = 8765, analytics=None) -> ThreadingHTTPServer:
     """Build (but do not start) a console server.
 
     ``port=0`` asks the OS for an ephemeral port — used by the tests. Binds
-    loopback by default (spec NFR-003).
+    loopback by default (spec NFR-003). ``analytics`` enables
+    ``POST /api/analytics/ask`` (spec ``0080`` T-026).
     """
-    config = ConsoleConfig(memory_root=memory_root, static_dir=static_dir)
+    config = ConsoleConfig(memory_root=memory_root, static_dir=static_dir, analytics=analytics)
 
     handler = type("BoundConsoleHandler", (ConsoleHandler,), {"config": config})
     return ThreadingHTTPServer((host, port), handler)
@@ -197,9 +232,9 @@ def make_server(memory_root: str | os.PathLike = "memory",
 
 def serve(memory_root: str | os.PathLike = "memory",
           static_dir: Optional[str | os.PathLike] = None,
-          host: str = "127.0.0.1", port: int = 8765) -> None:
+          host: str = "127.0.0.1", port: int = 8765, analytics=None) -> None:
     """Run the console server until interrupted."""
-    httpd = make_server(memory_root, static_dir, host, port)
+    httpd = make_server(memory_root, static_dir, host, port, analytics=analytics)
     bound_host, bound_port = httpd.server_address[:2]
     print(f"Knowledge Console on http://{bound_host}:{bound_port}  "
           f"(memory: {memory_root}, static: {static_dir or 'none'})")

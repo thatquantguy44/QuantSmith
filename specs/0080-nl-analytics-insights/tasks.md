@@ -20,46 +20,39 @@
 
 ## Start Here Next Session
 
-> Updated 2026-10-08. T-001–T-025, T-027, and T-028 are built. Remaining, in
-> order: **T-026 → T-029 → T-019**, then owner approval.
+> Updated 2026-10-09. T-001–T-028 are built. Remaining, in order:
+> **T-029 → T-019**, then owner approval.
 
 **Built for model use and governance:**
 - **T-024:** `llm_runtime`.
 - **T-025:** `LLMInterpreter` and `LLMNarrator`.
+- **T-026:** the read-only Knowledge Console route `POST /api/analytics/ask`
+  (`src/quantsmith/knowledge_console/analytics.py`) and the *Data Questions*
+  page (`web/src/components/Analytics.tsx`). Owner decision 2026-10-09: no
+  write-back, envelope, or knowledge candidate from the Console; the page
+  renders `markdown_table`, and the chart-library choice for `vega_lite` is
+  deferred. Enable it with `serve --analytics-registry … --analytics-data …
+  --analytics-today …` (optional `--llm-profiles`, `--viewer-override`).
 - **T-027:** the named approver and roles.
 - **T-028:** opt-in knowledge candidates. `ChatResponse.knowledge_candidate`
   is built, never staged by `answer()`.
 
-**T-026 — the Knowledge Console analytics route. First steps:**
+**T-029 — CLI flags, example, README. First steps:**
 
-1. Branch from the latest `main`. Read `src/quantsmith/knowledge_console/server.py`.
-   It is standard library only, binds `127.0.0.1` by default, and promises
-   that no route writes anything (spec `0057` NFR-003). Keep that promise:
-   the analytics route answers questions only. Write-back and knowledge
-   candidates stay in the CLI (T-029) until the owner decides the Console
-   should commit.
-2. Add `POST /api/analytics/ask` with body `{"question": str}`. The server
-   gets an injected analytics service (a small object holding the
-   `SemanticLayer`, the reader, an `InterpretContext` factory, and an
-   optional `llm_profiles.json` path) through `make_server(..., analytics=)`.
-   With no service configured, the route returns 404 with a reason.
-3. Viewer clearance comes from `access_control.resolve_viewer_clearance`,
-   the same resolver and `preview-access` override the console already
-   uses. `None` (roster inactive) means no filtering, as in `0058`.
-4. Build the interpreter and narrator from the profiles file with
-   `llm_runtime.as_callable(use=..., data_classes=["public_market_data"])`,
-   and give `LLMInterpreter` a `KeywordInterpreter` fallback so no model
-   still answers. Return the `ChatResponse` as JSON: headline, insights,
-   `vega_lite`, `markdown_table`, `plan_echo`, caveats, citations,
-   `narrative`, and `narrative_mode`.
-5. Front end (`web/`): a page with a question box. Render the
-   `markdown_table` first. Rendering `vega_lite` needs a chart library,
-   which `web/package.json` does not have yet (a dependency decision; say so
-   in the PR).
-6. Tests (AC-030): a restricted metric asked by an `internal` viewer is
-   indistinguishable from a nonexistent one; a permitted question returns
-   chart, insights, plan echo, caveats, and citations; the default bind is
-   loopback; and the route never writes (`tmp_path` has no new files).
+1. Add `--llm-profiles` / `--llm-profile` to `nl_analytics ask`, built the
+   same way as `knowledge_console.analytics.service_from_files` (an
+   `LLMInterpreter` with a `KeywordInterpreter` fallback and an
+   `LLMNarrator`, via `llm_runtime.as_callable`, data class
+   `public_market_data`).
+2. Give each answer a fresh `llm_runtime.TokenBudget` so
+   `limits.per_job_token_cap` applies per answer. The Console service does
+   not pass a budget yet; wire it there too.
+3. Add `--approver` (fills `WriteBackRequest.approver_handle`, roles from the
+   roster via `access_control.roles_for`) and `--propose-knowledge` (stages
+   the candidate with `workflow_memory.stage_candidates`, only on a committed
+   write).
+4. Update `examples/nl_analytics/` (README, transcript, sample response) and
+   add a README section on running against model APIs without Claude Code.
 
 **Commands:** `.venv/bin/python -m pytest -q tests/test_nl_analytics.py tests/test_llm_runtime.py tests/test_knowledge_console*.py`
 and `QF_STAGE_ENFORCE=1 hooks/stages/run-stage.sh spec`.
@@ -94,7 +87,7 @@ and `QF_STAGE_ENFORCE=1 hooks/stages/run-stage.sh spec`.
 | T-023 | Pack source in the response and envelope; `answer()` raises on domain tags with no catalog; CLI resolves packs via `0081` `resolve_packs` (local, then bundled) and errors only for an explicit empty `--packs-root` or no packs anywhere. | REQ-018, AC-027 | done | |
 | T-024 | `src/quantsmith/adapters/llm_runtime/` (code; docs stay in `adapters/llm_runtime/`): read QuantMeridian's `llm-profiles/1` files unchanged (vendored schema copy with its source and digest recorded; profile from an argument, `default_profile_env`, or `default_profile`); standard-library backends (`urllib.request`) for `anthropic_messages` and `openai_chat_completions`, and `none`; `auth` schemes `provider_default`, `bearer`, `header`, `none`; `header_envs`; `limits` (timeout, retries on 429/5xx, output tokens, per-answer token cap); `uses` per role; `fallback_profile` on transport failure; returns text plus profile/`api_style`/model/usage; never logs a credential. Document the callable contract and the profile format in `adapters/llm_runtime/adapter_contract.md`, with example profiles for Anthropic, OpenAI, Azure OpenAI, vLLM/Ollama, and a LiteLLM-style gateway. | REQ-019, NFR-003, AC-028 | done | Built 2026-10-08: `profiles.py` (stdlib `llm-profiles/1` validator, at least as strict as the vendored schema, with URL and secret-literal checks the schema can't express), `backends.py` (pure request builders and response parsers), `transport.py` (the only module that opens a connection), `client.py` (`complete()`, retries, `retry-after`, one-hop fallback on provider errors only, `TokenBudget`); refusals are `LLM_REFUSAL` and never fall back. `jsonschema` joined the `dev` extra so CI runs the schema cross-check. Lives outside `src/quantsmith/nl_analytics/` so AC-019's scan still holds. QuantMeridian's spec009 worker (T-014) can use it or inject its own callable; the Dataset Investigator (`0099`) can reuse it outside Claude Code. Generic HTTP/JSON, import-path callables, and token commands wait for an `llm-profiles` revision in QuantMeridian (see spec *Assumptions*). |
 | T-025 | `interpret.py`: `LLMInterpreter` (prompt carries the governed vocabulary and plan schema; strict JSON parse; validator gate; clarification on failure), registered via `register_interpreter`. `narrate.py`: `LLMNarrator` with grounding and template fallback plus caveat. Envelope records the model call. | REQ-020, REQ-003, REQ-008, REQ-013, AC-029 | done | Built 2026-10-08. Both take a plain `complete(prompt, system) -> str`; `llm_runtime.as_callable()` builds one from a profile (it raises `LookupError` for `api_style: none`). `LLMInterpreter` sends the governed vocabulary and plan schema and accepts one JSON object with known fields only (one fenced block tolerated). A window ending after today, an unknown field, or an ungoverned metric, dimension, or grain becomes a `Clarification`, as does any model failure unless a `fallback` interpreter is given; the plan records which interpreter produced it. A model's own clarification keeps only governed candidates, and masking still applies. `LLMNarrator` returns a `Narration` (text, mode, caveat); `ChatResponse` gains `narrative` and `narrative_mode`, and the envelope's narrate event names a model narrator. Tests use stub callables, plus one end-to-end test through a local stub server. |
-| T-026 | `0057` Console analytics route (`/api/analytics/ask`) and a page that renders the Vega-Lite spec, insights, plan echo, caveats, and citations; viewer clearance via the console's resolver; localhost bind by default. | REQ-021, REQ-004, AC-030 | todo | Separate from the console's `QueryEngine`, which answers over memory records, not datasets. |
+| T-026 | `0057` Console analytics route (`/api/analytics/ask`) and a page that renders the Vega-Lite spec, insights, plan echo, caveats, and citations; viewer clearance via the console's resolver; localhost bind by default. | REQ-021, REQ-004, AC-030 | done | Separate from the console's `QueryEngine`, which answers over memory records, not datasets. Read-only by owner decision (2026-10-09); the page renders `markdown_table`, and a chart library for `vega_lite` is deferred. |
 | T-027 | `writeback.py`: `approver_handle` on the request and records; contract fields `approver_roles` and `require_distinct_approver`; optional `roles` on roster entries (`access_control.py` parser, validator, `access/roster.yml` template comment). | REQ-023, REQ-011, AC-032 | done | Built 2026-10-08. `SCHEMA_COLUMNS` gains `approver_handle` after `author_handle`; `SQLiteWriter` adds missing columns to an existing table on open, so old rows read it as NULL. `publish()` takes `approver_handle`, `approver_roles` (the roles the caller resolved from the roster), and `roster_has_entries`. An approved commit that names no approver records the request's author as approver, explicitly. `access_control.RosterEntry.roles` (`roles: [a, b]` or `roles: a, b`) with `roles_for()` and role-name validation. `load_contract` reads the two new bullets from the template. Roster stays empty by default; a target declaring roles is refused until it has entries. |
 | T-028 | Opt-in knowledge candidate on publish (`propose_knowledge`): `0048` candidate record with citations, review status, dry-run preview, and stated reasons when none is created. | REQ-022, REQ-016, AC-031 | done | Built 2026-10-08. `nl_analytics/knowledge.py` builds one low-confidence `metric` candidate (`scope=metric:<name>`) from the headline insight with `workflow_memory.propose_records`, with evidence citing run id, plan hash, record keys, metric-definition hash, as-of, and interpreter. `WriteBackRequest` gains `propose_knowledge`, `knowledge_proposed_at` (required, since there is no clock), and `knowledge_target_catalog`; `ChatResponse` gains `knowledge_candidate` and `knowledge_candidate_reason`. `answer()` never stages: `workflow_memory.stage_candidates` is the caller's step, and only a human's `promote` makes a record. An unreviewed pack refuses the write, so it also yields no candidate, with the reason stated. Access level follows the metric's `AccessPolicy` level. |
 | T-029 | CLI flags (`--llm-profile`, `--approver`, `--propose-knowledge`), `examples/nl_analytics/` update, and the README section on running without Claude Code. | REQ-019, REQ-020, REQ-022, REQ-023 | todo | |
@@ -135,7 +128,7 @@ Every acceptance criterion must be named by at least one test.
 | AC-027 | `test_ac027_pack_source_reported_and_missing_catalog_raises` | done |
 | AC-028 | `test_ac028_conformance_resolution` (14 shared cases), `test_ac028_invalid_configs_fail_with_a_typed_error`, `test_ac028_quantmeridian_settings_parse_unchanged`, `test_ac028_anthropic_wire_format_and_usage`, `test_ac028_openai_wire_format`, `test_ac028_retries_honor_retry_after_then_succeed`, `test_ac028_fallback_profile_after_retries_records_fallback_from`, `test_ac028_refusal_is_typed_and_never_falls_back`, `test_ac028_token_cap_across_one_answer`, `test_ac028_credentials_never_appear_in_repr_or_errors`, `test_ac019_nl_analytics_never_imports_the_network_adapter` | done |
 | AC-029 | `test_ac029_valid_llm_plan_executes_through_the_same_gate`, `test_ac029_bad_llm_output_is_a_clarification_with_no_execution` (7 cases), `test_ac029_fenced_json_and_null_window_use_the_declared_default`, `test_ac029_model_clarification_keeps_only_governed_permitted_candidates`, `test_ac029_model_failure_is_a_clarification_or_the_keyword_fallback`, `test_ac029_grounded_model_narrative_ships`, `test_ac029_rejected_model_narrative_falls_back_to_the_template_with_a_caveat` (4 cases); end to end: `test_end_to_end_profile_backed_interpreter_and_narrator`, `test_end_to_end_no_llm_profile_falls_back_to_keyword_and_template` | done |
-| AC-030 | `test_ac030_console_analytics_route_masks_and_renders` | todo |
+| AC-030 | `test_ac030_permitted_question_answers_read_only`, `test_ac030_restricted_metric_matches_nonexistent`, `test_ac030_route_is_404_when_not_configured`, `test_ac030_bad_body_is_400`, `test_ac030_default_bind_is_localhost`, `test_ac030_no_model_profile_still_answers_by_keyword`, `test_ac030_partial_analytics_flags_exit_2` (in `tests/test_knowledge_console.py`) | done |
 | AC-031 | `test_ac031_committed_publish_proposes_one_reviewable_candidate`, `test_ac031_dry_run_returns_the_would_be_candidate_without_staging`, `test_ac031_no_candidate_when_the_write_is_refused_or_not_requested`, `test_ac031_unreviewed_pack_blocks_the_candidate_with_the_write` | done |
 | AC-032 | `test_ac032_every_commit_records_its_approver`, `test_ac032_approver_roles_and_distinct_approver_are_enforced_before_writing`, `test_ac032_answer_returns_write_rejected_with_the_reason`, `test_ac032_contract_file_declares_roles_and_distinct_approver`, `test_ac032_roster_roles_parse_validate_and_resolve`, `test_ac032_sqlite_table_from_before_the_approver_column_is_migrated` | done |
 | AC-022 | `test_ac022_typed_status_on_every_failure_path` | done |

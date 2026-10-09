@@ -472,10 +472,11 @@ def test_ac022_typed_status_on_every_failure_path(layer):
     r1 = answer("no such thing at all", _context(layer, reader=lambda p: rows))
     assert r1.status == "clarification_needed" and r1.reason and r1.chart is None
 
-    # masked: restricted metric
+    # masked: restricted metric, reported exactly like an unknown one (REQ-004)
     policy = AccessPolicy(metric_levels={"funding_cost": "restricted"})
     r2 = answer("funding cost", _context(layer, reader=lambda p: rows, access_policy=policy, viewer_clearance="public"))
-    assert r2.status == "masked" and r2.reason and r2.chart is None
+    assert r2.status == "clarification_needed" and r2.reason and r2.chart is None
+    assert (r2.status, r2.reason) == (r1.status, r1.reason)
 
     # empty: no rows in the window
     r3 = answer("funding cost", _context(layer, reader=lambda p: [], as_of=10))
@@ -489,7 +490,7 @@ def test_ac022_typed_status_on_every_failure_path(layer):
     assert r4.status == "stale" and r4.reason and r4.chart is None
 
     for r in (r1, r2, r3, r4):
-        assert r.status in ("clarification_needed", "masked", "empty", "stale")
+        assert r.status in ("clarification_needed", "empty", "stale")
         with pytest.raises(ResponseError):
             ChatResponse(status=r.status, reason="", headline="", insights=(), chart=None,
                         vega_lite=None, markdown_table=None, plan_echo="", caveats=(), citations=())

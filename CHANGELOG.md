@@ -21,6 +21,12 @@ patterns locally rather than expecting them to update in place.
 ## [Unreleased]
 
 ### Added
+- Read-only natural-language analytics in the Knowledge Console (spec `0080` T-026): `POST /api/analytics/ask`
+  answers a data question under the console viewer's clearance and returns headline, insights, `vega_lite`,
+  `markdown_table`, plan echo, caveats, citations, and narrative. It never writes back, emits an envelope, or builds a
+  knowledge candidate. Enable it with `knowledge_console serve --analytics-registry … --analytics-data …
+  --analytics-today …` (optional `--llm-profiles`, `--viewer-override`); without it the route returns 404. A new
+  *Data Questions* page renders the answer table (no chart library yet).
 - Opt-in knowledge candidates for natural-language analytics (spec `0080` T-028): a publish request with
   `propose_knowledge` gets a `0049` `workflow_memory` candidate built from its headline insight, with evidence citing
   run, plan hash, record keys, metric definition, and as-of (`ChatResponse.knowledge_candidate`, or
@@ -170,6 +176,9 @@ patterns locally rather than expecting them to update in place.
   `--packs-root` is optional and errors only when it names an empty catalog.
 
 ### Fixed
+- Natural-language analytics no longer discloses that a restricted metric exists (spec `0080` REQ-004): an
+  access-masked plan used to return status `masked`, distinct from an unknown metric's `clarification_needed`; it now
+  returns `clarification_needed` with the same reason, and `masked` is no longer a response status.
 - Dataset Investigator (spec `0099`), from runs on real data (IBM Telco churn, UCI Occupancy): numbers stored as text
   (blanks among numbers) are numeric with a mixed-type quality finding; a target gap is stated high-to-low and its
   stratified (Mantel–Haenszel) test is judged on strength in the gap's own direction, so protective gaps are no

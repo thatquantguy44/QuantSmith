@@ -111,3 +111,28 @@ declare global {
     __KB_MODEL__?: Model;
   }
 }
+
+// POST /api/analytics/ask (spec 0080 T-026). Read-only: no run id, envelope,
+// write-back, or knowledge candidate is ever returned by the console.
+export interface AnalyticsInsight {
+  kind: string;
+  statement: string;
+  values: Record<string, unknown>;
+}
+
+export interface AnalyticsAnswer {
+  status: string;
+  reason: string;
+  headline: string;
+  insights: AnalyticsInsight[];
+  chart: Record<string, unknown> | null;
+  vega_lite: Record<string, unknown> | null;
+  markdown_table: string | null;
+  plan_echo: string;
+  caveats: string[];
+  citations: string[];
+  narrative: string;
+  narrative_mode: string;
+  viewer_clearance: string | null;
+  read_only: true;
+}
