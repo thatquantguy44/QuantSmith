@@ -10,10 +10,11 @@ Standard library only.
 
 from __future__ import annotations
 
+import datetime
 import hashlib
 import json
 from dataclasses import asdict, dataclass, field, replace
-from typing import Callable, Dict, Mapping, Optional, Tuple
+from typing import Callable, Dict, Mapping, Optional, Sequence, Tuple
 
 from quantsmith.pipelines.analytics_packs import PackSource
 from quantsmith.pipelines.metrics_semantic_layer import SemanticLayer
@@ -31,7 +32,8 @@ from .domain import (
 from .execute import Reader, execute
 from .insights import Insight, compute_insights
 from .interpret import Interpreter, InterpretContext, interpret
-from .narrate import default_caveats, ground, template_narrative
+from .knowledge import DEFAULT_TARGET_CATALOG, knowledge_candidate
+from .narrate import Narration, default_caveats, ground, template_narrative
 from .plan import Clarification, PlanError, QueryPlan, TimeWindow, describe_plan, validate_plan
 from .writeback import (
     WriteBackContract,
@@ -42,7 +44,9 @@ from .writeback import (
     publish,
 )
 
-RESPONSE_STATUSES = ("answered", "clarification_needed", "masked", "empty", "stale", "write_rejected")
+# No "masked" status: a distinct status would itself disclose that a restricted
+# metric exists, so a masked plan reports as clarification_needed (REQ-004).
+RESPONSE_STATUSES = ("answered", "clarification_needed", "empty", "stale", "write_rejected")
 
 # How many periods one year is, per grain — used to shift a window back a
 # year for a "prior_year" comparison. Approximate for "day" (365, no leap-year
@@ -76,6 +80,20 @@ class WriteBackRequest:
     # Caller-supplied, like every other timestamp in this package — never a
     # clock. Defaults to the request's own as_of when unset.
     created_at: Optional[int] = None
+    # REQ-023: who approved (a 0049 pseudonymous handle; defaults to the
+    # author when approved without naming anyone), the roles the caller
+    # resolved for that approver from access/roster.yml, and whether that
+    # roster has any entries. See writeback.publish.
+    approver_handle: Optional[str] = None
+    approver_roles: Tuple[str, ...] = ()
+    roster_has_entries: bool = False
+    # REQ-022: opt in to proposing the answer as a knowledge candidate. It is
+    # built only (``ChatResponse.knowledge_candidate``); staging it into
+    # memory/inbox/ is the caller's step. ``knowledge_proposed_at`` is
+    # required with it, since this package reads no clock.
+    propose_knowledge: bool = False
+    knowledge_proposed_at: Optional[datetime.date] = None
+    knowledge_target_catalog: str = DEFAULT_TARGET_CATALOG
 
 
 @dataclass(frozen=True)
@@ -101,6 +119,15 @@ class ChatResponse:
     # Where the applied packs' catalog came from (``PackSource.describe()``,
     # REQ-018); empty when no pack applied.
     domain_pack_source: str = ""
+    # The narrative delivered with the answer and how it was produced:
+    # "template", or a narrator label such as "llm/1" when a model-written
+    # narrative passed grounding (REQ-008, REQ-020).
+    narrative: str = ""
+    narrative_mode: str = ""
+    # REQ-022: the knowledge candidate a publish request opted into (a
+    # ``workflow_memory.Candidate``, not yet staged), or why there is none.
+    knowledge_candidate: Optional[object] = None
+    knowledge_candidate_reason: str = ""
 
     def __post_init__(self) -> None:
         if self.status not in RESPONSE_STATUSES:
@@ -123,6 +150,11 @@ class AnswerContext:
     viewer_clearance: str = "public"
     access_policy: AccessPolicy = field(default_factory=AccessPolicy)
     interpreter: Optional[Interpreter] = None
+    # Optional model-written narrative (``narrate.LLMNarrator`` or anything
+    # with the same ``narrate(insights, result, plan_echo=)`` method). Its
+    # output ships only if it grounds; otherwise the template does, with a
+    # caveat (REQ-020, AC-029).
+    narrator: Optional[object] = None
     synthetic: bool = False
     min_sample_rows: int = 10
     staleness_caveat_periods: int = 2
@@ -164,6 +196,27 @@ class AnswerContext:
     # caller supplies packs without one, the response still identifies the
     # catalog by a hash of the packs it was given.
     domain_pack_source: Optional[PackSource] = None
+
+
+def _with_knowledge_candidate(final: ChatResponse, request: WriteBackRequest, plan: QueryPlan,
+                              insights: Sequence[Insight], outcome: WriteBackOutcome,
+                              context: "AnswerContext") -> ChatResponse:
+    """Attach the opted-in knowledge candidate, or the reason there is none (REQ-022, AC-031)."""
+    if request.knowledge_proposed_at is None:
+        return replace(final, knowledge_candidate_reason=(
+            "no knowledge candidate: knowledge_proposed_at is required (this package reads no clock)"))
+    if not insights:
+        return replace(final, knowledge_candidate_reason="no knowledge candidate: the answer has no insights")
+    level = context.access_policy.metric_levels.get(plan.metric, "internal")
+    candidate = knowledge_candidate(
+        plan, insights, outcome.records, run_id=context.run_id or "",
+        metric_definition_hash=_metric_definition_hash(context.layer, plan.metric), as_of=context.as_of,
+        proposed_at=request.knowledge_proposed_at, target_catalog=request.knowledge_target_catalog,
+        access_level=level if level in ("public", "internal", "restricted") else "internal",
+    )
+    reason = ("dry run: this candidate would be proposed when the write-back is committed; nothing staged"
+              if outcome.status == "dry_run" else "")
+    return replace(final, knowledge_candidate=candidate, knowledge_candidate_reason=reason)
 
 
 def _refuse(status: str, reason: str, plan_echo: str = "") -> ChatResponse:
@@ -216,7 +269,7 @@ def answer(question: str, context: AnswerContext) -> ChatResponse:
 
     authorized = authorize_plan(plan, context.access_policy, context.viewer_clearance)
     if isinstance(authorized, Clarification):
-        return _refuse("masked", authorized.reason)
+        return _refuse("clarification_needed", authorized.reason)
     plan = authorized
 
     result = execute(plan, context.layer, context.reader, context.as_of)
@@ -251,10 +304,12 @@ def answer(question: str, context: AnswerContext) -> ChatResponse:
         # deliver an unbacked number (RISK-002).
         raise ResponseError(f"template narrative is not grounded: {grounding.unbacked_numbers}")
 
+    narration = (context.narrator.narrate(insight_set, result, plan_echo=describe_plan(plan))
+                 if context.narrator is not None else Narration(narrative, "template"))
     caveats = default_caveats(
         result, synthetic=context.synthetic, min_sample_rows=context.min_sample_rows,
         staleness_periods=context.staleness_caveat_periods,
-    ) + domain_caveats(selection, policy, plan)
+    ) + domain_caveats(selection, policy, plan) + ((narration.caveat,) if narration.caveat else ())
     citations = (
         f"{plan.metric} — owner: {context.layer.definition(plan.metric).owner}",
         f"as of period {context.as_of}",
@@ -271,18 +326,21 @@ def answer(question: str, context: AnswerContext) -> ChatResponse:
         insights=insight_set, chart=chart, vega_lite=to_vega_lite(chart),
         markdown_table=to_markdown_table(chart), plan_echo=describe_plan(plan),
         caveats=caveats, citations=citations, domain_packs=selection.pack_ids,
-        domain_pack_source=pack_source,
+        domain_pack_source=pack_source, narrative=narration.text, narrative_mode=narration.mode,
     )
 
     if context.writeback is not None:
         if not context.run_id:
             raise ResponseError("writeback is set but run_id is not (a write-back record is keyed by a caller-assigned run id)")
+        request = context.writeback
+        no_candidate = ("no knowledge candidate: the write-back was refused"
+                        if request.propose_knowledge else "")
         refusal = writeback_refusal(selection)
         if refusal is not None:
             # Write-back is eligible only when every applied pack is
             # reviewed (REQ-016, AC-025); refused before any record is built.
-            return _refuse("write_rejected", refusal, describe_plan(plan))
-        request = context.writeback
+            return replace(_refuse("write_rejected", refusal, describe_plan(plan)),
+                           knowledge_candidate_reason=no_candidate)
         records = build_records(
             plan, result, insight_set, run_id=context.run_id, question=question,
             metric_definition_hash=_metric_definition_hash(context.layer, plan.metric),
@@ -293,13 +351,18 @@ def answer(question: str, context: AnswerContext) -> ChatResponse:
             outcome = publish(
                 records, request.contract, request.writer,
                 dry_run=request.dry_run, approved=request.approved,
+                approver_handle=request.approver_handle, approver_roles=request.approver_roles,
+                roster_has_entries=request.roster_has_entries,
             )
         except WriteBackError as exc:
             # A refused commit is a typed non-answer, never a raised
             # exception through the chat path (NFR-006) — the caller asked
             # a valid question but its write-back could not be committed.
-            return _refuse("write_rejected", str(exc), describe_plan(plan))
+            return replace(_refuse("write_rejected", str(exc), describe_plan(plan)),
+                           knowledge_candidate_reason=no_candidate)
         final = replace(final, run_id=context.run_id, writeback=outcome)
+        if request.propose_knowledge:
+            final = _with_knowledge_candidate(final, request, plan, insight_set, outcome, context)
 
     if context.envelope_dir is not None:
         if not context.run_id:

@@ -14,9 +14,10 @@ It never writes to `memory/` — the approval *action* (write-back) is a later s
 | --- | --- |
 | `model.py` | `load_store()` walks a `memory/` tree per its manifest into `0048` records tagged with workflow/source; `build_model()` derives the deterministic JSON view-model (counts, trends, graph, changes, review queue); `git_changes()` reads the git history feed. |
 | `query.py` | The NL-query seam: a `QueryEngine` protocol, a grounded `KeywordQueryEngine` default, and `resolve_engine()`/`register_engine()` so a real LLM engine can take over later behind the same contract. |
-| `server.py` | Standard-library HTTP server: `GET /api/model`, `GET /api/health`, `POST /api/query`, plus static serving of the built front end (traversal-guarded, loopback-bound, read-only). |
+| `analytics.py` | Read-only data questions (spec `0080` T-026): an `AnalyticsService` built once at startup that answers through `nl_analytics.answer()` under the viewer's clearance, and `service_from_files()`. |
+| `server.py` | Standard-library HTTP server: `GET /api/model`, `GET /api/health`, `POST /api/query`, `POST /api/analytics/ask`, plus static serving of the built front end (traversal-guarded, loopback-bound, read-only). |
 | `__main__.py` | CLI: `serve`, `snapshot`, `print`. |
-| `../../../web/` | Vite + React + TypeScript front end (six views). Build-time tooling only — it is **not** an SDK runtime dependency. |
+| `../../../web/` | Vite + React + TypeScript front end (seven views). Build-time tooling only — it is **not** an SDK runtime dependency. |
 
 The backend is **standard library only** (spec NFR-001); the front end pulls in
 no runtime third-party libraries and no external hosts (spec NFR-002).
@@ -35,6 +36,27 @@ python -m quantsmith.knowledge_console serve --root memory --static web/dist --p
 
 During front-end development, `npm --prefix web run dev` runs Vite with hot reload;
 point it at a running `serve` for the API.
+
+## Ask data questions (spec `0080`)
+
+Point `serve` at a metric registry and fact rows (the same files the
+`nl_analytics` CLI reads) to enable `POST /api/analytics/ask` and the *Data
+Questions* page:
+
+```sh
+python -m quantsmith.knowledge_console serve --root memory --static web/dist \
+  --analytics-registry examples/nl_analytics/registry.json \
+  --analytics-data examples/nl_analytics/data.json --analytics-today 3
+# optional: --llm-profiles settings/llm_profiles.json (llm-profiles/1) to use a
+# model for interpretation and narration; without it, the keyword interpreter
+# and template narrative answer. --viewer-override previews another clearance.
+```
+
+The route is read-only (owner decision, 2026-10-09): it never writes results
+back, emits a run envelope, or proposes knowledge; the `nl_analytics` CLI does
+those. Without the analytics flags it returns 404. The page renders the
+answer's table; it does not draw the Vega-Lite chart yet (no chart library is
+bundled).
 
 ## Share a snapshot (no server)
 

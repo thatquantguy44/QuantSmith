@@ -29,7 +29,7 @@ SCHEMA_COLUMNS: Tuple[str, ...] = (
     "record_key", "run_id", "question_hash", "plan_hash", "metric",
     "metric_definition_hash", "dimensions_json", "window_start", "window_end",
     "as_of", "insight_kind", "values_json", "headline", "interpreter_mode",
-    "author_handle", "created_at", "reversed_at",
+    "author_handle", "approver_handle", "created_at", "reversed_at",
 )
 
 
@@ -46,6 +46,10 @@ class WriteBackContract:
     idempotency_key: str
     source_tables_denied: Tuple[str, ...]
     auto_approve: bool = False
+    # REQ-023: roles (from ``access/roster.yml`` entries) an approver must hold
+    # one of, and whether the approver must differ from the record's author.
+    approver_roles: Tuple[str, ...] = ()
+    require_distinct_approver: bool = False
 
     def __post_init__(self) -> None:
         if not self.name:
@@ -67,16 +71,20 @@ class WriteBackContract:
         return False
 
 
-def default_contract(name: str, *, source_tables_denied: Sequence[str] = (), auto_approve: bool = False) -> WriteBackContract:
+def default_contract(name: str, *, source_tables_denied: Sequence[str] = (), auto_approve: bool = False,
+                     approver_roles: Sequence[str] = (), require_distinct_approver: bool = False) -> WriteBackContract:
     """A contract using the standard schema (matches the shipped template)."""
     return WriteBackContract(
         name=name, columns=SCHEMA_COLUMNS, idempotency_key="record_key",
         source_tables_denied=tuple(source_tables_denied), auto_approve=auto_approve,
+        approver_roles=tuple(approver_roles), require_distinct_approver=require_distinct_approver,
     )
 
 
 _NAME_RE = re.compile(r"^\s*-\s*\*\*Name:\*\*\s*(?P<value>\S+)")
 _AUTO_APPROVE_RE = re.compile(r"^\s*-\s*\*\*`auto_approve`:\*\*\s*`(?P<value>true|false)`")
+_APPROVER_ROLES_RE = re.compile(r"^\s*-\s*\*\*`approver_roles`:\*\*\s*`(?P<value>[^`]*)`")
+_DISTINCT_RE = re.compile(r"^\s*-\s*\*\*`require_distinct_approver`:\*\*\s*`(?P<value>true|false)`")
 _HEADING_RE = re.compile(r"^##\s+(?P<title>.+?)\s*$")
 _BULLET_RE = re.compile(r"^\s*-\s+(?P<text>.+?)\s*$")
 
@@ -124,7 +132,18 @@ def load_contract(path: str) -> WriteBackContract:
         if bullet and not bullet.group("text").startswith("<"):
             denied.append(bullet.group("text").strip("`"))
 
-    return default_contract(name, source_tables_denied=tuple(denied), auto_approve=auto_approve)
+    approver_roles: Tuple[str, ...] = ()
+    distinct = False
+    for line in lines:
+        m = _APPROVER_ROLES_RE.match(line)
+        if m and not m.group("value").strip().startswith("<"):
+            approver_roles = tuple(r.strip() for r in m.group("value").split(",") if r.strip())
+        m = _DISTINCT_RE.match(line)
+        if m:
+            distinct = m.group("value") == "true"
+
+    return default_contract(name, source_tables_denied=tuple(denied), auto_approve=auto_approve,
+                            approver_roles=approver_roles, require_distinct_approver=distinct)
 
 
 @runtime_checkable
@@ -201,6 +220,8 @@ def build_records(
                 "headline": insight.statement,
                 "interpreter_mode": interpreter_mode,
                 "author_handle": author_handle,
+                # Set by publish() once an approval is known (REQ-023).
+                "approver_handle": None,
                 "created_at": created_at,
                 "reversed_at": None,
             }
@@ -216,30 +237,62 @@ def publish(
     dry_run: bool = True,
     approved: bool = False,
     target_table: Optional[str] = None,
+    approver_handle: Optional[str] = None,
+    approver_roles: Sequence[str] = (),
+    roster_has_entries: bool = False,
 ) -> WriteBackOutcome:
-    """Publish ``records`` under ``contract`` (REQ-010, REQ-011).
+    """Publish ``records`` under ``contract`` (REQ-010, REQ-011, REQ-023).
 
     Dry run (the default) validates and returns the exact records it would
     write without calling ``writer`` at all. A commit needs ``approved=True``
     unless ``contract.auto_approve`` — a target naming its own approval
     decision in the contract, not a caller's local default.
+
+    Every approved commit records ``approver_handle``. When the caller names
+    no approver, the approver is the request's own author: the person who
+    asked is the person who approved, and that is what the record says. A
+    contract may also require the approver to hold one of
+    ``approver_roles`` (``approver_roles`` here are the roles the caller
+    resolved for the approver from ``access/roster.yml``; a target that
+    declares roles is refused while the roster has no entries) and may
+    require an approver other than the author. Each refusal raises
+    :class:`WriteBackError` before ``writer`` is called (AC-032).
     """
     if target_table is not None and contract.targets_denied_table(target_table):
         raise WriteBackError(f"contract {contract.name!r} denies writes to table {target_table!r}")
     _validate_records(records, contract)
 
     run_id = records[0]["run_id"] if records else None
+    author = str(records[0]["author_handle"]) if records else None
+    approver = approver_handle or (author if approved else None)
+    stamped = tuple({**dict(r), "approver_handle": approver} for r in records)
     if dry_run:
-        return WriteBackOutcome(status="dry_run", records=tuple(dict(r) for r in records), written_count=0, run_id=run_id)
+        return WriteBackOutcome(status="dry_run", records=stamped, written_count=0, run_id=run_id)
 
-    if not contract.auto_approve and not approved:
-        raise WriteBackError(
-            f"contract {contract.name!r} requires approval to commit "
-            "(pass approved=True) unless auto_approve is set"
-        )
+    if not contract.auto_approve:
+        if not approved:
+            raise WriteBackError(
+                f"contract {contract.name!r} requires approval to commit "
+                "(pass approved=True) unless auto_approve is set"
+            )
+        if contract.approver_roles:
+            if not roster_has_entries:
+                raise WriteBackError(
+                    f"contract {contract.name!r} requires an approver role "
+                    f"({', '.join(contract.approver_roles)}), but access/roster.yml has no entries to check it against"
+                )
+            if not set(approver_roles) & set(contract.approver_roles):
+                raise WriteBackError(
+                    f"approver {approver!r} holds none of the roles contract {contract.name!r} requires "
+                    f"({', '.join(contract.approver_roles)})"
+                )
+        if contract.require_distinct_approver and approver == author:
+            raise WriteBackError(
+                f"contract {contract.name!r} requires an approver other than the author ({author!r})"
+            )
 
-    written = writer.write(records)
-    return WriteBackOutcome(status="committed", records=tuple(dict(r) for r in records), written_count=written, run_id=run_id)
+    written = writer.write(stamped)
+    return WriteBackOutcome(status="committed", records=stamped, written_count=written, run_id=run_id)
 
 
 def reverse(run_id: str, reversed_at: int, contract: WriteBackContract, writer: WriteBackWriter) -> WriteBackOutcome:

@@ -114,15 +114,24 @@ advisory-by-default deployment decision. The chain builds on
 >
 > **The owner has made this the single highest priority, ahead of everything
 > below — including the credit-risk direction and the ranked list.** If only
-> one thing moves, it is this: build `0080` T-024–T-029 and get the spec
-> approved. T-001–T-023 are built. The owner resolved the open questions on
+> one thing moves, it is this: build `0080` T-029 and get the spec
+> approved. T-001–T-028 are built. On 2026-10-08 and 2026-10-09:
+> - T-024 added the provider-neutral LLM backend `quantsmith.adapters.llm_runtime`;
+> - T-025 added the gated `LLMInterpreter` and `LLMNarrator` on top of it;
+> - T-027 added the named approver for write-back;
+> - T-028 added opt-in knowledge candidates;
+> - T-026 added the read-only Knowledge Console route `POST /api/analytics/ask`
+>   and its *Data Questions* page (owner, 2026-10-09: read-only for now; no
+>   chart library yet). Building it also fixed a masking leak: a restricted
+>   metric no longer returns a distinct `masked` status. The owner resolved the open questions on
 > 2026-10-07: the first surface is the `0057` Knowledge Console backed by model
 > **APIs** through a configured, provider-neutral backend that reads
 > QuantMeridian's `llm-profiles/1` format unchanged (Anthropic, OpenAI, or any
 > OpenAI-compatible gateway or self-hosted server — no gateway assumed; there
 > is no Claude Code where it will run); knowledge candidates are opt-in per publish;
 > approval is per-request confirmation plus a recorded, optionally role-gated
-> approver. Start with T-024 (the API backend), which `0099` can reuse.
+> approver. Next is T-029 (CLI flags, example, README); `0099` can
+> reuse the backend too.
 > **Pick up here:** `specs/0080-nl-analytics-insights/tasks.md` →
 > *Start Here Next Session* has the task order, file layout, house pattern to
 > follow, tests to write, and commands.
@@ -130,8 +139,11 @@ advisory-by-default deployment decision. The chain builds on
 > in its local agent worker and pins QuantSmith by content digest
 > (`contracts/agent/quantsmith-pin.json` there, re-pinned to `c234119` on
 > 2026-10-07). Its companion items Q-1/Q-2 are done here; Q-5 is partly done;
-> Q-6 is T-024. A QuantSmith change in a pinned area needs a QuantMeridian
-> re-pin before its worker will run it.
+> Q-6 is T-024 (built). A QuantSmith change in a pinned area needs a QuantMeridian
+> re-pin before its worker will run it; T-024 adds Python files under
+> `src/quantsmith/`, so it changes the pinned code digest. The shared
+> conformance cases (`tests/fixtures/llm_profiles/conformance.json`) are
+> ready for QuantMeridian spec009 T-005.
 
 > ### New direction — Credit Risk Domain Foundation (spec `0072`, Approved)
 >
@@ -186,9 +198,10 @@ time:
    the insights published to a database so tomorrow's "what changed since
    yesterday" can compare against them. It reuses what is already built
    (`0008` metrics, `0058` access, `0014`–`0018` dashboards, `0070` replay)
-   rather than adding a new foundation. **Next:** build T-024–T-029 in order
-   (API backend, LLM interpreter and narrator, Console route, named approver,
-   opt-in knowledge candidates, CLI and docs), then approve the spec. Open
+   rather than adding a new foundation. **Next:** build T-029 (CLI flags and
+   docs), then approve the spec. T-024 (the LLM backend), T-025 (the LLM
+   interpreter and narrator), T-026 (the read-only Console route), T-027 (the
+   named approver), and T-028 (knowledge candidates) are built. Open
    questions resolved 2026-10-07 (see item 29), including the gateway: none
    assumed, backends are configured profiles. First write-back target:
    SQLite (local, gitignored file).
@@ -1518,7 +1531,30 @@ manual-task persistence question stays deferred until a real consumer needs it.
     per-request confirmation plus the approver's recorded handle, with
     optional approver roles from the roster and a second-person rule per
     target. These add REQ-019–REQ-023, AC-028–AC-032, and T-024–T-029.
-    **Remaining:** T-024–T-029, T-019 (ship docs), and owner approval.
+    **T-024 built (2026-10-08):** `quantsmith.adapters.llm_runtime` reads
+    `llm-profiles/1` unchanged and resolves profiles with spec009's rules and
+    error codes. It calls `anthropic_messages` and `openai_chat_completions`
+    with the standard library, with retries, a one-hop fallback, and a
+    per-answer token cap; it is checked against 14 shared conformance cases
+    and QuantMeridian's own settings file.
+    **T-025 built (2026-10-08):** `LLMInterpreter` and `LLMNarrator` take a
+    plain completion callable (`llm_runtime.as_callable()` builds one).
+    A malformed reply, an unknown field, an ungoverned plan, or a window past
+    today becomes a clarification, never a guess. A narrative ships only if
+    every number grounds and it has no causal wording; otherwise the template
+    ships with a caveat. `ChatResponse` gains `narrative` and `narrative_mode`.
+    **T-027 built (2026-10-08):** every committed write-back record carries
+    `approver_handle`. An approved commit that names no approver records its
+    author, explicitly. Contracts may require an approver role from
+    `access/roster.yml` (refused while the roster is empty) and a second
+    person. Existing SQLite tables gain the column on open.
+    **T-028 built (2026-10-08):** a publish request may opt in to a `0049`
+    knowledge candidate. It is built from the headline insight, with
+    evidence citing the run, plan hash, record keys, metric definition, and
+    as-of, and returned on `ChatResponse`. `answer()` never stages it; only
+    a human's `promote` makes a record. A refused write, including an
+    unreviewed pack, yields no candidate, with the reason stated.
+    **Remaining:** T-026, T-029, T-019 (ship docs), and owner approval.
 
 30. **Analytics domain packs (spec `0081`, Draft; packs drafted, validator
     built) — the domain knowledge behind item 29.** Forty JSON packs in

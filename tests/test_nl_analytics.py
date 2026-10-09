@@ -7,6 +7,7 @@ proves.
 
 from __future__ import annotations
 
+import datetime
 import json
 import os
 import sqlite3
@@ -17,6 +18,7 @@ from pathlib import Path
 import pytest
 
 from quantsmith.pipelines.dashboard_spec import DashboardSpec
+from quantsmith.pipelines.access_control import Roster, _parse_roster_text, roles_for, validate_roster
 from quantsmith.pipelines.metrics_semantic_layer import Fact, SemanticLayer
 from quantsmith.pipelines.powerbi_profile import render_powerbi
 from quantsmith.nl_analytics.plan import (
@@ -31,6 +33,8 @@ from quantsmith.nl_analytics.plan import (
 )
 from quantsmith.nl_analytics.interpret import (
     InterpretContext,
+    KeywordInterpreter,
+    LLMInterpreter,
     interpret,
     register_interpreter,
 )
@@ -38,7 +42,7 @@ from quantsmith.nl_analytics.authorize import AccessPolicy, authorize_clarificat
 from quantsmith.nl_analytics.execute import execute
 from quantsmith.nl_analytics.chart import ChartError, choose_chart, is_minimal_vega_lite, to_markdown_table, to_panel, to_vega_lite
 from quantsmith.nl_analytics.insights import compute_insights
-from quantsmith.nl_analytics.narrate import default_caveats, ground
+from quantsmith.nl_analytics.narrate import LLMNarrator, default_caveats, ground
 from quantsmith.nl_analytics.respond import AnswerContext, ChatResponse, ResponseError, WriteBackRequest, answer
 
 
@@ -468,10 +472,11 @@ def test_ac022_typed_status_on_every_failure_path(layer):
     r1 = answer("no such thing at all", _context(layer, reader=lambda p: rows))
     assert r1.status == "clarification_needed" and r1.reason and r1.chart is None
 
-    # masked: restricted metric
+    # masked: restricted metric, reported exactly like an unknown one (REQ-004)
     policy = AccessPolicy(metric_levels={"funding_cost": "restricted"})
     r2 = answer("funding cost", _context(layer, reader=lambda p: rows, access_policy=policy, viewer_clearance="public"))
-    assert r2.status == "masked" and r2.reason and r2.chart is None
+    assert r2.status == "clarification_needed" and r2.reason and r2.chart is None
+    assert (r2.status, r2.reason) == (r1.status, r1.reason)
 
     # empty: no rows in the window
     r3 = answer("funding cost", _context(layer, reader=lambda p: [], as_of=10))
@@ -485,7 +490,7 @@ def test_ac022_typed_status_on_every_failure_path(layer):
     assert r4.status == "stale" and r4.reason and r4.chart is None
 
     for r in (r1, r2, r3, r4):
-        assert r.status in ("clarification_needed", "masked", "empty", "stale")
+        assert r.status in ("clarification_needed", "empty", "stale")
         with pytest.raises(ResponseError):
             ChatResponse(status=r.status, reason="", headline="", insights=(), chart=None,
                         vega_lite=None, markdown_table=None, plan_echo="", caveats=(), citations=())
@@ -500,6 +505,7 @@ def test_ac022_typed_status_on_every_failure_path(layer):
 
 
 from quantsmith.nl_analytics.writeback import (
+    SCHEMA_COLUMNS,
     WriteBackContract,
     WriteBackError,
     build_records,
@@ -1386,3 +1392,282 @@ def test_ac027_pack_source_reported_and_missing_catalog_raises(tmp_path, monkeyp
 
     with pytest.raises(ResponseError, match="domain_packs is empty"):
         answer("yield yoy", replace(ctx, domain_packs=(), domain_pack_source=None))
+
+
+# --- AC-029: LLM interpreter and narrator, gated (T-025, REQ-020) -----------
+
+
+
+class _Model:
+    """A stub completion callable: returns a fixed reply (or raises), recording each call."""
+
+    def __init__(self, reply):
+        self.reply = reply
+        self.calls = []
+
+    def __call__(self, prompt, system):
+        self.calls.append((prompt, system))
+        if isinstance(self.reply, Exception):
+            raise self.reply
+        return self.reply(prompt) if callable(self.reply) else self.reply
+
+
+def _rows():
+    return [Fact(period=p, dims={"desk": d}, measures={"cost": float(p) + (2.0 if d == "fx" else 0.0)})
+            for p in range(6, 11) for d in ("rates", "fx")]
+
+
+def _no_read(plan):
+    raise AssertionError("nothing may execute for an ungoverned or unparsed plan")
+
+
+_GOOD_PLAN = {"metric": "funding_cost", "dimensions": ["desk"], "filters": [],
+              "window": {"start_period": 6, "end_period": 10, "grain": "day"}, "comparison": None, "rank": None}
+
+
+def test_ac029_valid_llm_plan_executes_through_the_same_gate(layer):
+    model = _Model(json.dumps(_GOOD_PLAN))
+    response = answer("what did funding cost do by desk this week", _context(layer, reader=lambda p: _rows(),
+                      interpreter=LLMInterpreter(model)))
+    assert response.status == "answered", response.reason
+    assert "funding_cost" in response.plan_echo and "by desk" in response.plan_echo
+    prompt, system = model.calls[0]
+    vocab = json.loads(prompt)["vocabulary"]
+    assert {m["name"] for m in vocab["metrics"]} == {"funding_cost", "revenue"} and vocab["today_period"] == 10
+    assert "JSON" in system and "never write SQL" in system
+
+
+@pytest.mark.parametrize("reply, reason", [
+    ("Sure! Here is the plan: funding_cost by desk", "not a valid plan"),
+    ("```json\n{\"metric\": \"funding_cost\"", "not a valid plan"),
+    (json.dumps({**_GOOD_PLAN, "dimensions": ["counterparty"]}), "not declared"),
+    (json.dumps({**_GOOD_PLAN, "sql": "SELECT 1"}), "unknown field"),
+    (json.dumps({**_GOOD_PLAN, "metric": "secret_pnl"}), "undefined metric"),
+    (json.dumps({**_GOOD_PLAN, "window": {"start_period": 9, "end_period": 12, "grain": "day"}}), "after today"),
+    (json.dumps({**_GOOD_PLAN, "window": {"start_period": 6, "end_period": 10, "grain": "hourly"}}), "grain"),
+])
+def test_ac029_bad_llm_output_is_a_clarification_with_no_execution(layer, reply, reason):
+    response = answer("funding cost by desk", _context(layer, reader=_no_read, interpreter=LLMInterpreter(_Model(reply))))
+    assert response.status == "clarification_needed"
+    assert reason in response.reason and response.chart is None
+
+
+def test_ac029_fenced_json_and_null_window_use_the_declared_default(layer):
+    reply = "```json\n" + json.dumps({**_GOOD_PLAN, "window": None}) + "\n```"
+    plan = interpret("funding cost by desk", layer, InterpretContext(today_period=10, default_window_periods=5),
+                     interpreter=LLMInterpreter(_Model(reply)))
+    assert isinstance(plan, QueryPlan)
+    assert (plan.window.start_period, plan.window.end_period) == (6, 10) and plan.defaults_applied == ("window",)
+    assert plan.interpreter == "llm/1"
+
+
+def test_ac029_model_clarification_keeps_only_governed_permitted_candidates(layer):
+    reply = json.dumps({"clarification": {"reason": "cost could mean two metrics",
+                                          "candidates": ["funding_cost", "revenue", "made_up_metric"]}})
+    response = answer("cost", _context(layer, reader=_no_read, interpreter=LLMInterpreter(_Model(reply)),
+                                       access_policy=AccessPolicy(metric_levels={"revenue": "restricted"})))
+    assert response.status == "clarification_needed"
+    assert "funding_cost" in response.reason
+    assert "made_up_metric" not in response.reason and "revenue" not in response.reason   # masked (AC-005)
+
+
+def test_ac029_model_failure_is_a_clarification_or_the_keyword_fallback(layer):
+    ctx = InterpretContext(today_period=10, default_window_periods=5)
+    down = LLMInterpreter(_Model(LookupError("no model")))
+    result = interpret("funding cost", layer, ctx, interpreter=down)
+    assert isinstance(result, Clarification) and "LookupError" in result.reason
+    with_fallback = LLMInterpreter(_Model(LookupError("no model")), fallback=KeywordInterpreter())
+    plan = interpret("funding cost", layer, ctx, interpreter=with_fallback)
+    assert isinstance(plan, QueryPlan) and plan.interpreter == "keyword/1"
+
+
+def _echo_statements(prompt):
+    return " ".join(i["statement"] for i in json.loads(prompt)["insights"])
+
+
+def test_ac029_grounded_model_narrative_ships(layer):
+    response = answer("funding cost", _context(layer, reader=lambda p: _rows(), narrator=LLMNarrator(_Model(_echo_statements))))
+    assert response.status == "answered" and response.narrative_mode == "llm/1"
+    assert response.narrative == template_narrative(response.insights)
+    assert not any("template" in c for c in response.caveats)
+
+
+@pytest.mark.parametrize("reply, caveat", [
+    ("Funding cost rose to 9999 this week.", "not in the computed results"),
+    (lambda prompt: _echo_statements(prompt) + " This happened because of rate hikes.", "causal wording"),
+    ("", "returned no text"),
+    (RuntimeError("provider down"), "unavailable"),
+])
+def test_ac029_rejected_model_narrative_falls_back_to_the_template_with_a_caveat(layer, reply, caveat):
+    response = answer("funding cost", _context(layer, reader=lambda p: _rows(), narrator=LLMNarrator(_Model(reply))))
+    assert response.status == "answered"
+    assert response.narrative_mode == "template" and response.narrative == template_narrative(response.insights)
+    assert any(caveat in c for c in response.caveats), response.caveats
+
+
+def test_default_answer_reports_the_template_narrative(layer):
+    response = answer("funding cost", _context(layer, reader=lambda p: _rows()))
+    assert response.narrative_mode == "template" and response.narrative == template_narrative(response.insights)
+
+
+# --- AC-032: named approver, approver roles, distinct approver (T-027, REQ-023) --
+
+
+
+class _NoWriteWriter(_RecordingWriter):
+    def write(self, records):
+        raise AssertionError("a refused commit must never reach the writer")
+
+
+def test_ac032_every_commit_records_its_approver(layer):
+    _, _, records = _built_records(layer)
+    contract = default_contract("approvals")
+    by_author = publish(records, contract, _RecordingWriter(), dry_run=False, approved=True)
+    assert {r["approver_handle"] for r in by_author.records} == {"anon-1"}       # the author approved
+    named = publish(records, contract, _RecordingWriter(), dry_run=False, approved=True, approver_handle="anon-2")
+    assert {r["approver_handle"] for r in named.records} == {"anon-2"}
+    dry = publish(records, contract, _RecordingWriter())
+    assert {r["approver_handle"] for r in dry.records} == {None}
+    auto = publish(records, default_contract("auto", auto_approve=True), _RecordingWriter(), dry_run=False)
+    assert auto.status == "committed" and {r["approver_handle"] for r in auto.records} == {None}
+
+
+def test_ac032_approver_roles_and_distinct_approver_are_enforced_before_writing(layer):
+    _, _, records = _built_records(layer)
+    gated = default_contract("gated", approver_roles=("desk-lead",))
+    with pytest.raises(WriteBackError, match="no entries"):
+        publish(records, gated, _NoWriteWriter(), dry_run=False, approved=True, approver_handle="anon-2")
+    with pytest.raises(WriteBackError, match="holds none of the roles"):
+        publish(records, gated, _NoWriteWriter(), dry_run=False, approved=True, approver_handle="anon-2",
+                approver_roles=("analyst",), roster_has_entries=True)
+    ok = publish(records, gated, _RecordingWriter(), dry_run=False, approved=True, approver_handle="anon-2",
+                 approver_roles=("analyst", "desk-lead"), roster_has_entries=True)
+    assert ok.status == "committed"
+
+    four_eyes = default_contract("four-eyes", require_distinct_approver=True)
+    with pytest.raises(WriteBackError, match="other than the author"):
+        publish(records, four_eyes, _NoWriteWriter(), dry_run=False, approved=True)
+    with pytest.raises(WriteBackError, match="other than the author"):
+        publish(records, four_eyes, _NoWriteWriter(), dry_run=False, approved=True, approver_handle="anon-1")
+    assert publish(records, four_eyes, _RecordingWriter(), dry_run=False, approved=True,
+                   approver_handle="anon-2").status == "committed"
+
+
+def test_ac032_answer_returns_write_rejected_with_the_reason(layer):
+    rows = [Fact(period=p, dims={"desk": "rates"}, measures={"cost": float(p)}) for p in range(6, 11)]
+    request = WriteBackRequest(contract=default_contract("gated", approver_roles=("desk-lead",)),
+                               writer=_NoWriteWriter(), author_handle="anon-1", dry_run=False, approved=True)
+    response = answer("funding cost", _context(layer, reader=lambda p: rows, run_id="run-gated", writeback=request))
+    assert response.status == "write_rejected" and "roster.yml has no entries" in response.reason
+
+
+def test_ac032_contract_file_declares_roles_and_distinct_approver(tmp_path):
+    text = (_REPO_ROOT / "templates" / "data" / "writeback_contract.md").read_text(encoding="utf-8")
+    text = text.replace("- **Name:** <target-name>", "- **Name:** desk_insights", 1)
+    text = text.replace("`<role, role>`", "`desk-lead, risk`", 1)
+    text = text.replace("- **`require_distinct_approver`:** `false`", "- **`require_distinct_approver`:** `true`", 1)
+    path = tmp_path / "contract.md"
+    path.write_text(text, encoding="utf-8")
+    contract = load_contract(str(path))
+    assert contract.approver_roles == ("desk-lead", "risk") and contract.require_distinct_approver
+    untouched = tmp_path / "plain.md"
+    untouched.write_text(text.replace("`desk-lead, risk`", "`<role, role>`"), encoding="utf-8")
+    assert load_contract(str(untouched)).approver_roles == ()
+
+
+def test_ac032_roster_roles_parse_validate_and_resolve():
+    text = ("people:\n"
+            "  - handle: u-aaaaaaaaaaaaaaaaaaaaaaaa\n    label: lead\n    clearance: internal\n    roles: [desk-lead, risk]\n"
+            "  - handle: u-bbbbbbbbbbbbbbbbbbbbbbbb\n    label: analyst\n    clearance: internal\n    roles: analyst\n"
+            "  - handle: u-cccccccccccccccccccccccc\n    label: other\n    clearance: public\n    roles: [Bad Role]\n")
+    entries, _ = _parse_roster_text(text, "roster.yml")
+    roster = Roster(entries=tuple(entries), enforced=True, source_file="roster.yml")
+    assert roles_for(roster, "u-aaaaaaaaaaaaaaaaaaaaaaaa") == ("desk-lead", "risk")
+    assert roles_for(roster, "u-bbbbbbbbbbbbbbbbbbbbbbbb") == ("analyst",)
+    assert roles_for(roster, "u-unknown") == () and roles_for(roster, None) == ()
+    assert [f.message for f in validate_roster(roster) if "role" in f.message] == [
+        "role 'Bad Role' must be lowercase letters, digits, and hyphens"]
+
+
+def test_ac032_sqlite_table_from_before_the_approver_column_is_migrated(layer):
+    conn = sqlite3.connect(":memory:")
+    old_columns = [c for c in SCHEMA_COLUMNS if c != "approver_handle"]
+    cols = ", ".join(f'"{c}" TEXT' for c in old_columns if c != "record_key")
+    conn.execute(f'CREATE TABLE "nl_analytics_writeback_legacy" ("record_key" TEXT PRIMARY KEY, {cols})')
+    conn.execute('INSERT INTO "nl_analytics_writeback_legacy" ("record_key", "metric", "dimensions_json") '
+                 "VALUES ('old', 'funding_cost', '[]')")
+    writer = SQLiteWriter(conn, default_contract("legacy"))
+    _, _, records = _built_records(layer)
+    publish(records, default_contract("legacy"), writer, dry_run=False, approved=True, approver_handle="anon-2")
+    rows = {r["record_key"]: r for r in writer.read("funding_cost")}
+    assert rows["old"]["approver_handle"] is None
+    assert {r["approver_handle"] for k, r in rows.items() if k != "old"} == {"anon-2"}
+
+
+# --- AC-031: opt-in knowledge candidates (T-028, REQ-022) -------------------
+
+
+_PROPOSED = datetime.date(2026, 10, 8)
+
+
+def _publish_ctx(layer, **request):
+    rows = [Fact(period=p, dims={"desk": "rates"}, measures={"cost": float(p)}) for p in range(6, 11)]
+    wb = WriteBackRequest(contract=default_contract("insights"), writer=_RecordingWriter(), author_handle="anon-1",
+                          propose_knowledge=True, knowledge_proposed_at=_PROPOSED, **request)
+    return _context(layer, reader=lambda p: rows, run_id="run-k1", writeback=wb)
+
+
+def test_ac031_committed_publish_proposes_one_reviewable_candidate(layer, tmp_path):
+    from quantsmith.pipelines import workflow_memory as wm
+
+    response = answer("funding cost", _publish_ctx(layer, dry_run=False, approved=True))
+    assert response.status == "answered" and response.writeback.status == "committed"
+    candidate = response.knowledge_candidate
+    assert isinstance(candidate, wm.Candidate) and response.knowledge_candidate_reason == ""
+    assert candidate.workflow == "nl_analytics" and candidate.source_run == "run-k1"
+    assert candidate.proposed_at == _PROPOSED and candidate.candidate_id == "nl_analytics/run-k1/001"
+    spec = candidate.spec
+    assert spec.scope == "metric:funding_cost" and spec.type == "metric" and spec.confidence == "low"
+    assert spec.statement == response.insights[0].statement
+    evidence = spec.evidence[0]
+    keys = {r["record_key"] for r in response.writeback.records}
+    assert evidence["source_run"] == "run-k1" and set(evidence["record_keys"].split(",")) == keys
+    assert evidence["plan_hash"] and evidence["metric_definition_hash"].startswith("sha256:")
+    assert evidence["as_of_period"] == "10"
+    # Staging is the caller's step, and it only ever writes the inbox: nothing is promoted.
+    path = wm.stage_candidates([candidate], root=tmp_path / "memory")
+    assert "inbox" in path.parts
+    assert [p.relative_to(tmp_path / "memory").parts[0] for p in (tmp_path / "memory").rglob("*") if p.is_file()] == ["inbox"]
+
+
+def test_ac031_dry_run_returns_the_would_be_candidate_without_staging(layer, tmp_path):
+    response = answer("funding cost", _publish_ctx(layer))
+    assert response.writeback.status == "dry_run"
+    assert response.knowledge_candidate is not None and "dry run" in response.knowledge_candidate_reason
+    assert not (tmp_path / "memory").exists()
+
+
+def test_ac031_no_candidate_when_the_write_is_refused_or_not_requested(layer):
+    refused = answer("funding cost", _publish_ctx(layer, dry_run=False, approved=False))
+    assert refused.status == "write_rejected" and refused.knowledge_candidate is None
+    assert refused.knowledge_candidate_reason == "no knowledge candidate: the write-back was refused"
+
+    rows = [Fact(period=p, dims={"desk": "rates"}, measures={"cost": float(p)}) for p in range(6, 11)]
+    plain = answer("funding cost", _context(layer, reader=lambda p: rows, run_id="run-k2", writeback=WriteBackRequest(
+        contract=default_contract("insights"), writer=_RecordingWriter(), dry_run=False, approved=True)))
+    assert plain.knowledge_candidate is None and plain.knowledge_candidate_reason == ""
+
+    no_date = answer("funding cost", _context(layer, reader=lambda p: rows, run_id="run-k3", writeback=WriteBackRequest(
+        contract=default_contract("insights"), writer=_RecordingWriter(), dry_run=False, approved=True,
+        propose_knowledge=True)))
+    assert no_date.knowledge_candidate is None and "knowledge_proposed_at is required" in no_date.knowledge_candidate_reason
+
+
+def test_ac031_unreviewed_pack_blocks_the_candidate_with_the_write():
+    layer = _rates_layer()
+    wb = WriteBackRequest(contract=default_contract("cli_default"), writer=_RecordingWriter(),
+                          propose_knowledge=True, knowledge_proposed_at=_PROPOSED)
+    ctx = _yearly_context(layer, _curve_rows(("2y",)), dataset_domains=("fixed_income_rates",), domain_packs=_PACKS)
+    refused = answer("yield yoy", replace(ctx, run_id="run-pack-k", writeback=wb))
+    assert refused.status == "write_rejected" and "rates_fixed_income" in refused.reason
+    assert refused.knowledge_candidate is None and "write-back was refused" in refused.knowledge_candidate_reason

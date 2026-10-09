@@ -90,6 +90,13 @@ def _response_to_dict(response: ChatResponse) -> Dict[str, Any]:
     }
 
 
+# Public names for other surfaces (the 0057 Knowledge Console's analytics route) that read the
+# same registry and fact-row files and serialize the same response shape.
+load_registry = _load_registry
+load_data = _load_data
+response_to_dict = _response_to_dict
+
+
 def _print_human(response: ChatResponse) -> None:
     print(f"status: {response.status}")
     if response.status != "answered":

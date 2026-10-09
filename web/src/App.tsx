@@ -7,8 +7,9 @@ import { Graph } from "./components/Graph";
 import { Changes } from "./components/Changes";
 import { Review } from "./components/Review";
 import { Ask } from "./components/Ask";
+import { Analytics } from "./components/Analytics";
 
-type View = "overview" | "trends" | "graph" | "changes" | "review" | "ask";
+type View = "overview" | "trends" | "graph" | "changes" | "review" | "ask" | "analytics";
 
 const NAV: { id: View; label: string; ico: string }[] = [
   { id: "overview", label: "Overview", ico: "▦" },
@@ -17,6 +18,7 @@ const NAV: { id: View; label: string; ico: string }[] = [
   { id: "changes", label: "Recent Changes", ico: "🕑" },
   { id: "review", label: "Needed Review", ico: "✔" },
   { id: "ask", label: "Ask", ico: "💬" },
+  { id: "analytics", label: "Data Questions", ico: "Σ" },
 ];
 
 const TITLES: Record<View, string> = {
@@ -26,6 +28,7 @@ const TITLES: Record<View, string> = {
   changes: "Recent Changes",
   review: "Needed Review",
   ask: "Ask the Knowledge Base",
+  analytics: "Data Questions",
 };
 
 export default function App() {
@@ -103,6 +106,7 @@ export default function App() {
           {view === "changes" && <Changes model={model} />}
           {view === "review" && <Review model={model} />}
           {view === "ask" && <Ask model={model} />}
+          {view === "analytics" && <Analytics />}
         </div>
       </main>
     </div>

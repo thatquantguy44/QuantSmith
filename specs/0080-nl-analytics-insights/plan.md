@@ -109,8 +109,8 @@ has no second templating layer for insight text; `values` is what a
 narrative is grounded against, not the template's slots). Kinds: `level`,
 `change`, `contributor`, `trend`, `outlier`, `concentration`.
 
-**`ChatResponse`** — `status ∈ {answered, clarification_needed, masked, empty,
-stale, write_rejected}`, `reason`, `headline`, `insights`, `chart`,
+**`ChatResponse`** — `status ∈ {answered, clarification_needed, empty, stale,
+write_rejected}` (an access-masked plan reports as `clarification_needed`, REQ-004), `reason`, `headline`, `insights`, `chart`,
 `vega_lite`, `markdown_table`, `plan_echo`, `caveats`, `citations`, `run_id`,
 `envelope_uri`, `writeback: WriteBackOutcome | None`.
 

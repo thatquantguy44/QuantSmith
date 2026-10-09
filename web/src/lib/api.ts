@@ -9,7 +9,7 @@
 // The embedded model is checked FIRST, before any fetch, so a static snapshot
 // works offline with zero requests.
 
-import type { Model, QueryAnswer, RecordView } from "./types";
+import type { AnalyticsAnswer, Model, QueryAnswer, RecordView } from "./types";
 
 export function isEmbedded(): boolean {
   return typeof window !== "undefined" && !!window.__KB_MODEL__;
@@ -106,4 +106,20 @@ export function localKeywordAnswer(
     mode: "keyword (local)",
     matched: true,
   };
+}
+
+// Data analytics (spec 0080 T-026). Server-only: a static snapshot has no fact
+// rows to query, so the embedded mode reports that instead of guessing.
+export async function askAnalytics(question: string): Promise<AnalyticsAnswer> {
+  if (isEmbedded()) {
+    throw new Error("analytics needs the live server; a static snapshot has no data to query");
+  }
+  const res = await fetch("/api/analytics/ask", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ question }),
+  });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(body.error || `Analytics failed: HTTP ${res.status}`);
+  return body as AnalyticsAnswer;
 }

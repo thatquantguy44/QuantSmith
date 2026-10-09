@@ -21,6 +21,35 @@ patterns locally rather than expecting them to update in place.
 ## [Unreleased]
 
 ### Added
+- Read-only natural-language analytics in the Knowledge Console (spec `0080` T-026): `POST /api/analytics/ask`
+  answers a data question under the console viewer's clearance and returns headline, insights, `vega_lite`,
+  `markdown_table`, plan echo, caveats, citations, and narrative. It never writes back, emits an envelope, or builds a
+  knowledge candidate. Enable it with `knowledge_console serve --analytics-registry … --analytics-data …
+  --analytics-today …` (optional `--llm-profiles`, `--viewer-override`); without it the route returns 404. A new
+  *Data Questions* page renders the answer table (no chart library yet).
+- Opt-in knowledge candidates for natural-language analytics (spec `0080` T-028): a publish request with
+  `propose_knowledge` gets a `0049` `workflow_memory` candidate built from its headline insight, with evidence citing
+  run, plan hash, record keys, metric definition, and as-of (`ChatResponse.knowledge_candidate`, or
+  `knowledge_candidate_reason` when there is none). `answer()` never stages it; staging into `memory/inbox/` is the
+  caller's step, and only a human's `promote` makes a record.
+- Named approver for natural-language analytics write-back (spec `0080` T-027): every committed record carries
+  `approver_handle`; an approved commit naming no approver records its author as approver. Write-back contracts may
+  set `approver_roles` (checked against the new optional `roles` on `access/roster.yml` entries; refused while the
+  roster is empty) and `require_distinct_approver`. Existing SQLite write-back tables gain the column on open.
+- Model-backed interpretation and narration for natural-language analytics (spec `0080` T-025):
+  `nl_analytics.interpret.LLMInterpreter` and `nl_analytics.narrate.LLMNarrator`, plugged in through
+  `AnswerContext.interpreter` and `.narrator`. They take a plain `complete(prompt, system)` callable
+  (`llm_runtime.as_callable()` builds one from a profile), so `nl_analytics` stays network-free. A malformed reply,
+  an unknown field, an ungoverned plan, or a window past today becomes a clarification. A model narrative ships only
+  if every number grounds and it has no causal wording; otherwise the template ships with a caveat. `ChatResponse`
+  gains `narrative` and `narrative_mode`.
+- Provider-neutral LLM backend (spec `0080` T-024): `quantsmith.adapters.llm_runtime` reads QuantMeridian's
+  `llm-profiles/1` profile files unchanged (standard-library validator, cross-checked against the vendored schema) and
+  resolves a profile per call with spec009's precedence and error codes. `complete()` sends single-turn completions
+  to the Anthropic Messages API or any OpenAI-compatible endpoint (OpenAI, Azure OpenAI v1, gateways, vLLM, Ollama),
+  with retries honoring `retry-after`, a one-hop fallback on provider errors, and a per-answer token cap. Credentials
+  come only from environment variables and never appear in errors or `repr`. Shared conformance cases in
+  `tests/fixtures/llm_profiles/conformance.json`. `jsonschema` joins the `dev` extra.
 - First vendored agent-skills sync (spec `0100` T-006): `vendor/agent-skills/` (35 files, 366 KB) and
   `vendor/agent-skills.lock.json`, pinned at fork `thatquantguy44/agent-skills@f63ec56` (plugin `0.6.7`, version stamp
   `0.6.7+f63ec56.53469383`). Content reviewed before sync; `instructions/agent_skills.md` maps the vendored files'
@@ -147,6 +176,9 @@ patterns locally rather than expecting them to update in place.
   `--packs-root` is optional and errors only when it names an empty catalog.
 
 ### Fixed
+- Natural-language analytics no longer discloses that a restricted metric exists (spec `0080` REQ-004): an
+  access-masked plan used to return status `masked`, distinct from an unknown metric's `clarification_needed`; it now
+  returns `clarification_needed` with the same reason, and `masked` is no longer a response status.
 - Dataset Investigator (spec `0099`), from runs on real data (IBM Telco churn, UCI Occupancy): numbers stored as text
   (blanks among numbers) are numeric with a mixed-type quality finding; a target gap is stated high-to-low and its
   stratified (Mantel–Haenszel) test is judged on strength in the gap's own direction, so protective gaps are no

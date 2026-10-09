@@ -1,0 +1,684 @@
+{
+ "schema_version": "llm-profile-conformance/1",
+ "note": "Shared resolution cases for QuantSmith 0080 T-024 and QuantMeridian spec009 T-005 (format from spec009 PLAN, 'Conformance fixtures'). A string config names a file in this directory; 'enable' flips those profiles on before resolving.",
+ "cases": [
+  {
+   "name": "default profile resolves to Anthropic direct",
+   "config": "quantmeridian_settings.json",
+   "env": {
+    "ANTHROPIC_API_KEY": "k-a"
+   },
+   "call": {
+    "use": "interpreter"
+   },
+   "expect": {
+    "profile": "anthropic-direct",
+    "api_style": "anthropic_messages",
+    "endpoint": "https://api.anthropic.com/v1/messages",
+    "auth_header": "x-api-key",
+    "extra_headers": [],
+    "model": "claude-opus-4-8",
+    "limits": {
+     "max_output_tokens": 1500,
+     "timeout_ms": 60000,
+     "max_retries": 2,
+     "per_job_token_cap": 20000,
+     "daily_token_budget": 500000
+    }
+   }
+  },
+  {
+   "name": "default_profile_env selects the deterministic profile",
+   "config": "quantmeridian_settings.json",
+   "env": {
+    "LLM_PROFILE_DEFAULT": "deterministic"
+   },
+   "call": {
+    "use": "narrator"
+   },
+   "expect": {
+    "profile": "deterministic",
+    "api_style": "none",
+    "endpoint": null,
+    "auth_header": null,
+    "extra_headers": [],
+    "model": null
+   }
+  },
+  {
+   "name": "requested beats every default",
+   "config": "quantmeridian_settings.json",
+   "enable": [
+    "openai-direct"
+   ],
+   "env": {
+    "LLM_PROFILE_DEFAULT": "deterministic",
+    "OPENAI_API_KEY": "k-o",
+    "OPENAI_MODEL": "gpt-test"
+   },
+   "call": {
+    "use": "interpreter",
+    "requested": "openai-direct"
+   },
+   "expect": {
+    "profile": "openai-direct",
+    "api_style": "openai_chat_completions",
+    "endpoint": "https://api.openai.com/v1/chat/completions",
+    "auth_header": "Authorization",
+    "extra_headers": [],
+    "model": "gpt-test"
+   }
+  },
+  {
+   "name": "disabled profile is not allowed",
+   "config": "quantmeridian_settings.json",
+   "env": {
+    "OPENAI_API_KEY": "k-o",
+    "OPENAI_MODEL": "gpt-test"
+   },
+   "call": {
+    "use": "interpreter",
+    "requested": "openai-direct"
+   },
+   "expect": {
+    "error": "LLM_PROFILE_NOT_ALLOWED"
+   }
+  },
+  {
+   "name": "OpenAI-compatible gateway by base URL (trailing slash trimmed)",
+   "config": "quantmeridian_settings.json",
+   "enable": [
+    "gateway-openai"
+   ],
+   "env": {
+    "LLM_GATEWAY_BASE_URL": "https://gateway.example/v1/",
+    "LLM_GATEWAY_MODEL": "team-model",
+    "LLM_GATEWAY_API_KEY": "k-g"
+   },
+   "call": {
+    "use": "interpreter",
+    "requested": "gateway-openai"
+   },
+   "expect": {
+    "profile": "gateway-openai",
+    "endpoint": "https://gateway.example/v1/chat/completions",
+    "auth_header": "Authorization",
+    "extra_headers": [],
+    "model": "team-model"
+   }
+  },
+  {
+   "name": "Anthropic-compatible gateway with bearer auth",
+   "config": "quantmeridian_settings.json",
+   "enable": [
+    "gateway-anthropic"
+   ],
+   "env": {
+    "ANTHROPIC_GATEWAY_BASE_URL": "https://claude-gw.example",
+    "ANTHROPIC_GATEWAY_MODEL": "claude-team",
+    "ANTHROPIC_GATEWAY_API_KEY": "k-ag"
+   },
+   "call": {
+    "use": "narrator",
+    "requested": "gateway-anthropic"
+   },
+   "expect": {
+    "profile": "gateway-anthropic",
+    "endpoint": "https://claude-gw.example/v1/messages",
+    "auth_header": "Authorization",
+    "extra_headers": [],
+    "model": "claude-team"
+   }
+  },
+  {
+   "name": "local server with no auth sends no auth header",
+   "config": "quantmeridian_settings.json",
+   "enable": [
+    "local-openai"
+   ],
+   "env": {
+    "LOCAL_LLM_BASE_URL": "http://localhost:11434/v1",
+    "LOCAL_LLM_MODEL": "llama-local"
+   },
+   "call": {
+    "use": "interpreter",
+    "requested": "local-openai"
+   },
+   "expect": {
+    "profile": "local-openai",
+    "endpoint": "http://localhost:11434/v1/chat/completions",
+    "auth_header": null,
+    "extra_headers": [],
+    "model": "llama-local"
+   }
+  },
+  {
+   "name": "use not listed in uses is not allowed",
+   "config": "quantmeridian_settings.json",
+   "enable": [
+    "local-openai"
+   ],
+   "env": {
+    "LOCAL_LLM_BASE_URL": "http://localhost:11434/v1",
+    "LOCAL_LLM_MODEL": "llama-local"
+   },
+   "call": {
+    "use": "drafter",
+    "requested": "local-openai"
+   },
+   "expect": {
+    "error": "LLM_PROFILE_NOT_ALLOWED"
+   }
+  },
+  {
+   "name": "missing credential is unavailable",
+   "config": "quantmeridian_settings.json",
+   "env": {},
+   "call": {
+    "use": "interpreter"
+   },
+   "expect": {
+    "error": "LLM_PROFILE_UNAVAILABLE"
+   }
+  },
+  {
+   "name": "missing base URL is unavailable",
+   "config": "quantmeridian_settings.json",
+   "enable": [
+    "gateway-openai"
+   ],
+   "env": {
+    "LLM_GATEWAY_MODEL": "team-model",
+    "LLM_GATEWAY_API_KEY": "k-g"
+   },
+   "call": {
+    "use": "interpreter",
+    "requested": "gateway-openai"
+   },
+   "expect": {
+    "error": "LLM_PROFILE_UNAVAILABLE"
+   }
+  },
+  {
+   "name": "unknown profile",
+   "config": "quantmeridian_settings.json",
+   "env": {},
+   "call": {
+    "use": "interpreter",
+    "requested": "nope"
+   },
+   "expect": {
+    "error": "LLM_PROFILE_UNKNOWN"
+   }
+  },
+  {
+   "name": "data class outside the profile is not allowed",
+   "config": {
+    "schema_version": "llm-profiles/1",
+    "default_profile": "p",
+    "profiles": {
+     "p": {
+      "enabled": true,
+      "label": "Public only",
+      "api_style": "anthropic_messages",
+      "model": "claude-x",
+      "auth": {
+       "scheme": "provider_default",
+       "credential_env": "ANTHROPIC_API_KEY"
+      },
+      "limits": {
+       "max_output_tokens": 1500,
+       "timeout_ms": 60000,
+       "max_retries": 2,
+       "per_job_token_cap": 20000,
+       "daily_token_budget": 500000
+      },
+      "data_classes": [
+       "public_market_data"
+      ],
+      "uses": [
+       "interpreter"
+      ]
+     }
+    }
+   },
+   "env": {
+    "ANTHROPIC_API_KEY": "k-a"
+   },
+   "call": {
+    "use": "interpreter",
+    "data_classes": [
+     "desk_simulated"
+    ]
+   },
+   "expect": {
+    "error": "LLM_PROFILE_NOT_ALLOWED"
+   }
+  },
+  {
+   "name": "header auth and extra headers (Azure OpenAI v1 style)",
+   "config": {
+    "schema_version": "llm-profiles/1",
+    "default_profile": "p",
+    "profiles": {
+     "p": {
+      "enabled": true,
+      "label": "Azure OpenAI",
+      "api_style": "openai_chat_completions",
+      "base_url_env": "AZURE_OPENAI_BASE_URL",
+      "model_env": "AZURE_OPENAI_DEPLOYMENT",
+      "auth": {
+       "scheme": "header",
+       "header_name": "api-key",
+       "credential_env": "AZURE_OPENAI_API_KEY"
+      },
+      "header_envs": {
+       "X-Tenant": "LLM_TENANT"
+      },
+      "limits": {
+       "max_output_tokens": 1500,
+       "timeout_ms": 60000,
+       "max_retries": 2,
+       "per_job_token_cap": 20000,
+       "daily_token_budget": 500000
+      },
+      "data_classes": [
+       "public_market_data"
+      ],
+      "uses": [
+       "interpreter",
+       "narrator"
+      ]
+     }
+    }
+   },
+   "env": {
+    "AZURE_OPENAI_BASE_URL": "https://res.openai.azure.com/openai/v1",
+    "AZURE_OPENAI_DEPLOYMENT": "gpt-deploy",
+    "AZURE_OPENAI_API_KEY": "k-z",
+    "LLM_TENANT": "desk-7"
+   },
+   "call": {
+    "use": "narrator"
+   },
+   "expect": {
+    "profile": "p",
+    "endpoint": "https://res.openai.azure.com/openai/v1/chat/completions",
+    "auth_header": "api-key",
+    "extra_headers": [
+     "X-Tenant"
+    ],
+    "model": "gpt-deploy"
+   }
+  },
+  {
+   "name": "model_env wins over model when set",
+   "config": {
+    "schema_version": "llm-profiles/1",
+    "default_profile": "p",
+    "profiles": {
+     "p": {
+      "enabled": true,
+      "label": "Alias",
+      "api_style": "anthropic_messages",
+      "model": "claude-pinned",
+      "model_env": "MODEL_ALIAS",
+      "auth": {
+       "scheme": "provider_default",
+       "credential_env": "ANTHROPIC_API_KEY"
+      },
+      "limits": {
+       "max_output_tokens": 1500,
+       "timeout_ms": 60000,
+       "max_retries": 2,
+       "per_job_token_cap": 20000,
+       "daily_token_budget": 500000
+      },
+      "data_classes": [
+       "public_market_data"
+      ],
+      "uses": [
+       "interpreter"
+      ]
+     }
+    }
+   },
+   "env": {
+    "ANTHROPIC_API_KEY": "k-a",
+    "MODEL_ALIAS": "claude-alias"
+   },
+   "call": {
+    "use": "interpreter"
+   },
+   "expect": {
+    "profile": "p",
+    "endpoint": "https://api.anthropic.com/v1/messages",
+    "auth_header": "x-api-key",
+    "extra_headers": [],
+    "model": "claude-alias"
+   }
+  }
+ ],
+ "invalid_configs": [
+  {
+   "name": "unknown profile field",
+   "config": {
+    "schema_version": "llm-profiles/1",
+    "default_profile": "p",
+    "profiles": {
+     "p": {
+      "enabled": true,
+      "label": "Base",
+      "api_style": "anthropic_messages",
+      "model": "claude-x",
+      "auth": {
+       "scheme": "provider_default",
+       "credential_env": "ANTHROPIC_API_KEY"
+      },
+      "limits": {
+       "max_output_tokens": 1500,
+       "timeout_ms": 60000,
+       "max_retries": 2,
+       "per_job_token_cap": 20000,
+       "daily_token_budget": 500000
+      },
+      "data_classes": [
+       "public_market_data"
+      ],
+      "uses": [
+       "interpreter"
+      ],
+      "endpoint": "x"
+     }
+    }
+   },
+   "schema_rejects": true
+  },
+  {
+   "name": "api_style none with a model",
+   "config": {
+    "schema_version": "llm-profiles/1",
+    "default_profile": "p",
+    "profiles": {
+     "p": {
+      "enabled": true,
+      "label": "No LLM",
+      "api_style": "none",
+      "model": "claude-x",
+      "data_classes": [
+       "public_market_data"
+      ],
+      "uses": [
+       "interpreter"
+      ]
+     }
+    }
+   },
+   "schema_rejects": true
+  },
+  {
+   "name": "enabled profile without model or model_env",
+   "config": {
+    "schema_version": "llm-profiles/1",
+    "default_profile": "p",
+    "profiles": {
+     "p": {
+      "enabled": true,
+      "label": "Base",
+      "api_style": "anthropic_messages",
+      "auth": {
+       "scheme": "provider_default",
+       "credential_env": "ANTHROPIC_API_KEY"
+      },
+      "limits": {
+       "max_output_tokens": 1500,
+       "timeout_ms": 60000,
+       "max_retries": 2,
+       "per_job_token_cap": 20000,
+       "daily_token_budget": 500000
+      },
+      "data_classes": [
+       "public_market_data"
+      ],
+      "uses": [
+       "interpreter"
+      ]
+     }
+    }
+   },
+   "schema_rejects": true
+  },
+  {
+   "name": "header scheme without header_name",
+   "config": {
+    "schema_version": "llm-profiles/1",
+    "default_profile": "p",
+    "profiles": {
+     "p": {
+      "enabled": true,
+      "label": "Base",
+      "api_style": "anthropic_messages",
+      "model": "claude-x",
+      "auth": {
+       "scheme": "header",
+       "credential_env": "K"
+      },
+      "limits": {
+       "max_output_tokens": 1500,
+       "timeout_ms": 60000,
+       "max_retries": 2,
+       "per_job_token_cap": 20000,
+       "daily_token_budget": 500000
+      },
+      "data_classes": [
+       "public_market_data"
+      ],
+      "uses": [
+       "interpreter"
+      ]
+     }
+    }
+   },
+   "schema_rejects": true
+  },
+  {
+   "name": "limits out of range",
+   "config": {
+    "schema_version": "llm-profiles/1",
+    "default_profile": "p",
+    "profiles": {
+     "p": {
+      "enabled": true,
+      "label": "Base",
+      "api_style": "anthropic_messages",
+      "model": "claude-x",
+      "auth": {
+       "scheme": "provider_default",
+       "credential_env": "ANTHROPIC_API_KEY"
+      },
+      "limits": {
+       "max_output_tokens": 1500,
+       "timeout_ms": 60000,
+       "max_retries": 9,
+       "per_job_token_cap": 20000,
+       "daily_token_budget": 500000
+      },
+      "data_classes": [
+       "public_market_data"
+      ],
+      "uses": [
+       "interpreter"
+      ]
+     }
+    }
+   },
+   "schema_rejects": true
+  },
+  {
+   "name": "wrong schema_version",
+   "config": {
+    "schema_version": "llm-profiles/2",
+    "default_profile": "p",
+    "profiles": {
+     "p": {
+      "enabled": true,
+      "label": "Base",
+      "api_style": "anthropic_messages",
+      "model": "claude-x",
+      "auth": {
+       "scheme": "provider_default",
+       "credential_env": "ANTHROPIC_API_KEY"
+      },
+      "limits": {
+       "max_output_tokens": 1500,
+       "timeout_ms": 60000,
+       "max_retries": 2,
+       "per_job_token_cap": 20000,
+       "daily_token_budget": 500000
+      },
+      "data_classes": [
+       "public_market_data"
+      ],
+      "uses": [
+       "interpreter"
+      ]
+     }
+    }
+   },
+   "schema_rejects": true
+  },
+  {
+   "name": "secret-like literal in the label",
+   "config": {
+    "schema_version": "llm-profiles/1",
+    "default_profile": "p",
+    "profiles": {
+     "p": {
+      "enabled": true,
+      "label": "key sk-live-123",
+      "api_style": "anthropic_messages",
+      "model": "claude-x",
+      "auth": {
+       "scheme": "provider_default",
+       "credential_env": "ANTHROPIC_API_KEY"
+      },
+      "limits": {
+       "max_output_tokens": 1500,
+       "timeout_ms": 60000,
+       "max_retries": 2,
+       "per_job_token_cap": 20000,
+       "daily_token_budget": 500000
+      },
+      "data_classes": [
+       "public_market_data"
+      ],
+      "uses": [
+       "interpreter"
+      ]
+     }
+    }
+   },
+   "schema_rejects": false
+  },
+  {
+   "name": "URL literal in the label",
+   "config": {
+    "schema_version": "llm-profiles/1",
+    "default_profile": "p",
+    "profiles": {
+     "p": {
+      "enabled": true,
+      "label": "https://gateway.example",
+      "api_style": "anthropic_messages",
+      "model": "claude-x",
+      "auth": {
+       "scheme": "provider_default",
+       "credential_env": "ANTHROPIC_API_KEY"
+      },
+      "limits": {
+       "max_output_tokens": 1500,
+       "timeout_ms": 60000,
+       "max_retries": 2,
+       "per_job_token_cap": 20000,
+       "daily_token_budget": 500000
+      },
+      "data_classes": [
+       "public_market_data"
+      ],
+      "uses": [
+       "interpreter"
+      ]
+     }
+    }
+   },
+   "schema_rejects": false
+  },
+  {
+   "name": "fallback to an undefined profile",
+   "config": {
+    "schema_version": "llm-profiles/1",
+    "default_profile": "p",
+    "profiles": {
+     "p": {
+      "enabled": true,
+      "label": "Base",
+      "api_style": "anthropic_messages",
+      "model": "claude-x",
+      "auth": {
+       "scheme": "provider_default",
+       "credential_env": "ANTHROPIC_API_KEY"
+      },
+      "limits": {
+       "max_output_tokens": 1500,
+       "timeout_ms": 60000,
+       "max_retries": 2,
+       "per_job_token_cap": 20000,
+       "daily_token_budget": 500000
+      },
+      "data_classes": [
+       "public_market_data"
+      ],
+      "uses": [
+       "interpreter"
+      ],
+      "fallback_profile": "ghost"
+     }
+    }
+   },
+   "schema_rejects": false
+  },
+  {
+   "name": "default_profile not defined",
+   "config": {
+    "schema_version": "llm-profiles/1",
+    "default_profile": "other",
+    "profiles": {
+     "p": {
+      "enabled": true,
+      "label": "Base",
+      "api_style": "anthropic_messages",
+      "model": "claude-x",
+      "auth": {
+       "scheme": "provider_default",
+       "credential_env": "ANTHROPIC_API_KEY"
+      },
+      "limits": {
+       "max_output_tokens": 1500,
+       "timeout_ms": 60000,
+       "max_retries": 2,
+       "per_job_token_cap": 20000,
+       "daily_token_budget": 500000
+      },
+      "data_classes": [
+       "public_market_data"
+      ],
+      "uses": [
+       "interpreter"
+      ]
+     }
+    }
+   },
+   "schema_rejects": false
+  }
+ ]
+}

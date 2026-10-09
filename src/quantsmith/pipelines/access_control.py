@@ -210,6 +210,9 @@ class RosterEntry:
     label: str
     clearance: str
     source_line: int = 0
+    # Optional roles (spec 0080 REQ-023), e.g. ``roles: [desk-lead, risk]``.
+    # A write-back target may require its approver to hold one of them.
+    roles: Tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -255,6 +258,24 @@ def _dequote(text: str) -> str:
     return text
 
 
+def _parse_roles(value: str) -> Tuple[str, ...]:
+    """``[a, b]`` or ``a, b`` -> ``("a", "b")``; empty -> ``()``."""
+    text = value.strip()
+    if text.startswith("[") and text.endswith("]"):
+        text = text[1:-1]
+    return tuple(_dequote(part) for part in text.split(",") if _dequote(part))
+
+
+_ROLE_RE = re.compile(r"^[a-z][a-z0-9-]*$")
+
+
+def roles_for(roster: Roster, handle: Optional[str]) -> Tuple[str, ...]:
+    """The roles ``handle`` holds in ``roster`` (spec 0080 REQ-023); ``()`` if none or unknown."""
+    if not handle:
+        return ()
+    return next((e.roles for e in roster.entries if e.handle == handle), ())
+
+
 def _parse_roster_text(text: str, file: str) -> Tuple[List[RosterEntry], str]:
     """Parse the roster's specific, small shape: top-level ``default_clearance:``
     scalar and a ``people:`` list of ``handle``/``label``/``clearance`` triples.
@@ -278,6 +299,7 @@ def _parse_roster_text(text: str, file: str) -> Tuple[List[RosterEntry], str]:
             label=str(current.get("label", "")),
             clearance=str(current.get("clearance", "")),
             source_line=int(current.get("_line", 0)),
+            roles=_parse_roles(str(current.get("roles", ""))),
         ))
 
     for lineno, raw in enumerate(text.splitlines(), start=1):
@@ -370,6 +392,12 @@ def validate_roster(roster: Roster) -> List[Finding]:
                 f"duplicate handle (also on line {seen[entry.handle]})", **where))
         else:
             seen[entry.handle] = entry.source_line
+
+        for role in entry.roles:
+            if not _ROLE_RE.match(role):
+                findings.append(Finding(
+                    entry.handle, "error",
+                    f"role {role!r} must be lowercase letters, digits, and hyphens", **where))
 
         if entry.clearance not in ACCESS_LEVELS:
             findings.append(Finding(

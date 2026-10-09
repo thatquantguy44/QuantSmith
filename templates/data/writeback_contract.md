@@ -68,6 +68,12 @@ patterns with the actual tables `0080`'s own `reader` reads from:
   Set `true` only for a target where the accountable owner has decided every
   commit through this contract needs no per-request confirmation (spec
   REQ-011); record that decision here, not just in code.
+- **`approver_roles`:** `<role, role>` — optional. A committed write's approver must hold one of these roles in
+  `access/roster.yml`; the target is refused while the roster has no entries. Delete the line for no role check.
+- **`require_distinct_approver`:** `false` — `true` rejects a commit approved by its own author.
+
+Every committed record carries `approver_handle` (spec `0080` REQ-023). When an approved commit names no
+approver, the approver is the request's author, and the record says so.
 
 ## Reversal
 

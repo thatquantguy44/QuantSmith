@@ -12,10 +12,11 @@ Standard library only.
 
 from __future__ import annotations
 
+import json
 import re
 import statistics
 from dataclasses import dataclass
-from typing import Optional, Sequence, Tuple
+from typing import Callable, Optional, Sequence, Tuple
 
 from .execute import Result
 from .insights import Insight
@@ -118,6 +119,70 @@ def ground(narrative: str, insights: Sequence[Insight], result: Optional[Result]
     causal = tuple(p for p in _CAUSAL_PHRASES if p in lowered)
 
     return GroundingReport(ok=not unbacked, unbacked_numbers=tuple(unbacked), causal_flags=causal)
+
+
+# ---------------------------------------------------------------------------
+# LLM narrator (T-025, REQ-020, AC-029)
+# ---------------------------------------------------------------------------
+
+_NARRATOR_SYSTEM = """You write a short plain-language summary of computed analytics results.
+Use only numbers that appear in the insights you are given, written as they appear there or
+rounded. Describe levels, changes, and contributions; never say why something happened (no
+"because", "due to", "caused by", "leads to"). At most {sentences} sentences, no headings or lists."""
+
+
+@dataclass(frozen=True)
+class Narration:
+    """The narrative an answer carries, how it was produced, and any caveat about it."""
+
+    text: str
+    mode: str                       # "template" or the narrator label, e.g. "llm/1"
+    caveat: Optional[str] = None
+
+
+class LLMNarrator:
+    """A model-written narrative that ships only if :func:`ground` accepts it (REQ-008, REQ-020).
+
+    ``complete(prompt, system) -> text`` is caller-built, so this package
+    opens no connection. Any unbacked number, causal wording, empty reply,
+    or model failure falls back to :func:`template_narrative` with a caveat
+    saying so (AC-029).
+    """
+
+    def __init__(self, complete: Callable[[str, str], str], *, name: str = "llm", version: str = "1",
+                 max_sentences: int = 4) -> None:
+        self._complete = complete
+        self.label = f"{name}/{version}"
+        self.max_sentences = max_sentences
+
+    def prompt(self, insights: Sequence[Insight], plan_echo: str) -> str:
+        return json.dumps({
+            "question_as_read": plan_echo,
+            "insights": [{"kind": i.kind, "statement": i.statement, "values": i.values} for i in insights],
+        }, sort_keys=True, ensure_ascii=False, default=str)
+
+    def narrate(self, insights: Sequence[Insight], result: Optional[Result] = None, *,
+                plan_echo: str = "") -> Narration:
+        template = template_narrative(insights)
+        try:
+            text = self._complete(self.prompt(insights, plan_echo),
+                                  _NARRATOR_SYSTEM.format(sentences=self.max_sentences)).strip()
+        except Exception:  # noqa: BLE001 - any model failure falls back; nothing unverified ships
+            return Narration(template, "template",
+                             "Narrative written from the template: the language model was unavailable.")
+        if not text:
+            return Narration(template, "template",
+                             "Narrative written from the template: the language model returned no text.")
+        report = ground(text, insights, result)
+        if not report.ok:
+            return Narration(template, "template",
+                             "Narrative written from the template: the model's version stated "
+                             f"{len(report.unbacked_numbers)} number(s) not in the computed results.")
+        if report.causal_flags:
+            return Narration(template, "template",
+                             "Narrative written from the template: the model's version used causal wording ("
+                             + ", ".join(report.causal_flags) + ").")
+        return Narration(text, self.label)
 
 
 # ---------------------------------------------------------------------------

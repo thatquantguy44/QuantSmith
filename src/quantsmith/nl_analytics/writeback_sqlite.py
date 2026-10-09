@@ -50,6 +50,13 @@ class SQLiteWriter:
         self._conn.execute(
             f'CREATE TABLE IF NOT EXISTS {self._table} ("record_key" TEXT PRIMARY KEY, {columns_sql})'
         )
+        # A table created before a column joined the schema (``approver_handle``,
+        # REQ-023) gains it here; old rows read it as NULL. Columns are only
+        # ever added, never dropped or renamed.
+        existing = {row[1] for row in self._conn.execute(f"PRAGMA table_info({self._table})")}
+        for column in SCHEMA_COLUMNS:
+            if column not in existing:
+                self._conn.execute(f'ALTER TABLE {self._table} ADD COLUMN "{column}" TEXT')
         self._conn.commit()
 
     def write(self, records: Sequence[Mapping[str, object]]) -> int:
