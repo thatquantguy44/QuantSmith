@@ -3,7 +3,8 @@
 # 🧮 QuantSmith
 
 
- ```text
+<div align="center">
+<pre>
    ____                    __  _____           _ __  __
   / __ \__  ______ _____  / /_/ ___/____ ___  (_) /_/ /_
  / / / / / / / __ `/ __ \/ __/\__ \/ __ `__ \/ / __/ __ \
@@ -23,7 +24,9 @@
                   ⟨EXECUTION⟩
 
          Research → Optimize → Automate
-```
+</pre>
+</div>
+
 
 ### *Build quant models the way you'd defend them — spec-driven, agentic, reproducible.*
 
