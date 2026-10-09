@@ -4,7 +4,7 @@
 - **Status:** Draft
 - **Author:** Joshua Lutkemuller, CFA
 - **Approver:** — (pending owner review)
-- **Last updated:** 2026-10-07
+- **Last updated:** 2026-10-09
 
 > WHAT and WHY only. Implementation lives in `plan.md`.
 
@@ -117,7 +117,7 @@ It supports two decisions: *what does the data say about my question right now*
 | NFR-003 | Security boundary | Standard library only in the runtime; no database driver, network call, connection string, or credential in the SDK; data access read-only; writes only to declared targets through an injected writer. |
 | NFR-004 | Privacy | Audit events store question and result hashes plus redacted text per the access level; `adapters/llm_runtime/` privacy flags (`contains_pii`, `contains_mnpi`, `contains_restricted_positions`) are propagated from the dataset's declared classification. |
 | NFR-005 | Latency (deterministic path, excluding data fetch and LLM calls) | < 2 s end-to-end for 100,000 fact rows on a developer laptop. |
-| NFR-006 | Honest failure | Every non-answer (clarification, access-masked, empty result, stale data, write rejected) returns a typed status and a user-readable reason; no path returns an empty chart or a silent no-op. |
+| NFR-006 | Honest failure | Every non-answer (clarification, access-masked, empty result, stale data, write rejected) returns a typed status (access-masked reports as `clarification_needed`, so the status cannot disclose existence; REQ-004) and a user-readable reason; no path returns an empty chart or a silent no-op. |
 
 ## Acceptance Criteria
 
@@ -245,6 +245,20 @@ It supports two decisions: *what does the data say about my question right now*
   import-path callable, and token-command credential become a proposed
   additive `llm-profiles` revision in QuantMeridian; `llm-profiles/1` rejects
   unknown fields, so adding them only here would split the format.
+- Resolved (owner, 2026-10-09): the Console analytics route is **read-only
+  for now**. It answers questions and starts no write-back, emits no run
+  envelope, and builds no knowledge candidate; those stay with the
+  `nl_analytics` CLI (T-029), so the Console keeps `0057` NFR-003 ("no route
+  writes"). REQ-021's clause on write-back the Console starts therefore has
+  nothing to apply to yet. The page renders the answer's `markdown_table`;
+  choosing a chart library to render `vega_lite` is deferred (no new
+  front-end dependency).
+- Fixed (2026-10-09, building AC-030): an access-masked plan used to return
+  status `masked`, while a nonexistent metric returned
+  `clarification_needed`, so the status alone disclosed that a restricted
+  metric exists (against REQ-004). A masked plan now reports as
+  `clarification_needed` with the nonexistent-metric reason, and `masked`
+  is no longer a response status (NFR-006 updated to match).
 
 ## Exceptions
 

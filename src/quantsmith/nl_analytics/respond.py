@@ -44,7 +44,9 @@ from .writeback import (
     publish,
 )
 
-RESPONSE_STATUSES = ("answered", "clarification_needed", "masked", "empty", "stale", "write_rejected")
+# No "masked" status: a distinct status would itself disclose that a restricted
+# metric exists, so a masked plan reports as clarification_needed (REQ-004).
+RESPONSE_STATUSES = ("answered", "clarification_needed", "empty", "stale", "write_rejected")
 
 # How many periods one year is, per grain — used to shift a window back a
 # year for a "prior_year" comparison. Approximate for "day" (365, no leap-year
@@ -267,7 +269,7 @@ def answer(question: str, context: AnswerContext) -> ChatResponse:
 
     authorized = authorize_plan(plan, context.access_policy, context.viewer_clearance)
     if isinstance(authorized, Clarification):
-        return _refuse("masked", authorized.reason)
+        return _refuse("clarification_needed", authorized.reason)
     plan = authorized
 
     result = execute(plan, context.layer, context.reader, context.as_of)

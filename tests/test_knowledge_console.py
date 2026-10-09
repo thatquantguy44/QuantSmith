@@ -17,9 +17,11 @@ from pathlib import Path
 
 import pytest
 
+from quantsmith.knowledge_console import analytics as an
 from quantsmith.knowledge_console import model as m
 from quantsmith.knowledge_console import query as q
 from quantsmith.knowledge_console import server as s
+from quantsmith.nl_analytics.authorize import AccessPolicy
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 MEMORY = str(REPO_ROOT / "memory")
@@ -263,3 +265,102 @@ def test_empty_store_yields_empty_model_AC_015(tmp_path):
     assert model["graph"]["nodes"] == []
     assert model["review_queue"] == []
     assert model["changes"] == []
+
+
+# --- spec 0080 AC-030: read-only analytics route ------------------------------
+
+ANALYTICS = REPO_ROOT / "examples" / "nl_analytics"
+
+
+def _service(**overrides):
+    svc = an.service_from_files(str(ANALYTICS / "registry.json"), str(ANALYTICS / "data.json"),
+                                today_period=3, default_window_periods=3)
+    svc.viewer_clearance = "internal"  # the template roster is inactive (0058), so set it directly
+    for key, value in overrides.items():
+        setattr(svc, key, value)
+    return svc
+
+
+@pytest.fixture
+def analytics_server():
+    started = []
+
+    def start(service):
+        httpd = s.make_server(MEMORY, None, "127.0.0.1", 0, analytics=service)
+        threading.Thread(target=httpd.serve_forever, daemon=True).start()
+        started.append(httpd)
+        return httpd.server_address[1]
+
+    yield start
+    for httpd in started:
+        httpd.shutdown()
+        httpd.server_close()
+
+
+def test_ac030_permitted_question_answers_read_only(analytics_server, tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    port = analytics_server(_service())
+    status, body = _post(port, "/api/analytics/ask", {"question": "funding cost by desk"})
+    assert status == 200
+    out = json.loads(body)
+    assert out["status"] == "answered" and out["read_only"] is True
+    for key in ("chart", "insights", "plan_echo", "caveats", "citations", "vega_lite", "markdown_table"):
+        assert out.get(key), key
+    assert out["viewer_clearance"] == "internal"
+    for key in ("run_id", "envelope_uri", "writeback", "knowledge_candidate"):
+        assert out.get(key) is None, key
+    assert list(tmp_path.iterdir()) == []  # the route writes nothing
+
+
+def test_ac030_restricted_metric_matches_nonexistent(analytics_server):
+    port = analytics_server(_service(access_policy=AccessPolicy(metric_levels={"funding_cost": "restricted"})))
+    _, masked = _post(port, "/api/analytics/ask", {"question": "funding cost by desk"})
+    _, missing = _post(port, "/api/analytics/ask", {"question": "xyzzy plugh by desk"})
+    masked, missing = json.loads(masked), json.loads(missing)
+    assert masked["status"] == "clarification_needed"
+    assert masked == missing  # byte-for-byte the same payload (REQ-004)
+    assert "funding_cost" not in json.dumps(masked)
+
+
+def test_ac030_route_is_404_when_not_configured(running_server):
+    status, body = _post(running_server, "/api/analytics/ask", {"question": "funding cost"})
+    assert status == 404
+    assert "--analytics-registry" in json.loads(body)["error"]
+
+
+def test_ac030_bad_body_is_400(analytics_server):
+    port = analytics_server(_service())
+    status, _ = _post(port, "/api/analytics/ask", {"nope": 1})
+    assert status == 400
+
+
+def test_ac030_default_bind_is_localhost():
+    import inspect
+
+    from quantsmith.knowledge_console import __main__ as cli
+
+    assert inspect.signature(s.serve).parameters["host"].default == "127.0.0.1"
+    assert "127.0.0.1" in inspect.getsource(cli.main)
+
+
+def test_ac030_no_model_profile_still_answers_by_keyword(tmp_path):
+    profiles = {"schema_version": "llm-profiles/1", "default_profile": "deterministic", "profiles": {
+        "deterministic": {"enabled": True, "label": "No LLM", "api_style": "none",
+                          "data_classes": ["public_market_data"], "uses": ["interpreter", "narrator"]}}}
+    path = tmp_path / "profiles.json"
+    path.write_text(json.dumps(profiles))
+    svc = an.service_from_files(str(ANALYTICS / "registry.json"), str(ANALYTICS / "data.json"),
+                                today_period=3, default_window_periods=3, llm_profiles=str(path),
+                                viewer_override="internal")
+    out = svc.ask_json("funding cost by desk")
+    assert out["status"] == "answered"
+    assert out["plan_echo"]
+    assert out["narrative_mode"] == "template"
+
+
+def test_ac030_partial_analytics_flags_exit_2(capsys):
+    from quantsmith.knowledge_console import __main__ as cli
+
+    code = cli.main(["serve", "--analytics-registry", str(ANALYTICS / "registry.json")])
+    assert code == 2
+    assert "--analytics-data" in capsys.readouterr().err

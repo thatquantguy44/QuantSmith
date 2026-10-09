@@ -47,10 +47,15 @@ def _viewer_filtered_records(root: str, viewer_clearance):
             if access_control.access_level_allows(r.access_level, viewer_clearance)]
 
 
+def _access_root(root: str) -> Path:
+    """Where ``access/roster.yml`` lives: the parent of the memory root (the repo root)."""
+    mem_root_path = Path(root)
+    return mem_root_path.parent if mem_root_path.name else mem_root_path
+
+
 def _preview_access(root: str, research_root: str, viewer_override):
     """Counts-only preview (spec 0058 REQ-014): visible vs. total, no full model."""
-    mem_root_path = Path(root)
-    mem_access_root = mem_root_path.parent if mem_root_path.name else mem_root_path
+    mem_access_root = _access_root(root)
     clearance = access_control.resolve_viewer_clearance(
         override=viewer_override, root=mem_access_root)
 
@@ -88,6 +93,16 @@ def main(argv=None) -> int:
     p_serve.add_argument("--port", type=int, default=8765)
     p_serve.add_argument("--static", default="web/dist",
                          help="built front-end directory (served at /)")
+    # Read-only natural-language analytics (spec 0080 T-026): all three of
+    # registry, data, and today are needed to enable POST /api/analytics/ask.
+    p_serve.add_argument("--analytics-registry", default=None, help="metric registry JSON (enables analytics)")
+    p_serve.add_argument("--analytics-data", default=None, help="fact-rows JSON for analytics")
+    p_serve.add_argument("--analytics-today", type=int, default=None, help="today's period key for analytics")
+    p_serve.add_argument("--analytics-window", type=int, default=7, help="default window, in periods")
+    p_serve.add_argument("--llm-profiles", default=None,
+                         help="llm-profiles/1 file; without it analytics uses the keyword interpreter")
+    p_serve.add_argument("--viewer-override", default=None,
+                         help="answer analytics as a roster handle or clearance level")
 
     p_snap = sub.add_parser("snapshot", help="write the view-model as JSON")
     p_snap.add_argument("--root", default="memory")
@@ -139,8 +154,21 @@ def main(argv=None) -> int:
 
     if args.command == "serve":
         static = args.static or None
+        analytics = None
+        wanted = (args.analytics_registry, args.analytics_data, args.analytics_today)
+        if any(v is not None for v in wanted):
+            if not all(v is not None for v in wanted):
+                print("analytics needs --analytics-registry, --analytics-data, and --analytics-today",
+                      file=sys.stderr)
+                return 2
+            from . import analytics as analytics_mod
+
+            analytics = analytics_mod.service_from_files(
+                args.analytics_registry, args.analytics_data, today_period=args.analytics_today,
+                default_window_periods=args.analytics_window, llm_profiles=args.llm_profiles,
+                viewer_override=args.viewer_override, access_root=_access_root(args.root))
         server_mod.serve(memory_root=args.root, static_dir=static,
-                         host=args.host, port=args.port)
+                         host=args.host, port=args.port, analytics=analytics)
         return 0
 
     if args.command == "preview-access":

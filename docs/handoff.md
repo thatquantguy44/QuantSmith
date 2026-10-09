@@ -114,19 +114,23 @@ advisory-by-default deployment decision. The chain builds on
 >
 > **The owner has made this the single highest priority, ahead of everything
 > below — including the credit-risk direction and the ranked list.** If only
-> one thing moves, it is this: build `0080` T-026 and T-029 and get the spec
-> approved. T-001–T-025, T-027, and T-028 are built. On 2026-10-08:
+> one thing moves, it is this: build `0080` T-029 and get the spec
+> approved. T-001–T-028 are built. On 2026-10-08 and 2026-10-09:
 > - T-024 added the provider-neutral LLM backend `quantsmith.adapters.llm_runtime`;
 > - T-025 added the gated `LLMInterpreter` and `LLMNarrator` on top of it;
 > - T-027 added the named approver for write-back;
-> - T-028 added opt-in knowledge candidates. The owner resolved the open questions on
+> - T-028 added opt-in knowledge candidates;
+> - T-026 added the read-only Knowledge Console route `POST /api/analytics/ask`
+>   and its *Data Questions* page (owner, 2026-10-09: read-only for now; no
+>   chart library yet). Building it also fixed a masking leak: a restricted
+>   metric no longer returns a distinct `masked` status. The owner resolved the open questions on
 > 2026-10-07: the first surface is the `0057` Knowledge Console backed by model
 > **APIs** through a configured, provider-neutral backend that reads
 > QuantMeridian's `llm-profiles/1` format unchanged (Anthropic, OpenAI, or any
 > OpenAI-compatible gateway or self-hosted server — no gateway assumed; there
 > is no Claude Code where it will run); knowledge candidates are opt-in per publish;
 > approval is per-request confirmation plus a recorded, optionally role-gated
-> approver. Next is T-026 (the Knowledge Console analytics route); `0099` can
+> approver. Next is T-029 (CLI flags, example, README); `0099` can
 > reuse the backend too.
 > **Pick up here:** `specs/0080-nl-analytics-insights/tasks.md` →
 > *Start Here Next Session* has the task order, file layout, house pattern to
@@ -194,10 +198,10 @@ time:
    the insights published to a database so tomorrow's "what changed since
    yesterday" can compare against them. It reuses what is already built
    (`0008` metrics, `0058` access, `0014`–`0018` dashboards, `0070` replay)
-   rather than adding a new foundation. **Next:** build T-026 and T-029 in
-   order (Console route, CLI and docs), then approve the spec. T-024 (the LLM
-   backend), T-025 (the LLM interpreter and narrator), T-027 (the named
-   approver), and T-028 (knowledge candidates) are built. Open
+   rather than adding a new foundation. **Next:** build T-029 (CLI flags and
+   docs), then approve the spec. T-024 (the LLM backend), T-025 (the LLM
+   interpreter and narrator), T-026 (the read-only Console route), T-027 (the
+   named approver), and T-028 (knowledge candidates) are built. Open
    questions resolved 2026-10-07 (see item 29), including the gateway: none
    assumed, backends are configured profiles. First write-back target:
    SQLite (local, gitignored file).
