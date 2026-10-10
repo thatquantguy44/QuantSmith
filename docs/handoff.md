@@ -1854,9 +1854,10 @@ manual-task persistence question stays deferred until a real consumer needs it.
     `skills-export` gate, pre-commit, CI, and tests fail when the export is stale or
     hand-edited. `pending --target claude_ai` lists exactly what to upload or delete,
     `package` builds a plugin (other repos) or zips (Claude.ai), and
-    `mark-published` records each publication. **Owner action (T-005):** do the
-    first Claude.ai upload from the zips, retire the hand-exported copies there,
-    then `mark-published --target claude_ai`. Rule: after any agent change, run
+    `mark-published` records each publication. **Owner decision (T-005,
+    2026-10-10):** Claude.ai is not a target — the agents are used in Claude Code
+    only — so nothing is published there and the older hand-exported copies on the
+    account are to be deleted. Rule: after any agent change, run
     `PYTHONPATH=src python3 -m quantsmith.skills_export build` and commit the result.
     Only a project selection (`config/skills_export.json` → `project`, 53 skills) is
     materialized in `.claude/skills/`: with all 204 loaded, Claude Code listed only

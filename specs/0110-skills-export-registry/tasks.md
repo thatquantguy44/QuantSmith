@@ -21,7 +21,7 @@
 | T-003 | Implement `check`; add the `skills-export` gate, pre-commit block, CI step, tests. | REQ-005 | done | `testing_validation` | Blocking in pre-commit and CI. |
 | T-004 | Implement `pending`, `mark-published`, plugin and zip packaging; CLI `quantsmith-skills`. | REQ-006, REQ-007, NFR-003 | done | `implementation` | No network. |
 | T-006 | Add project selection: only chosen categories/agents materialize in `.claude/skills/`; all stay registered and packaged. | REQ-008, RISK-003 | done | `implementation` | 53 of 204 selected. |
-| T-005 | First Claude.ai publication: upload `--pending-for claude_ai` zips, delete stale hand-made copies, `mark-published`. | REQ-006 | todo | owner | Needs the owner's Claude.ai account. |
+| T-005 | Decide the Claude.ai target: publish with `--pending-for claude_ai` + `mark-published`, or not. | REQ-006 | done | owner | Owner decision 2026-10-10: Claude.ai is not a target (the agents are not used in Claude.ai chat). Nothing is published there; the 99 older hand-exported copies on the account are to be deleted by the owner. The `claude_ai` target stays unmarked; the tooling remains available if that changes. |
 
 Status values: `todo` | `in-progress` | `blocked` | `done`.
 
