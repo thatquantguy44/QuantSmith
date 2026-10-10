@@ -3,7 +3,7 @@
 ## Snapshot
 
 > **Current top priority (owner, 2026-10-10): the platform expansion roadmap —
-> specs `0102`–`0109`; provenance (`0102`) is built, evaluation (`0103`) is next.** Eight
+> specs `0102`–`0109`; provenance (`0102`) is built and approved, evaluation (`0103`) is next.** Eight
 > agent groups across data engineering, ingestion and provenance, evaluation,
 > knowledge graphs, private markets, local LLM systems, and analyst delivery.
 > It outranks every other item, `0080` included. See item 0 of *What's Next*.
@@ -126,7 +126,7 @@ advisory-by-default deployment decision. The chain builds on
 >
 > | Order | Spec | Group | First slice | Status |
 > | --- | --- | --- | --- | --- |
-> | 1 | `0102` | **Provenance** — lineage + bitemporal | Content-hashed dataset versions, run-level and column-level lineage, upstream trace / downstream impact, OpenLineage-shaped events, and a bitemporal store (valid time × knowledge time) generalizing `0045`'s vintages; agents `provenance/lineage_capture`, `provenance/bitemporal_data` | **built (Draft, awaiting approval)** |
+> | 1 | `0102` | **Provenance** — lineage + bitemporal | Content-hashed dataset versions, run-level and column-level lineage, upstream trace / downstream impact, OpenLineage-shaped events, and a bitemporal store (valid time × knowledge time) generalizing `0045`'s vintages; agents `provenance/lineage_capture`, `provenance/bitemporal_data` | **built, Approved** |
 > | 2 | `0103` | **Evaluation** | `evaluation/agent_eval` (score this repo's own agents against their contracts, handoffs, citations), `llm_eval_suite` (golden sets, calibrated LLM-as-judge, cross-version regression), `red_team_safety` (injection via ingested documents, exfiltration), `forecast_scoring` (proper scoring rules, calibration, Diebold-Mariano) | reserved |
 > | 3 | `0104` | **Knowledge graph engineering** | `knowledge_graph/ontology_schema`, cross-domain `entity_resolution` (generalizes the venture agent), `graph_construction` (evidence-backed, time-valid edges), `graph_query_analytics` (ownership chains, exposure paths; feeds the GNN agent), `graph_quality` | reserved |
 > | 4 | `0105` | **Private markets** | `private_markets/` buyout, private credit (reuses `0072`/`0073`), real assets, secondaries/GP stakes, LP pacing (Takahashi-Alexander; extends `0091`), fund-document extraction (capital calls, distributions, ILPA templates); domain pack `knowledge/private_markets/` | reserved |
@@ -135,8 +135,8 @@ advisory-by-default deployment decision. The chain builds on
 > | 7 | `0108` | **Ingestion and provenance expansion** | `provenance/vendor_licensing_entitlements`, `ingestion/document_ingestion` (spans attached), `ingestion/alt_data_onboarding` (coverage, point-in-time honesty, survivorship), `ingestion/web_collection` (terms-compliant, raw snapshots) | reserved |
 > | 8 | `0109` | **Analyst workflow and delivery** | `delivery/report_packaging` (versioned decks/PDF/Excel with as-of stamps), `delivery/stakeholder_request_intake`, `delivery/qa_signoff`, `tooling/jupyter`, `tooling/python`, `tooling/sql` | reserved |
 >
-> **Pick up here:** `0102` is built (Draft) — get it approved, then start `0103`
-> (evaluation). `0102` follow-ups are in its `tasks.md`. Each reserved row is also in *Planned specs*
+> **Pick up here:** `0102` is built and Approved (Joshua Lutkemuller, CFA,
+> 2026-10-10) — start `0103` (evaluation). `0102` follow-ups are in its `tasks.md`. Each reserved row is also in *Planned specs*
 > below so the commitment stays visible until its directory exists.
 
 > ### #1 priority — Natural-language analytics (spec `0080`, Draft)
@@ -1822,7 +1822,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
     [`0093 tasks`](../specs/0093-visualization-packs/tasks.md) for live status and
     [`integration guide`](../knowledge/visualization_packs/README.md) for usage.
     Existing domain packs remain draft; `0080` T-021/T-022 remain separate.
-34. **Concurrent pipeline fleet (spec `0101`, Draft; built).** Extends the Data
+34. **Concurrent pipeline fleet (spec `0101`, Approved; built).** Extends the Data
     Engineer chain from one pipeline (`0011`) to hundreds running at once.
     `pipeline_fleet.py` declares a global limit, slot-weighted pools, and
     mutual-exclusion keys; admits all-or-nothing (no deadlock) with a starvation
@@ -1834,7 +1834,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
     config keys follow current Dagster/Mage docs and must be verified against the
     installed version; Airflow and Prefect exporters are follow-ups.
 
-35. **Lineage and bitemporal provenance (spec `0102`, Draft; built).** First
+35. **Lineage and bitemporal provenance (spec `0102`, Approved; built).** First
     slice of the expansion roadmap (What's Next #0). `provenance.py` records
     content-hashed immutable dataset versions, registered sources, and validated
     transform runs (code version, params, column maps); traces upstream, lists
@@ -1845,7 +1845,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
     New `agents/provenance/` group. Follow-ups: durable backend and CLI, automatic
     recording from the `0011`/`0101` runners, moving `0045` onto the store.
 
-36. **Skills export and registry (spec `0110`, Draft; built).** Every agent is
+36. **Skills export and registry (spec `0110`, Approved; built).** Every agent is
     generated into a self-contained Claude skill under `.claude/skills/` (project
     skills for anyone who clones the repo) by `quantsmith-skills build`, with a
     lifecycle registry at `.claude/skills/registry.json`: revision, introduced /

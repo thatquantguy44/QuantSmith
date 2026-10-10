@@ -1,7 +1,7 @@
 # Plan: Lineage and bitemporal provenance
 
 - **Spec:** 0102-lineage-bitemporal-provenance (`spec.md`)
-- **Status:** Draft
+- **Status:** Approved
 - **Author:** QuantSmith
 - **Last updated:** 2026-10-10
 

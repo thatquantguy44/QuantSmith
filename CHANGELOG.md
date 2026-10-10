@@ -187,6 +187,8 @@ patterns locally rather than expecting them to update in place.
   20 packs are unchanged.
 
 ### Changed
+- Specs `0101` (concurrent pipeline fleet), `0102` (lineage and bitemporal provenance), and `0110` (skills export
+  and registry) approved by Joshua Lutkemuller, CFA (2026-10-10).
 - `docs/packaging.md` updated — the Python-package phase is now active (real code
   exists); `docs/adoption_guide.md` rewritten to cover both the package and the
   scaffold.
