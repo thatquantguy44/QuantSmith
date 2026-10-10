@@ -75,6 +75,9 @@ role, downstream of ingestion.
 | `data_engineering/pipeline_builder/` | Compile source→transform→sink intent into a reviewable DAG with contracts, schedules, retries, tests, ownership, deployment plan | Design, Implementation |
 | `data_engineering/pipeline_deployment/` | Environment promotion, dry runs, canaries, rollback, state migration, scheduler deployment | Deployment |
 | `data_engineering/data_governance/` | Catalog, lineage, access policy, ownership, classification | Maintenance |
+| `data_engineering/streaming_cdc/` | CDC applied idempotently by per-key sequence; event-time windows under a watermark; late data to a side output or bitemporal restatement (`0111`) | Design, Implementation, Testing |
+| `data_engineering/schema_evolution/` | Schema-change classification (backward/forward), mode enforcement, safe backward reads, drift detection before load (`0111`) | Design, Testing, Maintenance |
+| `data_engineering/backfill_reprocessing/` | Restatements reprocessed from lineage under fleet limits as new versions; old-vs-new diffs; all-or-nothing gated publication with rollback (`0111`) | Implementation, Deployment, Maintenance |
 | `data_engineering/pipeline_concurrency/` | Hundreds of concurrent pipelines — global/pool/key limits, all-or-nothing admission, priorities and starvation guard, bounded retries, failure isolation, schedule staggering, capacity plan (`0101`) | Design, Implementation, Deployment |
 
 Runtimes: `src/quantsmith/pipelines/data_pipeline.py` (`0011`) and

@@ -17,7 +17,7 @@
 > Next* and items 29–30.
 
 The SDK has a working v1: a **spec-driven engineering framework** over the six
-software-development stages, **204 agents** in `agents/`,
+software-development stages, **207 agents** in `agents/`,
 **37 quality gates**, **40 instruction standards**, and CI that
 enforces the deterministic gates. It remains primarily a scaffold to be copied
 into quant repos, with `src/quantsmith/pipelines/`, `src/quantsmith/orchestration/`,
@@ -42,7 +42,7 @@ it via stable IDs (`REQ`/`NFR`/`AC`/`RISK`/`T`).
 - `specs/NNNN-slug/{spec,plan,tasks}.md` from `templates/spec/`; worked example at
   `specs/0001-daily-momentum-signal/`.
 
-**Agents (204, verified by the `agent-catalog` gate — treat `agents/README.md`
+**Agents (207, verified by the `agent-catalog` gate — treat `agents/README.md`
 as the live count, not the number here)** — all on the four-file contract
 (`README`/`prompt`/`instructions`/`tasks`) with a `Spec-Driven Role`:
 
@@ -131,7 +131,7 @@ advisory-by-default deployment decision. The chain builds on
 > | 3 | `0104` | **Knowledge graph engineering** | `knowledge_graph/ontology_schema`, cross-domain `entity_resolution` (generalizes the venture agent), `graph_construction` (evidence-backed, time-valid edges), `graph_query_analytics` (ownership chains, exposure paths; feeds the GNN agent), `graph_quality` | reserved |
 > | 4 | `0105` | **Private markets** | `private_markets/` buyout, private credit (reuses `0072`/`0073`), real assets, secondaries/GP stakes, LP pacing (Takahashi-Alexander; extends `0091`), fund-document extraction (capital calls, distributions, ILPA templates); domain pack `knowledge/private_markets/` | reserved |
 > | 5 | `0106` | **Local LLM systems** | `local_llm/` model selection and sizing, serving runtime (vLLM, llama.cpp, Ollama; reuses `0101` pools), LoRA/QLoRA fine-tuning, RAG pipeline (delivers the reserved `0054` server), air-gapped operations | reserved |
-> | 6 | `0107` | **Data engineering expansion** | `tooling/dbt`, `data_engineering/streaming_cdc`, `schema_evolution`, `lakehouse_table_formats` (Iceberg/Delta time travel), `backfill_reprocessing`, `data_cost_finops`, `tooling/spark`, `tooling/ray_dask`, Airflow and Prefect exporters for `0101`; domain pack: reference data (security master, corporate actions, symbology, calendars) | reserved |
+> | 6 | `0107` | **Data engineering expansion** | `tooling/dbt`, `data_engineering/streaming_cdc`, `schema_evolution`, `lakehouse_table_formats` (Iceberg/Delta time travel), `backfill_reprocessing`, `data_cost_finops`, `tooling/spark`, `tooling/ray_dask`, Airflow and Prefect exporters for `0101`; domain pack: reference data (security master, corporate actions, symbology, calendars) | slice A built as `0111` (Draft); slices B, C reserved |
 > | 7 | `0108` | **Ingestion and provenance expansion** | `provenance/vendor_licensing_entitlements`, `ingestion/document_ingestion` (spans attached), `ingestion/alt_data_onboarding` (coverage, point-in-time honesty, survivorship), `ingestion/web_collection` (terms-compliant, raw snapshots) | reserved |
 > | 8 | `0109` | **Analyst workflow and delivery** | `delivery/report_packaging` (versioned decks/PDF/Excel with as-of stamps), `delivery/stakeholder_request_intake`, `delivery/qa_signoff`, `tooling/jupyter`, `tooling/python`, `tooling/sql` | reserved |
 >
@@ -360,7 +360,7 @@ designs**: create and
 approve one only when the foundation it consumes — `0063` or `0072` — has frozen
 that contract and the prior dependency named above is satisfied. Do not add
 agents merely to fill the map; prefer a canonical knowledge artifact or tested
-runtime that an existing agent can use. **Next unreserved spec number: `0111`** (`0083`–`0092` are the venture-intelligence foundation and its reserved children, item 32; `0093` is the visualization packs spec; `0094` is the Asian-language NLP foundation; `0095` is the venture predictive-model baselines; `0096` is request routing; `0097` is the test-engineering runtime; `0098` is the model testing helpers; `0099` is the Dataset Investigator; `0100` is the agent-skills upstream integration; `0101` is the concurrent pipeline fleet; `0102`–`0109` are the platform expansion roadmap, What's Next #0; `0110` is the skills export and registry).
+runtime that an existing agent can use. **Next unreserved spec number: `0112`** (`0083`–`0092` are the venture-intelligence foundation and its reserved children, item 32; `0093` is the visualization packs spec; `0094` is the Asian-language NLP foundation; `0095` is the venture predictive-model baselines; `0096` is request routing; `0097` is the test-engineering runtime; `0098` is the model testing helpers; `0099` is the Dataset Investigator; `0100` is the agent-skills upstream integration; `0101` is the concurrent pipeline fleet; `0102`–`0109` are the platform expansion roadmap, What's Next #0; `0110` is the skills export and registry; `0111` is change-safe data engineering, slice A of `0107`).
 Reserving a number here does not create the directory; copy `templates/spec/`
 only when that slice becomes active.
 
@@ -783,7 +783,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
     to populate `sources/` as real sources come into use.
 
 14. **P1 Generalization & Team Onboarding — making QuantSmith self-serve across
-    domains.** QuantSmith is now a comprehensive framework (204 agents, 69 specs,
+    domains.** QuantSmith is now a comprehensive framework (207 agents, 69 specs,
     33 gates, 35 standards); the next phase is reducing discovery friction and
     enabling team-intuitive adoption without deep codebase reading.
     - **P0 Phase 1a: Role profiles** (`roles/{portfolio_manager,risk_manager,quant_researcher,data_engineer,compliance_officer}.md`):
@@ -1806,7 +1806,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
       `specs/0083-venture-intelligence-foundation/run_card.md` (see
       `docs/gate_runbook.md`); every `knowledge/venture_intelligence/` record is
       `draft` and most cite `unverified`; `agents/agent_registry.yaml` was incomplete (6 of
-      204 agents, with broken `skills_library/` paths); it is now generated from the
+      207 agents, with broken `skills_library/` paths); it is now generated from the
       agents by `scripts/build_agent_registry.py` and guarded by a test and the
       `agent-catalog` gate.
 
@@ -1863,6 +1863,20 @@ manual-task persistence question stays deferred until a real consumer needs it.
     materialized in `.claude/skills/`: with all 204 loaded, Claude Code listed only
     about 70 with descriptions. All 204 stay registered and in the plugin/zip packages.
 
+37. **Change-safe data engineering (spec `0111`, Draft; built).** Slice A of the
+    `0107` data-engineering expansion, taken ahead of roadmap order at the owner's
+    request (2026-10-10). `streaming_cdc.py` applies CDC idempotently by per-key
+    sequence and windows event time under a watermark, with late data as a side
+    output or a bitemporal restatement (`0102`). `schema_evolution.py` classifies
+    every schema change as backward/forward breaking, enforces a mode, reads old
+    data under a new schema only when safe, and detects drift before load.
+    `reprocessing.py` plans exactly the downstream of a restatement from lineage,
+    re-runs it under `0101` limits as new immutable versions, diffs old against
+    new, and publishes all-or-nothing with rollback pointers. Agents
+    `data_engineering/streaming_cdc`, `schema_evolution`, `backfill_reprocessing`.
+    Slices B (dbt, Spark, Ray/Dask, Airflow/Prefect exporters) and C (lakehouse
+    formats, FinOps, reference-data pack) stay under `0107`.
+
 ## Open Questions For The Owner
 
 - Copyable scaffold, Python package, or CLI/copier? (Directionally answered in
@@ -1878,7 +1892,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
 
 ## Risks
 
-- Breadth: 204 agents is useful only if each stays narrow and inspectable.
+- Breadth: 207 agents is useful only if each stays narrow and inspectable.
 - Heuristic gates (`leakage`, `backtest`, `secret-scan` fallback) can false-positive
   or miss; keep them advisory unless a repo's layout makes them reliable.
 - Docs can drift from the code; the `docs-link`, `agent-catalog`, and `spec-index` gates help, but
