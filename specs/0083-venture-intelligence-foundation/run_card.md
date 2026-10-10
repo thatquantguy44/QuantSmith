@@ -15,7 +15,7 @@
 The standard-library validator for the `knowledge/venture_intelligence/` pack
 (`quantsmith.pipelines.venture_pack`), which checks referential integrity,
 decision-path class rules, citation discipline, review sign-off, workflow-class
-consistency, and recomputes every golden case; then the eight venture, Asian-language, and fund-analytics
+consistency, and recomputes every golden case; then the eight venture, multilingual-NLP, and fund-analytics
 test modules and the full repository test suite. This sixth run follows the `0096`
 change, which added `routing.json` (request-routing rules), a validator block checking every routing
 reference, the `venture_orchestrator` agent, and glossary and roadmap entries. There is no model, no training, and no external
@@ -97,7 +97,7 @@ uv sync --frozen --all-extras --python 3.11
 PYTHONPATH=src .venv/bin/python -m quantsmith.pipelines.venture_pack
 PYTHONPATH=src .venv/bin/python -m pytest \
   tests/test_venture_pack.py tests/test_venture_ingestion.py tests/test_venture_regions.py \
-  tests/test_venture_central_asia.py tests/test_venture_signals.py tests/test_venture_tradecraft.py \
+  tests/test_venture_signals.py tests/test_venture_tradecraft.py \
   tests/test_asian_nlp.py tests/test_venture_fund_analytics.py tests/test_venture_knowledge.py tests/test_venture_models.py tests/test_venture_routing.py -q
 PYTHONPATH=src .venv/bin/python -m pytest -q
 ```

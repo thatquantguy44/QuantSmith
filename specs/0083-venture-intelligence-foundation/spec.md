@@ -73,7 +73,7 @@ Why the domain needs its own foundation rather than reusing quant defaults:
 - **No agents, runtimes, or trained models in this spec.** Charters are
   designed here; creation is gated to child specs (same rule as `0072`'s
   standing rule against adding agents to fill a map). The first child,
-  `0084`, builds the multilingual document agent and the Southeast Asia
+  `0084`, builds the multilingual document agent and the first regional
   regional group.
 - **No real data, no real company or person records, and no classified,
   controlled-unclassified (CUI), or employer-proprietary content in this
@@ -112,7 +112,7 @@ Why the domain needs its own foundation rather than reusing quant defaults:
 | REQ-015 | The SDK shall define an adopter-local overlay for sensitive deployment: a gitignored configuration naming data handling environment, access tiers, retention, and prohibited sources, following the `memory/manifest.yaml` and `role_context.yml` local-only patterns. | should |
 | REQ-016 | The SDK shall publish an ordered child-spec roadmap (`0084`–`0092`), each with scope, dependency, and the coverage rows it closes. | must |
 | REQ-018 | The SDK shall define a multilingual document-intelligence standard for start-up financial and legal documents (term sheets, shareholder agreements, financial statements, prospectuses, registry filings, pitch decks) covering at least Mandarin (Simplified and Traditional), Bahasa Indonesia/Malay, Vietnamese, Thai, and Filipino: source-span preservation, translation as labelled derived evidence, unit/numeral/calendar/currency normalization, legal-entity-suffix handling, and bilingual-clause precedence. | must |
-| REQ-019 | The SDK shall organize regional venture agents by world region under `agents/venture_intelligence/`, one region folder per region with a regional lead and only those specialists a coverage row justifies; Southeast Asia is built first and the remaining regions are reserved with scope in the regional roster. | must |
+| REQ-019 | The SDK shall organize regional venture agents by world region under `agents/venture_intelligence/`, one region folder per region with a regional lead and only those specialists a coverage row justifies; the first region is built first and the remaining regions are reserved with scope in the regional roster. | must |
 | REQ-020 | Each reviewable pack record shall carry `review_status` (`draft`, `reviewed`, `superseded`, `retired`); `reviewed` requires a named reviewer, ISO review date, and scope, and cannot coexist with an `unverified` citation unless the review explicitly accepts it. | must |
 | REQ-017 | The SDK shall define canonical workflow definitions (`workflows.md` entries) for at least: deal sourcing to diligence memo, signal-to-thesis, technology landscape scan, portfolio and fund review, and counter-diligence screening. | should |
 
