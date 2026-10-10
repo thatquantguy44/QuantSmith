@@ -95,6 +95,17 @@ constitution P9 (secrets never enter the repo).
 | `secrets_management/secret_rotation/` | Writing/updating/rotating and revoking credentials and custom keys | Deployment, Maintenance |
 | `secrets_management/secret_scanning/` | Detecting leaked secrets in code/history/logs; remediation and prevention | Implementation, Maintenance |
 
+## Provenance Agents (`provenance/`)
+
+Grouped in the `provenance/` category folder (see
+[`provenance/README.md`](provenance/README.md)); they answer *where did this come
+from?* and *what did we know, and when?* for every dataset and number (spec `0102`).
+
+| Agent | Handles | Feeds mainly |
+| --- | --- | --- |
+| `provenance/lineage_capture/` | Content-hashed immutable dataset versions, source registration, run and column lineage, trace, restatement impact, verification, citations, OpenLineage events | Implementation, Testing, Maintenance |
+| `provenance/bitemporal_data/` | Valid time × knowledge time facts: vintages, restatements, retractions, as-of queries, revision trails, backtest look-ahead detection | Implementation, Testing |
+
 ## Technology & Tooling Agents (`tooling/`)
 
 Grouped in the `tooling/` category folder; they bring the SDK's discipline to the

@@ -39,9 +39,9 @@ signal and model **reproducible, leakage-safe, and traceable to a spec**.
 [![CI](https://github.com/joshualutkemuller/QuantSmith/actions/workflows/ci.yml/badge.svg)](https://github.com/joshualutkemuller/QuantSmith/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](pyproject.toml)
 [![Approach: Spec-Driven](https://img.shields.io/badge/Approach-Spec--Driven-ff6f00)](instructions/spec_driven_development.md)
-[![Agents: 209](https://img.shields.io/badge/Agents-209-6f42c1)](agents/README.md)
+[![Agents: 211](https://img.shields.io/badge/Agents-211-6f42c1)](agents/README.md)
 [![Quality Gates: 36](https://img.shields.io/badge/Quality%20Gates-36-2ea44f)](hooks/README.md)
-[![Specs: 87](https://img.shields.io/badge/Specs-87-0969da)](specs/README.md)
+[![Specs: 88](https://img.shields.io/badge/Specs-88-0969da)](specs/README.md)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](.github/GIT_GUIDELINES.md)
 
 <br/>
@@ -91,7 +91,7 @@ signal and model **reproducible, leakage-safe, and traceable to a spec**.
 | 🧠 Plan research from a hypothesis | Spec-driven planning agents + traceable requirements |
 | 🔎 Catch leakage & time-alignment bugs | Point-in-time standards + `leakage`/`backtest` gates |
 | 📝 Document features, models, backtests | Templates, cards, and reproducible run artifacts |
-| 🤖 Reuse research workflows | 209 narrow, inspectable agent roles across the stack |
+| 🤖 Reuse research workflows | 211 narrow, inspectable agent roles across the stack |
 | 🚦 Stop mistakes before commit/push | 36 quality gates, advisory by default, CI-enforceable |
 | 🗣️ Share a common vocabulary | An [agentic dictionary](agentic_dictionary.md) for the team |
 
@@ -293,6 +293,10 @@ each. Uses the catalog as its routing table.
 - `pipeline_observability/`: reads the run manifest for freshness, data-downtime, SLA, and lineage (spec `0019`, tested runtime).
 - `pipeline_concurrency/`: runs hundreds of pipelines at once under global, pool, and mutual-exclusion limits — deadlock-free admission, starvation guard, bounded retries, failure isolation, staggered schedules, and a capacity plan; renders Dagster and Mage config with `tooling/dag_orchestration/` (spec `0101`, tested runtime).
 - `data_modeling/`, `pipeline_builder/`, `pipeline_deployment/`, `data_governance/`: design-and-review roles for dimensional modeling, DAG compilation, environment promotion/rollback, and catalog/lineage/access policy.
+
+**Provenance** (`agents/provenance/`):
+- `lineage_capture/`: content-hashed dataset versions, run and column lineage, restatement impact, verification, citations, and OpenLineage events (spec `0102`, tested runtime).
+- `bitemporal_data/`: valid-time × knowledge-time facts — vintages, restatements, as-of reads, and backtest look-ahead detection (spec `0102`, tested runtime).
 
 **Analytics** (`agents/analytics/`):
 - `metrics_semantic_layer/`: the canonical metrics layer — one source-of-truth definition per KPI, computed consistently and point-in-time, with governance and dimension reconciliation.
@@ -559,6 +563,7 @@ the [spec index](specs/README.md).
 | [`0095`](specs/0095-venture-predictive-model-baselines/) | Venture predictive-model reference baselines — point-in-time validation harness, computed deployability gate, competing-risks survival, emergence, organization-level link prediction, anomaly, and chain-ladder nowcast; synthetic validation only, no model usable for decisions | `venture_models/` package |
 | [`0096`](specs/0096-venture-request-routing-and-orchestrator/) | Venture request routing — reviewable rules turn a request into an ordered agent chain with review gates, decision owner, strictest class, and clearance; forbidden requests are refused with the human who owns each; plus the `venture_orchestrator` agent | `venture_routing.py` |
 | [`0094`](specs/0094-asian-language-nlp-foundation/) | Asian-language NLP foundation — dependency-free language/script identification, a segmentation baseline with a declared segmenter slot, rule-based amount/currency/date/era-year/fiscal-period extraction with verbatim spans and offsets (Mandarin, Japanese, Korean, Thai, Vietnamese, Indonesian/Malay, Filipino, Russian, Kazakh, Uzbek, English), per-language evaluation that refuses pooled scores, and a baseline-vs-model comparison that never overwrites | `asian_nlp/` package (`src/quantsmith/asian_nlp/`) |
+| [`0102`](specs/0102-lineage-bitemporal-provenance/) | Lineage and bitemporal provenance — immutable content-hashed versions, run and column lineage, restatement impact, verification, citations, OpenLineage events; valid-time × knowledge-time store with as-of reads and look-ahead detection | `provenance.py` |
 | [`0101`](specs/0101-concurrent-pipeline-fleet/) | Concurrent pipeline fleet — hundreds of pipelines under global, pool, and mutual-exclusion limits; deadlock-free admission, starvation guard, bounded retries, failure isolation, capacity plan, schedule staggering, Dagster and Mage config exporters | `pipeline_fleet.py` |
 | [`0055`](specs/0055-workflow-scheduling-operations/) | Workflow scheduling operations — registry validation, cron dry-run evidence, idempotent dispatch, JSONL ledger, manual reminders, daily reports, alert handoff, memory candidates | `workflow_scheduling.py` |
 | [`0060`](specs/0060-scheduler-monitoring/) | Scheduler monitoring — executable report and alert-preview CLI plus caller-injected alert delivery over the workflow-scheduling runtime | `workflow_scheduling.py` *(extended)*, `workflow_scheduling_cli.py` |

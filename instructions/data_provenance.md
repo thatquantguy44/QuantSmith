@@ -90,3 +90,24 @@ synthetic-data language in generated artifacts with no matching disclosure.
 See `instructions/point_in_time.md` (a related but distinct concern: point-in-time
 correctness of real data) and `instructions/engineering_principles.md` P10
 (honest reporting).
+
+## Lineage And Bitemporal Records (spec `0102`)
+
+A citation is only as good as the evidence behind it. For data that feeds models,
+signals, or reports:
+
+- **Versions are immutable.** Identify each dataset version by content hash; a
+  restatement is a new version, never an overwrite.
+- **Register sources, record runs.** Every external pull is registered with its
+  `sources/` catalog id and retrieval time; every transform records its code
+  version, parameters, inputs, outputs, and column mapping.
+- **Trace, don't guess.** Undeclared column lineage is reported as a gap.
+- **Restatements propagate.** The downstream impact of a changed input is
+  recomputed, not left stale.
+- **Two timelines.** Facts carry valid time and knowledge time; corrections append;
+  knowledge is never backdated; decisions read as of what was known at the time.
+- **Cite from lineage.** Point-of-use citations name version, hash, and sources.
+
+Runtime: `src/quantsmith/pipelines/provenance.py` (`LineageGraph`,
+`BitemporalStore`, `lookahead_violations`). Agents: `agents/provenance/`.
+
