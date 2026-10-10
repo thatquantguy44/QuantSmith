@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "generator": "quantsmith-skills/1",
-  "generation": 1,
+  "generation": 3,
   "updated": "2026-10-10",
   "targets": {},
   "skills": [
@@ -310,6 +310,22 @@
       "skill_hash": "sha256:dced55490ae92c70f55233fca12b46f60829e527a6459fb888b8a25e6671c64d"
     },
     {
+      "name": "data-engineering-backfill-reprocessing",
+      "agent": "data_engineering/backfill_reprocessing",
+      "category": "data_engineering",
+      "description": "The Backfill & Reprocessing Agent turns a vendor restatement or a corrected source into a safe, complete, reversible recomputation. Use when a vendor restates historical prices, fundamentals, or reference data, or a bug fix in a transform means history must be recomputed.",
+      "status": "active",
+      "project": true,
+      "path": ".claude/skills/data-engineering-backfill-reprocessing/SKILL.md",
+      "revision": 1,
+      "introduced": "2026-10-10",
+      "updated": "2026-10-10",
+      "removed": null,
+      "updated_generation": 2,
+      "source_hash": "sha256:432ec119ab84b92140a9f8b5bb0995eeb0e4865ebf0e199d0d4275db27f448ea",
+      "skill_hash": "sha256:344634c5e5f29cf027175d2a7661f9fc237931a8044ea8a682a274c73e391f90"
+    },
+    {
       "name": "data-engineering-data-governance",
       "agent": "data_engineering/data_governance",
       "category": "data_engineering",
@@ -420,6 +436,38 @@
       "updated_generation": 1,
       "source_hash": "sha256:1df35cf33e729611c575b6cdb50f5ac474fb6c6122d3067e2436d050e2e52bdb",
       "skill_hash": "sha256:c137f0f8cb619dae4998da198e659c7ed8e19624a36b18c12dc4cccdd75cdbf0"
+    },
+    {
+      "name": "data-engineering-schema-evolution",
+      "agent": "data_engineering/schema_evolution",
+      "category": "data_engineering",
+      "description": "The Schema Evolution Agent decides whether a schema change is safe and catches schema drift before bad rows load. Use when a vendor or upstream team announces a schema change (new, dropped, retyped, or null-relaxed columns), or a load failed or, worse, mis-parsed after an unannounced change.",
+      "status": "active",
+      "project": true,
+      "path": ".claude/skills/data-engineering-schema-evolution/SKILL.md",
+      "revision": 1,
+      "introduced": "2026-10-10",
+      "updated": "2026-10-10",
+      "removed": null,
+      "updated_generation": 2,
+      "source_hash": "sha256:9b649d0f9a36168d19f479b673e890aec2169490077ecdac38d5380f94b08c16",
+      "skill_hash": "sha256:9e22e495df2ca52abf5bccb81923ea81c4fcc2bc4adab53729a7b8e917ded931"
+    },
+    {
+      "name": "data-engineering-streaming-cdc",
+      "agent": "data_engineering/streaming_cdc",
+      "category": "data_engineering",
+      "description": "The Streaming & CDC Agent makes streamed and change-data-capture data correct under the conditions streams actually deliver: at-least-once replays, out-of-order events, and late prints. Use when a table is fed by a CDC connector (Debezium, DMS, a vendor change feed) and replays or out-of-order events are possible, or bars, VWAPs, or other event-time aggregates are built from a live feed and late prints arrive after a window looked complete.",
+      "status": "active",
+      "project": true,
+      "path": ".claude/skills/data-engineering-streaming-cdc/SKILL.md",
+      "revision": 1,
+      "introduced": "2026-10-10",
+      "updated": "2026-10-10",
+      "removed": null,
+      "updated_generation": 2,
+      "source_hash": "sha256:83151721ae16f5e8913139c38762eb8808c50ebedd8fff0c9ac0153d081a0afa",
+      "skill_hash": "sha256:c808bad0f3a7b855b66dca2ccd00ade5418938af173cd114a667359155543934"
     },
     {
       "name": "data-ingestion-api-ingestion",
@@ -2665,17 +2713,33 @@
       "name": "tooling-dag-orchestration",
       "agent": "tooling/dag_orchestration",
       "category": "tooling",
-      "description": "The DAG Orchestration Agent brings the SDK's pipeline discipline to the orchestrators that actually run data pipelines in production. Use when a Dagster or Mage deployment needs concurrency limits for many pipelines, or an approved fleet declaration (data_engineering/pipeline_concurrency) must be rendered as dagster.yaml / Mage metadata.yaml settings.",
+      "description": "The DAG Orchestration Agent brings the SDK's pipeline discipline to the orchestrators that actually run data pipelines in production. Use when a Dagster, Mage, Airflow, or Prefect deployment needs concurrency limits for many pipelines, or an approved fleet declaration (data_engineering/pipeline_concurrency) must be rendered as dagster.yaml / Mage metadata.yaml settings.",
       "status": "active",
       "project": true,
       "path": ".claude/skills/tooling-dag-orchestration/SKILL.md",
+      "revision": 2,
+      "introduced": "2026-10-10",
+      "updated": "2026-10-10",
+      "removed": null,
+      "updated_generation": 3,
+      "source_hash": "sha256:4c1c9f18289f077bf02ac51decea750e91db79a486dc761f668183c00c1b5d67",
+      "skill_hash": "sha256:b273bc5ad7fbd3137a86fb96d073491b725a752f41a08bbe41448a9bd5987958"
+    },
+    {
+      "name": "tooling-dbt",
+      "agent": "tooling/dbt",
+      "category": "tooling",
+      "description": "The dbt Agent brings the SDK's data-contract and reproducibility discipline to dbt projects. Use when a dbt project feeds research, signals, or reports and needs a correctness review, or an incremental model duplicates or drops rows on re-run or backfill.",
+      "status": "active",
+      "project": true,
+      "path": ".claude/skills/tooling-dbt/SKILL.md",
       "revision": 1,
       "introduced": "2026-10-10",
       "updated": "2026-10-10",
       "removed": null,
-      "updated_generation": 1,
-      "source_hash": "sha256:4d524d07cd5a52d7965d11bc35ee67bb092742f411b46168f45494d96c2303c4",
-      "skill_hash": "sha256:5a96fe70975f87338eed8cdfc594ac7d02f201601fb2d1458814edc85c018635"
+      "updated_generation": 3,
+      "source_hash": "sha256:0eafb99172bffecc24e4f17a1010c81c2ecf0c2ddfd8512896242073d838a1cd",
+      "skill_hash": "sha256:69cad2e1908b44b7b81a87c508df348564e428011c31f9c7d988c1b51fa9027c"
     },
     {
       "name": "tooling-excel",
@@ -2742,6 +2806,22 @@
       "skill_hash": "sha256:ed6f3b7963766a5b159cff5747b7b459bd16f3ea5c822c98539de9fad58efbc0"
     },
     {
+      "name": "tooling-ray-dask",
+      "agent": "tooling/ray_dask",
+      "category": "tooling",
+      "description": "The Ray & Dask Agent brings partitioning, skew, memory, and reproducibility discipline to Python-native distributed compute — Dask DataFrames and Ray (Ray Data, Ray Tasks) — used for feature generation, simulation, and parameter sweeps. Use when a Dask or Ray Data pipeline runs out of memory or crawls on a few big partitions, or a Monte Carlo or parameter sweep must be reproducible across runs and cluster sizes.",
+      "status": "active",
+      "project": true,
+      "path": ".claude/skills/tooling-ray-dask/SKILL.md",
+      "revision": 1,
+      "introduced": "2026-10-10",
+      "updated": "2026-10-10",
+      "removed": null,
+      "updated_generation": 3,
+      "source_hash": "sha256:9a58c0d515b67c7f963534de583b504192c3a04a7cfe05a4eac811215741e041",
+      "skill_hash": "sha256:ae3ae359e6dc33f4ff0ac6436fc2615e23e7838d681bb6f3519e467bfe4b8b7d"
+    },
+    {
       "name": "tooling-react",
       "agent": "tooling/react",
       "category": "tooling",
@@ -2756,6 +2836,22 @@
       "updated_generation": 1,
       "source_hash": "sha256:80672022738587a21c3d744c51d98b40509f10435f9dcc16f19ea33ff352baa2",
       "skill_hash": "sha256:54def53d8ea5e04392232a1559d9b13eb43a43c8ebe45667f93f42b6cc83e7d7"
+    },
+    {
+      "name": "tooling-spark",
+      "agent": "tooling/spark",
+      "category": "tooling",
+      "description": "The Spark Agent makes Spark jobs for quant data fast enough and reproducible. Use when a Spark job stalls on a few long tasks (skew) or spills (too few partitions), or a join or aggregation is dominated by a handful of tickers, accounts, or nulls.",
+      "status": "active",
+      "project": true,
+      "path": ".claude/skills/tooling-spark/SKILL.md",
+      "revision": 1,
+      "introduced": "2026-10-10",
+      "updated": "2026-10-10",
+      "removed": null,
+      "updated_generation": 3,
+      "source_hash": "sha256:ce6cd0273c8931ff4e6071527cd6f7490f6bc015bbcbfd1d2783472c87b644fe",
+      "skill_hash": "sha256:5a5fd357ed227bcd4cd82ef31fa858129b9ce85a7e6300467575155791bb0f0b"
     },
     {
       "name": "tooling-streamlit-dash",

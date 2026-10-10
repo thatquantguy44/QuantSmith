@@ -23,6 +23,19 @@ is a fixture, make it obviously fake (`sk-EXAMPLE-not-a-real-key`).
 
 ---
 
+## `skills-export` — "changed since the last build" / "differs from the generated skill"
+
+**Checks:** that `.claude/skills/` and `.claude/skills/registry.json` match what
+`agents/` renders to (spec `0110`).
+
+**Usual cause:** an agent was added or edited without rebuilding, or a generated
+`SKILL.md` was edited by hand.
+
+**Do:** `PYTHONPATH=src python3 -m quantsmith.skills_export build`, then commit the
+result with the agent change. Never edit `.claude/skills/` by hand — edit the agent.
+
+---
+
 ## `spec` — "task cites no requirement" / "AC has no test"
 
 **Checks:** the traceability chain across `spec.md` → `plan.md` → `tasks.md`.

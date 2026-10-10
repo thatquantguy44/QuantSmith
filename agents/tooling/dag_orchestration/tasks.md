@@ -14,6 +14,15 @@ Input: an approved `Fleet` declaration (`0101`).
 Output: `to_mage` config (`queue_config`, per-pipeline `concurrency_config`,
 retries) with a mitigation for every warning, per `profiles/mage.md`.
 
+## Render A Fleet To Airflow Or Prefect
+
+Input: an approved `Fleet` declaration (`0101`).
+
+Output: `to_airflow` (pools, `pool_slots`, `priority_weight`, `parallelism`) or
+`to_prefect` (work-pool limit, global concurrency limits, queues, `concurrency()`
+acquisitions) with every warning resolved, per `profiles/airflow.md` /
+`profiles/prefect.md`.
+
 ## Review An Orchestrator Deployment
 
 Input: an existing Dagster or Mage deployment and its symptoms.

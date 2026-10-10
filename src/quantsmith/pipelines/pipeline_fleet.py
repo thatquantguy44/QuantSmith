@@ -33,7 +33,8 @@ Guarantees held by construction:
 * REQ-006 / AC-006 — ``stagger_offsets`` spreads start times deterministically so
   hundreds of schedules do not fire on the same second.
 * REQ-007 / NFR-003 / AC-007 — exporters emit Dagster and Mage config plus an explicit
-  ``warnings`` list for anything the target cannot enforce natively.
+  ``warnings`` list for anything the target cannot enforce natively. Spec 0112 adds
+  ``to_airflow`` and ``to_prefect`` under the same rule.
 """
 
 from __future__ import annotations
@@ -614,5 +615,132 @@ def to_mage(fleet: Fleet) -> Dict[str, object]:
             "queue_config": {"concurrency": fleet.config.max_concurrent},
         },
         "pipelines": pipelines,
+        "warnings": warnings,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Airflow and Prefect exporters — spec 0112 (REQ-001 / REQ-002)
+# ---------------------------------------------------------------------------
+
+
+def _key_name(key: str, sep: str) -> str:
+    safe = "".join(c if c.isalnum() else sep for c in key).strip(sep)
+    return f"{TAG_PREFIX}{sep}key{sep}{safe}"
+
+
+def to_airflow(fleet: Fleet) -> Dict[str, object]:
+    """Render fleet limits as Airflow pools, DAG settings, and task arguments.
+
+    Each fleet job is one DAG. Pools carry the pool limits (``airflow pools set``);
+    a concurrency key becomes a 1-slot pool. An Airflow task takes exactly one
+    pool, so a job that needs a key and a pool, or several pools, gets the key pool
+    (correctness first) or its tightest pool, and every pool it cannot also hold is
+    listed in ``warnings``. ``airflow_cfg`` belongs in ``airflow.cfg``. Verify key
+    names against the Airflow version you run.
+    """
+    pools: Dict[str, Dict[str, object]] = {
+        f"{TAG_PREFIX}_{p}": {"slots": fleet.pools[p].limit,
+                              "description": f"QuantSmith fleet pool '{p}'"}
+        for p in sorted(fleet.pools)
+    }
+    for key in sorted(_shared_keys(fleet)):
+        pools[_key_name(key, "_")] = {"slots": 1,
+                                      "description": f"QuantSmith mutual exclusion '{key}'"}
+    warnings: List[str] = []
+    dags: Dict[str, Dict[str, object]] = {}
+    for n in fleet.order:
+        job = fleet.jobs[n]
+        task: Dict[str, object] = {"priority_weight": job.priority, "weight_rule": "absolute",
+                                   "retries": job.max_attempts - 1}
+        if job.concurrency_key is not None:
+            task["pool"] = _key_name(job.concurrency_key, "_")
+            task["pool_slots"] = 1
+            if job.pools:
+                warnings.append(
+                    f"job '{n}' needs key '{job.concurrency_key}' and pools "
+                    f"{sorted(job.pools)}; an Airflow task takes one pool, so only the key "
+                    f"is enforced — split the work into tasks per pool or dispatch via run_fleet."
+                )
+        elif job.pools:
+            tightest = min(sorted(job.pools), key=lambda p: fleet.pools[p].limit)
+            task["pool"] = f"{TAG_PREFIX}_{tightest}"
+            task["pool_slots"] = job.pools[tightest]
+            others = sorted(p for p in job.pools if p != tightest)
+            if others:
+                warnings.append(
+                    f"job '{n}' needs pools {sorted(job.pools)}; an Airflow task takes one "
+                    f"pool, so only '{tightest}' is enforced (not {others})."
+                )
+        dags[n] = {"max_active_runs": 1, "default_args": task}
+        if job.owner:
+            dags[n]["default_args"]["owner"] = job.owner  # type: ignore[index]
+    warnings += _dep_warning(fleet, "Airflow",
+                             "dataset/asset schedules or ExternalTaskSensor dependencies")
+    return {
+        "target": "airflow",
+        "airflow_cfg": {"core": {"parallelism": fleet.config.max_concurrent}},
+        "pools": pools,
+        "cli": [f'airflow pools set {name} {p["slots"]} "{p["description"]}"'
+                for name, p in pools.items()],
+        "dags": dags,
+        "warnings": warnings,
+    }
+
+
+def to_prefect(fleet: Fleet) -> Dict[str, object]:
+    """Render fleet limits as Prefect work-pool, global-concurrency, and queue config.
+
+    The global limit becomes the work pool's concurrency limit; each pool and each
+    concurrency key becomes a global concurrency limit acquired around the flow
+    body (``with concurrency(names, occupy=n)``); priorities become work queues
+    (Prefect queue priority 1 is served first). A job holding different slot
+    counts in different pools cannot use one ``concurrency`` call; it gets one call
+    per slot count, in a fixed name order, and a warning. Verify against your
+    Prefect version.
+    """
+    limits: Dict[str, int] = {
+        f"{TAG_PREFIX}-pool-{p}": fleet.pools[p].limit for p in sorted(fleet.pools)
+    }
+    for key in sorted(_shared_keys(fleet)):
+        limits[_key_name(key, "-")] = 1
+    prios = sorted({j.priority for j in fleet.jobs.values()}, reverse=True)
+    queues = {p: {"name": f"{TAG_PREFIX}-p{p}", "priority": i + 1} for i, p in enumerate(prios)}
+    warnings: List[str] = []
+    flows: Dict[str, Dict[str, object]] = {}
+    for n in fleet.order:
+        job = fleet.jobs[n]
+        held: Dict[str, int] = {f"{TAG_PREFIX}-pool-{p}": s for p, s in job.pools.items()}
+        if job.concurrency_key is not None:
+            held[_key_name(job.concurrency_key, "-")] = 1
+        if len(set(held.values())) <= 1:
+            acquire = [{"names": sorted(held), "occupy": next(iter(held.values()))}] if held else []
+        else:
+            # One call per limit, in name order: every job then acquires in the same
+            # global order, so partial holds cannot form a deadlock cycle.
+            acquire = [{"names": [name], "occupy": held[name]} for name in sorted(held)]
+            warnings.append(
+                f"job '{n}' holds different slot counts across limits, so it acquires "
+                f"them one concurrency() call at a time in name order; keep that order "
+                f"in the flow code (it is not all-or-nothing like run_fleet admission)."
+            )
+        flows[n] = {
+            "work_queue": queues[job.priority]["name"],
+            "retries": job.max_attempts - 1,
+            "concurrency": acquire,
+            "tags": [f"{TAG_PREFIX}-owner-{job.owner}"] if job.owner else [],
+        }
+    warnings += _dep_warning(fleet, "Prefect",
+                             "automations or run_deployment calls on upstream completion")
+    return {
+        "target": "prefect",
+        "work_pool": {"concurrency_limit": fleet.config.max_concurrent},
+        "work_queues": [queues[p] for p in prios],
+        "global_concurrency_limits": [{"name": k, "limit": v} for k, v in limits.items()],
+        "cli": (
+            [f"prefect work-pool set-concurrency-limit <work-pool> {fleet.config.max_concurrent}"]
+            + [f"prefect gcl create {k} --limit {v}" for k, v in limits.items()]
+        ),
+        "flows": flows,
         "warnings": warnings,
     }

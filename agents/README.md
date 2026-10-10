@@ -75,6 +75,9 @@ role, downstream of ingestion.
 | `data_engineering/pipeline_builder/` | Compile source→transform→sink intent into a reviewable DAG with contracts, schedules, retries, tests, ownership, deployment plan | Design, Implementation |
 | `data_engineering/pipeline_deployment/` | Environment promotion, dry runs, canaries, rollback, state migration, scheduler deployment | Deployment |
 | `data_engineering/data_governance/` | Catalog, lineage, access policy, ownership, classification | Maintenance |
+| `data_engineering/streaming_cdc/` | CDC applied idempotently by per-key sequence; event-time windows under a watermark; late data to a side output or bitemporal restatement (`0111`) | Design, Implementation, Testing |
+| `data_engineering/schema_evolution/` | Schema-change classification (backward/forward), mode enforcement, safe backward reads, drift detection before load (`0111`) | Design, Testing, Maintenance |
+| `data_engineering/backfill_reprocessing/` | Restatements reprocessed from lineage under fleet limits as new versions; old-vs-new diffs; all-or-nothing gated publication with rollback (`0111`) | Implementation, Deployment, Maintenance |
 | `data_engineering/pipeline_concurrency/` | Hundreds of concurrent pipelines — global/pool/key limits, all-or-nothing admission, priorities and starvation guard, bounded retries, failure isolation, schedule staggering, capacity plan (`0101`) | Design, Implementation, Deployment |
 
 Runtimes: `src/quantsmith/pipelines/data_pipeline.py` (`0011`) and
@@ -130,7 +133,10 @@ stores).
 | `tooling/looker/` | Looker: LookML semantic model, explores, caching; renders the shared spec (`0018`) | Implementation, Maintenance |
 | `tooling/qlik/` | Qlik: associative model, set analysis, section access; renders the shared spec (`0018`) | Implementation, Maintenance |
 | `tooling/superset/` | Apache Superset: SQL/dataset governance, Jinja safety, caching; renders the shared spec (`0018`) | Implementation, Maintenance |
-| `tooling/dag_orchestration/` | Orchestrators — Dagster and Mage profiles: run/task concurrency, pools, priority, retries, backfill throttling; renders a fleet via `to_dagster`/`to_mage` (`0101`) | Implementation, Deployment, Maintenance |
+| `tooling/dag_orchestration/` | Orchestrators — Dagster, Mage, Airflow, Prefect profiles: run/task concurrency, pools, priority, retries, backfill throttling; renders a fleet via `to_dagster`/`to_mage` (`0101`) and `to_airflow`/`to_prefect` (`0112`) | Implementation, Deployment, Maintenance |
+| `tooling/dbt/` | dbt from `manifest.json`: owners, primary-key tests, enforced contracts, backfill-safe incrementals, no wall-clock reads, freshness, snapshots (`0112`) | Design, Testing |
+| `tooling/spark/` | Spark partition sizing, skew and salting, determinism lint (`0112`) | Implementation, Testing |
+| `tooling/ray_dask/` | Ray/Dask partitions and blocks, hot keys, reproducible parallel seeding, determinism lint (`0112`) | Implementation, Testing |
 
 The planned technology matrix is maintained in
 [`tooling/README.md`](tooling/README.md#planned-coverage). It prioritizes Python,

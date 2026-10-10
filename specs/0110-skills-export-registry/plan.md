@@ -1,7 +1,7 @@
 # Plan: Skills export and registry
 
 - **Spec:** 0110-skills-export-registry (`spec.md`)
-- **Status:** Draft
+- **Status:** Approved
 - **Author:** QuantSmith
 - **Last updated:** 2026-10-10
 

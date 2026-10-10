@@ -1,9 +1,9 @@
 # Spec: Lineage and bitemporal provenance
 
 - **ID:** 0102-lineage-bitemporal-provenance
-- **Status:** Draft
+- **Status:** Approved
 - **Author:** QuantSmith
-- **Approver:** (pending)
+- **Approver:** Joshua Lutkemuller, CFA
 - **Last updated:** 2026-10-10
 
 > WHAT and WHY only. Implementation lives in `plan.md`.

@@ -24,7 +24,7 @@ date. Spec: `specs/0110-skills-export-registry/`.
 | --- | --- |
 | Anyone running Claude Code in a clone of QuantSmith | Automatic: the project selection (53 core skills) committed in `.claude/skills/`. Install the plugin for the rest. |
 | Claude Code in another repository, or user-wide | `quantsmith-skills package --format plugin --out DIR`, then `claude plugin marketplace add DIR` and `claude plugin install quantsmith-skills@quantsmith-skills-local`. |
-| Claude.ai (personal or organization skills) | `quantsmith-skills package --format zip --out DIR --pending-for claude_ai`, upload the zips, delete the listed removed skills, then `quantsmith-skills mark-published --target claude_ai`. |
+| Claude.ai (personal or organization skills) — *not used by this repository's owner (2026-10-10); kept for adopters* | `quantsmith-skills package --format zip --out DIR --pending-for claude_ai`, upload the zips, delete the listed removed skills, then `quantsmith-skills mark-published --target claude_ai`. |
 
 ## The Registry
 

@@ -39,9 +39,9 @@ signal and model **reproducible, leakage-safe, and traceable to a spec**.
 [![CI](https://github.com/joshualutkemuller/QuantSmith/actions/workflows/ci.yml/badge.svg)](https://github.com/joshualutkemuller/QuantSmith/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](pyproject.toml)
 [![Approach: Spec-Driven](https://img.shields.io/badge/Approach-Spec--Driven-ff6f00)](instructions/spec_driven_development.md)
-[![Agents: 204](https://img.shields.io/badge/Agents-204-6f42c1)](agents/README.md)
+[![Agents: 210](https://img.shields.io/badge/Agents-210-6f42c1)](agents/README.md)
 [![Quality Gates: 37](https://img.shields.io/badge/Quality%20Gates-37-2ea44f)](hooks/README.md)
-[![Specs: 86](https://img.shields.io/badge/Specs-86-0969da)](specs/README.md)
+[![Specs: 88](https://img.shields.io/badge/Specs-88-0969da)](specs/README.md)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](.github/GIT_GUIDELINES.md)
 
 <br/>
@@ -91,7 +91,7 @@ signal and model **reproducible, leakage-safe, and traceable to a spec**.
 | 🧠 Plan research from a hypothesis | Spec-driven planning agents + traceable requirements |
 | 🔎 Catch leakage & time-alignment bugs | Point-in-time standards + `leakage`/`backtest` gates |
 | 📝 Document features, models, backtests | Templates, cards, and reproducible run artifacts |
-| 🤖 Reuse research workflows | 204 narrow, inspectable agent roles across the stack |
+| 🤖 Reuse research workflows | 210 narrow, inspectable agent roles across the stack |
 | 🚦 Stop mistakes before commit/push | 37 quality gates, advisory by default, CI-enforceable |
 | 🗣️ Share a common vocabulary | An [agentic dictionary](agentic_dictionary.md) for the team |
 
@@ -291,6 +291,7 @@ each. Uses the catalog as its routing table.
 **Data engineering** (`agents/data_engineering/`):
 - `pipeline_orchestration/`: designs and runs data pipelines as DAGs — dependency ordering, per-step data contracts, idempotent partitioned runs, retries, backfill, and a run manifest (spec `0011`, tested runtime).
 - `pipeline_observability/`: reads the run manifest for freshness, data-downtime, SLA, and lineage (spec `0019`, tested runtime).
+- `streaming_cdc/`, `schema_evolution/`, `backfill_reprocessing/`: change safety — idempotent CDC and watermarked windows, schema compatibility and drift, and lineage-driven reprocessing with all-or-nothing publication (spec `0111`, tested runtime).
 - `pipeline_concurrency/`: runs hundreds of pipelines at once under global, pool, and mutual-exclusion limits — deadlock-free admission, starvation guard, bounded retries, failure isolation, staggered schedules, and a capacity plan; renders Dagster and Mage config with `tooling/dag_orchestration/` (spec `0101`, tested runtime).
 - `data_modeling/`, `pipeline_builder/`, `pipeline_deployment/`, `data_governance/`: design-and-review roles for dimensional modeling, DAG compilation, environment promotion/rollback, and catalog/lineage/access policy.
 
@@ -322,7 +323,7 @@ each. Uses the catalog as its routing table.
 
 <br/>
 
-**Tooling** (`agents/tooling/`) — `excel/`, `power_bi/`, `tableau/`, `react/`, `streamlit_dash/`, `looker/`, `qlik/`, `superset/`: reproducibility, point-in-time correctness, auditability, and secrets-safe connections to the spreadsheet, BI, and web-dashboard tools quants use. All but `tableau` render the shared dashboard spec (specs `0015`/`0016`/`0018`) — one governed design, seven targets. `dag_orchestration/` covers pipeline orchestrators — Dagster and Mage profiles for running hundreds of pipelines concurrently (spec `0101`).
+**Tooling** (`agents/tooling/`) — `excel/`, `power_bi/`, `tableau/`, `react/`, `streamlit_dash/`, `looker/`, `qlik/`, `superset/`: reproducibility, point-in-time correctness, auditability, and secrets-safe connections to the spreadsheet, BI, and web-dashboard tools quants use. All but `tableau` render the shared dashboard spec (specs `0015`/`0016`/`0018`) — one governed design, seven targets. `dag_orchestration/` covers pipeline orchestrators — Dagster, Mage, Airflow, and Prefect profiles for running hundreds of pipelines concurrently (specs `0101`, `0112`); `dbt/`, `spark/`, and `ray_dask/` cover dbt project review and reproducible distributed compute (spec `0112`).
 
 **Knowledge** (`agents/knowledge/`) — `knowledge_ingestion/`, `knowledge_curation/`, `knowledge_retrieval/`, `institutional_memory/`: absorb, organize, retrieve, and persist institutional knowledge across domains — grounded, cited answers, access control and information barriers, provenance, and durable memory. Spec `0056` extends this into a market-research knowledge base: the same MCP retrieval surface, with separate governed storage and entitlement-aware access for user notes, firm research, tagged email market color, and approved external-manager materials.
 
@@ -564,6 +565,8 @@ the [spec index](specs/README.md).
 | [`0095`](specs/0095-venture-predictive-model-baselines/) | Venture predictive-model reference baselines — point-in-time validation harness, computed deployability gate, competing-risks survival, emergence, organization-level link prediction, anomaly, and chain-ladder nowcast; synthetic validation only, no model usable for decisions | `venture_models/` package |
 | [`0096`](specs/0096-venture-request-routing-and-orchestrator/) | Venture request routing — reviewable rules turn a request into an ordered agent chain with review gates, decision owner, strictest class, and clearance; forbidden requests are refused with the human who owns each; plus the `venture_orchestrator` agent | `venture_routing.py` |
 | [`0094`](specs/0094-asian-language-nlp-foundation/) | Asian-language NLP foundation — dependency-free language/script identification, a segmentation baseline with a declared segmenter slot, rule-based amount/currency/date/era-year/fiscal-period extraction with verbatim spans and offsets (Mandarin, Japanese, Korean, Thai, Vietnamese, Indonesian/Malay, Filipino, Russian, Kazakh, Uzbek, English), per-language evaluation that refuses pooled scores, and a baseline-vs-model comparison that never overwrites | `asian_nlp/` package (`src/quantsmith/asian_nlp/`) |
+| [`0112`](specs/0112-data-engineering-tooling/) | Data-engineering tooling — Airflow and Prefect exporters for `0101` fleets, dbt manifest review, partition sizing, skew and salting, determinism lint for PySpark/Dask | `dbt_review.py`, `distributed_compute.py`, `pipeline_fleet.py` *(extended)* |
+| [`0111`](specs/0111-change-safe-data-engineering/) | Change-safe data engineering — idempotent CDC, watermarked windows with late data and bitemporal restatements, schema compatibility and drift, lineage-driven reprocessing with atomic gated publication | `streaming_cdc.py`, `schema_evolution.py`, `reprocessing.py` |
 | [`0110`](specs/0110-skills-export-registry/) | Skills export and registry — every agent as a generated Claude skill in `.claude/skills/`, a lifecycle registry with revisions and per-target publication tracking, plugin and zip packaging; `quantsmith-skills` CLI and the `skills-export` gate | `skills_export/` package |
 | [`0102`](specs/0102-lineage-bitemporal-provenance/) | Lineage and bitemporal provenance — immutable content-hashed versions, run and column lineage, restatement impact, verification, citations, OpenLineage events; valid-time × knowledge-time store with as-of reads and look-ahead detection | `provenance.py` |
 | [`0101`](specs/0101-concurrent-pipeline-fleet/) | Concurrent pipeline fleet — hundreds of pipelines under global, pool, and mutual-exclusion limits; deadlock-free admission, starvation guard, bounded retries, failure isolation, capacity plan, schedule staggering, Dagster and Mage config exporters | `pipeline_fleet.py` |
@@ -604,7 +607,7 @@ the [spec index](specs/README.md).
 - 📌 **Portfolio management:** mandate → universe → signal intake → allocation policy → construction oversight → implementation → monitored governance
 - 🧮 **Optimization toolkit:** `0007` (QP) · `0013` (LP/MILP/flow/DP) · `0012` (control) · `0034` (cardinality-constrained portfolio, composing `0013`+`0007`) · `0035` (funding ladder, `0013`'s min-cost flow) · `0036` (multi-period rebalancing, `0013`'s DP) — every `0013` solver now has a shipped application
 - 📊 **Data Analyst:** `0008` metrics → `0009` experimentation → `0010` pipeline → `0014` storytelling → `0015`/`0016`/`0018` dashboards → `0017` render adapters
-- 🏗️ **Data Engineer:** `0042` pipeline builder (design-time) → `0011` orchestration (execution) → `0101` concurrent fleet (Dagster/Mage) → `0019` observability
+- 🏗️ **Data Engineer:** `0042` pipeline builder (design-time) → `0011` orchestration (execution) → `0101` concurrent fleet (Dagster/Mage) → `0111` change safety (CDC, schema, reprocessing) → `0112` tooling (Airflow/Prefect, dbt, Spark/Ray/Dask) → `0019` observability
 - 🕒 **Scheduled operations:** `0055` workflow scheduling → `0060` scheduler monitoring and alert preview → `0020` alerting/manual follow-up → `0049` workflow-memory candidates
 - 🛰️ **Monitoring & alerting:** `0021` signal monitoring → `0020` alerting → `adapters/alert_delivery/` (`0032`: email + webhook; `0037`: Slack, Teams, ticketing, PagerDuty/Opsgenie, SMS/push — all seven executable)
 - 💵 **Securities financing:** `0022` asset-class mechanics → `0023` securities lending → `0028` financing cost analysis → backtest/risk

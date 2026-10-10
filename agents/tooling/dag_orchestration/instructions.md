@@ -3,7 +3,7 @@
 ## Operating Rules
 
 - Start from the fleet declaration (`0101`), never from hand-typed limits. Render
-  with `to_dagster` / `to_mage`; read and resolve every entry in `warnings`.
+  with `to_dagster` / `to_mage` / `to_airflow` / `to_prefect` (`0112`); read and resolve every entry in `warnings`.
 - Bound concurrency at two levels: runs across the deployment, and tasks/blocks
   inside a run. A run limit of 20 with 16-way fan-out per run is 320 tasks.
 - Map each pool to a native mechanism (Dagster tag limits or op/asset pools). Where

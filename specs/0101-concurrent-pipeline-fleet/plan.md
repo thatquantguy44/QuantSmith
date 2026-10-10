@@ -1,7 +1,7 @@
 # Plan: Concurrent pipeline fleet
 
 - **Spec:** 0101-concurrent-pipeline-fleet (`spec.md`)
-- **Status:** Draft
+- **Status:** Approved
 - **Author:** QuantSmith
 - **Last updated:** 2026-10-10
 

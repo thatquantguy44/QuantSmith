@@ -85,6 +85,36 @@ Fleet checklist:
 - [ ] Schedules are staggered; the capacity plan fits the window.
 - [ ] Rendered orchestrator config has every warning resolved.
 
+## Change-Safe Pipelines
+
+Data changes after it lands: streams replay and arrive late, vendors change
+schemas, and sources are restated. The change-safety contract (spec `0111`):
+
+1. **CDC by sequence.** Apply each change event only if its per-key sequence is
+   newer than the one already applied; replays and stale events are counted, not
+   applied. Prefer full row images; partial updates are order-safe only in sequence.
+2. **Windows on event time, under a watermark.** Emit a window only when the
+   watermark (max event time minus allowed lateness) passes its end. Every late
+   event goes to a side output or a numbered restatement recorded with its
+   knowledge time — never dropped.
+3. **Classify every schema change.** Know whether it breaks new readers on old data
+   (backward) or old readers on new data (forward); enforce the mode that matches
+   the upgrade order; replay history only under a backward-compatible schema.
+4. **Check drift before load.** Unknown, missing, null, and mistyped columns are
+   counted per delivery; drifting files are quarantined, not coerced.
+5. **Reprocess from lineage.** A restatement re-runs exactly what is downstream of
+   it, under fleet limits, as new immutable versions.
+6. **Publish all-or-nothing.** Compare old and new by key; move every published
+   pointer at once only when every gate passes; keep the previous pointers.
+
+Change-safety checklist:
+
+- [ ] CDC events carry a per-key sequence and are applied through the guard.
+- [ ] Windows use event time and a justified allowed lateness; late data is accounted for.
+- [ ] Schema changes are classified and checked against the declared mode.
+- [ ] Deliveries are drift-checked before load.
+- [ ] Restatements are reprocessed from lineage and published atomically.
+
 ## Runtime & Spec
 
 - Runtime: `src/quantsmith/pipelines/data_pipeline.py`
@@ -105,3 +135,7 @@ Fleet checklist:
   `to_mage`), spec `specs/0101-concurrent-pipeline-fleet/`; agents
   `data_engineering/pipeline_concurrency` and `tooling/dag_orchestration`
   (Dagster and Mage profiles).
+- Change-safety runtimes: `src/quantsmith/pipelines/streaming_cdc.py`,
+  `schema_evolution.py`, `reprocessing.py`, spec
+  `specs/0111-change-safe-data-engineering/`; agents
+  `data_engineering/streaming_cdc`, `schema_evolution`, `backfill_reprocessing`.

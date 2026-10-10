@@ -29,5 +29,6 @@
 - Bound both deployment runs (`max_concurrent_runs`, tag limits) and in-run fan-out
   (executor `max_concurrent`, op/asset pools).
 - Throttle backfills with a `dagster/backfill` tag limit or a backfill policy.
-- Prefect equivalents (work-pool concurrency, global concurrency limits) are a
-  planned exporter.
+- Prefect: render work-pool limits, global concurrency limits, and queues with
+  `pipeline_fleet.to_prefect` (spec `0112`); see
+  `agents/tooling/dag_orchestration/profiles/prefect.md`.

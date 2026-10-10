@@ -7,12 +7,12 @@ orchestrators that actually run data pipelines in production. It reviews and
 configures orchestrator deployments for concurrency, priority, retries,
 backfills, scheduling, and idempotency, and renders a tool-neutral fleet
 declaration (`0101`) into orchestrator config via `to_dagster` / `to_mage`. It
-ships two profiles — **Dagster** and **Mage** — and is the planned home for
-Airflow and Prefect profiles.
+ships four profiles — **Dagster**, **Mage**, **Airflow**, and **Prefect** (spec
+`0112` adds `to_airflow` / `to_prefect`).
 
 ## Use When
 
-- A Dagster or Mage deployment needs concurrency limits for many pipelines.
+- A Dagster, Mage, Airflow, or Prefect deployment needs concurrency limits for many pipelines.
 - An approved fleet declaration (`data_engineering/pipeline_concurrency`) must be
   rendered as `dagster.yaml` / Mage `metadata.yaml` settings.
 - Backfills, partitions, or dynamic fan-out are flooding the run queue.
@@ -29,8 +29,8 @@ Airflow and Prefect profiles.
 
 ## Outputs
 
-- Orchestrator config rendered by `to_dagster` / `to_mage`, with its `warnings`.
-- A profile review (`profiles/dagster.md`, `profiles/mage.md`): run vs. task
+- Orchestrator config rendered by `to_dagster` / `to_mage` / `to_airflow` / `to_prefect`, with its `warnings`.
+- A profile review (`profiles/dagster.md`, `mage.md`, `airflow.md`, `prefect.md`): run vs. task
   concurrency, priority, retries, backfill throttling, schedule staggering.
 - A mitigation for every limit the orchestrator cannot enforce natively.
 - Handoffs to `pipeline_concurrency`, `pipeline_deployment`, and

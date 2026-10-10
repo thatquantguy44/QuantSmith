@@ -15,7 +15,10 @@
       "test_engineering"
     ],
     "agents": [
-      "tooling/dag_orchestration"
+      "tooling/dag_orchestration",
+      "tooling/dbt",
+      "tooling/ray_dask",
+      "tooling/spark"
     ]
   }
 }

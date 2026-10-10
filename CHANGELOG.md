@@ -21,6 +21,17 @@ patterns locally rather than expecting them to update in place.
 ## [Unreleased]
 
 ### Added
+- Data-engineering tooling (spec `0112`, slice B of `0107`): `pipeline_fleet.to_airflow` / `to_prefect` exporters
+  for `0101` fleets with warnings for every non-native limit; `dbt_review.review_manifest` for dbt `manifest.json`
+  (owners, primary-key tests, contracts, incremental safety, wall-clock reads, freshness, snapshots);
+  `distributed_compute` (partition sizing, skew report, salting plan, determinism lint). New agents `tooling/dbt`,
+  `tooling/spark`, `tooling/ray_dask`; Airflow and Prefect profiles for `tooling/dag_orchestration`.
+- Change-safe data engineering (spec `0111`, slice A of `0107`): `streaming_cdc.py` (idempotent, order-safe CDC by
+  per-key sequence; watermarked event-time windows with late data as side output or bitemporal restatement),
+  `schema_evolution.py` (backward/forward change classification, mode enforcement, safe backward reads, drift detection
+  before load), and `reprocessing.py` (lineage-exact restatement plans run under `0101` limits as new versions, diffs,
+  all-or-nothing gated publication with rollback). New agents `data_engineering/streaming_cdc`, `schema_evolution`,
+  `backfill_reprocessing`; a *Change-Safe Pipelines* section in `instructions/pipeline_engineering.md`.
 - Skills export and registry (spec `0110`): `src/quantsmith/skills_export/` and the `quantsmith-skills` CLI generate
   a self-contained Claude skill for every agent under `.claude/skills/` (204 at generation 1) and keep a lifecycle
   registry (`.claude/skills/registry.json`: revision, introduced/updated/removed dates, generation, source and skill
@@ -187,6 +198,8 @@ patterns locally rather than expecting them to update in place.
   20 packs are unchanged.
 
 ### Changed
+- Specs `0101` (concurrent pipeline fleet), `0102` (lineage and bitemporal provenance), and `0110` (skills export
+  and registry) approved by Joshua Lutkemuller, CFA (2026-10-10).
 - `docs/packaging.md` updated — the Python-package phase is now active (real code
   exists); `docs/adoption_guide.md` rewritten to cover both the package and the
   scaffold.
