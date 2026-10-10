@@ -2,15 +2,22 @@
 
 ## Snapshot
 
-> **Current top priority (owner, 2026-09-24): natural-language analytics —
+> **Current top priority (owner, 2026-10-10): the platform expansion roadmap —
+> specs `0102`–`0109`; provenance (`0102`) is built, evaluation (`0103`) is next.** Eight
+> agent groups across data engineering, ingestion and provenance, evaluation,
+> knowledge graphs, private markets, local LLM systems, and analyst delivery.
+> It outranks every other item, `0080` included. See item 0 of *What's Next*.
+>
+> **Previous top priority, now second (owner, 2026-09-24): natural-language analytics —
 > spec `0080`.** Ask a data question in plain language; get a governed chart,
 > a grounded interpretation, and opt-in write-back to SQLite. It reads each
 > dataset through the `0081` analytics domain packs (40 packs spanning the
-> firm). It outranks every other item on this roadmap, the credit-risk
-> direction included. See item 1 of *What's Next* and items 29–30.
+> firm). It outranks every other item on this roadmap except the expansion
+> roadmap above, the credit-risk direction included. See item 1 of *What's
+> Next* and items 29–30.
 
 The SDK has a working v1: a **spec-driven engineering framework** over the six
-software-development stages, **207 agents** in `agents/`,
+software-development stages, **211 agents** in `agents/`,
 **36 quality gates**, **39 instruction standards**, and CI that
 enforces the deterministic gates. It remains primarily a scaffold to be copied
 into quant repos, with `src/quantsmith/pipelines/`, `src/quantsmith/orchestration/`,
@@ -35,7 +42,7 @@ it via stable IDs (`REQ`/`NFR`/`AC`/`RISK`/`T`).
 - `specs/NNNN-slug/{spec,plan,tasks}.md` from `templates/spec/`; worked example at
   `specs/0001-daily-momentum-signal/`.
 
-**Agents (207, verified by the `agent-catalog` gate — treat `agents/README.md`
+**Agents (211, verified by the `agent-catalog` gate — treat `agents/README.md`
 as the live count, not the number here)** — all on the four-file contract
 (`README`/`prompt`/`instructions`/`tasks`) with a `Spec-Driven Role`:
 
@@ -110,10 +117,33 @@ advisory-by-default deployment decision. The chain builds on
 
 ## What's Next (prioritized)
 
+> ### #0 priority — Platform expansion roadmap (specs `0102`–`0109`)
+>
+> **Owner decision, 2026-10-10: this is the highest priority in the repository,
+> ahead of `0080` and everything below.** It follows `0101` (concurrent pipeline
+> fleet) and fills the agent-group gaps a catalog review found. Build in this
+> order; each spec is a stdlib runtime slice plus its agents, the `0101` pattern.
+>
+> | Order | Spec | Group | First slice | Status |
+> | --- | --- | --- | --- | --- |
+> | 1 | `0102` | **Provenance** — lineage + bitemporal | Content-hashed dataset versions, run-level and column-level lineage, upstream trace / downstream impact, OpenLineage-shaped events, and a bitemporal store (valid time × knowledge time) generalizing `0045`'s vintages; agents `provenance/lineage_capture`, `provenance/bitemporal_data` | **built (Draft, awaiting approval)** |
+> | 2 | `0103` | **Evaluation** | `evaluation/agent_eval` (score this repo's own agents against their contracts, handoffs, citations), `llm_eval_suite` (golden sets, calibrated LLM-as-judge, cross-version regression), `red_team_safety` (injection via ingested documents, exfiltration), `forecast_scoring` (proper scoring rules, calibration, Diebold-Mariano) | reserved |
+> | 3 | `0104` | **Knowledge graph engineering** | `knowledge_graph/ontology_schema`, cross-domain `entity_resolution` (generalizes the venture agent), `graph_construction` (evidence-backed, time-valid edges), `graph_query_analytics` (ownership chains, exposure paths; feeds the GNN agent), `graph_quality` | reserved |
+> | 4 | `0105` | **Private markets** | `private_markets/` buyout, private credit (reuses `0072`/`0073`), real assets, secondaries/GP stakes, LP pacing (Takahashi-Alexander; extends `0091`), fund-document extraction (capital calls, distributions, ILPA templates); domain pack `knowledge/private_markets/` | reserved |
+> | 5 | `0106` | **Local LLM systems** | `local_llm/` model selection and sizing, serving runtime (vLLM, llama.cpp, Ollama; reuses `0101` pools), LoRA/QLoRA fine-tuning, RAG pipeline (delivers the reserved `0054` server), air-gapped operations | reserved |
+> | 6 | `0107` | **Data engineering expansion** | `tooling/dbt`, `data_engineering/streaming_cdc`, `schema_evolution`, `lakehouse_table_formats` (Iceberg/Delta time travel), `backfill_reprocessing`, `data_cost_finops`, `tooling/spark`, `tooling/ray_dask`, Airflow and Prefect exporters for `0101`; domain pack: reference data (security master, corporate actions, symbology, calendars) | reserved |
+> | 7 | `0108` | **Ingestion and provenance expansion** | `provenance/vendor_licensing_entitlements`, `ingestion/document_ingestion` (spans attached), `ingestion/alt_data_onboarding` (coverage, point-in-time honesty, survivorship), `ingestion/web_collection` (terms-compliant, raw snapshots) | reserved |
+> | 8 | `0109` | **Analyst workflow and delivery** | `delivery/report_packaging` (versioned decks/PDF/Excel with as-of stamps), `delivery/stakeholder_request_intake`, `delivery/qa_signoff`, `tooling/jupyter`, `tooling/python`, `tooling/sql` | reserved |
+>
+> **Pick up here:** `0102` is built (Draft) — get it approved, then start `0103`
+> (evaluation). `0102` follow-ups are in its `tasks.md`. Each reserved row is also in *Planned specs*
+> below so the commitment stays visible until its directory exists.
+
 > ### #1 priority — Natural-language analytics (spec `0080`, Draft)
 >
-> **The owner has made this the single highest priority, ahead of everything
-> below — including the credit-risk direction and the ranked list.** If only
+> **The owner previously made this the single highest priority; on 2026-10-10
+> the expansion roadmap (#0 above) moved ahead of it. It remains ahead of
+> everything else below — including the credit-risk direction and the ranked list.** If only
 > one thing moves, it is this: build `0080` T-029 and get the spec
 > approved. T-001–T-028 are built. On 2026-10-08 and 2026-10-09:
 > - T-024 added the provider-neutral LLM backend `quantsmith.adapters.llm_runtime`;
@@ -281,6 +311,13 @@ nobody noticed.
 | `0076` | **Regulatory capital and supervisory stress testing** — IRB risk weights, scenario expansion, capital planning inputs | approved `0072` plus `0075` for the ECL inputs it shares | item 24 |
 | `0078` | **Credit data sources and ingestion contracts** — register and ingest approved public regulatory, accounting, supervisory-scenario, and macro sources with vintage and effective-time controls | `0072` source-authority and temporal contracts; may proceed in parallel with `0073`–`0077` once those stabilize | item 24 |
 | `0079` | **Credit model risk management and monitoring runtime** — SR 11-7 model lifecycle, validation evidence, challenger comparison, drift and calibration monitoring, override logging | approved `0072` REQ-015 governance predicate; open question whether it should be credit-specific or generalized across the SDK's whole model inventory | item 24 |
+| `0103` | **Evaluation agents and runtime** — agent-contract evaluation, LLM eval suite, red-team safety, forecast scoring | `0070` harness; `0102` lineage for eval-set provenance | What's Next #0 |
+| `0104` | **Knowledge graph engineering** — ontology, cross-domain entity resolution, evidence-backed time-valid edges, graph query and quality | `0053` memory graph; `0102` bitemporal validity | What's Next #0 |
+| `0105` | **Private markets** — buyout, private credit, real assets, secondaries, LP pacing, fund-document extraction; `knowledge/private_markets/` pack | `0072`/`0073`, `0091`, `0104` entity resolution | What's Next #0 |
+| `0106` | **Local LLM systems** — sizing, serving, fine-tuning, RAG (delivers `0054`), air-gapped operations | `0052`/`0054`, `0101` pools, `adapters/llm_runtime/` | What's Next #0 |
+| `0107` | **Data engineering expansion** — dbt, streaming/CDC, schema evolution, lakehouse formats, backfill/reprocessing, FinOps, Spark, Ray/Dask, Airflow/Prefect exporters; reference-data pack | `0011`, `0101`, `0102` | What's Next #0 |
+| `0108` | **Ingestion and provenance expansion** — vendor licensing/entitlements, document ingestion, alt-data onboarding, web collection | `0027`, `0039`, `0102` | What's Next #0 |
+| `0109` | **Analyst workflow and delivery** — report packaging, request intake, QA sign-off, Jupyter/Python/SQL tooling | `0014`–`0018`, `0102` citations | What's Next #0 |
 
 Specs `0063-short-term-markets-domain-foundation/`,
 `0066-securities-lending-model-correction/`,
@@ -323,7 +360,7 @@ designs**: create and
 approve one only when the foundation it consumes — `0063` or `0072` — has frozen
 that contract and the prior dependency named above is satisfied. Do not add
 agents merely to fill the map; prefer a canonical knowledge artifact or tested
-runtime that an existing agent can use. **Next unreserved spec number: `0101`** (`0083`–`0092` are the venture-intelligence foundation and its reserved children, item 32; `0093` is the visualization packs spec; `0094` is the Asian-language NLP foundation; `0095` is the venture predictive-model baselines; `0096` is request routing; `0097` is the test-engineering runtime; `0098` is the model testing helpers; `0099` is the Dataset Investigator; `0100` is the agent-skills upstream integration).
+runtime that an existing agent can use. **Next unreserved spec number: `0110`** (`0083`–`0092` are the venture-intelligence foundation and its reserved children, item 32; `0093` is the visualization packs spec; `0094` is the Asian-language NLP foundation; `0095` is the venture predictive-model baselines; `0096` is request routing; `0097` is the test-engineering runtime; `0098` is the model testing helpers; `0099` is the Dataset Investigator; `0100` is the agent-skills upstream integration; `0101` is the concurrent pipeline fleet; `0102`–`0109` are the platform expansion roadmap, What's Next #0).
 Reserving a number here does not create the directory; copy `templates/spec/`
 only when that slice becomes active.
 
@@ -746,7 +783,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
     to populate `sources/` as real sources come into use.
 
 14. **P1 Generalization & Team Onboarding — making QuantSmith self-serve across
-    domains.** QuantSmith is now a comprehensive framework (207 agents, 69 specs,
+    domains.** QuantSmith is now a comprehensive framework (211 agents, 69 specs,
     33 gates, 35 standards); the next phase is reducing discovery friction and
     enabling team-intuitive adoption without deep codebase reading.
     - **P0 Phase 1a: Role profiles** (`roles/{portfolio_manager,risk_manager,quant_researcher,data_engineer,compliance_officer}.md`):
@@ -1769,7 +1806,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
       `specs/0083-venture-intelligence-foundation/run_card.md` (see
       `docs/gate_runbook.md`); every `knowledge/venture_intelligence/` record is
       `draft` and most cite `unverified`; `agents/agent_registry.yaml` was incomplete (6 of
-      207 agents, with broken `skills_library/` paths); it is now generated from the
+      211 agents, with broken `skills_library/` paths); it is now generated from the
       agents by `scripts/build_agent_registry.py` and guarded by a test and the
       `agent-catalog` gate.
 
@@ -1785,6 +1822,28 @@ manual-task persistence question stays deferred until a real consumer needs it.
     [`0093 tasks`](../specs/0093-visualization-packs/tasks.md) for live status and
     [`integration guide`](../knowledge/visualization_packs/README.md) for usage.
     Existing domain packs remain draft; `0080` T-021/T-022 remain separate.
+34. **Concurrent pipeline fleet (spec `0101`, Draft; built).** Extends the Data
+    Engineer chain from one pipeline (`0011`) to hundreds running at once.
+    `pipeline_fleet.py` declares a global limit, slot-weighted pools, and
+    mutual-exclusion keys; admits all-or-nothing (no deadlock) with a starvation
+    guard; retries through admission; isolates failures as `upstream_failed`;
+    plans capacity deterministically and names the bottleneck; staggers schedules;
+    and renders Dagster and Mage config with every lossy mapping listed. New agents
+    `data_engineering/pipeline_concurrency` and `tooling/dag_orchestration`
+    (Dagster and Mage profiles) and `adapters/schedulers/mage.md`. Orchestrator
+    config keys follow current Dagster/Mage docs and must be verified against the
+    installed version; Airflow and Prefect exporters are follow-ups.
+
+35. **Lineage and bitemporal provenance (spec `0102`, Draft; built).** First
+    slice of the expansion roadmap (What's Next #0). `provenance.py` records
+    content-hashed immutable dataset versions, registered sources, and validated
+    transform runs (code version, params, column maps); traces upstream, lists
+    restatement impact, reports undeclared column lineage as gaps, verifies hashes,
+    emits `0025` citations and OpenLineage-shaped events. `BitemporalStore` keeps
+    facts on valid time × knowledge time, append-only with no backdating, answers
+    as-of queries, records retractions and revision trails, and flags look-ahead.
+    New `agents/provenance/` group. Follow-ups: durable backend and CLI, automatic
+    recording from the `0011`/`0101` runners, moving `0045` onto the store.
 
 ## Open Questions For The Owner
 
@@ -1801,7 +1860,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
 
 ## Risks
 
-- Breadth: 207 agents is useful only if each stays narrow and inspectable.
+- Breadth: 211 agents is useful only if each stays narrow and inspectable.
 - Heuristic gates (`leakage`, `backtest`, `secret-scan` fallback) can false-positive
   or miss; keep them advisory unless a repo's layout makes them reliable.
 - Docs can drift from the code; the `docs-link`, `agent-catalog`, and `spec-index` gates help, but

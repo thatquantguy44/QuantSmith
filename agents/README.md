@@ -75,6 +75,7 @@ role, downstream of ingestion.
 | `data_engineering/pipeline_builder/` | Compile source→transform→sink intent into a reviewable DAG with contracts, schedules, retries, tests, ownership, deployment plan | Design, Implementation |
 | `data_engineering/pipeline_deployment/` | Environment promotion, dry runs, canaries, rollback, state migration, scheduler deployment | Deployment |
 | `data_engineering/data_governance/` | Catalog, lineage, access policy, ownership, classification | Maintenance |
+| `data_engineering/pipeline_concurrency/` | Hundreds of concurrent pipelines — global/pool/key limits, all-or-nothing admission, priorities and starvation guard, bounded retries, failure isolation, schedule staggering, capacity plan (`0101`) | Design, Implementation, Deployment |
 
 Runtimes: `src/quantsmith/pipelines/data_pipeline.py` (`0011`) and
 `src/quantsmith/pipelines/pipeline_observability.py` (`0019`); specs:
@@ -94,6 +95,17 @@ constitution P9 (secrets never enter the repo).
 | `secrets_management/secret_rotation/` | Writing/updating/rotating and revoking credentials and custom keys | Deployment, Maintenance |
 | `secrets_management/secret_scanning/` | Detecting leaked secrets in code/history/logs; remediation and prevention | Implementation, Maintenance |
 
+## Provenance Agents (`provenance/`)
+
+Grouped in the `provenance/` category folder (see
+[`provenance/README.md`](provenance/README.md)); they answer *where did this come
+from?* and *what did we know, and when?* for every dataset and number (spec `0102`).
+
+| Agent | Handles | Feeds mainly |
+| --- | --- | --- |
+| `provenance/lineage_capture/` | Content-hashed immutable dataset versions, source registration, run and column lineage, trace, restatement impact, verification, citations, OpenLineage events | Implementation, Testing, Maintenance |
+| `provenance/bitemporal_data/` | Valid time × knowledge time facts: vintages, restatements, retractions, as-of queries, revision trails, backtest look-ahead detection | Implementation, Testing |
+
 ## Technology & Tooling Agents (`tooling/`)
 
 Grouped in the `tooling/` category folder; they bring the SDK's discipline to the
@@ -110,6 +122,7 @@ stores).
 | `tooling/looker/` | Looker: LookML semantic model, explores, caching; renders the shared spec (`0018`) | Implementation, Maintenance |
 | `tooling/qlik/` | Qlik: associative model, set analysis, section access; renders the shared spec (`0018`) | Implementation, Maintenance |
 | `tooling/superset/` | Apache Superset: SQL/dataset governance, Jinja safety, caching; renders the shared spec (`0018`) | Implementation, Maintenance |
+| `tooling/dag_orchestration/` | Orchestrators — Dagster and Mage profiles: run/task concurrency, pools, priority, retries, backfill throttling; renders a fleet via `to_dagster`/`to_mage` (`0101`) | Implementation, Deployment, Maintenance |
 
 The planned technology matrix is maintained in
 [`tooling/README.md`](tooling/README.md#planned-coverage). It prioritizes Python,
