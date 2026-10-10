@@ -20,6 +20,7 @@
 | T-002 | Implement the registry build: add, revise, retire, reactivate; idempotent writes. | REQ-003, REQ-004, NFR-002 | done | `implementation` | Generation 1 = 204 skills. |
 | T-003 | Implement `check`; add the `skills-export` gate, pre-commit block, CI step, tests. | REQ-005 | done | `testing_validation` | Blocking in pre-commit and CI. |
 | T-004 | Implement `pending`, `mark-published`, plugin and zip packaging; CLI `quantsmith-skills`. | REQ-006, REQ-007, NFR-003 | done | `implementation` | No network. |
+| T-006 | Add project selection: only chosen categories/agents materialize in `.claude/skills/`; all stay registered and packaged. | REQ-008, RISK-003 | done | `implementation` | 53 of 204 selected. |
 | T-005 | First Claude.ai publication: upload `--pending-for claude_ai` zips, delete stale hand-made copies, `mark-published`. | REQ-006 | todo | owner | Needs the owner's Claude.ai account. |
 
 Status values: `todo` | `in-progress` | `blocked` | `done`.
@@ -36,3 +37,4 @@ Status values: `todo` | `in-progress` | `blocked` | `done`.
 | AC-006 | `tests/test_skills_export.py::test_pending_and_publication_marks_AC_006` | done |
 | AC-007 | `tests/test_skills_export.py::test_packaging_plugin_and_zips_AC_007` | done |
 | AC-008 | `tests/test_skills_export.py::test_cli_and_gate_AC_008` | done |
+| AC-009 | `tests/test_skills_export.py::test_project_selection_AC_009` | done |

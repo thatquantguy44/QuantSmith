@@ -46,6 +46,7 @@ missing), and nothing records which copy is current. A hand-maintained root
 | REQ-005 | The system shall report, without dates or network, every stale, missing, hand-edited, or retired-but-present skill, and invalid configuration; and enforce it in a gate, pre-commit, CI, and tests. | must |
 | REQ-006 | The system shall record per-target publication generations and list the skills to upload and delete for a target since its last publication. | must |
 | REQ-007 | The system shall package the active skills as a local plugin marketplace and as one deterministic archive per skill. | must |
+| REQ-008 | The system shall let configuration select which exported skills are materialized as project skills (by category and by agent), record the selection per registry entry, keep unselected skills registered and packaged, and treat a selection change as placement, not a content revision. | must |
 
 ## Non-Functional Requirements
 
@@ -67,6 +68,7 @@ missing), and nothing records which copy is current. A hand-maintained root
 | AC-006 | Given a published target, when one skill changes and one is removed, then pending lists exactly that upload and that delete; marking is refused while stale. | REQ-006 |
 | AC-007 | Given a fresh export, when packaged, then the plugin manifest, marketplace, and skills are complete, and per-skill archives are deterministic. | REQ-007, NFR-002 |
 | AC-008 | Given the CLI and the gate, when run on stale and fresh exports, then they fail and pass respectively. | REQ-005 |
+| AC-009 | Given a project selection, when built, then only selected skills are in `.claude/skills/`, unselected ones stay active with no revision or generation change and are still packaged; a selection change without a rebuild, an unknown category or agent, or a stray unselected copy is reported. | REQ-008, REQ-005 |
 
 ## Data & Dependencies
 
@@ -82,7 +84,7 @@ missing), and nothing records which copy is current. A hand-maintained root
 | --- | --- | --- | --- |
 | RISK-001 | Hand edits to generated skills. | Drift from agents. | Hash check in gate/pre-commit/CI; rebuild repairs (AC-004). |
 | RISK-002 | A rename silently retires a published skill. | Users lose a skill name. | `name_overrides`; removal is explicit in `pending` (AC-006). |
-| RISK-003 | 204 project skills exceed Claude Code's skill-listing budget. | Some skills hidden in sessions here. | `exclude` configuration; documented in the standard. |
+| RISK-003 | 204 project skills exceed Claude Code's skill-listing budget. | Observed: in a session with all 204 loaded, only about 70 were listed with descriptions. | Project selection (REQ-008): 53 skills (about 16,500 description characters) load in this repository; all 204 remain in packages. |
 | RISK-004 | Claude.ai copies fall behind. | Users run outdated roles. | Per-target generations and `pending` (AC-006). |
 | RISK-005 | Generated files overwrite a hand-written skill. | Lost work. | Build refuses non-generated directories (AC-005). |
 | RISK-006 | Local-only (gitignored) agents are exported and pushed. | Material the owner kept out of the repository is published. | Gitignored agent folders are skipped before rendering; no tombstone is written (AC-002). |

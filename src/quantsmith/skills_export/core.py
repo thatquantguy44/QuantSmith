@@ -5,6 +5,9 @@ directory under ``agents/`` containing ``prompt.md``) into a self-contained
 ``SKILL.md`` under ``.claude/skills/<name>/`` and keeps a registry,
 ``.claude/skills/registry.json``, that records every skill's lifecycle:
 
+* ``project`` — whether the skill is materialized in ``.claude/skills/`` for this
+  repository (``config/skills_export.json`` → ``project``); every exported skill is
+  registered and packaged either way;
 * ``revision`` increments only when the rendered skill changes;
 * ``introduced`` / ``updated`` / ``removed`` dates and the ``generation`` in which
   the skill last changed;
@@ -43,16 +46,38 @@ MAX_DESCRIPTION = 1024
 RESERVED_WORDS = ("anthropic", "claude")
 AGENT_FILES = ("README.md", "prompt.md", "instructions.md", "tasks.md", "SKILL.md")
 CONFIG = Path("config/skills_export.json")
+ENTRY_FIELDS = (
+    "name", "agent", "category", "description", "status", "project", "path",
+    "revision", "introduced", "updated", "removed", "updated_generation",
+    "source_hash", "skill_hash",
+)
 
 
 def load_config(root: Path) -> Dict[str, object]:
-    """``name_overrides`` (agent path -> skill name) and ``exclude`` (agent paths)."""
+    """``name_overrides``, ``exclude`` (not exported anywhere), and ``project``.
+
+    ``project`` selects which exported skills are materialized as project skills in
+    ``.claude/skills/`` (``categories`` and/or individual ``agents``). Omitted means
+    all. Every exported skill stays in the registry and in plugin/zip packages.
+    """
     path = root / CONFIG
     cfg = json.loads(path.read_text(encoding="utf-8")) if path.is_file() else {}
+    project = cfg.get("project")
     return {
         "name_overrides": dict(cfg.get("name_overrides", {})),
         "exclude": sorted(cfg.get("exclude", [])),
+        "project": None if project is None else {
+            "categories": sorted(project.get("categories", [])),
+            "agents": sorted(project.get("agents", [])),
+        },
     }
+
+
+def in_project(cfg: Dict[str, object], doc: "SkillDoc") -> bool:
+    project = cfg["project"]
+    if project is None:
+        return True
+    return doc.category in project["categories"] or doc.agent in project["agents"]  # type: ignore[index]
 
 
 # ---------------------------------------------------------------------------
@@ -282,7 +307,7 @@ def agent_dirs(root: Path) -> List[Path]:
     dirs = sorted(p.parent for p in (root / "agents").rglob("prompt.md"))
     rels = [d.relative_to(root).as_posix() + "/" for d in dirs]
     ignored = _git_ignored(root, rels)
-    return [d for d, rel in zip(dirs, rels) if rel not in ignored]
+    return [d for d, rel in zip(dirs, rels, strict=True) if rel not in ignored]
 
 
 def validate(docs: Sequence[SkillDoc]) -> List[str]:
@@ -308,8 +333,13 @@ def render_all(root: Path) -> List[SkillDoc]:
     exclude = set(cfg["exclude"])  # type: ignore[arg-type]
     dirs = agent_dirs(root)
     known = {d.relative_to(root / "agents").as_posix() for d in dirs}
-    problems = [f"{CONFIG}: unknown agent '{a}'" for a in sorted(set(overrides) | exclude)
+    project = cfg["project"] or {"categories": [], "agents": []}
+    problems = [f"{CONFIG}: unknown agent '{a}'"
+                for a in sorted(set(overrides) | exclude | set(project["agents"]))  # type: ignore[index]
                 if a not in known]
+    categories = {a.split("/")[0] if "/" in a else "root" for a in known}
+    problems += [f"{CONFIG}: unknown project category '{c}'"
+                 for c in project["categories"] if c not in categories]  # type: ignore[index]
     docs = [
         render(root, d, overrides.get(d.relative_to(root / "agents").as_posix()))
         for d in dirs
@@ -359,6 +389,7 @@ def build(root: Path, today: Optional[str] = None) -> BuildResult:
     """Render every agent's skill, update the registry, remove retired skills."""
     today = today or _dt.date.today().isoformat()
     docs = render_all(root)
+    cfg = load_config(root)
     reg = load_registry(root)
     skills_dir = root / SKILLS_DIR
     entries: Dict[str, Dict[str, object]] = {
@@ -383,13 +414,13 @@ def build(root: Path, today: Optional[str] = None) -> BuildResult:
         path = skills_dir / d.name / "SKILL.md"
         e = entries.get(d.name)
         on_disk = _read(path)
+        project = in_project(cfg, d)
         if e is None:
             entries[d.name] = {
                 "name": d.name, "agent": d.agent, "category": d.category,
                 "description": d.description, "status": "active", "revision": 1,
                 "introduced": today, "updated": today, "removed": None,
                 "updated_generation": generation,
-                "path": (SKILLS_DIR / d.name / "SKILL.md").as_posix(),
                 "source_hash": d.source_hash, "skill_hash": d.skill_hash,
             }
             added.append(d.name)
@@ -403,18 +434,21 @@ def build(root: Path, today: Optional[str] = None) -> BuildResult:
             })
             entries[d.name] = e
             changed.append(d.name)
-        elif on_disk != d.text:
-            pass  # a hand edit or deletion of the file is repaired below, not a revision
         else:
-            unchanged += 1
-        if on_disk != d.text:
+            unchanged += 1  # hand edits and project toggles are repaired, not revisions
+        # Project selection changes where a skill is materialized, never its content.
+        entries[d.name]["project"] = project
+        entries[d.name]["path"] = (SKILLS_DIR / d.name / "SKILL.md").as_posix() if project else None
+        if project and on_disk != d.text:
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(d.text, encoding="utf-8")
+        elif not project and path.parent.exists():
+            shutil.rmtree(path.parent)
 
     for name, e in entries.items():
         if name not in current and e.get("status") == "active":
             e.update({"status": "removed", "removed": today, "updated": today,
-                      "updated_generation": generation})
+                      "updated_generation": generation, "project": False, "path": None})
             removed.append(name)
         if name not in current:
             shutil.rmtree(skills_dir / name, ignore_errors=True)
@@ -427,7 +461,9 @@ def build(root: Path, today: Optional[str] = None) -> BuildResult:
     reg["schema"] = SCHEMA
     reg["generator"] = GENERATOR
     reg.setdefault("targets", {})
-    reg["skills"] = [entries[n] for n in sorted(entries)]
+    reg["skills"] = [
+        {k: entries[n].get(k) for k in ENTRY_FIELDS} for n in sorted(entries)
+    ]
     new_text = _dump(reg)
     path = registry_path(root)
     if _read(path) != new_text:
@@ -446,6 +482,7 @@ def check(root: Path) -> List[str]:
     if not path.is_file():
         return [f"{path.relative_to(root)} missing: run quantsmith-skills build"]
     reg = load_registry(root)
+    cfg = load_config(root)
     findings: List[str] = []
     entries = {str(e["name"]): e for e in reg.get("skills", [])}  # type: ignore[union-attr]
     names = [str(e["name"]) for e in reg.get("skills", [])]  # type: ignore[union-attr]
@@ -464,8 +501,16 @@ def check(root: Path) -> List[str]:
             findings.append(f"{d.name}: agent exists but registry says {e.get('status')}")
         if e.get("skill_hash") != d.skill_hash or e.get("source_hash") != d.source_hash:
             findings.append(f"{d.name}: agents/{d.agent}/ changed since the last build (stale)")
-        if _read(root / rel) != d.text:
-            findings.append(f"{rel}: differs from the generated skill (hand edit or stale)")
+        if in_project(cfg, d):
+            if e.get("project") is not True or e.get("path") != rel:
+                findings.append(f"{d.name}: project selection changed (registry not rebuilt)")
+            if _read(root / rel) != d.text:
+                findings.append(f"{rel}: differs from the generated skill (hand edit or stale)")
+        else:
+            if e.get("project") is not False:
+                findings.append(f"{d.name}: project selection changed (registry not rebuilt)")
+            if (root / SKILLS_DIR / d.name).exists():
+                findings.append(f"{SKILLS_DIR / d.name}: not selected as a project skill but present")
         if int(e.get("updated_generation", 0)) > generation:
             findings.append(f"{d.name}: updated_generation is ahead of the registry generation")
     for name, e in entries.items():
@@ -524,12 +569,30 @@ def mark_published(root: Path, target: str, today: Optional[str] = None) -> int:
     return gen
 
 
+def _active_texts(root: Path) -> Dict[str, str]:
+    """Every active skill's SKILL.md, rendered from agents/ and matched to the registry.
+
+    Packages include all exported skills, not only the project selection, so they
+    are rendered on demand; ``check`` has already proven they match the registry.
+    """
+    reg = load_registry(root)
+    hashes = {str(e["name"]): e["skill_hash"] for e in reg["skills"]  # type: ignore[index]
+              if e["status"] == "active"}
+    texts: Dict[str, str] = {}
+    for d in render_all(root):
+        if hashes.get(d.name) != d.skill_hash:
+            raise ValueError(f"{d.name}: rendered skill does not match the registry")
+        texts[d.name] = d.text
+    return texts
+
+
 def package_plugin(root: Path, out: Path, version: str) -> Path:
     """Write a local marketplace with one plugin holding every active skill."""
     problems = check(root)
     if problems:
         raise ValueError("export is stale; build before packaging")
     reg = load_registry(root)
+    texts = _active_texts(root)
     if out.exists():
         shutil.rmtree(out)
     plugin = out / PLUGIN_NAME
@@ -537,10 +600,9 @@ def package_plugin(root: Path, out: Path, version: str) -> Path:
     (out / ".claude-plugin").mkdir(parents=True)
     active = [e for e in reg["skills"] if e["status"] == "active"]  # type: ignore[index]
     for e in active:
-        src = root / str(e["path"])
         dst = plugin / "skills" / str(e["name"]) / "SKILL.md"
         dst.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(src, dst)
+        dst.write_text(texts[str(e["name"])], encoding="utf-8")
     manifest = {
         "name": PLUGIN_NAME,
         "version": f"{version}+g{reg['generation']}",
@@ -567,8 +629,7 @@ def package_zips(root: Path, out: Path, names: Optional[Sequence[str]] = None) -
     problems = check(root)
     if problems:
         raise ValueError("export is stale; build before packaging")
-    reg = load_registry(root)
-    active = {str(e["name"]): e for e in reg["skills"] if e["status"] == "active"}  # type: ignore[index]
+    active = _active_texts(root)
     wanted = list(names) if names is not None else sorted(active)
     unknown = [n for n in wanted if n not in active]
     if unknown:
@@ -580,6 +641,6 @@ def package_zips(root: Path, out: Path, names: Optional[Sequence[str]] = None) -
         info = zipfile.ZipInfo(f"{name}/SKILL.md", date_time=(1980, 1, 1, 0, 0, 0))
         info.compress_type = zipfile.ZIP_DEFLATED
         with zipfile.ZipFile(target, "w") as zf:
-            zf.writestr(info, (root / str(active[name]["path"])).read_text(encoding="utf-8"))
+            zf.writestr(info, active[name])
         written.append(target)
     return written

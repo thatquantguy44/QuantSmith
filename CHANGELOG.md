@@ -25,7 +25,9 @@ patterns locally rather than expecting them to update in place.
   a self-contained Claude skill for every agent under `.claude/skills/` (204 at generation 1) and keep a lifecycle
   registry (`.claude/skills/registry.json`: revision, introduced/updated/removed dates, generation, source and skill
   hashes, tombstones, per-target publication marks). `pending`/`mark-published` track what each target (e.g. Claude.ai)
-  needs; `package` builds a plugin marketplace or per-skill zips. New `skills-export` gate, blocking in pre-commit and
+  needs; `package` builds a plugin marketplace or per-skill zips. A `project` selection in
+  `config/skills_export.json` keeps the in-repo project skills (53) within Claude Code's listing budget; all 204 stay
+  registered and packaged. New `skills-export` gate, blocking in pre-commit and
   CI; `config/skills_export.json` for name overrides and exclusions; `instructions/skills_export.md`.
 - Lineage and bitemporal provenance (spec `0102`): `src/quantsmith/pipelines/provenance.py` adds `LineageGraph`
   (content-hashed immutable dataset versions, source registration, validated transform runs with code version and

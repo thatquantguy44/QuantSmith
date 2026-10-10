@@ -14,7 +14,7 @@ date. Spec: `specs/0110-skills-export-registry/`.
 | Path | What | Edited by |
 | --- | --- | --- |
 | `agents/<path>/` | The agent (README, prompt, instructions, tasks, optional SKILL.md). | People |
-| `config/skills_export.json` | `name_overrides` (agent path → skill name) and `exclude`. Gitignored (local-only) agent folders are never exported. | People |
+| `config/skills_export.json` | `name_overrides` (agent path → skill name), `exclude` (not exported anywhere), and `project` (which skills load as project skills here). Gitignored (local-only) agent folders are never exported. | People |
 | `.claude/skills/<name>/SKILL.md` | The generated skill. Claude Code loads it for anyone who clones the repo. | `quantsmith-skills build` only |
 | `.claude/skills/registry.json` | The lifecycle registry. | `build` and `mark-published` only |
 
@@ -22,7 +22,7 @@ date. Spec: `specs/0110-skills-export-registry/`.
 
 | Audience | How |
 | --- | --- |
-| Anyone running Claude Code in a clone of QuantSmith | Automatic: committed project skills in `.claude/skills/`. |
+| Anyone running Claude Code in a clone of QuantSmith | Automatic: the project selection (53 core skills) committed in `.claude/skills/`. Install the plugin for the rest. |
 | Claude Code in another repository, or user-wide | `quantsmith-skills package --format plugin --out DIR`, then `claude plugin marketplace add DIR` and `claude plugin install quantsmith-skills@quantsmith-skills-local`. |
 | Claude.ai (personal or organization skills) | `quantsmith-skills package --format zip --out DIR --pending-for claude_ai`, upload the zips, delete the listed removed skills, then `quantsmith-skills mark-published --target claude_ai`. |
 
@@ -31,6 +31,8 @@ date. Spec: `specs/0110-skills-export-registry/`.
 One entry per skill ever exported, sorted by name:
 
 - `name`, `agent`, `category`, `description`, `path`.
+- `project` / `path` — whether the skill is materialized in `.claude/skills/` for this
+  repository, and where (`path` is null otherwise). Every active skill is packaged.
 - `status` — `active` or `removed` (removed entries are kept as tombstones so
   targets know what to delete).
 - `revision` — starts at 1 and increments only when the rendered skill changes.
@@ -59,13 +61,24 @@ records, per distribution target, the generation it was last published at.
 - Hand-written project skills may live in `.claude/skills/` under names the
   export does not use; the build leaves them alone and refuses to overwrite them.
 
-## Context Budget
+## Context Budget And Project Selection
 
-Claude Code lists every project skill's description at session start. With the
-whole catalog exported that listing is large; if sessions in this repository show
-skills being dropped from the listing, add rarely used agents to `exclude` (an
-excluded agent is not exported to any target) or keep the first sentence of each
-agent README's Purpose short, since it leads the description.
+Claude Code lists every project skill's description at session start, within a
+fixed budget. With all 204 skills loaded only about 70 were listed with
+descriptions; the rest were bare names that Claude rarely picks. So only a
+selection is materialized here, set in `config/skills_export.json` → `project`:
+
+- `categories` — top-level `agents/` folders (`root` for agents directly under it);
+- `agents` — individual agent paths added on top.
+
+The default keeps about 53 skills (about 16,500 description characters): the lifecycle
+roles, data engineering, ingestion, provenance, test engineering, monitoring,
+alerts, secrets management, and `tooling/dag_orchestration`. Every other skill is
+still registered, versioned, and included in the plugin and Claude.ai packages —
+install the plugin to use them in this repository too. Changing the selection is
+placement, not content: it never bumps a revision or the generation. Keep the
+selection's description total well under the budget, since account-level and
+plugin skills share it.
 
 ## Checks
 

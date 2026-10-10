@@ -63,7 +63,11 @@ def test_repository_export_is_fresh_AC_001():
     excluded = set(json.loads((ROOT / "config/skills_export.json").read_text())["exclude"])
     active = sorted(e["agent"] for e in reg["skills"] if e["status"] == "active")
     assert active == sorted(a for a in agents if a not in excluded)
-    assert all((ROOT / e["path"]).is_file() for e in reg["skills"] if e["status"] == "active")
+    for e in reg["skills"]:
+        if e["project"]:
+            assert (ROOT / e["path"]).is_file()
+        else:
+            assert e["path"] is None and not (ROOT / ".claude/skills" / e["name"]).exists()
 
 
 # AC-002 ---------------------------------------------------------------------
@@ -235,6 +239,46 @@ def test_packaging_plugin_and_zips_AC_007(repo: Path, tmp_path: Path):
         package_zips(repo, tmp_path / "zips", ["ghost"])
 
 
+# AC-009 ---------------------------------------------------------------------
+
+
+def test_project_selection_AC_009(repo: Path, tmp_path: Path):
+    build(repo, "2026-01-01")
+    cfg = repo / "config/skills_export.json"
+    cfg.parent.mkdir()
+    cfg.write_text(json.dumps({"project": {"categories": ["group"]}}), encoding="utf-8")
+    assert any("project selection changed" in f for f in check(repo))
+    r = build(repo, "2026-02-01")
+    assert not r.changed_anything and r.generation == 1  # placement is not content
+    e = {x["name"]: x for x in load_registry(repo)["skills"]}
+    assert e["solo"]["project"] is False and e["solo"]["path"] is None
+    assert e["solo"]["revision"] == 1 and e["solo"]["status"] == "active"
+    assert not (repo / ".claude/skills/solo").exists()
+    assert (repo / ".claude/skills/group-beta/SKILL.md").is_file()
+    assert check(repo) == []
+
+    # Packages still carry every exported skill, rendered from agents/.
+    out = package_plugin(repo, tmp_path / "plugin", "1.0.0")
+    assert (out / "quantsmith-skills/skills/solo/SKILL.md").is_file()
+    assert len(package_zips(repo, tmp_path / "zips")) == 3
+
+    # Individual agents can be added; unknown names are reported.
+    cfg.write_text(json.dumps({"project": {"categories": ["group"], "agents": ["solo"]}}),
+                   encoding="utf-8")
+    build(repo, "2026-03-01")
+    assert (repo / ".claude/skills/solo/SKILL.md").is_file()
+    cfg.write_text(json.dumps({"project": {"categories": ["nope"], "agents": ["ghost"]}}),
+                   encoding="utf-8")
+    joined = " ".join(check(repo))
+    assert "unknown project category 'nope'" in joined and "unknown agent 'ghost'" in joined
+
+    # A stray copy of an unselected skill is flagged.
+    cfg.write_text(json.dumps({"project": {"categories": ["group"]}}), encoding="utf-8")
+    build(repo, "2026-04-01")
+    (repo / ".claude/skills/solo").mkdir()
+    assert any("not selected as a project skill but present" in f for f in check(repo))
+
+
 # AC-008 ---------------------------------------------------------------------
 
 
@@ -242,7 +286,7 @@ def test_cli_and_gate_AC_008(repo: Path, capsys):
     assert cli_main(["--root", str(repo), "check"]) == 1
     assert cli_main(["--root", str(repo), "build", "--date", "2026-01-01"]) == 0
     assert cli_main(["--root", str(repo), "check"]) == 0
-    assert "fresh: 3 active skills" in capsys.readouterr().out
+    assert "fresh: 3 active skills (3 project)" in capsys.readouterr().out
     gate = subprocess.run(
         ["sh", "hooks/stages/skills-export-check.sh"], cwd=ROOT, capture_output=True, text=True,
         env={"QF_STAGE_ENFORCE": "1", "PATH": "/usr/bin:/bin"}, check=False,

@@ -77,7 +77,9 @@ def main(argv: Optional[List[str]] = None) -> int:
             if not findings:
                 reg = core.load_registry(root)
                 active = sum(1 for e in reg["skills"] if e["status"] == "active")
-                print(f"skills export fresh: {active} active skills, generation {reg['generation']}")
+                project = sum(1 for e in reg["skills"] if e.get("project"))
+                print(f"skills export fresh: {active} active skills ({project} project), "
+                      f"generation {reg['generation']}")
             return 1 if findings else 0
         if args.cmd == "list":
             reg = core.load_registry(root)
@@ -86,7 +88,8 @@ def main(argv: Optional[List[str]] = None) -> int:
                 print(json.dumps(rows, indent=2))
             else:
                 for e in rows:
-                    print(f"{e['name']:<60} r{e['revision']:<3} {e['status']:<8} "
+                    where = "project" if e.get("project") else "package"
+                    print(f"{e['name']:<60} r{e['revision']:<3} {e['status']:<8} {where:<8} "
                           f"{e['updated']}  agents/{e['agent']}/")
             return 0
         if args.cmd == "pending":

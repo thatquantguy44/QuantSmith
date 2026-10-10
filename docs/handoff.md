@@ -1858,6 +1858,9 @@ manual-task persistence question stays deferred until a real consumer needs it.
     first Claude.ai upload from the zips, retire the hand-exported copies there,
     then `mark-published --target claude_ai`. Rule: after any agent change, run
     `PYTHONPATH=src python3 -m quantsmith.skills_export build` and commit the result.
+    Only a project selection (`config/skills_export.json` → `project`, 53 skills) is
+    materialized in `.claude/skills/`: with all 204 loaded, Claude Code listed only
+    about 70 with descriptions. All 204 stay registered and in the plugin/zip packages.
 
 ## Open Questions For The Owner
 

@@ -32,6 +32,9 @@ gate that runs every day.
   retire entries → write changed files only → bump `generation` only on change.
 - `check(root)`: findings for missing registry, missing/stale/hand-edited skills,
   retired-but-active or retired-but-present, sort order, invalid config.
+- Project selection: `config/skills_export.json` → `project.categories` / `project.agents`
+  decide which skills are written to `.claude/skills/`; each entry records `project`
+  and `path` (null when not materialized). Toggling never bumps revision or generation.
 - `pending(root, target)`, `mark_published(root, target)`.
 - `package_plugin(root, out, version)`: `out/.claude-plugin/marketplace.json` +
   `out/quantsmith-skills/{.claude-plugin/plugin.json, skills/, registry.json}`.
@@ -60,7 +63,8 @@ gate that runs every day.
 | REQ-004 | `build` retire / reactivate | T-002 |
 | REQ-005 | `check`, gate, pre-commit, CI, test | T-003 |
 | REQ-006 | `pending`, `mark_published` | T-004 |
-| REQ-007 | `package_plugin`, `package_zips` | T-004 |
+| REQ-007 | `package_plugin`, `package_zips` (render from agents, verified against registry hashes) | T-004 |
+| REQ-008 | `load_config` `project`, `in_project`, build/check placement | T-006 |
 | NFR-001..003 | generation-only writes, deterministic output, clash refusal | T-001..T-004 |
 
 ## Trade-offs & Alternatives
