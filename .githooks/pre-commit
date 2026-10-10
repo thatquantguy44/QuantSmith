@@ -63,4 +63,18 @@ if [ -x hooks/stages/handoff-sync-check.sh ]; then
   }
 fi
 
+# Skills export: every agent ships as a generated Claude skill (spec 0110). A
+# commit that changes an agent without rebuilding would publish a stale skill,
+# so this blocks when agents/, the export, or its config are staged.
+if git diff --cached --name-only | grep -Eq '^(agents/|\.claude/skills/|config/skills_export\.json)' \
+   && [ -f hooks/stages/skills-export-check.sh ]; then
+  QF_STAGE_ENFORCE=1 sh hooks/stages/skills-export-check.sh || {
+    echo
+    echo "Commit blocked: the skills export is stale. Rebuild it with:"
+    echo "  PYTHONPATH=src python3 -m quantsmith.skills_export build"
+    echo "then stage .claude/skills/."
+    exit 1
+  }
+fi
+
 echo "QuantSmith pre-commit checks passed."

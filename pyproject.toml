@@ -50,6 +50,7 @@ quantsmith-nl-analytics = "quantsmith.nl_analytics.cli:main"
 quantsmith-dataset-investigator = "quantsmith.dataset_investigator.cli:main"
 quantsmith-test-engineering = "quantsmith.test_engineering.cli:main"
 quantsmith-agent-skills = "quantsmith.agent_skills.cli:main"
+quantsmith-skills = "quantsmith.skills_export.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

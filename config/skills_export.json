@@ -1,0 +1,6 @@
+{
+  "schema": 1,
+  "_doc": "Skills export settings (spec 0110). name_overrides: agent path -> skill name, for names over 64 characters or renames that must keep a published name. exclude: agent paths not exported as skills. Gitignored (local-only) agent folders are never exported. Rebuild with `quantsmith-skills build` after editing. See instructions/skills_export.md.",
+  "name_overrides": {},
+  "exclude": []
+}

@@ -505,8 +505,10 @@ def _dep_warning(fleet: Fleet, target: str, how: str) -> List[str]:
     if not n:
         return []
     return [
-        f"{n} cross-pipeline dependency edge(s) are not expressed by {target} "
-        f"concurrency config; express them as {how}."
+        (
+            f"{n} cross-pipeline dependency edge(s) are not expressed by {target} "
+            f"concurrency config; express them as {how}."
+        )
     ]
 
 

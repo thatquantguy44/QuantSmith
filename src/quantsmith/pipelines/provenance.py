@@ -442,9 +442,12 @@ class BitemporalStore:
         """The fact for ``valid_at`` as known at ``known_at`` (latest knowledge wins)."""
         best: Optional[Fact] = None
         for f in self._by_key.get(key, []):
-            if f.recorded_at <= known_at and f.covers(valid_at):
-                if best is None or (f.recorded_at, f.seq) > (best.recorded_at, best.seq):
-                    best = f
+            if (
+                f.recorded_at <= known_at
+                and f.covers(valid_at)
+                and (best is None or (f.recorded_at, f.seq) > (best.recorded_at, best.seq))
+            ):
+                best = f
         if best is None or best.retracted:
             return None
         return best
