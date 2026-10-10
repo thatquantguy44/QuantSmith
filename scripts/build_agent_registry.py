@@ -51,8 +51,19 @@ LEGACY_INTERFACE: Dict[str, Dict[str, List[str]]] = {
 }
 
 
+# Gitignored, local-only regional agent folders (see .gitignore). Excluded so the
+# generated registry is identical whether or not they exist on this machine.
+LOCAL_ONLY = (
+    "venture_intelligence/central_asia/",
+    "venture_intelligence/greater_china_east_asia/",
+    "venture_intelligence/south_asia/",
+    "venture_intelligence/southeast_asia/",
+)
+
+
 def agent_dirs() -> List[Path]:
-    return sorted(p.parent for p in AGENTS.rglob("prompt.md"))
+    return sorted(p.parent for p in AGENTS.rglob("prompt.md")
+                  if not (p.parent.relative_to(AGENTS).as_posix() + "/").startswith(LOCAL_ONLY))
 
 
 def _section(text: str, heading: str) -> List[str]:
