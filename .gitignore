@@ -108,3 +108,16 @@ src/quantsmith/_bundled/
 
 # Per-machine Claude Code settings (agent-skills opt-in writes an absolute path here; spec 0100)
 .claude/settings.local.json
+
+# Local-only regional (Asia / Greater China) material -- kept on disk, never
+# committed or pushed. Anchored paths so shared agents, specs, and tests are
+# unaffected.
+/agents/venture_intelligence/central_asia/
+/agents/venture_intelligence/greater_china_east_asia/
+/agents/venture_intelligence/south_asia/
+/agents/venture_intelligence/southeast_asia/
+/specs/0084-venture-regional-agents-southeast-asia/
+/specs/0085-venture-regional-agents-east-and-south-asia/
+/specs/0086-venture-regional-agents-central-asia/
+/tests/test_venture_central_asia.py
+/tests/test_venture_regions.py

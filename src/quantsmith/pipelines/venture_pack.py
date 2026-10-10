@@ -306,6 +306,20 @@ def _filled(value: Any) -> bool:
     return isinstance(value, str) and bool(value.strip())
 
 
+# Regional agent folders that are gitignored (kept local, never committed); a
+# checkout without them must still validate, so their absence is not an error.
+LOCAL_ONLY_PREFIXES = (
+    "agents/venture_intelligence/central_asia/",
+    "agents/venture_intelligence/greater_china_east_asia/",
+    "agents/venture_intelligence/south_asia/",
+    "agents/venture_intelligence/southeast_asia/",
+)
+
+
+def _is_local_only(path: str) -> bool:
+    return (path.rstrip("/") + "/").startswith(LOCAL_ONLY_PREFIXES)
+
+
 def _dupes(ids: Sequence[str]) -> List[str]:
     seen, dup = set(), []
     for i in ids:
@@ -389,7 +403,8 @@ def validate_pack(pack: Mapping[str, Any], root: Path = Path(".")) -> List[str]:
             errors.append(f"coverage: {a['id']} lacks a never-boundary")
         if a["creating_spec"] not in spec_ids:
             errors.append(f"coverage: {a['id']} creating_spec {a['creating_spec']} not in roadmap")
-        if a["status"] == "built" and not (root / a.get("path", "") / "prompt.md").is_file():
+        if (a["status"] == "built" and not _is_local_only(a.get("path", ""))
+                and not (root / a.get("path", "") / "prompt.md").is_file()):
             errors.append(f"coverage: built agent {a['id']} has no prompt.md at {a.get('path')}")
     agent_ids = {a["id"] for a in agents}
     closed: List[str] = []
@@ -417,7 +432,8 @@ def validate_pack(pack: Mapping[str, Any], root: Path = Path(".")) -> List[str]:
         for ag in w["agents"]:
             if "(planned)" in ag:
                 continue
-            if not (root / "agents/venture_intelligence" / ag / "prompt.md").is_file():
+            if (not _is_local_only(f"agents/venture_intelligence/{ag}")
+                    and not (root / "agents/venture_intelligence" / ag / "prompt.md").is_file()):
                 errors.append(f"workflows: {w['id']} names agent {ag} that does not exist")
 
     # workflow class must cover the strictest class among its agents

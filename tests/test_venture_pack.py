@@ -211,10 +211,16 @@ def test_ac020_normalization_rules_and_cases(pack):
     assert {"有限公司", "Pte. Ltd.", "Sdn. Bhd.", "PT", "บริษัท จำกัด"} <= suffixes
 
 
+def agent_path(a):
+    return a.get("path", "")
+
+
 def test_ac021_regions_leads_and_contract_files(pack):
     base = ROOT / "agents/venture_intelligence"
     assert (base / "README.md").is_file()
-    for agent in [a for a in pack["coverage"]["agents"] if a["status"] == "built"]:
+    from quantsmith.pipelines.venture_pack import _is_local_only
+    for agent in [a for a in pack["coverage"]["agents"]
+                  if a["status"] == "built" and not _is_local_only(agent_path(a))]:
         for f in ("README.md", "instructions.md", "tasks.md", "prompt.md"):
             assert (ROOT / agent["path"] / f).is_file()
     regional = {a["id"] for a in pack["coverage"]["agents"] if a["group"] == "regional"}

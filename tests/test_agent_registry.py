@@ -37,7 +37,9 @@ def test_registry_is_current():
 
 
 def test_every_public_agent_is_listed_exactly_once():
-    on_disk = sorted(p.parent.relative_to(ROOT / "agents").as_posix() for p in (ROOT / "agents").rglob("prompt.md"))
+    LOCAL_ONLY = _builder().LOCAL_ONLY
+    on_disk = sorted(p.parent.relative_to(ROOT / "agents").as_posix() for p in (ROOT / "agents").rglob("prompt.md")
+                     if not (p.parent.relative_to(ROOT / "agents").as_posix() + "/").startswith(LOCAL_ONLY))
     listed = re.findall(r'^  - name: (".*")$', REGISTRY.read_text(encoding="utf-8"), re.M)
     names = [json.loads(n) for n in listed]
     assert names == on_disk
@@ -75,7 +77,9 @@ def test_legacy_entries_keep_their_machine_interface():
 
 def test_venture_agents_carry_their_decision_path_class():
     cov = json.loads((ROOT / "knowledge/venture_intelligence/coverage.json").read_text(encoding="utf-8"))
-    expected = {a["path"].replace("agents/", "", 1): a["decision_path_class"] for a in cov["agents"] if a.get("path")}
+    from quantsmith.pipelines.venture_pack import _is_local_only   # gitignored regional agents may be absent
+    expected = {a["path"].replace("agents/", "", 1): a["decision_path_class"] for a in cov["agents"]
+                if a.get("path") and not _is_local_only(a["path"])}
     by = {e["name"]: e for e in _entries()}
     assert expected, "no built venture agents found"
     for name, cls in expected.items():

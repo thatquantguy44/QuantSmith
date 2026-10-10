@@ -250,8 +250,9 @@ def test_ac007_plans_are_deterministic_and_do_not_mutate_inputs():
     p = plan(text)
     assert set(p) >= {"status", "task_kind", "steps", "decision_path_class", "required_clearance", "human_review",
                       "decision_owner", "refusals", "notes", "limits", "request"}
+    from quantsmith.pipelines.venture_pack import _is_local_only   # gitignored regional agents may be absent
     for s in p["steps"]:
-        assert (ROOT / s["path"] / "prompt.md").is_file()
+        assert _is_local_only(s["path"]) or (ROOT / s["path"] / "prompt.md").is_file()
 
 
 # ---------------------------------------------------------------- AC-008 the agent
