@@ -432,7 +432,8 @@ def validate_pack(pack: Mapping[str, Any], root: Path = Path(".")) -> List[str]:
         for ag in w["agents"]:
             if "(planned)" in ag:
                 continue
-            if not (root / "agents/venture_intelligence" / ag / "prompt.md").is_file():
+            if (not _is_local_only(f"agents/venture_intelligence/{ag}")
+                    and not (root / "agents/venture_intelligence" / ag / "prompt.md").is_file()):
                 errors.append(f"workflows: {w['id']} names agent {ag} that does not exist")
 
     # workflow class must cover the strictest class among its agents
