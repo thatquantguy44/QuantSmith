@@ -17,7 +17,10 @@ used without version control, tests, or point-in-time rigor.
 | `superset/` | Apache Superset: SQL/dataset governance, Jinja safety, caching. Renders the shared spec via `render_superset` (spec `0018`). |
 | `power_bi/` | Power BI datasets and reports: data model (star schema), DAX, refresh/lineage, row-level security, performance. Renders the tool-agnostic dashboard spec via `render_powerbi` (spec `0015`, `src/quantsmith/pipelines/powerbi_profile.py`). |
 | `tableau/` | Tableau workbooks and data sources: extracts vs live, LOD/table calcs, honest visualization, publishing/permissions. |
-| `dag_orchestration/` | Pipeline orchestrators — `profiles/dagster.md` and `profiles/mage.md`: run- and task-level concurrency, pools, priority, retries, backfill throttling, schedule staggering. Renders a fleet declaration via `to_dagster`/`to_mage` (spec `0101`, `src/quantsmith/pipelines/pipeline_fleet.py`). |
+| `dag_orchestration/` | Pipeline orchestrators — `profiles/dagster.md`, `mage.md`, `airflow.md`, `prefect.md`: run- and task-level concurrency, pools, priority, retries, backfill throttling, schedule staggering. Renders a fleet declaration via `to_dagster`/`to_mage` (spec `0101`) and `to_airflow`/`to_prefect` (spec `0112`), `src/quantsmith/pipelines/pipeline_fleet.py`. |
+| `dbt/` | dbt projects reviewed from `manifest.json`: ownership, primary-key tests, enforced contracts, backfill-safe incremental models, no wall-clock reads, source freshness, snapshots (`review_manifest`, spec `0112`). |
+| `spark/` | Spark: partition sizing, skew and salting for hot keys, determinism lint for reproducible jobs (`src/quantsmith/pipelines/distributed_compute.py`, spec `0112`). |
+| `ray_dask/` | Ray and Dask: memory-safe partitions/blocks, hot-key salting, cluster-size-independent seeding, determinism lint (spec `0112`). |
 
 ## Shared Principles
 
@@ -60,8 +63,8 @@ instead of creating a directory for every package.
 | Time-series / data stores | `kdb_q/`, `columnar_data/`, `warehouse_lakehouse/` | Temporal joins, tick data, partitioning, query plans, point-in-time semantics, Parquet/Arrow, Snowflake/Databricks/BigQuery/Redshift profiles. |
 | Notebooks / research IDEs | `jupyter/`, `research_ide/` | Execution order, hidden state, environment capture, notebook-to-package graduation; VS Code, RStudio, MATLAB, and similar profiles. |
 | BI / semantic analytics | `excel/`, `power_bi/`, `tableau/`, `react/`, `streamlit_dash/`, `looker/`, `qlik/`, `superset/` (all built) | Semantic models, calculations, refresh, permissions, performance, reconciliation, honest presentation. |
-| Data transformation / orchestration | `dbt/`, `dag_orchestration/` (built: Dagster and Mage profiles) | Model contracts, DAGs, scheduling, retries, backfills, idempotency, lineage, fleet concurrency; Airflow, Prefect, and cloud-orchestrator profiles still planned. |
-| Distributed compute | `spark/`, `ray_dask/` | Partitioning, shuffles, skew, determinism, serialization, memory, cluster cost. |
+| Data transformation / orchestration | `dbt/`, `dag_orchestration/` (both built: dbt review; Dagster, Mage, Airflow, Prefect profiles) | Model contracts, DAGs, scheduling, retries, backfills, idempotency, lineage, fleet concurrency; cloud-orchestrator profiles still planned. |
+| Distributed compute | `spark/`, `ray_dask/` (both built) | Partitioning, shuffles, skew, determinism, serialization, memory, cluster cost. |
 | Dev / production | `git_ci/`, `containers/`, `cloud_quant_platform/` | Reproducible builds, CI/CD, Docker/Kubernetes, secrets, observability, and AWS/Azure/GCP deployment profiles. |
 | Optimization / accelerated compute | `optimization_solvers/`, `gpu_compute/` | Solver formulation, tolerances, infeasibility diagnostics, duals; CUDA and accelerator reproducibility/performance. |
 | Market connectivity | `market_data_execution/` | FIX/vendor feeds, symbology, calendars, timestamps, throttling, replay, order safety, and audit trails. |

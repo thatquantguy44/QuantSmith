@@ -21,6 +21,11 @@ patterns locally rather than expecting them to update in place.
 ## [Unreleased]
 
 ### Added
+- Data-engineering tooling (spec `0112`, slice B of `0107`): `pipeline_fleet.to_airflow` / `to_prefect` exporters
+  for `0101` fleets with warnings for every non-native limit; `dbt_review.review_manifest` for dbt `manifest.json`
+  (owners, primary-key tests, contracts, incremental safety, wall-clock reads, freshness, snapshots);
+  `distributed_compute` (partition sizing, skew report, salting plan, determinism lint). New agents `tooling/dbt`,
+  `tooling/spark`, `tooling/ray_dask`; Airflow and Prefect profiles for `tooling/dag_orchestration`.
 - Change-safe data engineering (spec `0111`, slice A of `0107`): `streaming_cdc.py` (idempotent, order-safe CDC by
   per-key sequence; watermarked event-time windows with late data as side output or bitemporal restatement),
   `schema_evolution.py` (backward/forward change classification, mode enforcement, safe backward reads, drift detection

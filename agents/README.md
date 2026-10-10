@@ -133,7 +133,10 @@ stores).
 | `tooling/looker/` | Looker: LookML semantic model, explores, caching; renders the shared spec (`0018`) | Implementation, Maintenance |
 | `tooling/qlik/` | Qlik: associative model, set analysis, section access; renders the shared spec (`0018`) | Implementation, Maintenance |
 | `tooling/superset/` | Apache Superset: SQL/dataset governance, Jinja safety, caching; renders the shared spec (`0018`) | Implementation, Maintenance |
-| `tooling/dag_orchestration/` | Orchestrators — Dagster and Mage profiles: run/task concurrency, pools, priority, retries, backfill throttling; renders a fleet via `to_dagster`/`to_mage` (`0101`) | Implementation, Deployment, Maintenance |
+| `tooling/dag_orchestration/` | Orchestrators — Dagster, Mage, Airflow, Prefect profiles: run/task concurrency, pools, priority, retries, backfill throttling; renders a fleet via `to_dagster`/`to_mage` (`0101`) and `to_airflow`/`to_prefect` (`0112`) | Implementation, Deployment, Maintenance |
+| `tooling/dbt/` | dbt from `manifest.json`: owners, primary-key tests, enforced contracts, backfill-safe incrementals, no wall-clock reads, freshness, snapshots (`0112`) | Design, Testing |
+| `tooling/spark/` | Spark partition sizing, skew and salting, determinism lint (`0112`) | Implementation, Testing |
+| `tooling/ray_dask/` | Ray/Dask partitions and blocks, hot keys, reproducible parallel seeding, determinism lint (`0112`) | Implementation, Testing |
 
 The planned technology matrix is maintained in
 [`tooling/README.md`](tooling/README.md#planned-coverage). It prioritizes Python,
