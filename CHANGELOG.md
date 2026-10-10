@@ -21,6 +21,13 @@ patterns locally rather than expecting them to update in place.
 ## [Unreleased]
 
 ### Added
+- Concurrent pipeline fleet (spec `0101`): `src/quantsmith/pipelines/pipeline_fleet.py` runs hundreds of pipelines
+  under a global limit, slot-weighted pools, and mutual-exclusion keys with all-or-nothing admission, a starvation
+  guard, bounded retries through admission, and `upstream_failed` isolation; `simulate` gives a deterministic capacity
+  plan naming the bottleneck; `stagger_offsets` spreads schedules; `to_dagster`/`to_mage` render the limits as
+  orchestrator config and list every lossy mapping. New agents `data_engineering/pipeline_concurrency` and
+  `tooling/dag_orchestration` (Dagster and Mage profiles), the `adapters/schedulers/mage.md` adapter, and a
+  *Concurrency At Fleet Scale* section in `instructions/pipeline_engineering.md`.
 - Read-only natural-language analytics in the Knowledge Console (spec `0080` T-026): `POST /api/analytics/ask`
   answers a data question under the console viewer's clearance and returns headline, insights, `vega_lite`,
   `markdown_table`, plan echo, caveats, citations, and narrative. It never writes back, emits an envelope, or builds a

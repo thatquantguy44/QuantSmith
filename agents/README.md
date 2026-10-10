@@ -75,6 +75,7 @@ role, downstream of ingestion.
 | `data_engineering/pipeline_builder/` | Compile source→transform→sink intent into a reviewable DAG with contracts, schedules, retries, tests, ownership, deployment plan | Design, Implementation |
 | `data_engineering/pipeline_deployment/` | Environment promotion, dry runs, canaries, rollback, state migration, scheduler deployment | Deployment |
 | `data_engineering/data_governance/` | Catalog, lineage, access policy, ownership, classification | Maintenance |
+| `data_engineering/pipeline_concurrency/` | Hundreds of concurrent pipelines — global/pool/key limits, all-or-nothing admission, priorities and starvation guard, bounded retries, failure isolation, schedule staggering, capacity plan (`0101`) | Design, Implementation, Deployment |
 
 Runtimes: `src/quantsmith/pipelines/data_pipeline.py` (`0011`) and
 `src/quantsmith/pipelines/pipeline_observability.py` (`0019`); specs:
@@ -110,6 +111,7 @@ stores).
 | `tooling/looker/` | Looker: LookML semantic model, explores, caching; renders the shared spec (`0018`) | Implementation, Maintenance |
 | `tooling/qlik/` | Qlik: associative model, set analysis, section access; renders the shared spec (`0018`) | Implementation, Maintenance |
 | `tooling/superset/` | Apache Superset: SQL/dataset governance, Jinja safety, caching; renders the shared spec (`0018`) | Implementation, Maintenance |
+| `tooling/dag_orchestration/` | Orchestrators — Dagster and Mage profiles: run/task concurrency, pools, priority, retries, backfill throttling; renders a fleet via `to_dagster`/`to_mage` (`0101`) | Implementation, Deployment, Maintenance |
 
 The planned technology matrix is maintained in
 [`tooling/README.md`](tooling/README.md#planned-coverage). It prioritizes Python,

@@ -20,3 +20,14 @@
 - Teams may mix orchestration semantics with modeling logic.
 - Asset partitions and backfills can be misunderstood without clear as-of rules.
 - Provider-specific deployment metadata should stay in adapter configuration.
+
+## Concurrency At Fleet Scale
+
+- Render run-queue limits from the fleet declaration with
+  `pipeline_fleet.to_dagster` (spec `0101`) instead of hand-typing them; resolve
+  every warning. See `agents/tooling/dag_orchestration/profiles/dagster.md`.
+- Bound both deployment runs (`max_concurrent_runs`, tag limits) and in-run fan-out
+  (executor `max_concurrent`, op/asset pools).
+- Throttle backfills with a `dagster/backfill` tag limit or a backfill policy.
+- Prefect equivalents (work-pool concurrency, global concurrency limits) are a
+  planned exporter.

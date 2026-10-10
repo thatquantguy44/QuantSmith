@@ -13,10 +13,12 @@ provider-specific timing, retries, permissions, and run metadata.
 | `github_actions.md` | Repository-native scheduled and manually dispatched workflows. |
 | `airflow.md` | Airflow DAG deployment and operational metadata. |
 | `dagster_prefect.md` | Dagster and Prefect asset/flow orchestration profiles. |
+| `mage.md` | Mage pipelines, triggers, and per-pipeline concurrency (spec `0101`). |
 
 ## Use Cases
 
 - Daily intelligence reports.
 - Data ingestion backfills.
 - Pipeline and model monitoring checks.
+- Fleets of hundreds of concurrent pipelines (spec `0101`, `pipeline_fleet.py`).
 - Scheduled artifact generation.

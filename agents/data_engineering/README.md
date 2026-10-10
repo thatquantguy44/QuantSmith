@@ -12,6 +12,7 @@ These agents sit downstream of ingestion in the Data Engineer chain (see
 ```text
 data_ingestion/* (or sql-integration-agent) -> data_modeling
   -> pipeline_builder -> data_engineering/pipeline_orchestration
+  -> pipeline_concurrency -> tooling/dag_orchestration (Dagster / Mage)
   -> data-prep-agent + data_quality
   -> pipeline_observability (consumes the run manifest)
   -> pipeline_deployment ; data_governance (cross-cutting)
@@ -27,6 +28,7 @@ data_ingestion/* (or sql-integration-agent) -> data_modeling
 | `pipeline_builder/` | Compile a source → transform → sink intent into a reviewable DAG with contracts, schedules, retries, backfills, tests, ownership, and a deployment plan. |
 | `pipeline_deployment/` | Environment promotion, dry runs, canaries, rollback, state migration, and scheduler-specific deployment. |
 | `data_governance/` | Catalog, lineage, access policy, ownership, and classification. |
+| `pipeline_concurrency/` | Hundreds of pipelines at once: global, pool, and mutual-exclusion limits; all-or-nothing admission; priority with a starvation guard; bounded retries; failure isolation; staggered schedules; capacity plan (spec `0101`). Renders to Dagster/Mage via `tooling/dag_orchestration`. |
 
 ## Standard
 
@@ -49,3 +51,6 @@ contracts, and observability discipline.
   test-backed runtime workflow.
 - `specs/0019-pipeline-observability/` — reads the run manifest for freshness, data
   downtime, SLA, and lineage (`src/quantsmith/pipelines/pipeline_observability.py`).
+- `specs/0101-concurrent-pipeline-fleet/` — runs hundreds of pipelines concurrently
+  under shared limits, plans capacity, and renders Dagster/Mage config
+  (`src/quantsmith/pipelines/pipeline_fleet.py`).

@@ -46,6 +46,45 @@ modes structurally impossible in a QuantSmith pipeline.
 - [ ] Backfill runs only missing partitions.
 - [ ] A run manifest records per-(step, partition) status.
 
+## Concurrency At Fleet Scale
+
+The contract above makes *one* pipeline correct. Production runs hundreds at once
+against the same warehouse, vendor quotas, and sink tables, and the failures change
+character: connection-pool exhaustion, rate-limit bans, two writers on one
+partition, retry storms, starved large jobs. The fleet contract (spec `0101`):
+
+1. **Declare the fleet.** A global run limit, a named pool for every scarce shared
+   resource (with slot weights for heavy jobs), and a mutual-exclusion key for
+   every sink more than one pipeline writes. Limits come from real capacity minus
+   headroom, never orchestrator defaults.
+2. **All-or-nothing admission.** A run starts only when the global limit, every pool
+   it needs, and its key all have room. Nothing holds one resource while waiting
+   for another, so the fleet cannot deadlock. A job whose demand exceeds its pool is
+   rejected at declaration, not left to hang.
+3. **Priority without starvation.** Higher priority dequeues first and small jobs
+   may use idle capacity, but a job overtaken too often jumps the queue and
+   reserves capacity.
+4. **Retries re-enter admission.** Bounded attempts; a retry waits for capacity like
+   a first attempt, so an outage does not multiply load.
+5. **Failure isolation.** A permanent failure marks its transitive dependents
+   `upstream_failed`; unrelated pipelines keep running.
+6. **Stagger schedules.** Hash-based start offsets spread the fleet over a window and
+   do not move when pipelines are added or removed.
+7. **Plan before deploy.** A deterministic capacity plan reports makespan vs. a lower
+   bound, per-pool utilization, and which constraint caused the queue wait.
+8. **Render, don't retype.** Orchestrator config (Dagster, Mage) is generated from
+   the same declaration; every limit the orchestrator cannot enforce natively is
+   listed and mitigated, never silently dropped.
+
+Fleet checklist:
+
+- [ ] Every shared resource is a pool; every multi-writer sink has a key.
+- [ ] No job's slot demand exceeds its pool.
+- [ ] Retries are bounded and go back through admission.
+- [ ] Dependents of a failed pipeline are `upstream_failed`, not run on stale inputs.
+- [ ] Schedules are staggered; the capacity plan fits the window.
+- [ ] Rendered orchestrator config has every warning resolved.
+
 ## Runtime & Spec
 
 - Runtime: `src/quantsmith/pipelines/data_pipeline.py`
@@ -61,3 +100,8 @@ modes structurally impossible in a QuantSmith pipeline.
   `specs/0042-pipeline-builder/pipeline_manifest.md`.
 - Consumers/handoffs: `data_ingestion/*`, `data-prep-agent`, `data_quality`, and a
   future `pipeline_observability` node.
+- Fleet runtime: `src/quantsmith/pipelines/pipeline_fleet.py` (`Fleet`, `FleetJob`,
+  `Pool`, `FleetConfig`, `simulate`, `run_fleet`, `stagger_offsets`, `to_dagster`,
+  `to_mage`), spec `specs/0101-concurrent-pipeline-fleet/`; agents
+  `data_engineering/pipeline_concurrency` and `tooling/dag_orchestration`
+  (Dagster and Mage profiles).
