@@ -1,9 +1,68 @@
 # QuantSmith Handoff
 
+## Resume Here (last session: 2026-10-10)
+
+Start with this section; everything else in this file is background.
+
+**Branch state.** `claude/pipeline-fleet-concurrency` is 4 commits ahead of `main`,
+pushed, with **no open PR**. CI-equivalent checks pass locally (full suite 1486
+passed; `QF_STAGE_ENFORCE=1 hooks/stages/run-stage.sh` clean).
+
+| Commit | What | Spec status |
+| --- | --- | --- |
+| `10b3ae9` | Approve `0101`, `0102`, `0110` | Approved |
+| `1d6077f` | Claude.ai is not a skills publication target (`0110` T-005) | — |
+| `5a7613d` | `0111` change-safe data engineering (CDC, watermarks, schema evolution, reprocessing) | **Draft** |
+| `6266bb1` | `0112` data-engineering tooling (Airflow/Prefect exporters, dbt review, Spark/Ray/Dask) | **Draft** |
+
+**Waiting on the owner (ask before building further):**
+
+1. Approve `0111` and `0112` (then set Status/Approver in each `spec.md`/`plan.md`,
+   the `specs/README.md` rows, items 37–38 below, and the changelog — same pattern
+   as commit `10b3ae9`).
+2. Open a PR for the 4 commits (only when asked; follow
+   `.github/PULL_REQUEST_TEMPLATE.md`; **no attribution footer**, see `CLAUDE.md`).
+3. Choose next: **slice C of `0107`** (lakehouse table formats, data FinOps,
+   reference-data pack — the data-engineering thread the owner has been driving) or
+   **`0103` evaluation** (next in roadmap order, What's Next #0). Next free spec: `0113`.
+
+**How each slice was built (repeat the pattern):** spec/plan/tasks in
+`specs/NNNN-slug/` → stdlib runtime in `src/quantsmith/pipelines/` reusing approved
+runtimes → `tests/test_*.py` named `..._AC_00N` → agents with the four-file contract and a
+`Spec-Driven Role` → standard section in `instructions/` → catalog rows
+(`agents/README.md`, group README) → `specs/README.md` + root `README.md` rows →
+handoff item + roadmap row → changelog → `python3 scripts/build_agent_registry.py`
+→ `PYTHONPATH=src python3 -m quantsmith.skills_export build` → fix counts flagged
+by `hooks/stages/doc-counts-check.sh` → full suite + enforced gates → commit.
+
+**Gotchas learned this session:**
+
+- **Local-only material.** The owner made the regional Asia/China venture agents and
+  specs `0084`–`0086` local-only (`.gitignore`) and rewrote history. Never re-add
+  them; the skills export skips gitignored agent folders automatically. Counts in
+  docs are for a clean clone (210 agents, 88 specs).
+- **Skills export.** After any agent change, rebuild and commit `.claude/skills/`
+  (blocking in pre-commit and CI). Only the `project` selection in
+  `config/skills_export.json` is materialized (59 skills) because Claude Code's
+  skill listing has a budget; add new data-engineering/tooling agents there. If you
+  rebuild twice before committing, restore `registry.json` from `HEAD` and rebuild
+  once so the commit is a single generation.
+- **Claude.ai** is not a target (owner, 2026-10-10); the owner may delete 99 old
+  hand-exported copies there. Do not mark `claude_ai` published.
+- **Authorship.** Commits must use the owner's git identity and carry **no**
+  `Co-Authored-By`/session trailers; GitHub posts carry no attribution footer.
+- **Advisory heuristics** that fire on uncommitted diffs and are known false
+  positives here: `implementation` (repo-wide ruff style), `repro` (seeded
+  `random.Random(seed)` not recognized). Substantive lint used:
+  `ruff check --isolated --select F,E9,B,RUF059,PLW1510,SIM102,ISC004 <files>`.
+- **Unverified externals.** Dagster/Mage/Airflow/Prefect config keys and dbt
+  manifest field names follow current docs, not installed versions; profiles say to
+  verify and dry-run before promotion.
+
 ## Snapshot
 
 > **Current top priority (owner, 2026-10-10): the platform expansion roadmap —
-> specs `0102`–`0109`; provenance (`0102`) is built and approved, evaluation (`0103`) is next.** Eight
+> specs `0102`–`0109`; provenance (`0102`) is approved; `0107` slices A/B are built as `0111`/`0112`; next is `0107` slice C or `0103` (see *Resume Here*).** Eight
 > agent groups across data engineering, ingestion and provenance, evaluation,
 > knowledge graphs, private markets, local LLM systems, and analyst delivery.
 > It outranks every other item, `0080` included. See item 0 of *What's Next*.
@@ -135,8 +194,9 @@ advisory-by-default deployment decision. The chain builds on
 > | 7 | `0108` | **Ingestion and provenance expansion** | `provenance/vendor_licensing_entitlements`, `ingestion/document_ingestion` (spans attached), `ingestion/alt_data_onboarding` (coverage, point-in-time honesty, survivorship), `ingestion/web_collection` (terms-compliant, raw snapshots) | reserved |
 > | 8 | `0109` | **Analyst workflow and delivery** | `delivery/report_packaging` (versioned decks/PDF/Excel with as-of stamps), `delivery/stakeholder_request_intake`, `delivery/qa_signoff`, `tooling/jupyter`, `tooling/python`, `tooling/sql` | reserved |
 >
-> **Pick up here:** `0102` is built and Approved (Joshua Lutkemuller, CFA,
-> 2026-10-10) — start `0103` (evaluation). `0102` follow-ups are in its `tasks.md`. Each reserved row is also in *Planned specs*
+> **Pick up here:** see *Resume Here* at the top. `0102` is Approved; the owner
+> then pulled `0107` forward: slice A (`0111`) and slice B (`0112`) are built
+> (Draft). Next is the owner's choice between `0107` slice C and `0103`. `0102` follow-ups are in its `tasks.md`. Each reserved row is also in *Planned specs*
 > below so the commitment stays visible until its directory exists.
 
 > ### #1 priority — Natural-language analytics (spec `0080`, Draft)
