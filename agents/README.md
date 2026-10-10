@@ -95,6 +95,14 @@ constitution P9 (secrets never enter the repo).
 | `secrets_management/secret_rotation/` | Writing/updating/rotating and revoking credentials and custom keys | Deployment, Maintenance |
 | `secrets_management/secret_scanning/` | Detecting leaked secrets in code/history/logs; remediation and prevention | Implementation, Maintenance |
 
+## Agents As Claude Skills
+
+Every agent below is also exported as a generated Claude skill under
+`.claude/skills/<name>/` with a lifecycle registry at `.claude/skills/registry.json`
+(spec `0110`). After adding, changing, or removing an agent, rebuild with
+`PYTHONPATH=src python3 -m quantsmith.skills_export build`; see
+[`../instructions/skills_export.md`](../instructions/skills_export.md).
+
 ## Provenance Agents (`provenance/`)
 
 Grouped in the `provenance/` category folder (see

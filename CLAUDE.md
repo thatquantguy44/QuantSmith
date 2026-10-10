@@ -63,6 +63,12 @@ syntax, spec traceability, and backtest integrity; it runs leakage advisory.
   regenerate `agents/agent_registry.yaml` with `python3 scripts/build_agent_registry.py`,
   add a `Spec-Driven Role` section to `instructions.md` and a row to
   `agents/README.md`.
+- **Skills:** every agent is also exported as a Claude skill under `.claude/skills/`
+  with a lifecycle registry (`.claude/skills/registry.json`, spec `0110`). After
+  adding, changing, or removing an agent, rebuild with
+  `PYTHONPATH=src python3 -m quantsmith.skills_export build` and commit the result;
+  never edit `.claude/skills/` by hand. The `skills-export` gate, pre-commit, and CI
+  fail when it is stale. See `instructions/skills_export.md`.
 - **Commits:** Conventional Commits (`type(scope): description`) — enforced by the
   `commit-msg` hook. Run `./setup-hooks.sh` once to wire local Git hooks.
 - **Match the surrounding style** of whatever file you edit.

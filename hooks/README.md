@@ -56,6 +56,7 @@ pattern-based; tune them to your repository.
 | Handoff roadmap sync | `handoff-sync-check.sh` | every spec is referenced in `docs/handoff.md`; a new spec arrives with its entry |
 | Upstream surface drift | `upstream-drift-check.sh` | copied gates/standards vs the pinned upstream ref (consumer repos) |
 | agent-skills upstream integrity | `agent-skills-check.sh` | `vendor/agent-skills/` vs its lock, `config/agent_skills.json` allowlist/exclusions, `.claude-plugin/marketplace.json` and `.claude/settings*.json` sources, agent citations (spec `0100`) |
+| skills export freshness | `skills-export-check.sh` | `.claude/skills/` and `registry.json` match what `agents/` renders to; no hand edits, missing, stale, or retired-but-present skills; valid names and `config/skills_export.json` (spec `0110`) |
 | Ownership & support path | `ownership-check.sh` | CODEOWNERS, `docs/ownership.md`, and a gate runbook name real owners, not placeholders |
 | Persistent knowledge guide sync | `persistent-knowledge-check.sh` | `PERSISTENT_KNOWLEDGE.md`'s status table vs. the real record/task/AC counts; co-change with `workflow_memory.py`/`memory/`/spec `0048` |
 | Source catalog sync | `source-catalog-check.sh` | `sources/README.md`, `templates/data/source_catalog_entry.yml` |

@@ -41,6 +41,9 @@ jobs:
       - name: Enforce agent-skills upstream integrity (spec 0100)
         run: |
           QF_STAGE_ENFORCE=1 sh hooks/stages/run-stage.sh agent-skills
+      - name: Enforce skills export freshness (spec 0110)
+        run: |
+          QF_STAGE_ENFORCE=1 sh hooks/stages/run-stage.sh skills-export
       - name: Enforce backtest integrity (only when a report exists)
         run: |
           QF_STAGE_ENFORCE=1 sh hooks/stages/run-stage.sh backtest

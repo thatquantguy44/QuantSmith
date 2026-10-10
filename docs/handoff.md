@@ -17,8 +17,8 @@
 > Next* and items 29–30.
 
 The SDK has a working v1: a **spec-driven engineering framework** over the six
-software-development stages, **211 agents** in `agents/`,
-**36 quality gates**, **39 instruction standards**, and CI that
+software-development stages, **204 agents** in `agents/`,
+**37 quality gates**, **40 instruction standards**, and CI that
 enforces the deterministic gates. It remains primarily a scaffold to be copied
 into quant repos, with `src/quantsmith/pipelines/`, `src/quantsmith/orchestration/`,
 and `src/quantsmith/text_intelligence/` holding runnable, dependency-light
@@ -42,7 +42,7 @@ it via stable IDs (`REQ`/`NFR`/`AC`/`RISK`/`T`).
 - `specs/NNNN-slug/{spec,plan,tasks}.md` from `templates/spec/`; worked example at
   `specs/0001-daily-momentum-signal/`.
 
-**Agents (211, verified by the `agent-catalog` gate — treat `agents/README.md`
+**Agents (204, verified by the `agent-catalog` gate — treat `agents/README.md`
 as the live count, not the number here)** — all on the four-file contract
 (`README`/`prompt`/`instructions`/`tasks`) with a `Spec-Driven Role`:
 
@@ -59,7 +59,7 @@ as the live count, not the number here)** — all on the four-file contract
   per-group membership and counts, which change more often than this file is
   refreshed.
 
-**Gates (36)** in `hooks/stages/`, driven by `run-stage.sh`; advisory by default,
+**Gates (37)** in `hooks/stages/`, driven by `run-stage.sh`; advisory by default,
 `QF_STAGE_ENFORCE=1` blocks:
 
 - Cross-cutting: `spec`, `orchestration`, `text-intelligence`. Per stage: `planning`, `design`, `implementation`,
@@ -71,7 +71,7 @@ as the live count, not the number here)** — all on the four-file contract
   `doc-counts`, `quantsmith-version`, `agent-attribution`, `handoff-sync`, `upstream-drift`, `ownership`, `persistent-knowledge`, `knowledge`, `memory`, `access`, `role-context`,
   `model-plugin`, `source-catalog`, `agent-skills`.
 
-**Instructions (39)** — constitution, SDD method, point-in-time, and the domain
+**Instructions (40)** — constitution, SDD method, point-in-time, and the domain
 standards; see `README.md`'s "Public Instructions" table for the current list
 (this file lists categories, not every filename, to avoid drifting again).
 
@@ -360,7 +360,7 @@ designs**: create and
 approve one only when the foundation it consumes — `0063` or `0072` — has frozen
 that contract and the prior dependency named above is satisfied. Do not add
 agents merely to fill the map; prefer a canonical knowledge artifact or tested
-runtime that an existing agent can use. **Next unreserved spec number: `0110`** (`0083`–`0092` are the venture-intelligence foundation and its reserved children, item 32; `0093` is the visualization packs spec; `0094` is the Asian-language NLP foundation; `0095` is the venture predictive-model baselines; `0096` is request routing; `0097` is the test-engineering runtime; `0098` is the model testing helpers; `0099` is the Dataset Investigator; `0100` is the agent-skills upstream integration; `0101` is the concurrent pipeline fleet; `0102`–`0109` are the platform expansion roadmap, What's Next #0).
+runtime that an existing agent can use. **Next unreserved spec number: `0111`** (`0083`–`0092` are the venture-intelligence foundation and its reserved children, item 32; `0093` is the visualization packs spec; `0094` is the Asian-language NLP foundation; `0095` is the venture predictive-model baselines; `0096` is request routing; `0097` is the test-engineering runtime; `0098` is the model testing helpers; `0099` is the Dataset Investigator; `0100` is the agent-skills upstream integration; `0101` is the concurrent pipeline fleet; `0102`–`0109` are the platform expansion roadmap, What's Next #0; `0110` is the skills export and registry).
 Reserving a number here does not create the directory; copy `templates/spec/`
 only when that slice becomes active.
 
@@ -783,7 +783,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
     to populate `sources/` as real sources come into use.
 
 14. **P1 Generalization & Team Onboarding — making QuantSmith self-serve across
-    domains.** QuantSmith is now a comprehensive framework (211 agents, 69 specs,
+    domains.** QuantSmith is now a comprehensive framework (204 agents, 69 specs,
     33 gates, 35 standards); the next phase is reducing discovery friction and
     enabling team-intuitive adoption without deep codebase reading.
     - **P0 Phase 1a: Role profiles** (`roles/{portfolio_manager,risk_manager,quant_researcher,data_engineer,compliance_officer}.md`):
@@ -1806,7 +1806,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
       `specs/0083-venture-intelligence-foundation/run_card.md` (see
       `docs/gate_runbook.md`); every `knowledge/venture_intelligence/` record is
       `draft` and most cite `unverified`; `agents/agent_registry.yaml` was incomplete (6 of
-      211 agents, with broken `skills_library/` paths); it is now generated from the
+      204 agents, with broken `skills_library/` paths); it is now generated from the
       agents by `scripts/build_agent_registry.py` and guarded by a test and the
       `agent-catalog` gate.
 
@@ -1845,6 +1845,23 @@ manual-task persistence question stays deferred until a real consumer needs it.
     New `agents/provenance/` group. Follow-ups: durable backend and CLI, automatic
     recording from the `0011`/`0101` runners, moving `0045` onto the store.
 
+36. **Skills export and registry (spec `0110`, Draft; built).** Every agent is
+    generated into a self-contained Claude skill under `.claude/skills/` (project
+    skills for anyone who clones the repo) by `quantsmith-skills build`, with a
+    lifecycle registry at `.claude/skills/registry.json`: revision, introduced /
+    updated / removed dates, the generation of the last change, source and skill
+    hashes, and tombstones for retired skills. Builds are idempotent; the
+    `skills-export` gate, pre-commit, CI, and tests fail when the export is stale or
+    hand-edited. `pending --target claude_ai` lists exactly what to upload or delete,
+    `package` builds a plugin (other repos) or zips (Claude.ai), and
+    `mark-published` records each publication. **Owner action (T-005):** do the
+    first Claude.ai upload from the zips, retire the hand-exported copies there,
+    then `mark-published --target claude_ai`. Rule: after any agent change, run
+    `PYTHONPATH=src python3 -m quantsmith.skills_export build` and commit the result.
+    Only a project selection (`config/skills_export.json` → `project`, 53 skills) is
+    materialized in `.claude/skills/`: with all 204 loaded, Claude Code listed only
+    about 70 with descriptions. All 204 stay registered and in the plugin/zip packages.
+
 ## Open Questions For The Owner
 
 - Copyable scaffold, Python package, or CLI/copier? (Directionally answered in
@@ -1860,7 +1877,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
 
 ## Risks
 
-- Breadth: 211 agents is useful only if each stays narrow and inspectable.
+- Breadth: 204 agents is useful only if each stays narrow and inspectable.
 - Heuristic gates (`leakage`, `backtest`, `secret-scan` fallback) can false-positive
   or miss; keep them advisory unless a repo's layout makes them reliable.
 - Docs can drift from the code; the `docs-link`, `agent-catalog`, and `spec-index` gates help, but

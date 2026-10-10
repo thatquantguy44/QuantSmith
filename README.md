@@ -39,9 +39,9 @@ signal and model **reproducible, leakage-safe, and traceable to a spec**.
 [![CI](https://github.com/joshualutkemuller/QuantSmith/actions/workflows/ci.yml/badge.svg)](https://github.com/joshualutkemuller/QuantSmith/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](pyproject.toml)
 [![Approach: Spec-Driven](https://img.shields.io/badge/Approach-Spec--Driven-ff6f00)](instructions/spec_driven_development.md)
-[![Agents: 211](https://img.shields.io/badge/Agents-211-6f42c1)](agents/README.md)
-[![Quality Gates: 36](https://img.shields.io/badge/Quality%20Gates-36-2ea44f)](hooks/README.md)
-[![Specs: 88](https://img.shields.io/badge/Specs-88-0969da)](specs/README.md)
+[![Agents: 204](https://img.shields.io/badge/Agents-204-6f42c1)](agents/README.md)
+[![Quality Gates: 37](https://img.shields.io/badge/Quality%20Gates-37-2ea44f)](hooks/README.md)
+[![Specs: 86](https://img.shields.io/badge/Specs-86-0969da)](specs/README.md)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](.github/GIT_GUIDELINES.md)
 
 <br/>
@@ -91,8 +91,8 @@ signal and model **reproducible, leakage-safe, and traceable to a spec**.
 | 🧠 Plan research from a hypothesis | Spec-driven planning agents + traceable requirements |
 | 🔎 Catch leakage & time-alignment bugs | Point-in-time standards + `leakage`/`backtest` gates |
 | 📝 Document features, models, backtests | Templates, cards, and reproducible run artifacts |
-| 🤖 Reuse research workflows | 211 narrow, inspectable agent roles across the stack |
-| 🚦 Stop mistakes before commit/push | 36 quality gates, advisory by default, CI-enforceable |
+| 🤖 Reuse research workflows | 204 narrow, inspectable agent roles across the stack |
+| 🚦 Stop mistakes before commit/push | 37 quality gates, advisory by default, CI-enforceable |
 | 🗣️ Share a common vocabulary | An [agentic dictionary](agentic_dictionary.md) for the team |
 
 ---
@@ -420,6 +420,7 @@ Reusable standards and behavioral rules that agents follow.
 - [`workflow_memory.md`](instructions/workflow_memory.md)
 - [`git_workflow.md`](instructions/git_workflow.md)
 - [`agent_skills.md`](instructions/agent_skills.md) — vendored agent-skills: precedence, stage map, exclusions (spec `0100`)
+- [`skills_export.md`](instructions/skills_export.md) — every agent as a generated Claude skill: registry, rebuild rule, distribution to other repos and Claude.ai (spec `0110`)
 - [`documentation.md`](instructions/documentation.md)
 
 </td><td>
@@ -552,9 +553,9 @@ the [spec index](specs/README.md).
 | [`0093`](specs/0093-visualization-packs/) | Domain visualization packs — seven domains and fourteen recipes, governed evidence, executive findings, analyst detail, and portable HTML/JSON/Markdown; implementation in progress | `visualization_packs/` ([guide](knowledge/visualization_packs/README.md)) |
 | [`0082`](specs/0082-enterprise-risk-agents/) | Enterprise risk agents — six agents (operational, model risk management, counterparty credit/XVA, AML/financial crime, liquidity/treasury/IRRBB, climate/ESG risk) fixing a real gap `0081` found: 27 of 40 packs fell back to the generic `agents/risk`, whose charter is investment/portfolio risk, not these six disciplines; re-points the 7 mismatched packs, leaves `agents/risk` and the other 20 unchanged; contract-only, no runtime | `agents/enterprise_risk/`, `instructions/enterprise_risk.md` |
 | [`0083`](specs/0083-venture-intelligence-foundation/) | Venture & non-traditional intelligence foundation — taxonomy, venture data-time and bias contracts, source-grade and confidence conventions, channel and model catalogs, multilingual normalization rules, decision-path classes, coverage matrix and roadmap, per-record review sign-off, and a stdlib validator with golden cases | `venture_pack.py` (validator + normalization helpers; pack in `knowledge/venture_intelligence/`) |
-| [`0084`](specs/0084-venture-regional-agents-southeast-asia/) | Multilingual start-up document NLP agent and Southeast Asia regional agents | `agents/venture_intelligence/` (contract-only) |
-| [`0085`](specs/0085-venture-regional-agents-east-and-south-asia/) | Greater China & East Asia lead and structure analyst, South Asia lead, Traditional Chinese/Korean/lakh-crore/Japanese-era normalization | `agents/venture_intelligence/` (contract-only) |
-| [`0086`](specs/0086-venture-regional-agents-central-asia/) | Central Asia lead, Cyrillic script-variant entity resolution, Russian-locale numbers | `agents/venture_intelligence/` (contract-only) |
+| `0084` *(local-only)* | Multilingual document NLP agent and first regional agents (regional agents kept local) | `agents/venture_intelligence/` (contract-only) |
+| `0085` *(local-only)* | Further regional agents (kept local) | — |
+| `0086` *(local-only)* | Further regional agent (kept local; remaining regions deferred to `0087`) | — |
 | [`0088`](specs/0088-venture-sources-pit-ingestion/) | Venture sources and point-in-time ingestion — eleven public source entries with `known_at` policies, as-of views, outcome-independent cohorts, deterministic entity resolution that never merges on a name alone | `venture_ingestion.py` |
 | [`0089`](specs/0089-venture-signal-and-sourcing-agents/) | Venture signal analysts (patent/IP, hiring, narrative/news, technology landscape) and sourcing/diligence agents | `agents/venture_intelligence/` (contract-only) |
 | [`0090`](specs/0090-venture-tradecraft-and-screening-agents/) | Venture tradecraft and screening support — grades, origin-aware corroboration, competing-hypotheses matrix, effective ownership, conclusion-language lint | `venture_tradecraft.py` |
@@ -563,6 +564,7 @@ the [spec index](specs/README.md).
 | [`0095`](specs/0095-venture-predictive-model-baselines/) | Venture predictive-model reference baselines — point-in-time validation harness, computed deployability gate, competing-risks survival, emergence, organization-level link prediction, anomaly, and chain-ladder nowcast; synthetic validation only, no model usable for decisions | `venture_models/` package |
 | [`0096`](specs/0096-venture-request-routing-and-orchestrator/) | Venture request routing — reviewable rules turn a request into an ordered agent chain with review gates, decision owner, strictest class, and clearance; forbidden requests are refused with the human who owns each; plus the `venture_orchestrator` agent | `venture_routing.py` |
 | [`0094`](specs/0094-asian-language-nlp-foundation/) | Asian-language NLP foundation — dependency-free language/script identification, a segmentation baseline with a declared segmenter slot, rule-based amount/currency/date/era-year/fiscal-period extraction with verbatim spans and offsets (Mandarin, Japanese, Korean, Thai, Vietnamese, Indonesian/Malay, Filipino, Russian, Kazakh, Uzbek, English), per-language evaluation that refuses pooled scores, and a baseline-vs-model comparison that never overwrites | `asian_nlp/` package (`src/quantsmith/asian_nlp/`) |
+| [`0110`](specs/0110-skills-export-registry/) | Skills export and registry — every agent as a generated Claude skill in `.claude/skills/`, a lifecycle registry with revisions and per-target publication tracking, plugin and zip packaging; `quantsmith-skills` CLI and the `skills-export` gate | `skills_export/` package |
 | [`0102`](specs/0102-lineage-bitemporal-provenance/) | Lineage and bitemporal provenance — immutable content-hashed versions, run and column lineage, restatement impact, verification, citations, OpenLineage events; valid-time × knowledge-time store with as-of reads and look-ahead detection | `provenance.py` |
 | [`0101`](specs/0101-concurrent-pipeline-fleet/) | Concurrent pipeline fleet — hundreds of pipelines under global, pool, and mutual-exclusion limits; deadlock-free admission, starvation guard, bounded retries, failure isolation, capacity plan, schedule staggering, Dagster and Mage config exporters | `pipeline_fleet.py` |
 | [`0055`](specs/0055-workflow-scheduling-operations/) | Workflow scheduling operations — registry validation, cron dry-run evidence, idempotent dispatch, JSONL ledger, manual reminders, daily reports, alert handoff, memory candidates | `workflow_scheduling.py` |

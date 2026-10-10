@@ -88,7 +88,7 @@ def test_content_hash_and_immutability_AC_001():
 
 
 def test_run_validation_AC_002():
-    g, prices, fx, usd, _ = build_graph()
+    g, prices, _fx, usd, _ = build_graph()
     ghost = DatasetVersion.of("ghost", "v1", [])
     new = DatasetVersion.of("out", "v1", [{"a": 1}])
     with pytest.raises(ValueError, match="unknown input"):
@@ -117,7 +117,7 @@ def test_run_validation_AC_002():
 
 
 def test_trace_impact_and_column_lineage_AC_003():
-    g, prices, fx, usd, signal = build_graph()
+    g, _prices, fx, usd, signal = build_graph()
     tr = g.trace(signal)
     assert [s.source_id for s in tr.sources] == ["ecb_fx", "vendor_eod"]
     assert [r.run_id for r in tr.runs] == ["r1", "r2"]  # upstream first
@@ -141,7 +141,7 @@ def test_trace_impact_and_column_lineage_AC_003():
 
 
 def test_verify_and_cite_AC_004():
-    g, prices, fx, usd, signal = build_graph()
+    g, _prices, _fx, usd, signal = build_graph()
     assert g.verify(usd, PRICES_USD)
     tampered = [dict(PRICES_USD[0], close_usd=999.0)]
     assert not g.verify(usd, tampered)
@@ -155,7 +155,7 @@ def test_verify_and_cite_AC_004():
 
 
 def test_openlineage_event_AC_005():
-    g, prices, fx, usd, _ = build_graph()
+    g, *_ = build_graph()
     ev = g.to_openlineage(g.runs["r1"], namespace="quant", event_time="2026-10-01T23:00:00Z")
     assert ev["eventType"] == "COMPLETE"
     assert ev["run"]["runId"] == "r1"
