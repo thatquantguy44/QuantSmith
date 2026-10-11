@@ -4,25 +4,21 @@
 
 Start with this section; everything else in this file is background.
 
-**Branch state.** `claude/pipeline-fleet-concurrency` is 4 commits ahead of `main`,
-pushed, with **no open PR**. CI-equivalent checks pass locally (full suite 1486
-passed; `QF_STAGE_ENFORCE=1 hooks/stages/run-stage.sh` clean).
+**Branch state.** The pipeline-fleet work is merged into `main` via PR #123;
+`main` is synchronized with `origin/main` and the worktree is clean. CI-equivalent
+checks passed locally (full suite 1486 passed; `QF_STAGE_ENFORCE=1
+hooks/stages/run-stage.sh` clean).
 
 | Commit | What | Spec status |
 | --- | --- | --- |
 | `10b3ae9` | Approve `0101`, `0102`, `0110` | Approved |
 | `1d6077f` | Claude.ai is not a skills publication target (`0110` T-005) | — |
-| `5a7613d` | `0111` change-safe data engineering (CDC, watermarks, schema evolution, reprocessing) | **Draft** |
-| `6266bb1` | `0112` data-engineering tooling (Airflow/Prefect exporters, dbt review, Spark/Ray/Dask) | **Draft** |
+| `5a7613d` | `0111` change-safe data engineering (CDC, watermarks, schema evolution, reprocessing) | **Approved** |
+| `6266bb1` | `0112` data-engineering tooling (Airflow/Prefect exporters, dbt review, Spark/Ray/Dask) | **Approved** |
 
 **Waiting on the owner (ask before building further):**
 
-1. Approve `0111` and `0112` (then set Status/Approver in each `spec.md`/`plan.md`,
-   the `specs/README.md` rows, items 37–38 below, and the changelog — same pattern
-   as commit `10b3ae9`).
-2. Open a PR for the 4 commits (only when asked; follow
-   `.github/PULL_REQUEST_TEMPLATE.md`; **no attribution footer**, see `CLAUDE.md`).
-3. Choose next: **slice C of `0107`** (lakehouse table formats, data FinOps,
+1. Choose next: **slice C of `0107`** (lakehouse table formats, data FinOps,
    reference-data pack — the data-engineering thread the owner has been driving) or
    **`0103` evaluation** (next in roadmap order, What's Next #0). Next free spec: `0113`.
 
@@ -190,13 +186,13 @@ advisory-by-default deployment decision. The chain builds on
 > | 3 | `0104` | **Knowledge graph engineering** | `knowledge_graph/ontology_schema`, cross-domain `entity_resolution` (generalizes the venture agent), `graph_construction` (evidence-backed, time-valid edges), `graph_query_analytics` (ownership chains, exposure paths; feeds the GNN agent), `graph_quality` | reserved |
 > | 4 | `0105` | **Private markets** | `private_markets/` buyout, private credit (reuses `0072`/`0073`), real assets, secondaries/GP stakes, LP pacing (Takahashi-Alexander; extends `0091`), fund-document extraction (capital calls, distributions, ILPA templates); domain pack `knowledge/private_markets/` | reserved |
 > | 5 | `0106` | **Local LLM systems** | `local_llm/` model selection and sizing, serving runtime (vLLM, llama.cpp, Ollama; reuses `0101` pools), LoRA/QLoRA fine-tuning, RAG pipeline (delivers the reserved `0054` server), air-gapped operations | reserved |
-> | 6 | `0107` | **Data engineering expansion** | `tooling/dbt`, `data_engineering/streaming_cdc`, `schema_evolution`, `lakehouse_table_formats` (Iceberg/Delta time travel), `backfill_reprocessing`, `data_cost_finops`, `tooling/spark`, `tooling/ray_dask`, Airflow and Prefect exporters for `0101`; domain pack: reference data (security master, corporate actions, symbology, calendars) | slice A built as `0111`, slice B as `0112` (both Draft); slice C reserved |
+> | 6 | `0107` | **Data engineering expansion** | `tooling/dbt`, `data_engineering/streaming_cdc`, `schema_evolution`, `lakehouse_table_formats` (Iceberg/Delta time travel), `backfill_reprocessing`, `data_cost_finops`, `tooling/spark`, `tooling/ray_dask`, Airflow and Prefect exporters for `0101`; domain pack: reference data (security master, corporate actions, symbology, calendars) | slices A/B built and Approved as `0111`/`0112`; slice C reserved |
 > | 7 | `0108` | **Ingestion and provenance expansion** | `provenance/vendor_licensing_entitlements`, `ingestion/document_ingestion` (spans attached), `ingestion/alt_data_onboarding` (coverage, point-in-time honesty, survivorship), `ingestion/web_collection` (terms-compliant, raw snapshots) | reserved |
 > | 8 | `0109` | **Analyst workflow and delivery** | `delivery/report_packaging` (versioned decks/PDF/Excel with as-of stamps), `delivery/stakeholder_request_intake`, `delivery/qa_signoff`, `tooling/jupyter`, `tooling/python`, `tooling/sql` | reserved |
 >
 > **Pick up here:** see *Resume Here* at the top. `0102` is Approved; the owner
 > then pulled `0107` forward: slice A (`0111`) and slice B (`0112`) are built
-> (Draft). Next is the owner's choice between `0107` slice C and `0103`. `0102` follow-ups are in its `tasks.md`. Each reserved row is also in *Planned specs*
+> and Approved. Next is the owner's choice between `0107` slice C and `0103`. `0102` follow-ups are in its `tasks.md`. Each reserved row is also in *Planned specs*
 > below so the commitment stays visible until its directory exists.
 
 > ### #1 priority — Natural-language analytics (spec `0080`, Draft)
@@ -1923,7 +1919,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
     materialized in `.claude/skills/`: with all 204 loaded, Claude Code listed only
     about 70 with descriptions. All 204 stay registered and in the plugin/zip packages.
 
-37. **Change-safe data engineering (spec `0111`, Draft; built).** Slice A of the
+37. **Change-safe data engineering (spec `0111`, Approved; built).** Slice A of the
     `0107` data-engineering expansion, taken ahead of roadmap order at the owner's
     request (2026-10-10). `streaming_cdc.py` applies CDC idempotently by per-key
     sequence and windows event time under a watermark, with late data as a side
@@ -1937,7 +1933,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
     Slice B shipped as `0112` (item 38); slice C (lakehouse formats, FinOps,
     reference-data pack) stays under `0107`.
 
-38. **Data-engineering tooling (spec `0112`, Draft; built).** Slice B of `0107`.
+38. **Data-engineering tooling (spec `0112`, Approved; built).** Slice B of `0107`.
     `pipeline_fleet.to_airflow` / `to_prefect` render `0101` fleets for Airflow
     (pools, `pool_slots`, `priority_weight` with `weight_rule: absolute`,
     `parallelism`) and Prefect (work-pool limit, global concurrency limits,

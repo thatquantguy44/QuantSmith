@@ -1,9 +1,9 @@
 # Spec: Change-safe data engineering
 
 - **ID:** 0111-change-safe-data-engineering
-- **Status:** Draft
+- **Status:** Approved
 - **Author:** QuantSmith
-- **Approver:** (pending)
+- **Approver:** Joshua Lutkemuller, CFA
 - **Last updated:** 2026-10-10
 
 > WHAT and WHY only. Implementation lives in `plan.md`.

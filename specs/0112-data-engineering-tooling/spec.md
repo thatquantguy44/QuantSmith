@@ -1,9 +1,9 @@
 # Spec: Data-engineering tooling
 
 - **ID:** 0112-data-engineering-tooling
-- **Status:** Draft
+- **Status:** Approved
 - **Author:** QuantSmith
-- **Approver:** (pending)
+- **Approver:** Joshua Lutkemuller, CFA
 - **Last updated:** 2026-10-10
 
 > WHAT and WHY only. Implementation lives in `plan.md`.

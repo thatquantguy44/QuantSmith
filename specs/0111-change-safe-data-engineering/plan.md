@@ -1,7 +1,7 @@
 # Plan: Change-safe data engineering
 
 - **Spec:** 0111-change-safe-data-engineering (`spec.md`)
-- **Status:** Draft
+- **Status:** Approved
 - **Author:** QuantSmith
 - **Last updated:** 2026-10-10
 

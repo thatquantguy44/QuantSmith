@@ -1,7 +1,7 @@
 # Plan: Data-engineering tooling
 
 - **Spec:** 0112-data-engineering-tooling (`spec.md`)
-- **Status:** Draft
+- **Status:** Approved
 - **Author:** QuantSmith
 - **Last updated:** 2026-10-10
 
