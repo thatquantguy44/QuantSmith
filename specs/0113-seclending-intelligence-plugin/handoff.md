@@ -7,7 +7,37 @@
   opened — open one only when the owner asks)
 
 This is the single entry point for the next agent working on the SFMeridian
-plugin. Read it first, then `roadmap.md`, then the child spec you are building.
+plugin.
+
+## Start here (in order)
+
+**The next task is spec `0116`: governed tier, SQL verification, execution, and
+composition.** Do these steps in order:
+
+0. **Verify the baseline**: run the commands in §6 and confirm the expected
+   results before changing anything. If they fail, fix or report that first.
+1. **Read**: §1–§2 below (state, code map), `roadmap.md` Phase 3 (the `0116` exit
+   criteria), and §3 (the brief).
+2. **Write the spec, then stop**: create
+   `specs/0116-sfmeridian-governed-sql-composition/` (spec, plan, tasks) per §3
+   "First steps", run `QF_STAGE_ENFORCE=1 hooks/stages/run-stage.sh spec`, commit,
+   push, and **ask the owner to approve it. Write no `0116` code before approval.**
+3. **After approval, build in this order** (each step depends on the one before):
+   1. a synthetic SQLite fixture database matching
+      `fixtures/catalog/fixture_db.catalog.json` (see §3 "Inputs");
+   2. `sql.verify` and its adversarial suite;
+   3. `sql.execute` (the read-only seam; runs only verified SQL);
+   4. the `0080` `Reader` over `available` metric sources;
+   5. governed-first routing (`ask`) through `0080` `answer()`;
+   6. `sql.compose` (`reuse` → `adapt` → `generate`);
+   7. the write-back runtime refusal;
+   8. agents `sql_composer` (C-03) and `sfmeridian_orchestrator` (C-04);
+   9. docs, counts, registry, skills export, gates, full suite, commit, push,
+      and update this file.
+4. **Done when** `roadmap.md` Phase 3's exit criteria hold (`0113` A-009–A-011,
+   A-021, A-027, A-028, A-030 pass; the adversarial suite rejects every case;
+   `ask` answers lookup and aggregation questions on the synthetic database with
+   citations), and §1 of this file says `0116` is built.
 
 ## 1. Where things stand
 
