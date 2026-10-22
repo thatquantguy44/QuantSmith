@@ -140,6 +140,6 @@ QF_STAGE_ENFORCE=1 hooks/stages/run-stage.sh
 cd plugins/sfmeridian && PYTHONPATH=src:../../src python -m sfmeridian --config fixtures/sfmeridian.mapping.yml --today 2026-10-22 agent run semantic_mapping_steward
 ```
 
-Expected: 56 passed, 1 skipped; gates exit 0; the steward run is `completed` with
+Expected: 57 passed, 1 skipped; gates exit 0; the steward run is `completed` with
 4/5 governed metrics bound and 6 amendments staged (it writes under
 `fixtures/.sfmeridian/`, which is gitignored — delete it afterwards).
