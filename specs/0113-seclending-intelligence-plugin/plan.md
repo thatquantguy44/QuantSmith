@@ -3,7 +3,7 @@
 - **Spec:** 0113-seclending-intelligence-plugin (`spec.md`)
 - **Status:** Draft
 - **Author:** Joshua Lutkemuller, CFA
-- **Last updated:** 2026-10-22
+- **Last updated:** 2026-10-22 (governed-first tier on `0080`/`0081`)
 
 > HOW. Every `REQ-*`/`NFR-*` in `spec.md` appears in the traceability matrix
 > below. Delivery order and phase exit criteria are in `roadmap.md`. This plan
@@ -19,6 +19,18 @@ exemplar — and deterministic code *disposes*: it resolves identifiers, verifie
 the query, executes it read-only, recomputes numbers, and checks citations.
 Hallucination is limited by construction because there is no path from model
 output to the user that skips those checks.
+
+Answering is **tiered, governed-first** (REQ-023). Every question goes to
+`0080` first: if it maps to a governed `0008` metric (seeded from `0081`'s
+`securities_financing_prime` pack), `0080` plans it, the plugin supplies the
+rows through `0080`'s injected `Reader` by running reviewed **metric source
+queries** through the same verify/execute path (REQ-024), and `0080` computes
+insights, picks the chart, and grounds the narrative. Only when `0080` says
+the question names no governed metric does the plugin fall through to the
+reviewed-query tiers (`reuse` → `adapt` → `generate`). An ambiguity among
+governed metrics is returned as `0080`'s clarification, never resolved by
+falling through. So there is one answer path per question, and the governed
+path is always tried first.
 
 The query repository is the plugin's memory of "how this firm queries its
 data". It is declared in configuration, indexed into exemplars and structure
@@ -48,6 +60,12 @@ replay, `0071` the LLM evidence boundary, `0110` the plugin packaging, and
                                                ▼
    ask(question, as_of, caller)  ── orchestrator (seclending_orchestrator) ──┐
      1 classify intent + resolve terms ── glossary / 0063 pack (REQ-012/013) │
+     G governed tier ──────────────────── 0080 answer() (REQ-023)            │
+         interpret → QueryPlan over 0008 metrics (0081 pack-aware)           │
+         Reader = metric source queries → steps 5–6 → Facts (REQ-024)        │
+         0080 insights + chart + grounded narrative → step 9 → step 10       │
+         clarification among governed metrics → return it (no fall-through)  │
+         "no governed metric" → continue at step 2                           │
      2 retrieve exemplars ─────────────── query index (REQ-006, 0114)        │
      3 map concepts → columns ─────────── semantic mapping (REQ-008, 0115)   │
      4 compose SQL (reuse|adapt|generate) sql_composer (REQ-009, 0116)       │
@@ -79,7 +97,8 @@ plugins/seclending/
     repos/                          # git/local/object_store fetchers, pinned refs
     indexing/                       # front-matter, SQL structure extraction, join graph, index
     catalog/                        # introspection, catalog files, snapshots, drift reconcile
-    semantic/                       # concept → column mapping on 0008 rules; 0063 glossary bridge
+    semantic/                       # concept → column mapping on 0008 rules, seeded from 0081; 0063 glossary bridge
+    governed/                       # the only 0080/0081 adapter: tier routing, Reader, pack resolution, amendments
     compose/                        # retrieval-first composer (LLM via adapters/llm_runtime)
     verify/                         # deterministic static verifier + EXPLAIN cost guard
     execute/                        # read-only seam over 0023 SQLDataSource / adopter drivers
@@ -95,7 +114,11 @@ plugins/seclending/
   tests/
 ```
 
-The core depends on the standard library only. Optional extras:
+The core depends on the standard library plus a SemVer-pinned `quantsmith`
+dependency used only by `governed/` (the stdlib-only `nl_analytics`,
+`metrics_semantic_layer`, and `analytics_packs` modules, NFR-003); no other
+plugin module imports `quantsmith`, so a `0080` interface change is absorbed
+in one place (RISK-013). Optional extras:
 `[postgres]`, `[mssql]`, `[snowflake]` (drivers), `[sqlparse]` (a stricter SQL
 parser, e.g. `sqlglot`), `[embeddings]` (via the `0071` seam). Without
 `[sqlparse]` the verifier uses a conservative stdlib tokenizer that *rejects*
@@ -112,13 +135,14 @@ any construct it cannot resolve — it never fails open.
 | `repos.status` | Index health | — | per-repo ref, freshness, drift findings |
 | `catalog.snapshot` | Introspect or load a catalog | profile ID | snapshot ID, dated object counts |
 | `catalog.describe` | Describe tables/columns for grounding | profile, objects | columns, types, keys, comments, concept mappings |
+| `metrics.list` | Governed metrics available to the caller | profile | metric names, units, additivity, pack ID and review status, bound source query, availability |
 | `queries.search` | Retrieve exemplars | intent text, filters (tags, profile, review status) | ranked exemplars with citations and scores |
 | `glossary.lookup` | Resolve a domain term | term | `0063` record or plugin glossary entry, viewpoint |
 | `sql.compose` | Compose SQL retrieval-first | question, as_of, profile | SQL, bound params, path (`reuse`/`adapt`/`generate`), sources |
 | `sql.verify` | Deterministic static verification | SQL, params, profile, question type | pass/fail with codes, normalized SQL hash |
 | `sql.execute` | Read-only execution of a *verified* query | verification token, params | rows (redacted), provenance record |
 | `answer.ground` | Check a draft answer against results | draft, run IDs | per-claim verdicts, cleaned answer or abstention |
-| `ask` | End-to-end orchestrated answer | question, as_of, caller | answer, citations, run envelope, or abstention |
+| `ask` | End-to-end orchestrated answer | question, as_of, caller | answer, tier (`governed`/`reuse`/`adapt`/`generate`), citations, chart spec (governed tier), caveats, run envelope — or clarification or abstention |
 | `feedback.propose` | Stage a candidate exemplar or correction | run ID, correction, proposer | inbox candidate ID |
 | `eval.run` | Run the golden-question evaluation | golden set version, thresholds | metrics, pass/fail per threshold |
 
@@ -134,7 +158,8 @@ interface, not of agent discipline.
 `E_VERIFY_MISSING_PIT`, `E_VERIFY_NO_LIMIT`, `E_VERIFY_COST`,
 `E_VERIFY_TABLE_NOT_ALLOWED`, `E_EXEC_TOKEN`, `E_EXEC_TIMEOUT`,
 `E_ACCESS_DENIED`, `E_GROUND_UNCITED`, `E_GROUND_MISMATCH`,
-`E_GROUND_UNDEFINED_TERM`, `E_GROUND_VIEWPOINT`, `E_ABSTAIN_INSUFFICIENT_EVIDENCE`.
+`E_GROUND_UNDEFINED_TERM`, `E_GROUND_VIEWPOINT`, `E_ABSTAIN_INSUFFICIENT_EVIDENCE`,
+`E_GOVERNED_CLARIFICATION`, `E_METRIC_SOURCE_UNAVAILABLE`, `E_WRITEBACK_DISABLED`.
 
 ### Configuration (REQ-003, REQ-004, REQ-017, REQ-020)
 
@@ -148,7 +173,8 @@ only). Real file: repo-root `seclending_plugin.yml` (gitignored) or the path in
 | `query_repositories[]` | `id`, `kind` (`git`/`local`/`object_store`), `uri`, `ref`, `paths.include`/`exclude`, `dialect`, `metadata_convention` (`front_matter`/`sidecar`), `trust_tier`, `review_policy` (`reviewed_only`/`allow_unreviewed_as_hints`), `refresh` (`on_demand`/cron). |
 | `databases[]` | `id` (profile), `dialect`, `connection.secret_ref` (pointer, never a value), `read_only: true` (required), `schemas_allowlist`, `tables_allowlist`, `row_limit`, `timeout_s`, `explain_cost_limit`, `max_concurrency`. |
 | `catalog` | Per profile: `source` (`introspect`/`file`), `file`, `refresh`, `drift_policy` (`exclude`/`warn`). |
-| `semantic_mapping` | Per profile: canonical concept ID (`0063`) → physical expression, grain, PIT column, viewpoint. |
+| `semantic_mapping` | Per profile: concept (an `0081` pack metric/dimension name or a `0063` ID) → physical expression, grain, PIT column, viewpoint. |
+| `governed_tier` | `enabled`, `interpreter` (`keyword`/`llm`), `packs_root` (for `resolve_packs`; local overlay first), `domain_tags` (e.g. `securities_lending`), `metric_sources` (metric → reviewed exemplar ID and column map to `Fact` period/dims/measures), `writeback.enabled: false` (REQ-026). |
 | `grounding` | `retrieval_min_score`, `max_compose_retries`, `require_citation_per_number: true`, `abstain_message`, numeric tolerance. |
 | `access` | Redaction classes (`counterparty_identity`, `account`, `client_position`), column → class map, caller clearance source (`0058` roster). |
 | `llm` | Runtime profile name resolved through `adapters/llm_runtime/`; temperature and token budgets; no keys. |
@@ -210,6 +236,9 @@ incremental and diffable (NFR-001, NFR-005).
 | `sql-integration-agent` | Generic SQL safety review; reference for the execution seam rules. |
 | `data_ingestion/database_connectivity` | Connection profiles, drivers, read-only service accounts. |
 | `knowledge/knowledge_retrieval` | Retrieval over the `0063` pack and glossary. |
+| `analytics/nl_analytics` (`0080`) | **The governed tier**: question → `QueryPlan` → insights → grounded narrative over the plugin's `Reader`. |
+| `analytics/metrics_semantic_layer` (`0008`) | Owns governed metric definitions; reviews metric candidates the plugin learns from the query repository before they become governed. |
+| `analytics/data_visualization` | Chart choice for governed-tier answers (`0080` `ChartSpec`, Vega-Lite). |
 | `data_quality`, `quality-guard-agent` | Data checks on result sets; release gate over the eval report. |
 | `provenance/lineage_capture` | Lineage from answer → run → query → repo commit → catalog snapshot. |
 | `data_engineering/schema_evolution` | Classifies catalog drift found by reconciliation. |
@@ -288,9 +317,9 @@ proposes no agent for any workflow below.
 | Row | Agent | Distinct workflow | Never does | Child |
 | --- | --- | --- | --- | --- |
 | C-01 | `query_librarian` | Onboard and index query repositories; front-matter hygiene; dedup; drift triage; review queue for candidates. | Never promotes a candidate or edits query SQL without a named human reviewer. | `0114` |
-| C-02 | `semantic_mapping_steward` | Map `0063` concepts to physical columns per profile; declare grain, PIT column, viewpoint, unit. | Never invents a mapping without a catalog object and an exemplar or owner confirmation. | `0115` |
-| C-03 | `sql_composer` | Retrieval-first SQL composition (reuse → adapt → generate) under the catalog and mapping. | Never executes SQL and never bypasses `sql.verify`. | `0116` |
-| C-04 | `seclending_orchestrator` | Route desk questions through the 11-step pipeline; pick analytics agents; manage retries and abstention. | Never answers from model memory; never returns a number without a run citation. | `0116`/`0117` |
+| C-02 | `semantic_mapping_steward` | Bind `0081` pack metrics and `0063` concepts to physical columns and metric source queries per profile; declare grain, PIT column, viewpoint, unit; draft `0081` pack amendments for missing concepts. | Never invents a mapping without a catalog object and an exemplar or owner confirmation; never edits a pack's `review` block or defines a concept privately. | `0115` |
+| C-03 | `sql_composer` | Retrieval-first SQL composition (reuse → adapt → generate) under the catalog and mapping, **only for questions `0080` reports as outside the governed metrics** — the workflow `nl_analytics` deliberately does not hold. | Never executes SQL and never bypasses `sql.verify`. | `0116` |
+| C-04 | `seclending_orchestrator` | Route desk questions through the governed tier, then the 11-step pipeline; pick analytics agents; manage retries and abstention. | Never answers from model memory; never returns a number without a run citation. | `0116`/`0117` |
 | C-05 | `answer_grounding_reviewer` | Claim-level citation, recompute, term, and viewpoint checks on draft answers. | Never adds new facts; can only cite, correct to the cited value, remove, or abstain. | `0117` |
 | C-06 | `utilization_specials_analyst` | Desk-facing interpretation of utilization, demand/supply, fee trends, GC→warm→special migration, days-to-cover; consumes `time_series_forecasting` and `unsupervised_anomaly` outputs rather than building models. | Never builds or trains a model itself; never uses non-PIT rates for history. | `0119` |
 | C-07 | `recall_buyin_risk_analyst` | Recall pressure (dividends, votes, sales), buy-in and fail exposure on open loans/borrows; consumes `supervised_learning` recall scores and hands events to `operational_risk`. | Never sends or recommends sending a recall; outputs risk indicators only. | `0119` |
@@ -308,7 +337,7 @@ in the handoff map above.
 
 | Workflow | Agents | Tools | Inputs → outputs | Review gate | Must cite |
 | --- | --- | --- | --- | --- | --- |
-| W1 Desk question → cited answer | C-04, C-03, C-05, `securities_lending` | `ask` (all steps) | question, as_of → answer + citations or abstention | grounding check | run IDs, query IDs, `0063` terms |
+| W1 Desk question → cited answer | C-04, `nl_analytics` (governed tier), C-03, C-05, `securities_lending` | `ask` (all steps) | question, as_of → answer + tier + citations, clarification, or abstention | grounding check | run IDs, query IDs, pack ID and review status, `0063` terms |
 | W2 Daily utilization & specials monitor | C-06, `time_series_forecasting`, `unsupervised_anomaly`, `alert_policy`, `alert_router` | `queries.search`, `sql.*`, `answer.ground` | as_of → movers, migrations, alerts | `data_quality` on inputs | runs per metric, PIT predicate |
 | W3 Recall & buy-in risk review | C-07, `supervised_learning`, `operational_risk`, `collateral_management`, `risk` | `sql.*`, `answer.ground` | book as_of, corporate-action calendar → risk list | named human review | runs, corporate-action source |
 | W4 Lending revenue attribution | C-08, `performance_attribution`, `financing_cost_analysis` | `sql.*`, `0008` metrics | period → attribution reconciled to book | reconciliation to book total | runs, reconciliation diff |
@@ -326,19 +355,26 @@ in the handoff map above.
 - **Fixture:** a synthetic SQLite database extending `0023`'s
   `seed_demo_data` (`borrow_rates`, `positions`, `sec_lending_book`, `recalls`)
   with `lendable_inventory`, `collateral`, `counterparties`, `corporate_actions`,
-  and `program_revenue`; a synthetic query repository (~40 annotated queries,
+  and `program_revenue`; a synthetic `securities_lending`-tagged `0027`
+  source entry so `0080` selects the `0081` pack; a synthetic query repository (~40 annotated queries,
   some deliberately stale, unreviewed, or malformed); all flagged per `0025`.
 - **Golden set:** versioned JSONL; each question has a category, `as_of`,
   expected SQL result (not expected SQL text), expected citations, and
   expected abstention flag. Categories: lookup, aggregation, as-of (PIT),
   viewpoint/sign, multi-join, metric (utilization, revenue), unanswerable
   (missing column/table), ambiguous (must clarify), adversarial (injection in
-  comments or results), and drifted (exemplar references a dropped column).
+  comments or results), drifted (exemplar references a dropped column), and
+  governed (maps to an `0081` pack metric; must be answered at tier
+  `governed`, and again through `reuse` for the agreement check).
 - **Metrics:** identifier-fabrication rate (unresolved identifiers in executed
   SQL), execution accuracy (executes without error when answerable),
   result-match accuracy (result set equals expected), unsupported-claim rate
   (claims without a valid citation in final answers), viewpoint-error rate,
-  abstention precision and recall, exemplar-reuse rate, and p95 latency.
+  abstention precision and recall, exemplar-reuse rate, governed-tier share,
+  **tier-agreement rate** (governed vs reuse answers to the same question must
+  match: target 100%, RISK-012), wrong-tier rate (a governed question answered
+  by SQL composition, or an ambiguity resolved by fall-through: target 0), and
+  p95 latency.
 - **Gate:** `eval.run` compares to thresholds in config; `quality-guard-agent`
   treats a miss as release-blocking. LLM-dependent metrics are reported with
   the model profile and run three seeds; deterministic metrics must be exact.
@@ -379,6 +415,10 @@ in the handoff map above.
 | REQ-020 | Multi-dialect profiles | T-016, T-025 |
 | REQ-021 | Specialist handoff map; workflows W7–W12 | T-028, T-029 |
 | REQ-022 | Decision-support output envelope for optimizer and model results | T-029, T-030 |
+| REQ-023 | Governed-first tier routing through `0080` (`governed/`) | T-031, T-035 |
+| REQ-024 | `Reader` over verified metric source queries | T-032 |
+| REQ-025 | Concept vocabulary seeded from `0081`; pack amendments; unreviewed-pack caveat | T-033 |
+| REQ-026 | Write-back disabled by default; target validation | T-034 |
 | NFR-001 | Offline deterministic fixtures and harness | T-008, T-019 |
 | NFR-002 | Release thresholds | T-019 |
 | NFR-003 | Stdlib core, optional extras | T-020 |
@@ -393,6 +433,9 @@ in the handoff map above.
 
 | Decision | Chosen | Rejected alternative | Why |
 | --- | --- | --- | --- |
+| Question → SQL path | Governed-first through `0080`, query repository for the tail | A second, independent NL→SQL path | `0080` already plans over governed metrics with clarification, clearance, and grounding; two paths would answer the same question two ways (RISK-012). |
+| `0080` dependency | Pinned `quantsmith` import isolated in `governed/` | Vendor a copy of `0080` | A vendored copy forks the governed path and its fixes; pinning plus one adapter keeps a single source of truth. |
+| Missing pack concepts | Propose `0081` amendments | Plugin-private concept list | Private definitions would fork the domain vocabulary `0080` and reviewers rely on. |
 | Packaging | Separate distributable under `plugins/seclending/` | Module inside `src/quantsmith/` | Apps must install it without the SDK (NFR-003); `0110` already packages Claude plugins. |
 | "Learning" | Indexed retrieval + structure extraction + reviewed promotion | Fine-tuning on the query repo | Auditable, reversible, no training data leaves the adopter; fine-tune deferred until eval shows a gap (roadmap Phase 6). |
 | Verification | Deterministic verifier with fail-closed tokenizer; optional strict parser | LLM self-check of SQL | A model cannot reliably check its own invented identifiers; determinism makes the fabrication-rate threshold of 0 achievable. |
@@ -413,6 +456,9 @@ in the handoff map above.
   metrics exact, LLM-dependent metrics over three seeds with the model profile
   recorded.
 - Replay of `ask` runs through the `0070` replay command (AC-011).
+- Tier-routing and `Reader` tests against `0080`'s own fixtures plus the
+  synthetic database, pinned to the `quantsmith` version under test
+  (AC-027, AC-028); pack-seeding validation through `0081`'s validator (AC-029).
 - Repo gates: `spec`, `spec-index`, `handoff-sync`, `agent-catalog`,
   `skills-export`, `secret-scan`, `data-provenance` (AC-022, AC-024).
 
@@ -433,6 +479,7 @@ in the handoff map above.
 ## Open Questions
 
 - Which viewpoint and dialect the first adopter needs (see `spec.md`).
+- Who reviews the `0081` `securities_financing_prime` pack and its amendments.
 - Whether the MCP server should also expose the query index as `0052`
   resources (`knowledge://seclending/...`) or tools only.
 - Whether `0120` (regulatory completeness) should be scheduled ahead of

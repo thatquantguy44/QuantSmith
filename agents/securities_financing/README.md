@@ -42,7 +42,9 @@ or rate/price/yield semantics.
 
 Spec `0113` (Draft) designs a separate, app-embeddable plugin that answers
 securities-lending questions from the adopter's own databases by learning from
-a configurable repository of reviewed SQL queries, with structural limits on
+a configurable repository of reviewed SQL queries — governed metrics first
+through `analytics/nl_analytics` (`0080`) and the `0081` securities-financing
+pack — with structural limits on
 hallucination (catalog-resolved identifiers, verified read-only execution,
 cited numbers, `0063` viewpoint checks, abstention). It reuses the agents above
 and proposes a coverage-gated `seclending_intelligence/` subgroup built by

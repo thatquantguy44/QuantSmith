@@ -13,9 +13,9 @@
 | Spec | Title | Scope | Depends on | Coverage rows closed | Tasks |
 | --- | --- | --- | --- | --- | --- |
 | `0114` | Query repository connector & indexer | Config loader and schema; `local`/`git`/`object_store` fetchers at pinned refs; front-matter parser; exemplar store, join graph, metric/filter extraction; lexical index; feedback inbox; `coverage.json`; agent `query_librarian`. | `0113`; `0049` pattern; `0027` source catalog | C-01 | T-005–T-009, T-017 (C-01) |
-| `0115` | Schema catalog, semantic mapping & access | Catalog snapshots (introspect/file), drift reconciliation, `0063` concept mapping on `0008` rules, viewpoint/unit declarations, secret pointers, allowlists, redaction, clearance; agent `semantic_mapping_steward`. | `0114`; `0063`; `0008`; `0058`; `secrets_management` | C-02 | T-010–T-013 |
-| `0116` | Grounded SQL composition, verification & execution | Retrieval-first composer; deterministic verifier with tokens and cost guard; read-only execution seam over `0023`; provenance and `0070` envelope; agents `sql_composer`, `seclending_orchestrator`. | `0115`; `0070`; `0023`; `adapters/llm_runtime/` | C-03, C-04 | T-014–T-017 |
-| `0117` | Grounded answering & hallucination evaluation | Grounding check, recompute, viewpoint enforcement, abstention; synthetic fixture DB and query repo; golden-question set, metrics, thresholds, release gate; agent `answer_grounding_reviewer`. | `0116`; `0063`; `0025`; coordinates with `0103` | C-05 | T-018, T-019 |
+| `0115` | Schema catalog, semantic mapping & access | Catalog snapshots (introspect/file), drift reconciliation, concept mapping seeded from `0081` `securities_financing_prime` on `0008` rules (plus drafted pack amendments) and governed-metric source-query bindings, viewpoint/unit declarations, secret pointers, allowlists, redaction, clearance; agent `semantic_mapping_steward`. | `0114`; `0063`; `0008`; `0081`; `0058`; `secrets_management` | C-02 | T-010–T-013, T-032 (binding), T-033 |
+| `0116` | Governed tier, grounded SQL composition, verification & execution | Governed-first routing through `0080` and the `Reader` over metric source queries; retrieval-first composer for the tail; deterministic verifier with tokens and cost guard; read-only execution seam over `0023`; provenance and `0070` envelope; agents `sql_composer`, `seclending_orchestrator`. | `0115`; `0080`; `0070`; `0023`; `adapters/llm_runtime/` | C-03, C-04 | T-014–T-017, T-031, T-032, T-034 |
+| `0117` | Grounded answering & hallucination evaluation | Grounding check, recompute, viewpoint enforcement, abstention; synthetic fixture DB and query repo; golden-question set, metrics, thresholds, release gate; agent `answer_grounding_reviewer`. | `0116`; `0063`; `0025`; coordinates with `0103` | C-05 | T-018, T-019, T-035 |
 | `0118` | Plugin packaging & app surfaces | `plugins/seclending/` distributable; Python API; MCP server on `0052`; Claude Code plugin via `0110`; cross-surface contract tests; SemVer per `0047`; second-dialect fixture. | `0117`; `0052`; `0110`; `0047` | — (surfaces) | T-001 (schemas), T-020–T-023, T-025 |
 | `0119` | Securities-lending analytics agents and specialist workflows | Agents `utilization_specials_analyst`, `recall_buyin_risk_analyst`, `lending_revenue_analyst`; workflows W2–W5 and W7–W12 wiring the optimization, risk, portfolio-management, knowledge, and ML handoffs (`plan.md` handoff map); decision-support envelope producers (REQ-022). | `0118`; `0028`; `0066`; `0067`; `0013`; `0006`/`0046` | C-06, C-07, C-08 | T-026 (part) |
 | `0120` | Lending reporting completeness checks | Agent `lending_reporting_check`; field-completeness and consistency checks for SFTR / Rule 10c-1a style datasets; never submits; regulatory dates confirmed by adopter counsel. | `0119`; `0069` when written | C-09 | T-026 (part) |
@@ -25,10 +25,12 @@
 ### Phase 0 — Foundation (`0113`) · ~1 week
 
 Spec, plan, tasks, roadmap, configuration template, front-matter convention,
-roster and coverage matrix, evaluation protocol. Ships documents only.
+roster and coverage matrix, evaluation protocol, and the governed-first design
+on `0080`/`0081`. Ships documents only.
 
-**Exit:** `0113` approved; the four open questions in `spec.md` answered (first
-viewpoint, first dialect, embeddings permission, `0119`/`0120` order); `spec`,
+**Exit:** `0113` approved; the open questions in `spec.md` answered (first
+viewpoint, first dialect, embeddings permission, `0119`/`0120` order) and a
+named reviewer assigned for the `0081` `securities_financing_prime` pack; `spec`,
 `spec-index`, and `handoff-sync` gates clean.
 
 ### Phase 1 — Learn the query repository (`0114`) · ~2–3 weeks
@@ -45,7 +47,9 @@ repository is a no-op; the synthetic repository's golden extraction matches.
 Catalog snapshots and drift; `0063` concept mapping with viewpoint and unit;
 access controls and redaction.
 
-**Exit:** AC-007, AC-008, AC-017 pass; drifted exemplars are excluded; no
+**Exit:** AC-007, AC-008, AC-017, AC-029 pass; the `0081` pack amendments
+are proposed and the pack review is scheduled (reviewed is preferred, not
+required, to proceed); drifted exemplars are excluded; no
 credential appears in any artifact (secret-scan clean).
 
 ### Phase 3 — Grounded SQL (`0116`) · ~3–4 weeks · **MVP**
@@ -53,7 +57,8 @@ credential appears in any artifact (secret-scan clean).
 Retrieval-first composition, deterministic verification, read-only execution,
 provenance and replay; the end-to-end `ask` tool in shadow mode.
 
-**Exit (MVP):** AC-009–AC-011, AC-021 pass; the adversarial verifier suite
+**Exit (MVP):** AC-009–AC-011, AC-021, AC-027, AC-028, AC-030 pass; every
+question that maps to a governed metric is answered at tier `governed`; the adversarial verifier suite
 rejects 100% of cases; identifier-fabrication rate in *executed* SQL is 0 on a
 preliminary golden set; `ask` answers lookup and aggregation questions on the
 synthetic database with citations.
@@ -62,7 +67,8 @@ synthetic database with citations.
 
 Grounding check and abstention; the versioned golden set and release gate.
 
-**Exit:** AC-012, AC-013, AC-016, AC-022 pass; NFR-002 thresholds met on the
+**Exit:** AC-012, AC-013, AC-016, AC-022 pass; tier-agreement rate 100% and
+wrong-tier rate 0 on the governed golden questions; NFR-002 thresholds met on the
 synthetic golden set over three seeds; the eval report is reproducible.
 
 ### Phase 5 — Ship as a plugin (`0118`) · ~2 weeks
@@ -104,6 +110,12 @@ live use requires the NFR-002 thresholds on the private set as well.
 | M6 Pilot live | 5–6 | NFR-002 thresholds met on the adopter-private golden set; desk sign-off. |
 
 ## Dependencies on Other Programs
+
+- `0080` natural-language analytics and `0081` domain packs (both Draft):
+  **hard dependency** for the governed tier from Phase 3. Pinned `quantsmith`
+  version, isolated in `governed/` (RISK-013). Reviewing the
+  `securities_financing_prime` pack removes the unreviewed-pack caveat and
+  makes `0080` write-back eligible (still off by default, REQ-026).
 
 - `0103` evaluation (reserved): shares red-team and LLM-judge methods; `0117`
   does not wait for it and uses deterministic metrics first.

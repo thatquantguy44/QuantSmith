@@ -65,16 +65,37 @@ catalog:
     drift_policy: exclude           # exclude | warn
 
 # --- Canonical concept -> physical column mapping (REQ-008, REQ-013) --------
-# Concept IDs come from knowledge/short_term_markets/taxonomy.json (0063).
+# Concepts are 0081 pack metric/dimension names (seeded from
+# knowledge/analytics_packs/securities_financing_prime.json) or 0063 IDs from
+# knowledge/short_term_markets/taxonomy.json. A concept missing from both is
+# proposed as a pack amendment, never defined here.
 semantic_mapping:
   <profile-id>:
-    - concept: <0063-concept-id>    # e.g. on-loan quantity, fee rate, utilization
+    - concept: <pack-metric-or-0063-id>  # e.g. utilization, borrow_fee, on_loan_value
       expression: "<table>.<column>"
       grain: "<table grain, e.g. security x counterparty x business date>"
       pit_column: "<table>.<as_of_column>"
       viewpoint: <borrower|lender|agent|beneficial_owner>
       unit: <shares|currency|bps|fraction>
       day_count: ACT/360            # 0066 default for fee/rebate accrual
+
+# --- Governed-first tier on 0080 / 0081 (REQ-023 to REQ-026) ---------------
+# Questions that map to a governed metric are answered by 0080 over rows the
+# plugin reads with reviewed metric source queries; everything else falls
+# through to the reviewed-query tiers below.
+governed_tier:
+  enabled: true
+  interpreter: keyword              # keyword | llm (llm uses the llm section)
+  packs_root: null                  # null = bundled packs; or a local overlay root
+  domain_tags: [securities_lending] # selects knowledge/analytics_packs/securities_financing_prime.json
+  metric_sources:                   # governed metric -> reviewed exemplar + Fact column map
+    - metric: utilization           # name from the 0081 pack
+      exemplar_id: <reviewed-query-id>
+      period_column: <as_of_column>
+      dimension_columns: {security: <column>, borrow_category: <column>, client: <column>}
+      measure_columns: {<base_measure>: <column>}
+  writeback:
+    enabled: false                  # REQ-026; never a lending or books-and-records system
 
 # --- Anti-hallucination policy (REQ-009, REQ-010, REQ-012) -------------------
 grounding:

@@ -53,6 +53,11 @@
 | T-028 | Publish the specialist handoff map (optimization, risk, portfolio management, knowledge, machine learning) with trigger, evidence, output, never-boundary, and workflow per agent; add workflows W7–W12. | REQ-021, AC-025 | `0113` (`plan.md`) | done | Machine-checkable `handoffs.json` follows in `0114` alongside `coverage.json`. |
 | T-029 | Implement handoff payloads (run IDs, PIT panels, citations, redaction) for W7–W12 and wire `optimization_orchestrator`, `pm_orchestrator`, and `ml_orchestrator` routing from `seclending_orchestrator`. | REQ-021, REQ-022, AC-025 | `0116` (payload), `0119` (workflows) | todo | No change to the receiving agents' charters; add a `Related` pointer in each only. |
 | T-030 | Implement the decision-support output envelope: optimizer results carry solver status, diagnostics, sensitivities; model results carry baseline, interval/calibration, PIT feature attestation; reject action-phrased outputs in grounding. | REQ-022, AC-026 | `0117` (check), `0119` (producers) | todo | Borrow-demand models validated with `0006`/`0046` folds. |
+| T-031 | Implement the `governed/` adapter: call `0080` `answer()` with the configured interpreter, `0081` pack selection, and caller clearance; route by outcome (answer → return; clarification among governed candidates → return, no fall-through; no governed metric → fall through); record the tier. | REQ-023, AC-027 | `0116` | todo | The only module importing `quantsmith`; pinned version. |
+| T-032 | Implement the `0080` `Reader` over metric source queries: bind each governed metric to a reviewed exemplar and a column map, run through `sql.verify`/`sql.execute` with the plan's as-of and filters as parameters, emit `0008` `Fact` rows with provenance; mark unbound, unreviewed, or drifted metrics unavailable. | REQ-024, AC-028 | `0115` (binding), `0116` (Reader) | todo | |
+| T-033 | Seed the semantic mapping from `0081` `securities_financing_prime` via `resolve_packs` (local overlay first); draft pack amendments for missing concepts (rebate rate, lendable value, on-loan quantity, recall quantity, collateral value, days-to-cover) through `0081`'s review flow; propagate the unreviewed-pack caveat. | REQ-025, REQ-008, AC-029 | `0115` | todo | Amendments are a separate `0081` change, reviewed by the named pack owner. |
+| T-034 | Default `governed_tier.writeback.enabled: false`; refuse publish requests with a reason; reject write-back targets classed as lending, trading, or books-and-records in config validation. | REQ-026, AC-030 | `0114` (config), `0116` (refusal) | todo | |
+| T-035 | Add governed and tier-agreement questions to the golden set; report governed-tier share, tier-agreement rate, and wrong-tier rate; flag disagreeing exemplars or bindings for review. | REQ-023, REQ-016 | `0117` | todo | RISK-012. |
 
 Status values: `todo` | `in-progress` | `blocked` | `done`.
 
@@ -90,11 +95,18 @@ criteria are checked by gates and review.
 | AC-024 | gates: `spec`, `spec-index`, `handoff-sync`, `agent-catalog`, `skills-export` (names AC-024) | `0113` | in-progress |
 | AC-025 | `test_handoff_map_agents_exist_and_are_bounded` + review of W7–W12 (names AC-025) | `0114` | todo |
 | AC-026 | `test_decision_support_envelope_for_optimizer_and_model_outputs` (names AC-026) | `0117` | todo |
+| AC-027 | `test_governed_first_tier_routing_and_no_fallthrough_on_ambiguity` (names AC-027) | `0116` | todo |
+| AC-028 | `test_reader_facts_reproduce_metric_source_queries` (names AC-028) | `0116` | todo |
+| AC-029 | `test_mapping_seeded_from_0081_pack_and_amendments_not_private` (names AC-029) | `0115` | todo |
+| AC-030 | `test_writeback_refused_by_default_and_unsafe_targets_rejected` (names AC-030) | `0116` | todo |
 
 ## Follow-ups
 
 Tracked work intentionally deferred (no silent "temporary" shortcuts — P8).
 
+- Name the reviewer for the `0081` `securities_financing_prime` pack (owner
+  action; Phase 0 exit). Until then governed answers carry the unreviewed-pack
+  caveat and write-back stays refused.
 - Resolve the four open questions in `spec.md` (viewpoint, dialect, embeddings
   permission, `0119` vs `0120` order) before `0115` is approved.
 - Fine-tuning on promoted exemplars: roadmap Phase 6, only if the evaluation
