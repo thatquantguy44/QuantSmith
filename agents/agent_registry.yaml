@@ -2173,6 +2173,18 @@ agents:
       - "Corporate-action handling (manufactured dividends, voting) on the loan."
       - "Point-in-time borrow-cost treatment for signals and backtests."
       - "Capacity implications from limited or expensive borrow."
+  - name: "securities_financing/sfmeridian/query_librarian"
+    category: "securities_financing"
+    purpose: "The Query Librarian keeps SFMeridian's query-repository index healthy."
+    path: "agents/securities_financing/sfmeridian/query_librarian/"
+    inputs:
+      - "The SFMeridian configuration (`sfmeridian.yml`): repositories, policies, inbox."
+      - "Optionally, the repository IDs to index and whether to force a full rebuild."
+    outputs:
+      - "An index (exemplars, join graph, metric candidates, filter patterns), every entry cited to repository, ref, path, and line span."
+      - "A curation report whose findings each cite evidence observed in the run."
+      - "Drafted front-matter for unannotated files, always `review_status: draft`."
+      - "A run record (status, trace, configuration hash) for audit."
   - name: "sql-integration-agent"
     category: "root"
     purpose: "The SQL Integration Agent connects to SQL databases, inspects schemas, and runs safe analytical queries."

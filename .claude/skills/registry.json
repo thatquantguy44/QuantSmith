@@ -1,8 +1,8 @@
 {
   "schema": 1,
   "generator": "quantsmith-skills/1",
-  "generation": 3,
-  "updated": "2026-10-10",
+  "generation": 4,
+  "updated": "2026-10-22",
   "targets": {},
   "skills": [
     {
@@ -2580,6 +2580,22 @@
       "updated_generation": 1,
       "source_hash": "sha256:fb60b432b89cc54b7e38d88d933782d5931042495a19f8b9533892d56be484da",
       "skill_hash": "sha256:bd7a7f659cb3b03429dc7e5edb8103e47577a1d5e54939ecbacb1fcfa7450cc8"
+    },
+    {
+      "name": "securities-financing-sfmeridian-query-librarian",
+      "agent": "securities_financing/sfmeridian/query_librarian",
+      "category": "securities_financing",
+      "description": "The Query Librarian keeps SFMeridian's query-repository index healthy. Use when a query repository is onboarded or changes and needs (re)indexing, or analysts need to know which queries are unusable and how to fix them.",
+      "status": "active",
+      "project": false,
+      "path": null,
+      "revision": 1,
+      "introduced": "2026-10-22",
+      "updated": "2026-10-22",
+      "removed": null,
+      "updated_generation": 4,
+      "source_hash": "sha256:eaeb1099ab3f6e75451f0e62fd81b6efb01285b97d062e790f8b3f90fb570098",
+      "skill_hash": "sha256:3f106354732542d770eab788ee95aa4f48ae6d00a1e4fdbe1d92eeaa83031e8d"
     },
     {
       "name": "sql-integration-agent",

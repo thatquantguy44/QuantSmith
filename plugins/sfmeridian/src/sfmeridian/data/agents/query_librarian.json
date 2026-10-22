@@ -1,0 +1,35 @@
+{
+ "name": "query_librarian",
+ "version": "1.0.0",
+ "coverage_row": "C-01",
+ "spec": "0114-sfmeridian-query-repository-indexer",
+ "goal": "Keep the query-repository index healthy and give people a cited curation report: rejected files and why, conflicting metric definitions, files needing front-matter, and candidates awaiting review.",
+ "tools": [
+  "config.validate",
+  "repos.index",
+  "repos.status",
+  "index.rejections",
+  "index.findings",
+  "index.metrics",
+  "index.joins",
+  "queries.search",
+  "queries.get",
+  "feedback.list",
+  "feedback.propose"
+ ],
+ "verifiers": [
+  "librarian.findings_cite_observed_evidence",
+  "librarian.every_rejection_reported",
+  "librarian.drafts_never_reviewed"
+ ],
+ "max_steps": 20,
+ "max_tool_calls": 20,
+ "max_repairs": 2,
+ "human_checkpoints": [
+  "Promote or discard inbox candidates (feedback.promote / feedback.discard are human_only).",
+  "Fix rejected files in the query repository.",
+  "Choose the canonical definition of a conflicting metric.",
+  "Fix unreachable repositories or invalid configuration (the loop escalates)."
+ ],
+ "never": "Never promotes or discards a candidate, edits repository files, marks anything reviewed, or chooses a canonical metric definition."
+}

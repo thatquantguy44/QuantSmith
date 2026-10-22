@@ -127,3 +127,6 @@ src/quantsmith/_bundled/
 # Anchored to the repo root so templates/sfmeridian/ stays tracked.
 /sfmeridian.yml
 /sfmeridian.yaml
+
+# SFMeridian local index cache and review inbox (spec 0114); rebuildable.
+.sfmeridian/

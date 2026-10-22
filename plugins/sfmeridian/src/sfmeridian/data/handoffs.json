@@ -1,0 +1,428 @@
+{
+ "schema_version": 1,
+ "source": "specs/0113-seclending-intelligence-plugin/plan.md",
+ "handoffs": [
+  {
+   "group": "optimization",
+   "agent": "problem_formulation",
+   "path": "optimization/problem_formulation",
+   "trigger": "Any allocation, pricing, or capacity question that needs an optimizer",
+   "evidence": "inventory, demand, constraints panels",
+   "output": "formal objective, variables, constraints, data map",
+   "never": "never solves with undeclared constraints",
+   "workflows": [
+    "W7",
+    "W8",
+    "W9"
+   ]
+  },
+  {
+   "group": "optimization",
+   "agent": "linear_programming",
+   "path": "optimization/linear_programming",
+   "trigger": "Inventory-to-demand allocation (extends `0023`'s LP)",
+   "evidence": "lendable inventory, borrow demand, fees, caps",
+   "output": "proposed allocation",
+   "never": "never ignores the balance-sheet cap (`0023` AC)",
+   "workflows": [
+    "W7"
+   ]
+  },
+  {
+   "group": "optimization",
+   "agent": "mixed_integer_optimization",
+   "path": "optimization/mixed_integer_optimization",
+   "trigger": "Allocation with minimum lot sizes, counterparty count limits, or all-or-nothing loans",
+   "evidence": "same as LP plus lot/limit data",
+   "output": "proposed allocation",
+   "never": "never reports a MIP gap as optimal",
+   "workflows": [
+    "W7"
+   ]
+  },
+  {
+   "group": "optimization",
+   "agent": "collateral_margin_optimization",
+   "path": "optimization/collateral_margin_optimization",
+   "trigger": "Cheapest-to-deliver collateral, substitutions, margin under schedules (`0067` contract)",
+   "evidence": "collateral holdings, eligibility, haircuts, margin calls",
+   "output": "proposed collateral allocation",
+   "never": "never breaches eligibility or concentration schedules",
+   "workflows": [
+    "W8"
+   ]
+  },
+  {
+   "group": "optimization",
+   "agent": "pricing_revenue_optimization",
+   "path": "optimization/pricing_revenue_optimization",
+   "trigger": "Fee-setting for warm/special names, tiered counterparty pricing",
+   "evidence": "PIT fee history, utilization, demand elasticity estimates",
+   "output": "proposed fee grid with expected revenue range",
+   "never": "never reprices; proposals only",
+   "workflows": [
+    "W9"
+   ]
+  },
+  {
+   "group": "optimization",
+   "agent": "resource_capacity_optimization",
+   "path": "optimization/resource_capacity_optimization",
+   "trigger": "Balance-sheet, RWA, or lending-capacity budgeting across programs",
+   "evidence": "capacity limits, balances, returns on capacity",
+   "output": "proposed capacity split",
+   "never": "never exceeds declared limits",
+   "workflows": [
+    "W7",
+    "W9"
+   ]
+  },
+  {
+   "group": "optimization",
+   "agent": "robust_optimization",
+   "path": "optimization/robust_optimization",
+   "trigger": "Allocations that must survive recall or demand uncertainty",
+   "evidence": "demand/recall forecast intervals (W10)",
+   "output": "robust allocation and cost of robustness",
+   "never": "never hides the uncertainty set",
+   "workflows": [
+    "W7"
+   ]
+  },
+  {
+   "group": "optimization",
+   "agent": "solver_diagnostics_sensitivity",
+   "path": "optimization/solver_diagnostics_sensitivity",
+   "trigger": "**Every** solve above",
+   "evidence": "solver output",
+   "output": "status, binding constraints, duals, sensitivities",
+   "never": "never certifies a solve it cannot reproduce",
+   "workflows": [
+    "W7",
+    "W8",
+    "W9"
+   ]
+  },
+  {
+   "group": "optimization",
+   "agent": "model_plugin_registration",
+   "path": "optimization/model_plugin_registration",
+   "trigger": "Adopter's in-house allocation or collateral engine",
+   "evidence": "`0026` manifest",
+   "output": "understanding brief and routing",
+   "never": "never inspects proprietary logic",
+   "workflows": [
+    "W7",
+    "W8"
+   ]
+  },
+  {
+   "group": "risk",
+   "agent": "risk",
+   "path": "risk",
+   "trigger": "Short-side or lending-program risk profile",
+   "evidence": "borrow cost, recall, concentration panels",
+   "output": "risk profile, stress cases",
+   "never": "never states return without the risk story",
+   "workflows": [
+    "W3",
+    "W11"
+   ]
+  },
+  {
+   "group": "risk",
+   "agent": "counterparty_credit_risk",
+   "path": "enterprise_risk/counterparty_credit_risk",
+   "trigger": "Exposure to borrowers net of collateral and indemnification",
+   "evidence": "loans, collateral marks, netting sets, limits",
+   "output": "netted, collateralized exposure, PFE with horizon",
+   "never": "never lets gross exposure stand for net",
+   "workflows": [
+    "W11"
+   ]
+  },
+  {
+   "group": "risk",
+   "agent": "liquidity_treasury_risk",
+   "path": "enterprise_risk/liquidity_treasury_risk",
+   "trigger": "Cash-collateral reinvestment, recall-driven liquidity needs",
+   "evidence": "cash collateral balances, reinvestment holdings, recall forecasts",
+   "output": "liquidity gap and stress with stated basis",
+   "never": "never reports a liquidity number without its basis",
+   "workflows": [
+    "W11"
+   ]
+  },
+  {
+   "group": "risk",
+   "agent": "operational_risk",
+   "path": "enterprise_risk/operational_risk",
+   "trigger": "Fails, buy-ins, late returns, booking breaks",
+   "evidence": "fails and buy-in records, recall timelines",
+   "output": "classified events vs near-misses",
+   "never": "never classifies a developing event as a loss",
+   "workflows": [
+    "W3"
+   ]
+  },
+  {
+   "group": "risk",
+   "agent": "model_risk_management",
+   "path": "enterprise_risk/model_risk_management",
+   "trigger": "The plugin's own models and the grounding pipeline once used for decisions",
+   "evidence": "eval reports (REQ-016), model cards",
+   "output": "inventory entry, validation cadence, findings",
+   "never": "never approves its own validation",
+   "workflows": [
+    "W12"
+   ]
+  },
+  {
+   "group": "portfolio_management",
+   "agent": "universe_selection",
+   "path": "portfolio_management/universe_selection",
+   "trigger": "Shortable universe for a strategy",
+   "evidence": "PIT availability, HTB status, fees",
+   "output": "eligible, PIT short universe",
+   "never": "never uses today's borrow status historically",
+   "workflows": [
+    "W5",
+    "W10"
+   ]
+  },
+  {
+   "group": "portfolio_management",
+   "agent": "compliance_constraints",
+   "path": "portfolio_management/compliance_constraints",
+   "trigger": "Locate, Reg SHO, restricted-list, and lending-guideline checks",
+   "evidence": "locates, restricted lists, client lending guidelines",
+   "output": "pre/post-trade constraint checks, exceptions",
+   "never": "never waives a constraint",
+   "workflows": [
+    "W10"
+   ]
+  },
+  {
+   "group": "portfolio_management",
+   "agent": "liquidity_cash_management",
+   "path": "portfolio_management/liquidity_cash_management",
+   "trigger": "Short-side implementability under borrow and funding",
+   "evidence": "availability, recall risk, funding",
+   "output": "implementability verdict and constraints",
+   "never": "never assumes free borrow",
+   "workflows": [
+    "W10"
+   ]
+  },
+  {
+   "group": "portfolio_management",
+   "agent": "risk_budgeting",
+   "path": "portfolio_management/risk_budgeting",
+   "trigger": "Borrow-cost and recall risk inside the portfolio risk budget",
+   "evidence": "borrow-cost panel, recall indicators",
+   "output": "budget usage and breaches",
+   "never": "never reallocates budget itself",
+   "workflows": [
+    "W10"
+   ]
+  },
+  {
+   "group": "portfolio_management",
+   "agent": "rebalance_trade_implementation",
+   "path": "portfolio_management/rebalance_trade_implementation",
+   "trigger": "Rebalances that open or cover shorts",
+   "evidence": "locate status, availability, fees",
+   "output": "implementation plan with borrow checks",
+   "never": "never sends orders",
+   "workflows": [
+    "W10"
+   ]
+  },
+  {
+   "group": "portfolio_management",
+   "agent": "performance_attribution",
+   "path": "portfolio_management/performance_attribution",
+   "trigger": "Borrow cost and lending income in portfolio results; reviews C-08's revenue attribution",
+   "evidence": "revenue and borrow-cost runs",
+   "output": "attribution incl. financing effect",
+   "never": "never omits costs",
+   "workflows": [
+    "W4",
+    "W10"
+   ]
+  },
+  {
+   "group": "portfolio_management",
+   "agent": "data_signal_intake",
+   "path": "portfolio_management/data_signal_intake",
+   "trigger": "Borrow-derived signals (utilization, fee moves, short interest) entering PM decisions",
+   "evidence": "plugin panels with run citations",
+   "output": "readiness verdict",
+   "never": "never admits a signal without PIT proof",
+   "workflows": [
+    "W5",
+    "W10"
+   ]
+  },
+  {
+   "group": "knowledge",
+   "agent": "knowledge_retrieval",
+   "path": "knowledge/knowledge_retrieval",
+   "trigger": "Domain term or desk-procedure lookup",
+   "evidence": "—",
+   "output": "cited `0063`/glossary records",
+   "never": "never answers without a source",
+   "workflows": [
+    "W1"
+   ]
+  },
+  {
+   "group": "knowledge",
+   "agent": "knowledge_ingestion",
+   "path": "knowledge/knowledge_ingestion",
+   "trigger": "Onboarding desk runbooks, data dictionaries, and schema docs that explain the query repository",
+   "evidence": "documents (adopter-local)",
+   "output": "provenance-tagged, access-aware chunks; PII/secret flags",
+   "never": "never ingests restricted material into a lower tier",
+   "workflows": [
+    "W6"
+   ]
+  },
+  {
+   "group": "knowledge",
+   "agent": "knowledge_curation",
+   "path": "knowledge/knowledge_curation",
+   "trigger": "Dedup, conflict, and staleness across exemplars, metric definitions, and glossary terms",
+   "evidence": "index, drift findings, candidate inbox",
+   "output": "canonical choices, conflict and gap list",
+   "never": "never resolves a conflict without a canonical source",
+   "workflows": [
+    "W6",
+    "W12"
+   ]
+  },
+  {
+   "group": "knowledge",
+   "agent": "institutional_memory",
+   "path": "knowledge/institutional_memory",
+   "trigger": "Accepted answers, corrections, and recurring desk questions",
+   "evidence": "promoted feedback, decisions",
+   "output": "durable records feeding the index (`0049`)",
+   "never": "never persists unreviewed claims",
+   "workflows": [
+    "W12"
+   ]
+  },
+  {
+   "group": "machine_learning",
+   "agent": "problem_framing_labeling",
+   "path": "machine_learning/problem_framing_labeling",
+   "trigger": "Defining targets: \"goes special within h days\", \"recalled within h days\", demand level",
+   "evidence": "PIT event history",
+   "output": "label spec with horizon and leakage review",
+   "never": "never labels with information after the decision time",
+   "workflows": [
+    "W10"
+   ]
+  },
+  {
+   "group": "machine_learning",
+   "agent": "feature_store_engineering",
+   "path": "machine_learning/feature_store_engineering",
+   "trigger": "Reusable PIT borrow features (utilization, fee momentum, days-to-cover, recall rate)",
+   "evidence": "plugin panels with as-of",
+   "output": "feature definitions with as-of joins",
+   "never": "never serves a feature without its as-of",
+   "workflows": [
+    "W10"
+   ]
+  },
+  {
+   "group": "machine_learning",
+   "agent": "time_series_forecasting",
+   "path": "machine_learning/time_series_forecasting",
+   "trigger": "Borrow demand, utilization, fee forecasts",
+   "evidence": "PIT panels",
+   "output": "forecasts with baseline and intervals",
+   "never": "never reports a forecast without a naive baseline",
+   "workflows": [
+    "W2",
+    "W10"
+   ]
+  },
+  {
+   "group": "machine_learning",
+   "agent": "supervised_learning",
+   "path": "machine_learning/supervised_learning",
+   "trigger": "Specials and recall classifiers",
+   "evidence": "features and labels above",
+   "output": "calibrated scores",
+   "never": "never reports uncalibrated probabilities",
+   "workflows": [
+    "W3",
+    "W10"
+   ]
+  },
+  {
+   "group": "machine_learning",
+   "agent": "unsupervised_anomaly",
+   "path": "machine_learning/unsupervised_anomaly",
+   "trigger": "Unusual fee, utilization, or recall patterns; unusual query-rejection patterns",
+   "evidence": "PIT panels, verifier logs",
+   "output": "ranked anomalies with explanations",
+   "never": "never treats an anomaly as a confirmed event",
+   "workflows": [
+    "W2",
+    "W12"
+   ]
+  },
+  {
+   "group": "machine_learning",
+   "agent": "model_selection_validation",
+   "path": "machine_learning/model_selection_validation",
+   "trigger": "Every model above",
+   "evidence": "candidate models",
+   "output": "purged/walk-forward validation (`0006`/`0046`)",
+   "never": "never selects on in-sample results",
+   "workflows": [
+    "W10"
+   ]
+  },
+  {
+   "group": "machine_learning",
+   "agent": "causal_uplift",
+   "path": "machine_learning/causal_uplift",
+   "trigger": "Effect of a fee or recall-policy change on demand or revenue",
+   "evidence": "pre/post panels, experiment design",
+   "output": "effect estimate with identification assumptions",
+   "never": "never presents correlation as effect",
+   "workflows": [
+    "W9"
+   ]
+  },
+  {
+   "group": "machine_learning",
+   "agent": "ranking_recommendation",
+   "path": "machine_learning/ranking_recommendation",
+   "trigger": "Exemplar ranking for `queries.search` if lexical retrieval underperforms on the golden set",
+   "evidence": "golden-set retrieval logs",
+   "output": "ranker with offline metrics",
+   "never": "never ranks unreviewed exemplars above reviewed",
+   "workflows": [
+    "W1"
+   ]
+  },
+  {
+   "group": "machine_learning",
+   "agent": "mlops_monitoring",
+   "path": "machine_learning/mlops_monitoring",
+   "trigger": "Drift and decay of deployed borrow models",
+   "evidence": "live predictions vs outcomes",
+   "output": "drift and decay alerts",
+   "never": "never retrains silently",
+   "workflows": [
+    "W12"
+   ]
+  }
+ ]
+}

@@ -148,6 +148,9 @@ any construct it cannot resolve — it never fails open.
 | `sql.verify` | Deterministic static verification | SQL, params, profile, question type | pass/fail with codes, normalized SQL hash |
 | `sql.execute` | Read-only execution of a *verified* query | verification token, params | rows (redacted), provenance record |
 | `answer.ground` | Check a draft answer against results | draft, run IDs | per-claim verdicts, cleaned answer or abstention |
+| `queries.get`, `index.rejections`, `index.findings`, `index.metrics`, `index.joins` | Index inspection (built in `0114`) | exemplar ID or filters | exemplars, rejections, findings, metric candidates, join edges |
+| `feedback.list`; `feedback.promote`, `feedback.discard` (`human_only`) | Inbox triage and human decisions (built in `0114`) | candidate ID, note/reason | candidate records |
+| `governance.validate` | Roster, handoff, tooling, manifest, and import checks (built in `0114`) | strict | report |
 | `ask` | End-to-end orchestrated answer | question, as_of, caller | answer, tier (`governed`/`reuse`/`adapt`/`generate`), citations, chart spec (governed tier), caveats, run envelope — or clarification or abstention |
 | `feedback.propose` | Stage a candidate exemplar or correction | run ID, correction, proposer | inbox candidate ID |
 | `eval.run` | Run the golden-question evaluation | golden set version, thresholds | metrics, pass/fail per threshold |
@@ -228,6 +231,46 @@ incremental and diffable (NFR-001, NFR-005).
   viewpoints or units without a `0063` conversion record.
 - Fee/rebate accrual uses ACT/360 per `0066` unless the mapping declares
   another basis explicitly.
+
+## Agent Loop Runtime (REQ-028, REQ-029)
+
+SFMeridian agents are not prompt files with a checklist; each is a bounded
+tool loop the plugin runs, built in `0114` and used by every later child:
+
+```text
+manifest (goal, tools, verifiers, budgets, human checkpoints, never)
+   │
+   ▼
+policy.decide(state) ──▶ ToolCall ──▶ tool registry (schema check, effect) ──▶ observation ─┐
+   ▲                    Finish   ──▶ deterministic verifiers ── fail ──▶ observation ───────┤
+   │                    Escalate ──▶ stop: a human checkpoint                               │
+   └────────────────────────────────────────────────────────────────────────────────────────┘
+trace ──▶ run record (run ID, config hash, audit events) ──▶ 0070 envelope
+```
+
+- **Tool registry** (`sfmeridian.tools`): the contract table above *is* the
+  registry. Effects: `read`, `index`, `propose`, `human_only`, and
+  `execute_read` from `0116` (verified read-only SQL). Apps and agents call
+  the same tools.
+- **Manifests** (`sfmeridian/data/agents/<name>.json`): mirror the agent's
+  `coverage.json` loop row; the governance check fails when they disagree or
+  when a manifest grants a `human_only` tool.
+- **Harness** (`sfmeridian.agent.run_agent`): least privilege, budgets,
+  verified finish with bounded repair, escalation as a first-class outcome,
+  deterministic trace.
+- **Policies**: a deterministic policy per agent (offline, testable) and
+  `ModelPolicy`, which prompts an injected completion function with the goal,
+  granted tool schemas, and observations, and parses one JSON action; output
+  passes the same harness checks. Two malformed actions escalate.
+- **Verifiers**: deterministic functions over the run's observations and the
+  proposed finish — the agent-level form of REQ-012 grounding (for example,
+  "every finding cites evidence observed in this run").
+- **Evaluation**: each agent's golden runs join the `0117` evaluation gate
+  (completion rate, verifier-repair rate, escalation precision, denied-call
+  rate).
+
+Each coverage row below carries its loop in `coverage.json`: granted tools,
+verifiers, human checkpoints, and stop condition.
 
 ## Agent Roster & Coverage Matrix (REQ-015)
 
@@ -422,6 +465,8 @@ in the handoff map above.
 | REQ-021 | Specialist handoff map; workflows W7–W12 | T-028, T-029 |
 | REQ-022 | Decision-support output envelope for optimizer and model results | T-029, T-030 |
 | REQ-027 | Tooling catalog, admission review, catalog-only recommendations | T-036, T-037 |
+| REQ-028 | Loop harness, manifests, policies, verifiers, traces | T-038, T-040 |
+| REQ-029 | Shared tool registry with effects; `human_only` decisions | T-039 |
 | REQ-023 | Governed-first tier routing through `0080` (`governed/`) | T-031, T-035 |
 | REQ-024 | `Reader` over verified metric source queries | T-032 |
 | REQ-025 | Concept vocabulary seeded from `0081`; pack amendments; unreviewed-pack caveat | T-033 |

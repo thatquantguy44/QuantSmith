@@ -14,6 +14,7 @@ does.
 | `repo_financing/` | Repo and reverse repo: funding positions, repo rates, term vs overnight, tri-party vs bilateral, haircuts, roll and counterparty risk. |
 | `collateral_management/` | Eligibility, haircuts, margin, collateral optimization and substitution, concentration, rehypothecation, and regulatory (LCR/NSFR) impact. |
 | `financing_cost_analysis/` | All-in cost of carry, borrow cost and short rebate, financing spread — and financing-aware backtesting. Tested runtime (spec `0028`). |
+| `sfmeridian/` | SFMeridian loop agents (specs `0113`–`0120`); first built: `query_librarian/` (`0114`), which indexes configured SQL query repositories and reports cited curation findings. |
 
 ## Group Workflow
 

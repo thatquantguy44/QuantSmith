@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sfmeridian"
+version = "0.1.0"
+description = "SFMeridian: grounded securities-finance intelligence from your own reviewed SQL (QuantSmith spec 0113)."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []
+
+# Optional extras are added only after a tooling-catalog admission review
+# (spec 0113 REQ-027); none ship in 0.1.0.
+[project.optional-dependencies]
+
+[project.scripts]
+sfmeridian = "sfmeridian.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+sfmeridian = ["data/*.json", "data/agents/*.json"]

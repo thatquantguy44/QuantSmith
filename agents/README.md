@@ -389,6 +389,7 @@ costs and risks.
 | `securities_financing/repo_financing/` | Repo/reverse repo funding, rates, term, haircuts, roll and counterparty risk | Testing |
 | `securities_financing/collateral_management/` | Eligibility, haircuts, margin, collateral optimization, rehypothecation, regulatory impact | Deployment |
 | `securities_financing/financing_cost_analysis/` | All-in cost of carry, borrow/rebate/funding netting, financing-aware backtesting | Testing |
+| `securities_financing/sfmeridian/query_librarian/` | SFMeridian loop agent (`0114`): indexes configured SQL query repositories and returns a cited curation report (rejections, metric conflicts, missing front-matter, review queue); never promotes or edits | Coding / Implementation |
 
 `securities_lending/` has a tested runtime (spec `0023-securities-lending-workflow`):
 `src/quantsmith/quant/agentic_quant/sec_lending_workflow.py` — universe
