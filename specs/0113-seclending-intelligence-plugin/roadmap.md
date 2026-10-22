@@ -1,0 +1,116 @@
+# Roadmap: Securities Lending Intelligence Plugin
+
+- **Spec:** 0113-seclending-intelligence-plugin (`spec.md`, `plan.md`, `tasks.md`)
+- **Last updated:** 2026-10-22
+
+> The ordered child-spec roadmap (REQ-018). Each phase is one or more bounded
+> child specs, written and approved one at a time through the normal SDD gates.
+> A phase starts only when the previous phase's exit criteria hold. Durations
+> are planning estimates for one engineer, not commitments.
+
+## Reserved Child Specs
+
+| Spec | Title | Scope | Depends on | Coverage rows closed | Tasks |
+| --- | --- | --- | --- | --- | --- |
+| `0114` | Query repository connector & indexer | Config loader and schema; `local`/`git`/`object_store` fetchers at pinned refs; front-matter parser; exemplar store, join graph, metric/filter extraction; lexical index; feedback inbox; `coverage.json`; agent `query_librarian`. | `0113`; `0049` pattern; `0027` source catalog | C-01 | T-005–T-009, T-017 (C-01) |
+| `0115` | Schema catalog, semantic mapping & access | Catalog snapshots (introspect/file), drift reconciliation, `0063` concept mapping on `0008` rules, viewpoint/unit declarations, secret pointers, allowlists, redaction, clearance; agent `semantic_mapping_steward`. | `0114`; `0063`; `0008`; `0058`; `secrets_management` | C-02 | T-010–T-013 |
+| `0116` | Grounded SQL composition, verification & execution | Retrieval-first composer; deterministic verifier with tokens and cost guard; read-only execution seam over `0023`; provenance and `0070` envelope; agents `sql_composer`, `seclending_orchestrator`. | `0115`; `0070`; `0023`; `adapters/llm_runtime/` | C-03, C-04 | T-014–T-017 |
+| `0117` | Grounded answering & hallucination evaluation | Grounding check, recompute, viewpoint enforcement, abstention; synthetic fixture DB and query repo; golden-question set, metrics, thresholds, release gate; agent `answer_grounding_reviewer`. | `0116`; `0063`; `0025`; coordinates with `0103` | C-05 | T-018, T-019 |
+| `0118` | Plugin packaging & app surfaces | `plugins/seclending/` distributable; Python API; MCP server on `0052`; Claude Code plugin via `0110`; cross-surface contract tests; SemVer per `0047`; second-dialect fixture. | `0117`; `0052`; `0110`; `0047` | — (surfaces) | T-001 (schemas), T-020–T-023, T-025 |
+| `0119` | Securities-lending analytics agents | Agents `utilization_specials_analyst`, `recall_buyin_risk_analyst`, `lending_revenue_analyst`; workflows W2–W5; hand-offs to `financing_cost_analysis`, `collateral_management`, `risk`, `backtest_review`, alerts. | `0118`; `0028`; `0066` | C-06, C-07, C-08 | T-026 (part) |
+| `0120` | Lending reporting completeness checks | Agent `lending_reporting_check`; field-completeness and consistency checks for SFTR / Rule 10c-1a style datasets; never submits; regulatory dates confirmed by adopter counsel. | `0119`; `0069` when written | C-09 | T-026 (part) |
+
+## Phases
+
+### Phase 0 — Foundation (`0113`) · ~1 week
+
+Spec, plan, tasks, roadmap, configuration template, front-matter convention,
+roster and coverage matrix, evaluation protocol. Ships documents only.
+
+**Exit:** `0113` approved; the four open questions in `spec.md` answered (first
+viewpoint, first dialect, embeddings permission, `0119`/`0120` order); `spec`,
+`spec-index`, and `handoff-sync` gates clean.
+
+### Phase 1 — Learn the query repository (`0114`) · ~2–3 weeks
+
+A configured repository (local and Git at a pinned ref) indexes into
+exemplars, join graph, metric candidates, and a lexical index; the feedback
+inbox works; `query_librarian` exists.
+
+**Exit:** AC-003–AC-006, AC-014, AC-015 pass; re-index of an unchanged
+repository is a no-op; the synthetic repository's golden extraction matches.
+
+### Phase 2 — Know the schema and the meaning (`0115`) · ~2–3 weeks
+
+Catalog snapshots and drift; `0063` concept mapping with viewpoint and unit;
+access controls and redaction.
+
+**Exit:** AC-007, AC-008, AC-017 pass; drifted exemplars are excluded; no
+credential appears in any artifact (secret-scan clean).
+
+### Phase 3 — Grounded SQL (`0116`) · ~3–4 weeks · **MVP**
+
+Retrieval-first composition, deterministic verification, read-only execution,
+provenance and replay; the end-to-end `ask` tool in shadow mode.
+
+**Exit (MVP):** AC-009–AC-011, AC-021 pass; the adversarial verifier suite
+rejects 100% of cases; identifier-fabrication rate in *executed* SQL is 0 on a
+preliminary golden set; `ask` answers lookup and aggregation questions on the
+synthetic database with citations.
+
+### Phase 4 — Grounded answers, measured (`0117`) · ~2–3 weeks
+
+Grounding check and abstention; the versioned golden set and release gate.
+
+**Exit:** AC-012, AC-013, AC-016, AC-022 pass; NFR-002 thresholds met on the
+synthetic golden set over three seeds; the eval report is reproducible.
+
+### Phase 5 — Ship as a plugin (`0118`) · ~2 weeks
+
+Distributable package; Python API, MCP server, Claude Code plugin; contract
+tests; second dialect.
+
+**Exit:** AC-001, AC-002, AC-020, AC-023 pass; `quantsmith-seclending 1.0.0`
+tagged with a release note; a reference app (a minimal CLI chat over the MCP
+server) answers the golden set with identical results to the Python API.
+
+**Pilot:** one named desk in shadow mode on the adopter's real query
+repository with an adopter-private golden set; promotion of the pilot to
+live use requires the NFR-002 thresholds on the private set as well.
+
+### Phase 6 — Expand (`0119`, `0120`, options) · ongoing
+
+- `0119` analytics agents and workflows W2–W5 (utilization/specials monitor,
+  recall and buy-in risk, revenue attribution, PIT borrow-cost feed to backtests).
+- `0120` reporting completeness checks.
+- Options, each needing its own spec and evaluation evidence: fine-tuning on
+  promoted exemplars; query-index resources over `0052`; integration with
+  `0104` knowledge graph (counterparty and security relationships); scheduled
+  daily packs through `0055`/`0060`; dashboards through `0015`–`0018`.
+
+## Milestones & KPIs
+
+| Milestone | Phase | KPI |
+| --- | --- | --- |
+| M1 Repository learned | 1 | ≥ 95% of annotated synthetic queries indexed as `reviewed`; 0 malformed files silently accepted. |
+| M2 Schema-aware | 2 | 100% of semantic-mapping concepts resolve to catalog objects; drift detected on every seeded change. |
+| M3 MVP grounded SQL | 3 | Fabrication in executed SQL = 0; adversarial rejection = 100%; exemplar-reuse rate reported. |
+| M4 Measured | 4 | NFR-002 thresholds met on synthetic golden set (3 seeds). |
+| M5 Plugin 1.0 | 5 | Identical results across surfaces; one reference app integrated. |
+| M6 Pilot live | 5–6 | NFR-002 thresholds met on the adopter-private golden set; desk sign-off. |
+
+## Dependencies on Other Programs
+
+- `0103` evaluation (reserved): shares red-team and LLM-judge methods; `0117`
+  does not wait for it and uses deterministic metrics first.
+- `0069` regulatory/legal knowledge pack (reserved): `0120` cites it when
+  written; until then regulatory context is labelled `unverified`.
+- `0104` knowledge graph (reserved): optional Phase 6 integration.
+- `0064`/`0068` short-term-markets runtimes and ingestion (reserved): no
+  blocking dependency; the plugin consumes adopter databases, not these feeds.
+
+## Change Control
+
+Adding a child spec, an agent, or a tool to the contract requires amending
+`spec.md`/`plan.md` first (new `REQ-*`/coverage row), then flowing through
+the gates. Reordering phases requires an owner decision recorded here.

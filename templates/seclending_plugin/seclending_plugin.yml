@@ -1,0 +1,130 @@
+# Securities Lending Intelligence Plugin configuration (spec 0113).
+#
+# TEMPLATE — placeholders only. Copy to the repository root as
+# `seclending_plugin.yml` (gitignored) or point QS_SECLENDING_CONFIG at a copy
+# outside the repo. Never commit real repository URLs, hosts, schemas, table
+# names, or credentials. Secrets are pointers resolved at runtime through
+# `secrets_management/`, never values.
+#
+# Resolution order: built-in defaults -> this file -> QS_SECLENDING__* env vars
+# -> per-call overrides (only fields in per_call_overrides_allowlist, and only
+# in the restrictive direction for safety fields).
+
+schema_version: 1
+enabled: true
+
+# --- Where the SQL query repository lives (REQ-004) --------------------------
+# One or more repositories. Nothing about their location is hard-coded in the
+# plugin; this list is the only source.
+query_repositories:
+  - id: desk_queries
+    kind: git                       # git | local | object_store
+    uri: <git-remote-url>           # e.g. an internal Git remote
+    ref: <branch-tag-or-commit>     # pin a commit for reproducible indexing
+    paths:
+      include: ["<subdir>/**/*.sql"]
+      exclude: ["**/scratch/**", "**/deprecated/**"]
+    dialect: <postgres|mssql|snowflake|sqlite>
+    database_profile: <profile-id>  # default profile for queries in this repo
+    metadata_convention: front_matter   # front_matter | sidecar
+    trust_tier: reviewed            # reviewed | team | personal
+    review_policy: reviewed_only    # reviewed_only | allow_unreviewed_as_hints
+    refresh: on_demand              # on_demand | "<cron expression>"
+  - id: local_scratch
+    kind: local
+    uri: <absolute-or-relative-path>
+    paths:
+      include: ["**/*.sql"]
+    dialect: <dialect>
+    database_profile: <profile-id>
+    metadata_convention: front_matter
+    trust_tier: personal
+    review_policy: allow_unreviewed_as_hints
+    refresh: on_demand
+
+# --- Databases the plugin may query, read-only (REQ-011, REQ-017, REQ-020) ---
+databases:
+  - id: <profile-id>
+    dialect: <postgres|mssql|snowflake|sqlite>
+    connection:
+      secret_ref: <secret-store-pointer>   # resolved by secrets_management
+    read_only: true                        # required; false is rejected
+    schemas_allowlist: ["<schema>"]
+    tables_allowlist: []                   # empty = every table in allowed schemas
+    row_limit: 10000
+    timeout_s: 60
+    explain_cost_limit: null               # dialect-specific units; null = off
+    max_concurrency: 2
+
+# --- Schema catalog snapshots (REQ-007) --------------------------------------
+catalog:
+  <profile-id>:
+    source: introspect              # introspect | file
+    file: null                      # path to a declared catalog when source=file
+    refresh: daily
+    drift_policy: exclude           # exclude | warn
+
+# --- Canonical concept -> physical column mapping (REQ-008, REQ-013) --------
+# Concept IDs come from knowledge/short_term_markets/taxonomy.json (0063).
+semantic_mapping:
+  <profile-id>:
+    - concept: <0063-concept-id>    # e.g. on-loan quantity, fee rate, utilization
+      expression: "<table>.<column>"
+      grain: "<table grain, e.g. security x counterparty x business date>"
+      pit_column: "<table>.<as_of_column>"
+      viewpoint: <borrower|lender|agent|beneficial_owner>
+      unit: <shares|currency|bps|fraction>
+      day_count: ACT/360            # 0066 default for fee/rebate accrual
+
+# --- Anti-hallucination policy (REQ-009, REQ-010, REQ-012) -------------------
+grounding:
+  mode: full                        # full | retrieval_only (kill switch: no generate path)
+  retrieval_min_score: 0.35
+  max_compose_retries: 2
+  require_citation_per_number: true
+  numeric_tolerance: 1.0e-9
+  require_pit_predicate_for_as_of: true
+  abstain_message: "Not enough verified evidence to answer; missing: {missing}."
+
+# --- Access and redaction (REQ-017) ------------------------------------------
+access:
+  clearance_source: access/roster.yml      # 0058 roster
+  redaction_classes:
+    counterparty_identity: restricted
+    account: restricted
+    client_position: restricted
+  column_classes: {}                        # "<table>.<column>": <class>
+
+# --- Model runtime (via adapters/llm_runtime/; no keys here) -----------------
+llm:
+  runtime_profile: <llm-runtime-profile>
+  temperature: 0.0
+  max_output_tokens: 2000
+
+retrieval:
+  mode: lexical                     # lexical | lexical+embeddings
+  embedding_profile: null           # 0071 embedding profile when enabled
+
+# --- Reviewed learning loop (REQ-014) ----------------------------------------
+feedback:
+  inbox: <path-to-staging-inbox>
+  promoters: ["<reviewer-handle>"]
+  auto_propose_accepted_answers: false
+
+# --- Evaluation and release gate (REQ-016, NFR-002) --------------------------
+eval:
+  golden_sets:
+    - plugins/seclending/fixtures/golden_questions.jsonl   # synthetic, in repo
+    - <adopter-private-golden-set-path>                      # optional, local only
+  thresholds:
+    identifier_fabrication_rate: 0.0
+    unsupported_claim_rate: 0.01
+    viewpoint_error_rate: 0.0
+    execution_accuracy: 0.90
+    abstention_recall: 0.95
+  seeds: [1, 2, 3]
+
+per_call_overrides_allowlist:
+  - as_of
+  - row_limit          # may only be lowered
+  - database_profile   # must be a configured profile

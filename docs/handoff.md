@@ -20,7 +20,7 @@ hooks/stages/run-stage.sh` clean).
 
 1. Choose next: **slice C of `0107`** (lakehouse table formats, data FinOps,
    reference-data pack — the data-engineering thread the owner has been driving) or
-   **`0103` evaluation** (next in roadmap order, What's Next #0). Next free spec: `0113`.
+   **`0103` evaluation** (next in roadmap order, What's Next #0). Next free spec: `0121` (`0113` securities lending intelligence plugin foundation is Draft; `0114`–`0120` reserved).
 
 **How each slice was built (repeat the pattern):** spec/plan/tasks in
 `specs/NNNN-slug/` → stdlib runtime in `src/quantsmith/pipelines/` reusing approved
@@ -374,6 +374,13 @@ nobody noticed.
 | `0107` | **Data engineering expansion** — dbt, streaming/CDC, schema evolution, lakehouse formats, backfill/reprocessing, FinOps, Spark, Ray/Dask, Airflow/Prefect exporters; reference-data pack | `0011`, `0101`, `0102` | What's Next #0 |
 | `0108` | **Ingestion and provenance expansion** — vendor licensing/entitlements, document ingestion, alt-data onboarding, web collection | `0027`, `0039`, `0102` | What's Next #0 |
 | `0109` | **Analyst workflow and delivery** — report packaging, request intake, QA sign-off, Jupyter/Python/SQL tooling | `0014`–`0018`, `0102` citations | What's Next #0 |
+| `0114` | **Seclending plugin: query repository connector & indexer** — configurable query repos, front-matter, exemplars, join graph, feedback inbox; agent `query_librarian` | `0113` approved | `0113` roadmap |
+| `0115` | **Seclending plugin: schema catalog, semantic mapping & access** — catalog snapshots and drift, `0063` concept mapping on `0008`, redaction and clearance; agent `semantic_mapping_steward` | `0114` | `0113` roadmap |
+| `0116` | **Seclending plugin: grounded SQL composition, verification & execution** — retrieval-first composer, deterministic verifier, read-only seam over `0023`; agents `sql_composer`, `seclending_orchestrator` | `0115`, `0070` | `0113` roadmap |
+| `0117` | **Seclending plugin: grounded answering & hallucination evaluation** — grounding check, abstention, golden-question release gate; agent `answer_grounding_reviewer` | `0116` | `0113` roadmap |
+| `0118` | **Seclending plugin: packaging & app surfaces** — `plugins/seclending/` distributable, Python API, MCP server (`0052`), Claude Code plugin (`0110`), SemVer (`0047`) | `0117` | `0113` roadmap |
+| `0119` | **Seclending plugin: analytics agents** — utilization/specials, recall/buy-in risk, lending revenue attribution | `0118`, `0028`, `0066` | `0113` roadmap |
+| `0120` | **Seclending plugin: lending reporting completeness checks** — SFTR / Rule 10c-1a style field checks; never submits | `0119`, `0069` when written | `0113` roadmap |
 
 Specs `0063-short-term-markets-domain-foundation/`,
 `0066-securities-lending-model-correction/`,
@@ -416,7 +423,7 @@ designs**: create and
 approve one only when the foundation it consumes — `0063` or `0072` — has frozen
 that contract and the prior dependency named above is satisfied. Do not add
 agents merely to fill the map; prefer a canonical knowledge artifact or tested
-runtime that an existing agent can use. **Next unreserved spec number: `0113`** (`0083`–`0092` are the venture-intelligence foundation and its reserved children, item 32; `0093` is the visualization packs spec; `0094` is the Asian-language NLP foundation; `0095` is the venture predictive-model baselines; `0096` is request routing; `0097` is the test-engineering runtime; `0098` is the model testing helpers; `0099` is the Dataset Investigator; `0100` is the agent-skills upstream integration; `0101` is the concurrent pipeline fleet; `0102`–`0109` are the platform expansion roadmap, What's Next #0; `0110` is the skills export and registry; `0111` is change-safe data engineering, slice A of `0107`; `0112` is data-engineering tooling, slice B of `0107`).
+runtime that an existing agent can use. **Next unreserved spec number: `0121`** (`0113`–`0120` are the securities lending intelligence plugin foundation and its reserved children, see `specs/0113-seclending-intelligence-plugin/roadmap.md`; `0083`–`0092` are the venture-intelligence foundation and its reserved children, item 32; `0093` is the visualization packs spec; `0094` is the Asian-language NLP foundation; `0095` is the venture predictive-model baselines; `0096` is request routing; `0097` is the test-engineering runtime; `0098` is the model testing helpers; `0099` is the Dataset Investigator; `0100` is the agent-skills upstream integration; `0101` is the concurrent pipeline fleet; `0102`–`0109` are the platform expansion roadmap, What's Next #0; `0110` is the skills export and registry; `0111` is change-safe data engineering, slice A of `0107`; `0112` is data-engineering tooling, slice B of `0107`).
 Reserving a number here does not create the directory; copy `templates/spec/`
 only when that slice becomes active.
 

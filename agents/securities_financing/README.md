@@ -38,6 +38,16 @@ canonical spec `0063` pack at `knowledge/short_term_markets/` and the standard
 privately redefining repo/reverse-repo, GC/special, fee/rebate, haircut/margin,
 or rate/price/yield semantics.
 
+## Planned: Securities Lending Intelligence Plugin
+
+Spec `0113` (Draft) designs a separate, app-embeddable plugin that answers
+securities-lending questions from the adopter's own databases by learning from
+a configurable repository of reviewed SQL queries, with structural limits on
+hallucination (catalog-resolved identifiers, verified read-only execution,
+cited numbers, `0063` viewpoint checks, abstention). It reuses the agents above
+and proposes a coverage-gated `seclending_intelligence/` subgroup built by
+children `0114`–`0120`. See `specs/0113-seclending-intelligence-plugin/`.
+
 ## Shared Principles
 
 Every securities-financing agent upholds the constitution and the quant standards:
