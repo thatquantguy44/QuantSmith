@@ -18,6 +18,9 @@ research (`0121`); and three loop agents, `query_librarian`,
 composition, verification, and execution (`0116`), grounded answers and the
 evaluation gate (`0117`), the MCP server and Claude Code plugin (`0118`).
 
+**Contributors:** current state, the next build (`0116`), open decisions, and
+repo conventions are in `specs/0113-seclending-intelligence-plugin/handoff.md`.
+
 Standard library only (Python 3.11+); no runtime dependencies. The governed
 bridge (`sfmeridian.governed`) uses the QuantSmith SDK when it is importable
 (`0081` pack resolution and validation, `0008` metric compilation) and

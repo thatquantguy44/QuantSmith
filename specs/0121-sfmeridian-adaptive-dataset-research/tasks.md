@@ -66,5 +66,5 @@ All in `tests/test_sfmeridian_research.py`.
 
 - AC-016 live connector smoke when nonproduction environments exist.
 - Owner decision on SQL Server (POC dialect).
-- `0115` catalog snapshots replace hand-declared dataset columns.
+- Check declared dataset columns against `0115` catalog snapshots (snapshots exist; the check is not wired yet).
 - `0116` reuses these templates' static check in its verifier.

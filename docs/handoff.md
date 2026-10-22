@@ -4,6 +4,18 @@
 
 Start with this section; everything else in this file is background.
 
+**SFMeridian thread (2026-10-22, separate branch).** The securities finance
+intelligence plugin (`plugins/sfmeridian/`, specs `0113`–`0121`) lives on branch
+`claude/seclending-intelligence-plugin` (pushed, **not merged**, no PR yet). Built
+and Approved: `0114` (indexer, tool registry, loop harness, `query_librarian`),
+`0115` (catalog, drift, governed mapping, access, `semantic_mapping_steward`),
+`0121` (dataset research, `lending_data_researcher`). **Next: `0116`** (governed
+tier, SQL verify/execute/compose, `sql_composer`, `sfmeridian_orchestrator`).
+Everything a new agent needs — state, code map, the `0116` starting brief, open
+owner decisions, gotchas — is in
+[`specs/0113-seclending-intelligence-plugin/handoff.md`](../specs/0113-seclending-intelligence-plugin/handoff.md).
+The rest of this section describes `main`.
+
 **Branch state.** The pipeline-fleet work is merged into `main` via PR #123;
 `main` is synchronized with `origin/main` and the worktree is clean. CI-equivalent
 checks passed locally (full suite 1486 passed; `QF_STAGE_ENFORCE=1

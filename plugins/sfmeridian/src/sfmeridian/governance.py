@@ -4,10 +4,10 @@ Spec ``0114`` REQ-009 (realizing ``0113`` REQ-015, REQ-021, REQ-027, REQ-028).
 The machine-readable catalogs under ``data/`` are generated from, and must
 agree with, the approved ``0113`` documents:
 
-* ``coverage.json`` — the nine SFMeridian agents (C-01…C-09), each with a
+* ``coverage.json`` — the ten SFMeridian agents (C-01…C-10), each with a
   distinct workflow, a never-boundary, its creating child spec, and its loop
   (tools, verifiers, human checkpoints, stop condition);
-* ``handoffs.json`` — the 34 existing agents SFMeridian hands work to;
+* ``handoffs.json`` — the 37 existing agents SFMeridian hands work to;
 * ``tooling_catalog.json`` — the screened third-party catalog;
 * ``agents/*.json`` — manifests of built loop agents.
 

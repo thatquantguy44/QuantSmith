@@ -130,7 +130,7 @@ offline tests); lexical retrieval only.
 
 - Assumption: adopters can add front-matter to the queries they want treated
   as reviewed; others index as hints or not at all, by repository policy.
-- Open (carried from `0113`, not blocking this phase): the `0081` pack reviewer.
+- Resolved 2026-10-22: the `0081` pack reviewer is Joshua Lutkemuller, CFA (review pending).
 
 ## Exceptions
 

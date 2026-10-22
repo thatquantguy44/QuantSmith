@@ -112,11 +112,13 @@ criteria are checked by gates and review.
 
 Tracked work intentionally deferred (no silent "temporary" shortcuts — P8).
 
-- Name the reviewer for the `0081` `securities_financing_prime` pack (owner
-  action; Phase 0 exit). Until then governed answers carry the unreviewed-pack
+- `0081` `securities_financing_prime` pack reviewer named 2026-10-22 (Joshua
+  Lutkemuller, CFA). The review itself, and of the six amendments `0115`
+  staged, is pending; until then governed answers carry the unreviewed-pack
   caveat and write-back stays refused.
 - Viewpoint, dialects, retrieval mode, and `0119`/`0120` order resolved
-  2026-10-22 (`spec.md`). The pack reviewer remains open (needed for `0115`).
+  2026-10-22 (`spec.md`).
+- Next build: `0116` (see `handoff.md` §3 for the starting brief).
 - Fine-tuning on promoted exemplars: roadmap Phase 6, only if the evaluation
   shows a gap retrieval cannot close.
 - Expose the query index as `0052` resources (`knowledge://sfmeridian/...`):

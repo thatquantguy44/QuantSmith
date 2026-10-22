@@ -1,6 +1,6 @@
 # SFMeridian Agents
 
-SFMeridian is the securities finance intelligence plugin (specs `0113`–`0120`):
+SFMeridian is the securities finance intelligence plugin (specs `0113`–`0121`):
 grounded answers to securities-lending questions from an adopter's own
 databases, learned from a configurable repository of reviewed SQL queries.
 The runtime lives in `plugins/sfmeridian/` (package `sfmeridian`).
@@ -27,6 +27,9 @@ agents call the same tools.
 | `lending_reporting_check` | C-09 | planned | `0120` |
 
 The full roster, each planned agent's loop (tools, verifiers, human
-checkpoints, stop condition), and the 34 existing agents SFMeridian hands work
+checkpoints, stop condition), and the 37 existing agents SFMeridian hands work
 to are machine-readable in `plugins/sfmeridian/src/sfmeridian/data/coverage.json`
 and `handoffs.json`, validated by `python -m sfmeridian governance validate`.
+
+Current build state and the next pickup point (`0116`: `sql_composer`,
+`sfmeridian_orchestrator`) are in `specs/0113-seclending-intelligence-plugin/handoff.md`.

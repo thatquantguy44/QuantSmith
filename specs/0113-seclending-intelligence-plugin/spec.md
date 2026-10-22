@@ -298,6 +298,11 @@ Why it needs its own foundation rather than a prompt on top of
   extra, enabled only if the golden set shows a retrieval gap.
 - Order: `0119` analytics before `0120` reporting checks (as `roadmap.md`
   assumes), unless an adopter reporting deadline reorders them.
+- Pack reviewer: Joshua Lutkemuller, CFA reviews the `0081`
+  `securities_financing_prime` pack and its proposed amendments; the review
+  itself is pending (the pack stays `draft`).
+- Build order: `0115` then `0116` (`0114`, `0115`, and `0121` are built; current
+  state and the pickup point are in `handoff.md`).
 
 **Still open:**
 

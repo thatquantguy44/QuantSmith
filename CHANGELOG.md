@@ -21,6 +21,17 @@ patterns locally rather than expecting them to update in place.
 ## [Unreleased]
 
 ### Added
+- SFMeridian securities finance intelligence plugin (specs `0113`–`0121`; branch
+  `claude/seclending-intelligence-plugin`): a separate stdlib-only distributable under
+  `plugins/sfmeridian/`. `0114` adds fail-closed configuration, query-repository indexing
+  (local, pinned Git, object store), cited exemplars, BM25 search, a reviewed feedback inbox,
+  the shared tool registry, the agent loop harness, and `query_librarian`. `0115` adds
+  catalog snapshots, classified diffs, drift exclusion, a governed semantic mapping on the
+  `0081` `securities_financing_prime` pack and `0063` with `0008` ratio rules, metric-source
+  availability, pack-amendment proposals for the named reviewer, `0058` clearance and column
+  redaction, and `semantic_mapping_steward`. `0121` adds adaptive dataset research (the
+  Dataset Intake Investigator POC) and `lending_data_researcher`. Handoff:
+  `specs/0113-seclending-intelligence-plugin/handoff.md`.
 - Data-engineering tooling (spec `0112`, slice B of `0107`): `pipeline_fleet.to_airflow` / `to_prefect` exporters
   for `0101` fleets with warnings for every non-native limit; `dbt_review.review_manifest` for dbt `manifest.json`
   (owners, primary-key tests, contracts, incremental safety, wall-clock reads, freshness, snapshots);

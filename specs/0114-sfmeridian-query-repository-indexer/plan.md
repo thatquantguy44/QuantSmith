@@ -147,4 +147,4 @@ agent folder. Index health is reported by `python -m sfmeridian status`.
 
 ## Open Questions
 
-- None blocking. The `0081` pack reviewer is needed for `0115`.
+- None blocking. (The `0081` pack reviewer was named 2026-10-22 and `0115` is built.)

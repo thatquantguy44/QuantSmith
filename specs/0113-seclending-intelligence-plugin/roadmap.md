@@ -7,6 +7,9 @@
 > child specs, written and approved one at a time through the normal SDD gates.
 > A phase starts only when the previous phase's exit criteria hold. Durations
 > are planning estimates for one engineer, not commitments.
+>
+> **Current state and where to pick up: [`handoff.md`](handoff.md).** Built:
+> Phases 0, 1, 2, 2b. Next: Phase 3 (`0116`).
 
 ## Reserved Child Specs
 
@@ -35,7 +38,7 @@ lender viewpoint; PostgreSQL, Oracle, Databricks; lexical retrieval; `0119`
 before `0120`) and a named reviewer assigned for the `0081` `securities_financing_prime` pack; `spec`,
 `spec-index`, and `handoff-sync` gates clean.
 
-### Phase 1 — Learn the query repository (`0114`) · ~2–3 weeks
+### Phase 1 — Learn the query repository (`0114`) · built
 
 A configured repository (local and Git at a pinned ref) indexes into
 exemplars, join graph, metric candidates, and a lexical index; the feedback
@@ -71,7 +74,7 @@ of `0116`'s verifier.
 **Exit:** `0121` AC-001–AC-024 pass except AC-016 (live connectors), which
 stays open until nonproduction environments exist.
 
-### Phase 3 — Grounded SQL (`0116`) · ~3–4 weeks · **MVP**
+### Phase 3 — Grounded SQL (`0116`) · ~3–4 weeks · **MVP** · **next (not started)**
 
 Retrieval-first composition, deterministic verification, read-only execution,
 provenance and replay; the end-to-end `ask` tool in shadow mode.
@@ -81,6 +84,10 @@ question that maps to a governed metric is answered at tier `governed`; the adve
 rejects 100% of cases; identifier-fabrication rate in *executed* SQL is 0 on a
 preliminary golden set; `ask` answers lookup and aggregation questions on the
 synthetic database with citations.
+
+**Starting brief:** `handoff.md` §3 (what to build, which `0114`/`0115` modules
+and `0080`/`0023` interfaces each piece plugs into, and the fixture database it
+still needs).
 
 ### Phase 4 — Grounded answers, measured (`0117`) · ~2–3 weeks
 

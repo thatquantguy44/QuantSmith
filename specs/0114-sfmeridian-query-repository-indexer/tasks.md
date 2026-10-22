@@ -59,7 +59,7 @@ All in `tests/test_sfmeridian_indexer.py`.
 
 ## Follow-ups
 
-- `0115`: catalog snapshots and drift; bind canonical metrics; needs the `0081`
-  pack reviewer named.
+- `0115`: catalog snapshots and drift; bind canonical metrics — built
+  2026-10-22 (pack reviewer named; review pending).
 - Admission reviews (`0113` T-037) before any optional extra ships.
 - Packaged test entry point inside the distributable (`0118`).
