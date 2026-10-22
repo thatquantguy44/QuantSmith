@@ -24,7 +24,7 @@ query_repositories:
     paths:
       include: ["<subdir>/**/*.sql"]
       exclude: ["**/scratch/**", "**/deprecated/**"]
-    dialect: <postgres|mssql|snowflake|sqlite>
+    dialect: <postgres|oracle|databricks|sqlite>
     database_profile: <profile-id>  # default profile for queries in this repo
     metadata_convention: front_matter   # front_matter | sidecar
     trust_tier: reviewed            # reviewed | team | personal
@@ -45,7 +45,7 @@ query_repositories:
 # --- Databases the plugin may query, read-only (REQ-011, REQ-017, REQ-020) ---
 databases:
   - id: <profile-id>
-    dialect: <postgres|mssql|snowflake|sqlite>
+    dialect: <postgres|oracle|databricks|sqlite>
     connection:
       secret_ref: <secret-store-pointer>   # resolved by secrets_management
     read_only: true                        # required; false is rejected

@@ -20,7 +20,7 @@ hooks/stages/run-stage.sh` clean).
 
 1. Choose next: **slice C of `0107`** (lakehouse table formats, data FinOps,
    reference-data pack — the data-engineering thread the owner has been driving) or
-   **`0103` evaluation** (next in roadmap order, What's Next #0). Next free spec: `0121` (`0113` SFMeridian securities finance intelligence plugin foundation is Draft; `0114`–`0120` reserved).
+   **`0103` evaluation** (next in roadmap order, What's Next #0). Next free spec: `0121` (`0113` SFMeridian securities finance intelligence plugin foundation is Approved; `0114` in build; `0115`–`0120` reserved).
 
 **How each slice was built (repeat the pattern):** spec/plan/tasks in
 `specs/NNNN-slug/` → stdlib runtime in `src/quantsmith/pipelines/` reusing approved

@@ -1,9 +1,9 @@
 # Spec: SFMeridian — Securities Finance Intelligence Plugin (Foundation)
 
 - **ID:** 0113-seclending-intelligence-plugin
-- **Status:** Draft
+- **Status:** Approved
 - **Author:** Joshua Lutkemuller, CFA
-- **Approver:**
+- **Approver:** Joshua Lutkemuller, CFA (2026-10-22)
 - **Last updated:** 2026-10-22 (REQ-021/REQ-022 handoffs; REQ-023–REQ-026 governed-first tier on `0080`/`0081`; REQ-027 tooling catalog; named SFMeridian)
 - **Product name:** SFMeridian (distributable `sfmeridian`). Only the plugin
   carries this name; QuantSmith is unchanged. The spec directory keeps its
@@ -161,7 +161,7 @@ Why it needs its own foundation rather than a prompt on top of
 | REQ-017 | The plugin shall enforce access and data-handling controls: database credentials only via `secrets_management` pointers, per-profile allowlists of schemas/tables, column-level redaction classes (counterparty identity, account, client positions), and `0052`/`0058` caller clearance on retrieval and results. | must |
 | REQ-018 | The SDK shall publish an ordered child-spec roadmap (`0114`–`0120`) with scope, dependencies, the coverage rows each closes, and phase exit criteria (`roadmap.md`). | must |
 | REQ-019 | The SDK shall define canonical workflows at charter level: ad-hoc desk question → cited answer; daily utilization and specials monitor; recall and buy-in risk review; lending revenue attribution; short-side borrow-cost feed into `financing_cost_analysis`/backtests; and query-repository onboarding. | should |
-| REQ-020 | The plugin shall support **multiple database profiles and dialects** (at least SQLite for tests, PostgreSQL, SQL Server, Snowflake) behind one interface, with dialect differences resolved in configuration and the execution seam, not in agents. | should |
+| REQ-020 | The plugin shall support **multiple database profiles and dialects** (SQLite for offline tests; PostgreSQL, Oracle, and Databricks SQL as the first adopter targets; SQL Server and Snowflake later) behind one interface, with dialect differences resolved in configuration and the execution seam, not in agents. | should |
 | REQ-021 | The plugin shall **hand off, not re-implement**, specialist work to existing agents in five groups — optimization (`optimization/`), risk (`risk`, `enterprise_risk/`), portfolio management (`portfolio_management/`), knowledge (`knowledge/`), and machine learning (`machine_learning/`) — through declared handoff contracts naming the trigger, the plugin evidence passed (run IDs, point-in-time panels, citations), the expected output, and the agent's never-boundary; no new plugin agent may hold a workflow one of these agents already holds. | must |
 | REQ-023 | The plugin shall answer **governed-first**: it shall pass each question to `0080` (`answer()` with the configured interpreter, `0081` pack selection, and caller clearance) before any SQL composition. It shall fall through to the reviewed-query tiers only when `0080` reports that the question references no governed metric or dimension; when `0080` returns a clarification among governed candidates, the plugin shall return that clarification and shall not fall through. Every answer records its tier: `governed`, `reuse`, `adapt`, or `generate`. | must |
 | REQ-024 | The plugin shall supply `0080`'s read-only `Reader`: each governed metric's base measures are bound in configuration to a reviewed **metric source query** from the query repository, run through `sql.verify`/`sql.execute` with the plan's as-of and filters bound as parameters, and returned as `0008` `Fact` rows with provenance; a metric whose source query is missing, unreviewed, or drifted is unavailable to the governed tier, never silently served. | must |
@@ -207,7 +207,7 @@ Why it needs its own foundation rather than a prompt on top of
 | AC-017 | Given a caller without clearance for counterparty identity, when an answer depends on a counterparty-level result, then counterparty identifiers are redacted or the answer is withheld, and no credential appears in any log, trace, or index artifact. | REQ-017, NFR-004 |
 | AC-018 | Given `roadmap.md` and `specs/README.md`, when read, then `0114`–`0120` are reserved with scope, dependency, closed coverage rows, and phase exit criteria. | REQ-018 |
 | AC-019 | Given the workflow charters, when read, then each of the six REQ-019 workflows names its agents, tools, inputs, outputs, review gate, and the evidence it must cite. | REQ-019 |
-| AC-020 | Given the same golden questions against SQLite and one other configured dialect fixture, when run, then dialect differences are handled by configuration and the execution seam, and no agent prompt or tool contract changes. | REQ-020 |
+| AC-020 | Given the same golden questions against SQLite and the PostgreSQL, Oracle, and Databricks SQL dialect fixtures, when run, then dialect differences are handled by configuration and the execution seam, and no agent prompt or tool contract changes. | REQ-020 |
 | AC-021 | Given the plan, when read, then latency/cost budgets, incremental re-indexing, and the `EXPLAIN` cost guard are specified with configurable limits. | NFR-005 |
 | AC-022 | Given a repo-wide scan, when examples, fixtures, and golden questions are searched, then every record is flagged synthetic per `0025` and none references a real counterparty, position, or firm query. | NFR-006 |
 | AC-023 | Given the tool contract and config schema, when inspected, then both carry versions, and the plan states the SemVer and migration-note rules. | NFR-007 |
@@ -281,19 +281,27 @@ Why it needs its own foundation rather than a prompt on top of
   through a service account managed by the adopter's secret store.
 - Assumption: an LLM runtime is available through `adapters/llm_runtime/`;
   the verifier, executor, and grounding checks do not depend on which model.
-- Open question: primary viewpoint for the first deployment — agency lender /
-  beneficial owner, prime broker, or short-side borrower? Affects default
-  semantic mappings and which analytics agent (`0119`) is built first.
-- Open question: which non-SQLite dialect is the first adopter target
-  (PostgreSQL, SQL Server, or Snowflake)?
-- Open question: is an embedding model permitted in the adopter environment,
-  or must retrieval stay lexical (BM25) only? The design supports both.
-- Open question: who is the named domain owner who will review the `0081`
+**Resolved 2026-10-22 (owner decisions, recorded at approval):**
+
+- Viewpoint: the first deployment serves the **agency lender / beneficial
+  owner**. Default concept viewpoints are `lender`/`beneficial_owner`; fees are
+  income; `lending_revenue_analyst` (C-08) is the first `0119` agent, then
+  `utilization_specials_analyst` (C-06), then `recall_buyin_risk_analyst` (C-07).
+- Dialects: the first adopter targets are **PostgreSQL, Oracle, and Databricks
+  SQL** (REQ-020). SQLite stays the offline test fixture; SQL Server and
+  Snowflake move to later.
+- Retrieval: **lexical (BM25) only** for now; embeddings remain an optional
+  extra, enabled only if the golden set shows a retrieval gap.
+- Order: `0119` analytics before `0120` reporting checks (as `roadmap.md`
+  assumes), unless an adopter reporting deadline reorders them.
+
+**Still open:**
+
+- Who is the named domain owner who will review the `0081`
   `securities_financing_prime` pack (and its proposed amendments)? Until
   then every governed answer carries the unreviewed-pack caveat and
-  write-back stays refused.
-- Open question: is `0119`'s analytics work wanted before the regulatory
-  completeness checks (`0120`), as `roadmap.md` assumes?
+  write-back stays refused. Needed before `0115` is approved, not before
+  `0114`.
 
 ## Exceptions
 

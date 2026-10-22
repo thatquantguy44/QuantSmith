@@ -29,9 +29,9 @@ roster and coverage matrix, evaluation protocol, and the governed-first design
 on `0080`/`0081`. Ships documents only.
 
 **Exit:** `0113` approved; `tooling_catalog.md` screened (done) with
-admission reviews scheduled for the `adopt` entries; the open questions in `spec.md` answered (first
-viewpoint, first dialect, embeddings permission, `0119`/`0120` order) and a
-named reviewer assigned for the `0081` `securities_financing_prime` pack; `spec`,
+admission reviews scheduled for the `adopt` entries; the open questions in `spec.md` answered (done 2026-10-22: agency
+lender viewpoint; PostgreSQL, Oracle, Databricks; lexical retrieval; `0119`
+before `0120`) and a named reviewer assigned for the `0081` `securities_financing_prime` pack; `spec`,
 `spec-index`, and `handoff-sync` gates clean.
 
 ### Phase 1 — Learn the query repository (`0114`) · ~2–3 weeks
@@ -75,7 +75,7 @@ synthetic golden set over three seeds; the eval report is reproducible.
 ### Phase 5 — Ship as a plugin (`0118`) · ~2 weeks
 
 Distributable package; Python API, MCP server, Claude Code plugin; contract
-tests; second dialect.
+tests; PostgreSQL, Oracle, and Databricks SQL dialects.
 
 **Exit:** AC-001, AC-002, AC-020, AC-023 pass; `sfmeridian 1.0.0`
 tagged with a release note; a reference app (a minimal CLI chat over the MCP

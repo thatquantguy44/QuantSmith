@@ -120,6 +120,19 @@ a client library is only an adapter to a registered source.
 | Bloomberg wrappers (pdblp, BloombergFetch, Rblpapi) | various | assess | adopter-licensed | Prices and reference data where the adopter licenses Bloomberg | Adopter-local; never in repo fixtures. |
 | commercial data APIs (Commercial & Proprietary Services section) | various | exclude | — | — | Vendor selection is a non-goal; an adopter registers a licensed vendor via `0027`. |
 
+### Database drivers and SQL parsing (extras `[postgres]`, `[oracle]`, `[databricks]`, `[sqlparse]`)
+
+Not in the community list; added for the first adopter targets decided
+2026-10-22 (PostgreSQL, Oracle, Databricks SQL). The SQLite fixture uses the
+standard library.
+
+| Library | Lang | Ring | SFMeridian use | Component / agent | Notes |
+| --- | --- | --- | --- | --- | --- |
+| psycopg (v3) | Python | trial | PostgreSQL read-only profiles; CI execution fixture | `execute/`, `catalog/` (`0115`/`0116`) | Admission review before `0116` ships. |
+| oracledb | Python | trial | Oracle read-only profiles (thin mode, no client install) | `execute/`, `catalog/` | Admission review before `0116` ships. |
+| databricks-sql-connector | Python | trial | Databricks SQL warehouse profiles | `execute/`, `catalog/` | Unity Catalog introspection via `information_schema`; admission review before `0116`. |
+| sqlglot | Python | trial | Strict multi-dialect parsing for the verifier (Postgres, Oracle, Databricks) | `verify/` (`0116`) | Optional; the stdlib tokenizer fails closed without it. |
+
 ### Delivery and spreadsheets (extra `[excel]`)
 
 | Library | Lang | Ring | SFMeridian use | Component / agent | Notes |
@@ -163,6 +176,5 @@ No entry addresses securities lending directly: none covers lendable
 inventory, fee/rebate data models, recalls, or SFTR / Rule 10c-1a
 reporting. Those stay with SFMeridian's own components and the existing
 agents. Two needs the list does not meet and the plan already names:
-a stricter SQL parser for the verifier (`[sqlparse]` extra, e.g. `sqlglot`,
-needs its own admission review) and database drivers (`[postgres]`,
-`[mssql]`, `[snowflake]`).
+a stricter SQL parser for the verifier and database drivers; both are now
+catalogued above as `trial`, pending admission review.

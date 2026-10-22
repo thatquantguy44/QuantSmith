@@ -47,7 +47,7 @@
 | T-022 | Implement the MCP server surface on the `0052` adapter contract (stdio JSON-RPC). | REQ-002, AC-002 | `0118` | todo | |
 | T-023 | Package the Claude Code plugin (skills + `.mcp.json`) with `0110` tooling; cross-surface contract tests; SemVer and migration-note rules; release notify per `0047`. | REQ-002, NFR-007, AC-002, AC-023 | `0118` | todo | |
 | T-024 | Publish the child-spec roadmap with scope, dependencies, closed coverage rows, and phase exit criteria; reserve `0114`–`0120` in the spec index and handoff. | REQ-018, AC-018 | `0113` | done | `roadmap.md`; `specs/README.md`; `docs/handoff.md`. |
-| T-025 | Add a second dialect fixture (PostgreSQL or the first adopter dialect) and run the golden set against it unchanged. | REQ-020, AC-020 | `0118` | todo | Blocked on open question: first adopter dialect. |
+| T-025 | Add PostgreSQL, Oracle, and Databricks SQL dialect fixtures (identifier quoting, parameter style, `LIMIT`/`FETCH FIRST`, date functions, catalog introspection) and run the golden set against them unchanged. | REQ-020, AC-020 | `0115` (introspection), `0116` (verify/execute), `0118` (golden set) | todo | Decided 2026-10-22. PostgreSQL executes in CI; Oracle and Databricks verify statically plus adopter-side execution. |
 | T-026 | Create analytics agents C-06/C-07/C-08 and workflows W2–W5; then C-09 and the reporting-completeness workflow. | REQ-015, REQ-019 | `0119`, `0120` | todo | |
 | T-027 | Verify repo gates and disclosure: `spec`, `spec-index`, `handoff-sync`, `agent-catalog`, `skills-export`, `secret-scan`, `data-provenance`; confirm no existing agent or runtime behaviour changed. | NFR-006, NFR-008, NFR-009, AC-022, AC-024 | `0113`, then every child | in-progress | `0113` adds documents only. |
 | T-028 | Publish the specialist handoff map (optimization, risk, portfolio management, knowledge, machine learning) with trigger, evidence, output, never-boundary, and workflow per agent; add workflows W7–W12. | REQ-021, AC-025 | `0113` (`plan.md`) | done | Machine-checkable `handoffs.json` follows in `0114` alongside `coverage.json`. |
@@ -110,8 +110,8 @@ Tracked work intentionally deferred (no silent "temporary" shortcuts — P8).
 - Name the reviewer for the `0081` `securities_financing_prime` pack (owner
   action; Phase 0 exit). Until then governed answers carry the unreviewed-pack
   caveat and write-back stays refused.
-- Resolve the four open questions in `spec.md` (viewpoint, dialect, embeddings
-  permission, `0119` vs `0120` order) before `0115` is approved.
+- Viewpoint, dialects, retrieval mode, and `0119`/`0120` order resolved
+  2026-10-22 (`spec.md`). The pack reviewer remains open (needed for `0115`).
 - Fine-tuning on promoted exemplars: roadmap Phase 6, only if the evaluation
   shows a gap retrieval cannot close.
 - Expose the query index as `0052` resources (`knowledge://sfmeridian/...`):

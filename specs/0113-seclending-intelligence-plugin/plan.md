@@ -1,7 +1,7 @@
 # Plan: SFMeridian — Securities Finance Intelligence Plugin (Foundation)
 
 - **Spec:** 0113-seclending-intelligence-plugin (`spec.md`)
-- **Status:** Draft
+- **Status:** Approved
 - **Author:** Joshua Lutkemuller, CFA
 - **Last updated:** 2026-10-22 (governed-first tier on `0080`/`0081`)
 
@@ -114,7 +114,8 @@ plugins/sfmeridian/
   tests/
 ```
 
-Optional extras are drawn only from the governed tooling catalog
+Database-driver extras for the first targets are `[postgres]`, `[oracle]`, and
+`[databricks]` (catalog rows pending admission review). Optional extras are drawn only from the governed tooling catalog
 (`tooling_catalog.md`, REQ-027): `[data]`, `[conventions]`, `[calendars]`,
 `[timeseries]`, `[validation]`, `[optimization]`, `[sources]`, `[excel]`, plus
 the database-driver and `[sqlparse]` extras below.
@@ -124,7 +125,7 @@ dependency used only by `governed/` (the stdlib-only `nl_analytics`,
 `metrics_semantic_layer`, and `analytics_packs` modules, NFR-003); no other
 plugin module imports `quantsmith`, so a `0080` interface change is absorbed
 in one place (RISK-013). Optional extras:
-`[postgres]`, `[mssql]`, `[snowflake]` (drivers), `[sqlparse]` (a stricter SQL
+`[postgres]`, `[oracle]`, `[databricks]` (drivers; SQL Server and Snowflake later), `[sqlparse]` (a stricter SQL
 parser, e.g. `sqlglot`), `[embeddings]` (via the `0071` seam). Without
 `[sqlparse]` the verifier uses a conservative stdlib tokenizer that *rejects*
 any construct it cannot resolve — it never fails open.
