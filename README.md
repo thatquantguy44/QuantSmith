@@ -39,9 +39,9 @@ signal and model **reproducible, leakage-safe, and traceable to a spec**.
 [![CI](https://github.com/joshualutkemuller/QuantSmith/actions/workflows/ci.yml/badge.svg)](https://github.com/joshualutkemuller/QuantSmith/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](pyproject.toml)
 [![Approach: Spec-Driven](https://img.shields.io/badge/Approach-Spec--Driven-ff6f00)](instructions/spec_driven_development.md)
-[![Agents: 212](https://img.shields.io/badge/Agents-212-6f42c1)](agents/README.md)
+[![Agents: 213](https://img.shields.io/badge/Agents-213-6f42c1)](agents/README.md)
 [![Quality Gates: 37](https://img.shields.io/badge/Quality%20Gates-37-2ea44f)](hooks/README.md)
-[![Specs: 91](https://img.shields.io/badge/Specs-91-0969da)](specs/README.md)
+[![Specs: 92](https://img.shields.io/badge/Specs-92-0969da)](specs/README.md)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](.github/GIT_GUIDELINES.md)
 
 <br/>
@@ -91,7 +91,7 @@ signal and model **reproducible, leakage-safe, and traceable to a spec**.
 | 🧠 Plan research from a hypothesis | Spec-driven planning agents + traceable requirements |
 | 🔎 Catch leakage & time-alignment bugs | Point-in-time standards + `leakage`/`backtest` gates |
 | 📝 Document features, models, backtests | Templates, cards, and reproducible run artifacts |
-| 🤖 Reuse research workflows | 212 narrow, inspectable agent roles across the stack |
+| 🤖 Reuse research workflows | 213 narrow, inspectable agent roles across the stack |
 | 🚦 Stop mistakes before commit/push | 37 quality gates, advisory by default, CI-enforceable |
 | 🗣️ Share a common vocabulary | An [agentic dictionary](agentic_dictionary.md) for the team |
 
@@ -565,6 +565,7 @@ the [spec index](specs/README.md).
 | [`0095`](specs/0095-venture-predictive-model-baselines/) | Venture predictive-model reference baselines — point-in-time validation harness, computed deployability gate, competing-risks survival, emergence, organization-level link prediction, anomaly, and chain-ladder nowcast; synthetic validation only, no model usable for decisions | `venture_models/` package |
 | [`0096`](specs/0096-venture-request-routing-and-orchestrator/) | Venture request routing — reviewable rules turn a request into an ordered agent chain with review gates, decision owner, strictest class, and clearance; forbidden requests are refused with the human who owns each; plus the `venture_orchestrator` agent | `venture_routing.py` |
 | [`0094`](specs/0094-asian-language-nlp-foundation/) | Asian-language NLP foundation — dependency-free language/script identification, a segmentation baseline with a declared segmenter slot, rule-based amount/currency/date/era-year/fiscal-period extraction with verbatim spans and offsets (Mandarin, Japanese, Korean, Thai, Vietnamese, Indonesian/Malay, Filipino, Russian, Kazakh, Uzbek, English), per-language evaluation that refuses pooled scores, and a baseline-vs-model comparison that never overwrites | `asian_nlp/` package (`src/quantsmith/asian_nlp/`) |
+| [`0115`](specs/0115-sfmeridian-schema-catalog-mapping-access/) | SFMeridian schema catalog, semantic mapping & access — dated catalog snapshots and drift exclusion, governed concept bindings on the `0081` pack and `0063` taxonomy with `0008` ratio rules, metric-source availability, pack-amendment proposals for the named reviewer, `0058` clearance and column redaction; loop agent `semantic_mapping_steward` | `plugins/sfmeridian/src/sfmeridian/` (`catalog.py`, `mapping.py`, `access.py`) |
 | [`0121`](specs/0121-sfmeridian-adaptive-dataset-research/) | SFMeridian dataset research — adaptive, budgeted research of lending datasets with pushed-down aggregates, a securities-finance rule pack, evidence-linked recommendations, and reproducible bundles (POC incorporated) | `plugins/sfmeridian/src/sfmeridian/research/` |
 | [`0114`](specs/0114-sfmeridian-query-repository-indexer/) | SFMeridian Phase 1 — configurable query-repository indexing, cited exemplars and learned join/metric structure, reviewed feedback inbox, shared tool registry, agent loop harness, and the `query_librarian` loop agent | `plugins/sfmeridian/` *(separate distributable `sfmeridian`)* |
 | [`0112`](specs/0112-data-engineering-tooling/) | Data-engineering tooling — Airflow and Prefect exporters for `0101` fleets, dbt manifest review, partition sizing, skew and salting, determinism lint for PySpark/Dask | `dbt_review.py`, `distributed_compute.py`, `pipeline_fleet.py` *(extended)* |

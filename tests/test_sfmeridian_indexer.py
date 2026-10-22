@@ -379,7 +379,7 @@ def test_ac009_governance_catalogs_and_imports():
     """AC-009: coverage, handoffs, tooling, manifests valid; strict lists pending admissions; mutations fail."""
     report = governance.validate_all(ROOT / "agents", registry=default_registry())
     assert report["ok"], report["errors"]
-    assert report["counts"] == {"coverage_rows": 10, "built_agents": 2, "handoffs": 37, "manifests": 2,
+    assert report["counts"] == {"coverage_rows": 10, "built_agents": 3, "handoffs": 37, "manifests": 3,
                                 "tooling_entries": report["counts"]["tooling_entries"]}
     strict = governance.validate_all(ROOT / "agents", strict=True, registry=default_registry())
     assert not strict["ok"] and "statsmodels" in strict["pending_admissions"]

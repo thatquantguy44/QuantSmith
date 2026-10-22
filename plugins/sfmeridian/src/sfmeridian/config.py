@@ -143,6 +143,8 @@ _ENUMS = {
     ("query_repositories", "review_policy"): ("reviewed_only", "allow_unreviewed_as_hints"),
     ("grounding", "mode"): ("full", "retrieval_only"),
     ("governed_tier", "interpreter"): ("keyword", "llm"),
+    ("semantic_mapping", "kind"): ("measure", "ratio"),
+    ("semantic_mapping", "quote"): ("fee", "rebate"),
 }
 _OVERRIDABLE = ("as_of", "row_limit", "database_profile")
 
@@ -164,6 +166,8 @@ def _type_ok(value: Any, kind: str) -> bool:
         return isinstance(value, list)
     if kind == "map":
         return isinstance(value, dict)
+    if kind == "any":
+        return True
     raise AssertionError(kind)  # pragma: no cover
 
 
@@ -398,6 +402,11 @@ def validate_data(data: Mapping[str, Any], *, allow_placeholders: bool = False) 
             if profile not in profile_ids and not _PLACEHOLDER_RE.search(profile):
                 issues.append(Issue("E_CONFIG_INVALID", f"{section}.{profile}",
                                     f"unknown database profile {profile!r}"))
+    _validate_catalog_entries(data.get("catalog"), issues)
+    _validate_bindings(data.get("semantic_mapping"), issues)
+    gov_tier = data.get("governed_tier")
+    if isinstance(gov_tier, dict):
+        _validate_metric_sources(gov_tier.get("metric_sources"), issues)
 
     _validate_datasets(data.get("datasets"), {d["id"]: d for d in dbs if isinstance(d, dict) and isinstance(d.get("id"), str)},
                        issues)
@@ -464,6 +473,60 @@ def validate_data(data: Mapping[str, Any], *, allow_placeholders: bool = False) 
             if _PLACEHOLDER_RE.search(key):
                 issues.append(Issue("E_CONFIG_PLACEHOLDER", path, f"unresolved placeholder key {key!r}"))
     return sorted(set(issues), key=lambda i: (i.path, i.code, i.message))
+
+
+_CATALOG_FIELDS = {"source": ("str", True), "file": ("str?", False), "refresh": ("str", False),
+                   "drift_policy": ("str", False), "default_schema": ("str?", False)}
+_BINDING_FIELDS = {
+    "concept": ("str", True), "kind": ("str", False), "expression": ("str", False), "aggregation": ("str", False),
+    "dimensions": ("any", False), "numerator": ("str", False), "denominator": ("str", False),
+    "grain": ("str", False), "pit_column": ("str", False), "viewpoint": ("str", True), "unit": ("str", True),
+    "source_unit": ("str", False), "conversion": ("str", False), "quote": ("str", False),
+    "day_count": ("str", False), "owner": ("str", True), "evidence": ("map", False),
+}
+_SOURCE_FIELDS = {"metric": ("str", True), "exemplar_id": ("str", True), "period_column": ("str", True),
+                  "dimension_columns": ("map", False), "measure_columns": ("map", True)}
+
+
+def _validate_catalog_entries(cat: Any, issues: list[Issue]) -> None:
+    """``catalog.<profile>`` (spec 0115 REQ-001): introspect, or a declared file; drift policy."""
+    if not isinstance(cat, dict):
+        return
+    for profile, entry in cat.items():
+        path = f"catalog.{profile}"
+        _check_fields(entry, _CATALOG_FIELDS, path, "catalog", issues)
+        if not isinstance(entry, dict):
+            continue
+        if entry.get("source") not in ("introspect", "file") and not _PLACEHOLDER_RE.search(str(entry.get("source"))):
+            issues.append(Issue("E_CONFIG_INVALID", f"{path}.source", "source is introspect or file"))
+        if entry.get("source") == "file" and not isinstance(entry.get("file"), str):
+            issues.append(Issue("E_CONFIG_MISSING", f"{path}.file", "a file catalog needs a file path"))
+        if entry.get("drift_policy", "exclude") not in ("exclude", "warn"):
+            issues.append(Issue("E_CONFIG_INVALID", f"{path}.drift_policy", "drift_policy is exclude or warn"))
+
+
+def _validate_bindings(mapping: Any, issues: list[Issue]) -> None:
+    """``semantic_mapping.<profile>`` shape only; meaning is checked by ``mapping.validate`` (spec 0115)."""
+    if not isinstance(mapping, dict):
+        return
+    for profile, bindings in mapping.items():
+        if not isinstance(bindings, list):
+            issues.append(Issue("E_CONFIG_TYPE", f"semantic_mapping.{profile}", "expected a list of bindings"))
+            continue
+        for i, b in enumerate(bindings):
+            path = f"semantic_mapping.{profile}[{i}]"
+            _check_fields(b, _BINDING_FIELDS, path, "semantic_mapping", issues)
+            if isinstance(b, dict) and isinstance(b.get("evidence"), dict):
+                for key in b["evidence"]:
+                    if key not in ("exemplars", "owner_confirmation"):
+                        issues.append(Issue("E_CONFIG_UNKNOWN_KEY", f"{path}.evidence.{key}", "unknown key"))
+
+
+def _validate_metric_sources(sources: Any, issues: list[Issue]) -> None:
+    if not isinstance(sources, list):
+        return
+    for i, src in enumerate(sources):
+        _check_fields(src, _SOURCE_FIELDS, f"governed_tier.metric_sources[{i}]", "metric_sources", issues)
 
 
 _DATASET_FIELDS = {

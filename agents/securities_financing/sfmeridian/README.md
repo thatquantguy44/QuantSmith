@@ -16,7 +16,7 @@ agents call the same tools.
 | Agent | Coverage row | Status | Spec |
 | --- | --- | --- | --- |
 | `query_librarian/` | C-01 | built (loop agent) | `0114` |
-| `semantic_mapping_steward` | C-02 | planned | `0115` |
+| `semantic_mapping_steward/` | C-02 | built (loop agent) | `0115` |
 | `sql_composer` | C-03 | planned | `0116` |
 | `sfmeridian_orchestrator` | C-04 | planned | `0116` |
 | `answer_grounding_reviewer` | C-05 | planned | `0117` |

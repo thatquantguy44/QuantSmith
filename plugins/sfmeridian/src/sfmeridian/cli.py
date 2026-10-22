@@ -18,6 +18,7 @@ from typing import Any
 from . import CONTRACT_VERSION, __version__
 from .config import ConfigError, load_config
 from .librarian import run_librarian
+from .steward import run_steward
 from .tools import ToolContext, default_registry
 
 
@@ -73,7 +74,7 @@ def _parser() -> argparse.ArgumentParser:
     sub.add_parser("research", help="research run --config C --dataset D --context X (adaptive dataset research)")
     a = sub.add_parser("agent", help="run a loop agent").add_subparsers(dest="action", required=True)
     ar = a.add_parser("run")
-    ar.add_argument("name", choices=["query_librarian"])
+    ar.add_argument("name", choices=["query_librarian", "semantic_mapping_steward"])
     ar.add_argument("--repo", action="append", dest="repo_ids")
     ar.add_argument("--save", action="store_true", help="write the run record under <index.dir>/runs/")
     return p
@@ -108,7 +109,10 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command == "agent":
         inputs = {"repo_ids": args.repo_ids} if args.repo_ids else {}
-        run = run_librarian(ctx, registry=registry, inputs=inputs)
+        if args.name == "semantic_mapping_steward":
+            run = run_steward(ctx, registry=registry, inputs=inputs)
+        else:
+            run = run_librarian(ctx, registry=registry, inputs=inputs)
         record = run.as_dict()
         if args.save:
             runs = config.resolve_path(config.data["index"]["dir"]) / "runs"

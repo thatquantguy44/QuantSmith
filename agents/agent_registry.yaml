@@ -2197,6 +2197,18 @@ agents:
       - "A curation report whose findings each cite evidence observed in the run."
       - "Drafted front-matter for unannotated files, always `review_status: draft`."
       - "A run record (status, trace, configuration hash) for audit."
+  - name: "securities_financing/sfmeridian/semantic_mapping_steward"
+    category: "securities_financing"
+    purpose: "The Semantic Mapping Steward keeps SFMeridian's semantic layer tied to the adopter's real schema and to governed definitions."
+    path: "agents/securities_financing/sfmeridian/semantic_mapping_steward/"
+    inputs:
+      - "The SFMeridian configuration: `catalog`, `semantic_mapping`, `governed_tier.metric_sources`, `access`, and the query repositories."
+      - "Optionally an injected read-only connection per profile (introspection), or a declared catalog file."
+    outputs:
+      - "Content-addressed catalog snapshots and classified diffs."
+      - "A drift list (`drift.json`) that removes drifted exemplars from retrieval."
+      - "A stewardship report: bindings, governed-metric coverage, metric sources, amendments, caveats, handoffs, and cited findings."
+      - "Pack-amendment proposals staged for the named reviewer (the pack is unchanged)."
   - name: "sql-integration-agent"
     category: "root"
     purpose: "The SQL Integration Agent connects to SQL databases, inspects schemas, and runs safe analytical queries."

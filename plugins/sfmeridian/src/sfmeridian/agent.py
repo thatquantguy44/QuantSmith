@@ -26,7 +26,8 @@ Guarantees, held by the harness rather than by the policy:
 * **No loops on the same call** — an identical tool call (same name and
   arguments) is refused with ``E_AGENT_DUPLICATE_ACTION``, except one retry
   after a transient read failure (``E_SOURCE_TRANSIENT``).
-* **Trace** — every decision, call, result, and verdict is recorded with a
+* **Trace** — every decision, call, result, and verdict is recorded (with
+  credential-shaped text scrubbed, ``0115``) with a
   deterministic run ID and the configuration hash, in a shape the ``0070``
   run envelope can carry.
 
@@ -48,6 +49,7 @@ from typing import (
     Protocol,
 )
 
+from .access import scrub, scrub_value
 from .tools import ToolContext, ToolRegistry, ToolResult
 
 __all__ = [
@@ -223,12 +225,12 @@ def run_agent(manifest: AgentManifest, policy: Policy, registry: ToolRegistry, c
         try:
             action = policy.decide(state)
         except Exception as exc:  # noqa: BLE001 — a policy bug is a failed run, never a crash of the host app
-            trace.append({"event": "policy_error", "step": state.step, "error": f"{type(exc).__name__}: {exc}"})
+            trace.append({"event": "policy_error", "step": state.step, "error": scrub(f"{type(exc).__name__}: {exc}")})
             return finish("failed", f"policy error: {exc}", {})
 
         if isinstance(action, ToolCall):
-            trace.append({"event": "decide", "step": state.step, "name": action.name, "args": action.args,
-                          "why": action.why})
+            trace.append({"event": "decide", "step": state.step, "name": action.name,
+                          "args": scrub_value(action.args), "why": scrub(action.why)})
             if action.name not in manifest.tools:
                 obs = Observation(state.step, "harness", action.name, False, {}, "E_AGENT_TOOL_DENIED",
                                   f"{action.name} is not in {manifest.name}'s manifest")

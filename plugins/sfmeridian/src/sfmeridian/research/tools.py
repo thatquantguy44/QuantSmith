@@ -15,8 +15,10 @@ only); ``research.finish`` is ``report`` (writes the local bundle only).
 from __future__ import annotations
 
 import time
+from dataclasses import replace
 from typing import Any
 
+from ..access import caller, withheld_columns
 from ..tools import ToolContext, ToolError, ToolRegistry, ToolSpec, _obj
 from . import analysis
 from .bundle import write_bundle
@@ -58,6 +60,13 @@ def _start(ctx: ToolContext, args: dict[str, Any]) -> dict[str, Any]:
         context = parse_context(args["context"], dataset.columns)
     except ContextError as exc:
         raise ToolError("E_RESEARCH_CONTEXT", str(exc)) from None
+    withheld = withheld_columns(ctx.config, caller(ctx.config, ctx.actor), dataset.obj or dataset.id, dataset.columns)
+    if withheld:
+        clash = sorted(set(withheld) & (set(context.segments) | set(context.allowed_analysis_columns)))
+        if clash:
+            raise ToolError("E_ACCESS_CLEARANCE", f"the caller's clearance withholds {', '.join(clash)}; it cannot be "
+                                                  "a segment or an analysis column")
+        context = replace(context, sensitive_columns=tuple(sorted(set(context.sensitive_columns) | set(withheld))))
     decl = next(d for d in ctx.config.data.get("datasets", []) if d["id"] == dataset.id)
     dataset.is_view = decl.get("object_type") == "view"
     budget = Budget(dict(context.budgets), clock=ctx.clients.get("clock", time.monotonic))
@@ -68,6 +77,8 @@ def _start(ctx: ToolContext, args: dict[str, Any]) -> dict[str, Any]:
     s = ResearchSession(dataset=dataset, context=context, executor=executor, budget=budget,
                         config_hash=ctx.config.hash)
     s.facts["contract"] = decl.get("contract")
+    if withheld:
+        s.limitation(f"Values of {', '.join(sorted(withheld))} are withheld at the caller's clearance (0115 access controls).")
     ctx.session["research"] = s
     try:
         s.facts["probe_start"] = _probe(s)

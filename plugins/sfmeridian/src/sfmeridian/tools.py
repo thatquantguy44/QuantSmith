@@ -9,8 +9,10 @@ harness (``agent.py``). There is no agent-only back door.
 Effects:
 
 * ``read`` — reads configuration, repositories, or the index;
-* ``index`` — rebuilds the local index cache (reversible: it is a cache);
-* ``propose`` — stages something for human review (the feedback inbox);
+* ``index`` — rebuilds the local index cache, catalog snapshots, or the drift
+  list (reversible: they are caches);
+* ``propose`` — stages something for human review (the feedback inbox, or a
+  pack-amendment proposal for the named pack reviewer);
 * ``execute_read`` — runs plugin-rendered, statically checked read-only SQL
   against a configured source (``0121`` research templates);
 * ``report`` — writes a local run bundle under the configured output directory;
@@ -30,6 +32,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from . import access as access_mod
+from . import catalog as catalog_mod
 from . import feedback as feedback_mod
 from . import governance
 from .config import Config, ConfigError, validate_data
@@ -146,11 +150,11 @@ class ToolRegistry:
                 raise ToolError("E_TOOL_INPUT", "; ".join(errors))
             return ToolResult(True, spec.handler(ctx, dict(args)))
         except ToolError as exc:
-            return ToolResult(False, {}, exc.code, exc.message)
+            return ToolResult(False, {}, exc.code, access_mod.scrub(exc.message))
         except ConfigError as exc:
             return ToolResult(False, {"issues": [i.as_dict() for i in exc.issues]}, "E_CONFIG_INVALID", str(exc))
-        except feedback_mod.FeedbackError as exc:
-            return ToolResult(False, {}, exc.code, exc.message)
+        except (feedback_mod.FeedbackError, catalog_mod.CatalogError) as exc:
+            return ToolResult(False, {}, exc.code, access_mod.scrub(exc.message))
 
 
 # --------------------------------------------------------------------------
@@ -328,5 +332,7 @@ def default_registry() -> ToolRegistry:
     for tool in tools:
         reg.register(tool)
     from .research.tools import register as register_research
+    from .semantic_tools import register as register_semantic
     register_research(reg)
+    register_semantic(reg)
     return reg

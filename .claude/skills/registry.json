@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "generator": "quantsmith-skills/1",
-  "generation": 5,
+  "generation": 6,
   "updated": "2026-10-22",
   "targets": {},
   "skills": [
@@ -2612,6 +2612,22 @@
       "updated_generation": 4,
       "source_hash": "sha256:eaeb1099ab3f6e75451f0e62fd81b6efb01285b97d062e790f8b3f90fb570098",
       "skill_hash": "sha256:3f106354732542d770eab788ee95aa4f48ae6d00a1e4fdbe1d92eeaa83031e8d"
+    },
+    {
+      "name": "securities-financing-sfmeridian-semantic-mapping-steward",
+      "agent": "securities_financing/sfmeridian/semantic_mapping_steward",
+      "category": "securities_financing",
+      "description": "The Semantic Mapping Steward keeps SFMeridian's semantic layer tied to the adopter's real schema and to governed definitions. Use when a database profile is onboarded, or its schema may have changed, or a metric owner adds or edits a binding in semantic_mapping.",
+      "status": "active",
+      "project": false,
+      "path": null,
+      "revision": 1,
+      "introduced": "2026-10-22",
+      "updated": "2026-10-22",
+      "removed": null,
+      "updated_generation": 6,
+      "source_hash": "sha256:e5d39a348d2418ef35e24894cfed8809d7337cee1e0b0f9689bfd86f7808f2a0",
+      "skill_hash": "sha256:c5d83d5e5045d2398e82451d548daa11463fe7dd29393e565f705c80e38753e7"
     },
     {
       "name": "sql-integration-agent",

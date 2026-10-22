@@ -13,7 +13,7 @@
 | Spec | Title | Scope | Depends on | Coverage rows closed | Tasks |
 | --- | --- | --- | --- | --- | --- |
 | `0114` | Query repository connector & indexer | Tool registry and agent loop harness (REQ-028/029); config loader and schema; `local`/`git`/`object_store` fetchers at pinned refs; front-matter parser; exemplar store, join graph, metric/filter extraction; lexical index; feedback inbox; `coverage.json`; agent `query_librarian`. | `0113`; `0049` pattern; `0027` source catalog | C-01 | T-005–T-009, T-017 (C-01) |
-| `0115` | Schema catalog, semantic mapping & access | Catalog snapshots (introspect/file), drift reconciliation, concept mapping seeded from `0081` `securities_financing_prime` on `0008` rules (plus drafted pack amendments) and governed-metric source-query bindings, viewpoint/unit declarations, secret pointers, allowlists, redaction, clearance; agent `semantic_mapping_steward`. | `0114`; `0063`; `0008`; `0081`; `0058`; `secrets_management` | C-02 | T-010–T-013, T-032 (binding), T-033 |
+| `0115` | Schema catalog, semantic mapping & access (built) | Catalog snapshots (introspect/file), drift reconciliation, concept mapping seeded from `0081` `securities_financing_prime` on `0008` rules (plus drafted pack amendments) and governed-metric source-query bindings, viewpoint/unit declarations, secret pointers, allowlists, redaction, clearance; agent `semantic_mapping_steward`. | `0114`; `0063`; `0008`; `0081`; `0058`; `secrets_management` | C-02 | T-010–T-013, T-032 (binding), T-033 |
 | `0116` | Governed tier, grounded SQL composition, verification & execution | Governed-first routing through `0080` and the `Reader` over metric source queries; retrieval-first composer for the tail; deterministic verifier with tokens and cost guard; read-only execution seam over `0023`; provenance and `0070` envelope; agents `sql_composer`, `sfmeridian_orchestrator`. | `0115`; `0080`; `0070`; `0023`; `adapters/llm_runtime/` | C-03, C-04 | T-014–T-017, T-031, T-032, T-034 |
 | `0117` | Grounded answering & hallucination evaluation | Grounding check, recompute, viewpoint enforcement, abstention; synthetic fixture DB and query repo; golden-question set, metrics, thresholds, release gate; agent `answer_grounding_reviewer`. | `0116`; `0063`; `0025`; coordinates with `0103` | C-05 | T-018, T-019, T-035 |
 | `0118` | Plugin packaging & app surfaces | `plugins/sfmeridian/` distributable; Python API; MCP server on `0052`; Claude Code plugin via `0110`; cross-surface contract tests; SemVer per `0047`; second-dialect fixture. | `0117`; `0052`; `0110`; `0047` | — (surfaces) | T-001 (schemas), T-020–T-023, T-025 |
@@ -44,7 +44,7 @@ inbox works; `query_librarian` exists.
 **Exit:** AC-003–AC-006, AC-014, AC-015 pass; re-index of an unchanged
 repository is a no-op; the synthetic repository's golden extraction matches.
 
-### Phase 2 — Know the schema and the meaning (`0115`) · ~2–3 weeks
+### Phase 2 — Know the schema and the meaning (`0115`) · built
 
 Catalog snapshots and drift; `0063` concept mapping with viewpoint and unit;
 access controls and redaction.
@@ -53,6 +53,13 @@ access controls and redaction.
 are proposed and the pack review is scheduled (reviewed is preferred, not
 required, to proceed); drifted exemplars are excluded; no
 credential appears in any artifact (secret-scan clean).
+
+**Status (2026-10-22):** built and Approved. The exit criteria are met by
+`0115` AC-004 (drift), AC-007 (governed ratio; by-counterparty utilization is
+refused, see `0115` Exceptions), AC-010/AC-011 (clearance, redaction,
+credentials), and AC-005/AC-013 (all five pack metrics, amendments proposed,
+caveat). The pack reviewer is named (Joshua Lutkemuller, CFA); the review
+itself is pending, so governed answers carry the unreviewed-pack caveat.
 
 ### Phase 2b — Dataset research (`0121`) · built
 

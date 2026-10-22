@@ -391,6 +391,7 @@ costs and risks.
 | `securities_financing/financing_cost_analysis/` | All-in cost of carry, borrow/rebate/funding netting, financing-aware backtesting | Testing |
 | `securities_financing/sfmeridian/lending_data_researcher/` | SFMeridian loop agent (`0121`): adaptive research of one lending dataset — coverage ledger, pushed-down aggregates, securities-finance rule pack, evidence-linked recommendations, reproducible bundle; never writes or repairs | Testing |
 | `securities_financing/sfmeridian/query_librarian/` | SFMeridian loop agent (`0114`): indexes configured SQL query repositories and returns a cited curation report (rejections, metric conflicts, missing front-matter, review queue); never promotes or edits | Coding / Implementation |
+| `securities_financing/sfmeridian/semantic_mapping_steward/` | SFMeridian loop agent (`0115`): catalog snapshots and drift exclusion, concept bindings validated against the catalog and the `0081`/`0063` vocabulary, governed-metric coverage and sources, pack amendments staged for the named reviewer; never invents a mapping or edits a pack | Design / Architecture |
 
 `securities_lending/` has a tested runtime (spec `0023-securities-lending-workflow`):
 `src/quantsmith/quant/agentic_quant/sec_lending_workflow.py` — universe

@@ -42,29 +42,39 @@
    "id": "C-02",
    "agent": "semantic_mapping_steward",
    "child_spec": "0115",
-   "status": "planned",
+   "status": "built",
    "workflow": "Bind 0081 pack metrics and 0063 concepts to physical columns and metric source queries per profile; declare grain, PIT column, viewpoint, unit; draft 0081 pack amendments.",
-   "never": "Never invents a mapping without a catalog object and an exemplar or owner confirmation; never edits a pack's review block or defines a concept privately.",
+   "never": "Never invents a mapping without a catalog object and an exemplar or owner confirmation; never edits a pack's review block, defines a concept privately, or decides a breaking catalog change is safe.",
    "loop": {
     "tools": [
+     "config.validate",
+     "repos.index",
      "catalog.snapshot",
      "catalog.describe",
+     "catalog.diff",
+     "catalog.reconcile",
+     "mapping.validate",
      "metrics.list",
+     "glossary.lookup",
+     "mapping.amendments",
+     "mapping.propose_amendment",
      "queries.search",
      "queries.get",
-     "glossary.lookup",
-     "feedback.propose"
+     "access.describe"
     ],
     "verifiers": [
      "mapping.every_binding_resolves_in_catalog",
      "mapping.viewpoint_and_unit_declared",
-     "mapping.no_private_concepts"
+     "mapping.no_private_concepts",
+     "mapping.every_governed_metric_accounted"
     ],
     "human_checkpoints": [
      "approve concept bindings",
-     "review pack amendments"
+     "review pack amendments",
+     "decide breaking catalog changes (schema_evolution)",
+     "re-review drifted exemplars"
     ],
-    "stop_condition": "Every governed metric bound or reported unbound with the missing evidence."
+    "stop_condition": "Every governed metric bound or reported unbound with the missing evidence; escalation on invalid configuration or no catalog."
    }
   },
   {

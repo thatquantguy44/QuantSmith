@@ -400,7 +400,17 @@ class Index:
 
 
 def load_index(index_dir: Path) -> Index:
-    return Index(_read_jsonl(Path(index_dir) / "exemplars.jsonl"))
+    """The searchable index: exemplars minus those a catalog reconcile excluded for drift (``0115``)."""
+    excluded = _excluded(Path(index_dir))
+    return Index([e for e in _read_jsonl(Path(index_dir) / "exemplars.jsonl") if e["exemplar_id"] not in excluded])
+
+
+def _excluded(index_dir: Path) -> set[str]:
+    path = index_dir / "drift.json"
+    if not path.exists():
+        return set()
+    return {d["exemplar_id"] for d in json.loads(path.read_text(encoding="utf-8")).get("drifted", [])
+            if d.get("status") == "excluded"}
 
 
 def search(index: Index, query: str, *, limit: int = 5, profile: str | None = None,

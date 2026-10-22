@@ -32,15 +32,17 @@ WORKFLOWS = tuple(f"W{i}" for i in range(1, 14))
 CHILD_SPECS = tuple(f"{n:04d}" for n in range(114, 122))
 ADMISSION_FIELDS = ("reviewer", "reviewed_on", "license_verified", "version", "sha256", "advisory_scan")
 
-#: The 0113 tool contract (built in 0114, or planned for a later child).
+#: The 0113 tool contract (built in 0114, 0115, and 0121, or planned for a later child).
 CONTRACT_TOOLS = frozenset({
     # 0114
     "config.validate", "repos.index", "repos.status", "queries.search", "queries.get", "index.rejections",
     "index.findings", "index.metrics", "index.joins", "feedback.propose", "feedback.list",
     "feedback.promote", "feedback.discard", "governance.validate",
-    # 0115-0118
-    "catalog.snapshot", "catalog.describe", "metrics.list", "glossary.lookup", "sql.compose", "sql.verify",
-    "sql.execute", "answer.ground", "ask", "eval.run",
+    # 0115
+    "catalog.snapshot", "catalog.describe", "catalog.diff", "catalog.reconcile", "metrics.list", "glossary.lookup",
+    "mapping.validate", "mapping.amendments", "mapping.propose_amendment", "access.describe",
+    # 0116-0118
+    "sql.compose", "sql.verify", "sql.execute", "answer.ground", "ask", "eval.run",
     # 0121
     "research.start", "research.intake", "research.inspect_schema", "research.summarize_columns",
     "research.check_grain", "research.inspect_missingness", "research.inspect_time", "research.check_domain_rules",

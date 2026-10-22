@@ -73,28 +73,47 @@ datasets:
 research:
   output_dir: .sfmeridian/research # local, approved location for run bundles
 
-# --- Schema catalog snapshots (REQ-007) --------------------------------------
+# --- Schema catalog snapshots (REQ-007; built in 0115) -----------------------
+# Snapshots are content-addressed under index.dir/catalog/<profile>/. Exemplars
+# that reference a missing table or column are excluded from retrieval
+# (drift_policy: exclude) or reported only (warn).
 catalog:
   <profile-id>:
-    source: introspect              # introspect | file
+    source: introspect              # introspect (injected read-only connection) | file
     file: null                      # path to a declared catalog when source=file
     refresh: daily
     drift_policy: exclude           # exclude | warn
+    default_schema: null            # null = dialect default (main, public, default)
 
-# --- Canonical concept -> physical column mapping (REQ-008, REQ-013) --------
-# Concepts are 0081 pack metric/dimension names (seeded from
-# knowledge/analytics_packs/securities_financing_prime.json) or 0063 IDs from
-# knowledge/short_term_markets/taxonomy.json. A concept missing from both is
-# proposed as a pack amendment, never defined here.
+# --- Canonical concept -> physical column mapping (REQ-008, REQ-013; 0115) --
+# Concepts are 0081 pack metric names (seeded from
+# knowledge/analytics_packs/securities_financing_prime.json), proposed pack
+# amendments (plugins/sfmeridian/src/sfmeridian/data/pack_amendments.json), or
+# 0063 IDs from knowledge/short_term_markets/taxonomy.json. A concept missing
+# from all three is proposed as a pack amendment, never defined here.
 semantic_mapping:
   <profile-id>:
-    - concept: <pack-metric-or-0063-id>  # e.g. utilization, borrow_fee, on_loan_value
-      expression: "<table>.<column>"
+    - concept: <pack-metric-or-0063-id>  # e.g. on_loan_value, borrow_fee, lending_revenue
+      expression: "<table>.<column>"     # one table; columns, numbers, + - * / ( ) only
+      aggregation: sum                   # sum | count | avg | min | max | none (rates are never summed)
+      dimensions: {security: "<table>.<security_column>"}   # pack (or proposed) dimensions on the same table
       grain: "<table grain, e.g. security x counterparty x business date>"
       pit_column: "<table>.<as_of_column>"
-      viewpoint: <borrower|lender|agent|beneficial_owner>
-      unit: <shares|currency|bps|fraction>
-      day_count: ACT/360            # 0066 default for fee/rebate accrual
+      viewpoint: <lender|beneficial_owner|agent_lender|borrower>
+      unit: <pack-unit>                  # the pack's unit; declare source_unit + conversion if the column differs
+      owner: <metric-owner-handle>
+      evidence: {exemplars: [<reviewed-query-id>]}   # or {owner_confirmation: <promoter-handle>}
+    - concept: utilization               # ratio: two bound, summed measures over dimensions both support
+      kind: ratio
+      numerator: on_loan_value
+      denominator: lendable_value
+      dimensions: [security]
+      viewpoint: lender
+      unit: pct
+      source_unit: ratio
+      conversion: multiply by 100
+      owner: <metric-owner-handle>
+    # borrow_fee / rebate_rate bindings also declare quote: fee|rebate and day_count: ACT/360 (0066)
 
 # --- Governed-first tier on 0080 / 0081 (REQ-023 to REQ-026) ---------------
 # Questions that map to a governed metric are answered by 0080 over rows the

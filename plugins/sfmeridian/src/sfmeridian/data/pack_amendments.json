@@ -1,0 +1,128 @@
+{
+ "schema_version": 1,
+ "pack_id": "securities_financing_prime",
+ "status": "proposed",
+ "proposed_by": "semantic_mapping_steward",
+ "proposed_on": "2026-10-22",
+ "reviewer": "Joshua Lutkemuller, CFA",
+ "review_request": {
+  "status": "scheduled",
+  "requested_on": "2026-10-22",
+  "note": "The named pack reviewer (owner decision 2026-10-22). Recording the reviewer does not mark the pack reviewed: the pack stays draft until the reviewer runs the 0081 review flow."
+ },
+ "concept_refs": {
+  "borrow_fee": "concept.borrow_fee",
+  "rebate_rate": "concept.rebate_rate",
+  "collateral_value": null,
+  "on_loan_value": null,
+  "utilization": null,
+  "lending_revenue": null,
+  "client_debit_balance": null
+ },
+ "metrics": [
+  {
+   "amendment_id": "amend.rebate_rate",
+   "name": "rebate_rate",
+   "description": "Annualized rebate paid to the borrower on cash collateral (lender pays); fee = benchmark rate minus rebate",
+   "unit": "bps",
+   "additivity": "non_additive",
+   "synonyms": [
+    "rebate",
+    "short rebate",
+    "cash collateral rebate"
+   ],
+   "concept_ref": "concept.rebate_rate",
+   "rationale": "0113 REQ-008 lists rebate rate; the pack has only borrow_fee, and 0063 forbids treating fee and rebate as interchangeable."
+  },
+  {
+   "amendment_id": "amend.lendable_value",
+   "name": "lendable_value",
+   "description": "Market value available to lend at a point in time (the utilization denominator)",
+   "unit": "currency",
+   "additivity": "semi_additive",
+   "synonyms": [
+    "lendable",
+    "lendable supply"
+   ],
+   "concept_ref": null,
+   "rationale": "The pack defines utilization as value on loan divided by lendable value but has no lendable_value measure to divide by."
+  },
+  {
+   "amendment_id": "amend.on_loan_quantity",
+   "name": "on_loan_quantity",
+   "description": "Shares or nominal on loan at a point in time",
+   "unit": "quantity",
+   "additivity": "semi_additive",
+   "synonyms": [
+    "on-loan quantity",
+    "shares on loan"
+   ],
+   "concept_ref": null,
+   "rationale": "0113 REQ-008 lists on-loan quantity; reviewed exemplars compute it."
+  },
+  {
+   "amendment_id": "amend.lendable_quantity",
+   "name": "lendable_quantity",
+   "description": "Shares or nominal available to lend at a point in time",
+   "unit": "quantity",
+   "additivity": "semi_additive",
+   "synonyms": [
+    "lendable quantity",
+    "lendable shares"
+   ],
+   "concept_ref": null,
+   "rationale": "0113 REQ-008 lists lendable quantity; reviewed exemplars compute it."
+  },
+  {
+   "amendment_id": "amend.recall_quantity",
+   "name": "recall_quantity",
+   "description": "Quantity under open recall at a point in time",
+   "unit": "quantity",
+   "additivity": "semi_additive",
+   "synonyms": [
+    "recalls",
+    "open recalls"
+   ],
+   "concept_ref": null,
+   "rationale": "0113 REQ-008 lists recall quantity; recall and buy-in workflows (W3) need it."
+  },
+  {
+   "amendment_id": "amend.collateral_value",
+   "name": "collateral_value",
+   "description": "Market value of collateral received against loans at a point in time",
+   "unit": "currency",
+   "additivity": "semi_additive",
+   "synonyms": [
+    "collateral",
+    "collateral held"
+   ],
+   "concept_ref": null,
+   "rationale": "0113 REQ-008 lists collateral value; collateral coverage and margin checks need it."
+  },
+  {
+   "amendment_id": "amend.days_to_cover",
+   "name": "days_to_cover",
+   "description": "Shares on loan divided by average daily trading volume",
+   "unit": "days",
+   "additivity": "non_additive",
+   "synonyms": [
+    "days to cover",
+    "short interest ratio"
+   ],
+   "concept_ref": null,
+   "rationale": "0113 T-033 lists days-to-cover for recall and squeeze risk (W3)."
+  }
+ ],
+ "dimensions": [
+  {
+   "amendment_id": "amend.dim.counterparty",
+   "name": "counterparty",
+   "description": "Borrowing counterparty (lender viewpoint); identity is a restricted redaction class",
+   "synonyms": [
+    "borrower",
+    "borrowing counterparty"
+   ],
+   "rationale": "The pack's client dimension is the prime client or lender; the agency-lender deployment slices on-loan and recalls by borrower."
+  }
+ ]
+}
