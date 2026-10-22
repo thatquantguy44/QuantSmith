@@ -21,18 +21,13 @@ from __future__ import annotations
 
 import hashlib
 import re
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any
 
 __all__ = ["SqlStructureError", "Token", "extract", "tokenize"]
 
-KEYWORDS = frozenset("""
-SELECT FROM WHERE JOIN INNER LEFT RIGHT FULL OUTER CROSS NATURAL LATERAL ON USING AS GROUP BY
-ORDER HAVING LIMIT OFFSET FETCH FIRST NEXT ROWS ROW ONLY UNION ALL INTERSECT EXCEPT MINUS
-DISTINCT WITH RECURSIVE AND OR NOT IN IS NULL LIKE ILIKE BETWEEN CASE WHEN THEN ELSE END EXISTS
-INSERT UPDATE DELETE MERGE INTO VALUES SET CREATE ALTER DROP TRUNCATE GRANT REVOKE CALL EXEC
-EXECUTE COPY QUALIFY WINDOW OVER PARTITION ASC DESC NULLS TOP INTERVAL TRUE FALSE
-""".split())
+KEYWORDS = frozenset(["SELECT", "FROM", "WHERE", "JOIN", "INNER", "LEFT", "RIGHT", "FULL", "OUTER", "CROSS", "NATURAL", "LATERAL", "ON", "USING", "AS", "GROUP", "BY", "ORDER", "HAVING", "LIMIT", "OFFSET", "FETCH", "FIRST", "NEXT", "ROWS", "ROW", "ONLY", "UNION", "ALL", "INTERSECT", "EXCEPT", "MINUS", "DISTINCT", "WITH", "RECURSIVE", "AND", "OR", "NOT", "IN", "IS", "NULL", "LIKE", "ILIKE", "BETWEEN", "CASE", "WHEN", "THEN", "ELSE", "END", "EXISTS", "INSERT", "UPDATE", "DELETE", "MERGE", "INTO", "VALUES", "SET", "CREATE", "ALTER", "DROP", "TRUNCATE", "GRANT", "REVOKE", "CALL", "EXEC", "EXECUTE", "COPY", "QUALIFY", "WINDOW", "OVER", "PARTITION", "ASC", "DESC", "NULLS", "TOP", "INTERVAL", "TRUE", "FALSE"])
 WRITE_KEYWORDS = ("INSERT", "UPDATE", "DELETE", "MERGE", "CREATE", "ALTER", "DROP", "TRUNCATE",
                   "GRANT", "REVOKE", "CALL", "EXEC", "EXECUTE", "COPY")
 AGGREGATES = ("SUM", "COUNT", "AVG", "MIN", "MAX")
@@ -53,7 +48,7 @@ class Token:
     value: str           # names are lower-cased dotted paths; keywords upper
     raw: str
     pos: int
-    parts: Tuple[str, ...] = ()
+    parts: tuple[str, ...] = ()
 
 
 _IDENT_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_$#]*")
@@ -61,8 +56,8 @@ _NUMBER_RE = re.compile(r"(\d+\.\d*|\.\d+|\d+)([eE][-+]?\d+)?")
 _OPS = ("<=", ">=", "<>", "!=", "||", "::", "=", "<", ">", "+", "-", "*", "/", "%")
 
 
-def _raw_tokens(sql: str, dialect: str) -> List[Tuple[str, str, int]]:
-    out: List[Tuple[str, str, int]] = []
+def _raw_tokens(sql: str, dialect: str) -> list[tuple[str, str, int]]:
+    out: list[tuple[str, str, int]] = []
     i, n = 0, len(sql)
     while i < n:
         ch = sql[i]
@@ -156,10 +151,10 @@ def _raw_tokens(sql: str, dialect: str) -> List[Tuple[str, str, int]]:
     return out
 
 
-def tokenize(sql: str, dialect: str = "sqlite") -> List[Token]:
+def tokenize(sql: str, dialect: str = "sqlite") -> list[Token]:
     """Tokens with dotted names merged and keywords recognized."""
     raw = _raw_tokens(sql, dialect)
-    tokens: List[Token] = []
+    tokens: list[Token] = []
     i = 0
     while i < len(raw):
         kind, value, pos = raw[i]
@@ -189,22 +184,22 @@ def tokenize(sql: str, dialect: str = "sqlite") -> List[Token]:
 # Extraction
 # --------------------------------------------------------------------------
 
-def _is_kw(tok: Optional[Token], *words: str) -> bool:
+def _is_kw(tok: Token | None, *words: str) -> bool:
     return tok is not None and tok.kind == "kw" and tok.value in words
 
 
-def _is_p(tok: Optional[Token], ch: str) -> bool:
+def _is_p(tok: Token | None, ch: str) -> bool:
     return tok is not None and tok.kind == "punct" and tok.value == ch
 
 
-def _render(tokens: Sequence[Token], names: Optional[Dict[int, str]] = None) -> str:
+def _render(tokens: Sequence[Token], names: dict[int, str] | None = None) -> str:
     """Canonical text: string literals redacted, names optionally replaced.
 
     Numeric constants are kept (a day-count ``360`` is part of a metric's
     definition); string literals never are.
     """
-    out: List[str] = []
-    prev: Optional[Token] = None
+    out: list[str] = []
+    prev: Token | None = None
     for k, t in enumerate(tokens):
         text = "<literal>" if t.kind == "string" else (names or {}).get(k, t.value)
         glue = prev is None or _is_p(t, ")") or _is_p(t, ",") or _is_p(prev, "(") or (
@@ -215,7 +210,7 @@ def _render(tokens: Sequence[Token], names: Optional[Dict[int, str]] = None) -> 
 
 
 class _Reader:
-    def __init__(self, tokens: List[Token]) -> None:
+    def __init__(self, tokens: list[Token]) -> None:
         self.t = tokens
         self.depth = [0] * len(tokens)
         d = 0
@@ -226,24 +221,24 @@ class _Reader:
             if _is_p(tok, "("):
                 d += 1
         self.scope = [-1] * len(tokens)          # index of the enclosing "(" (-1 at top)
-        stack: List[int] = []
+        stack: list[int] = []
         for i, tok in enumerate(tokens):
             if _is_p(tok, ")") and stack:
                 stack.pop()
             self.scope[i] = stack[-1] if stack else -1
             if _is_p(tok, "("):
                 stack.append(i)
-        self.scope_targets: Dict[int, List[str]] = {}
-        self.ctes: List[str] = []
-        self.cte_body: Dict[str, int] = {}       # CTE name -> index of its body's "("
-        self.tables: List[str] = []
-        self.aliases: Dict[str, str] = {}
+        self.scope_targets: dict[int, list[str]] = {}
+        self.ctes: list[str] = []
+        self.cte_body: dict[str, int] = {}       # CTE name -> index of its body's "("
+        self.tables: list[str] = []
+        self.aliases: dict[str, str] = {}
         self.ambiguous: set = set()
-        self.joins: Dict[Tuple[str, str], set] = {}
+        self.joins: dict[tuple[str, str], set] = {}
         self.filters: set = set()
-        self.unresolved: List[str] = []
+        self.unresolved: list[str] = []
 
-    def tok(self, i: int) -> Optional[Token]:
+    def tok(self, i: int) -> Token | None:
         return self.t[i] if 0 <= i < len(self.t) else None
 
     def matching(self, i: int) -> int:
@@ -293,14 +288,14 @@ class _Reader:
             self.ambiguous.add(alias)
         self.aliases[alias] = target
 
-    def table_ref(self, i: int) -> Tuple[int, Optional[str]]:
+    def table_ref(self, i: int) -> tuple[int, str | None]:
         """Read one table reference at ``i``; return (next index, table or None)."""
         start = i
         tok = self.tok(i)
         if _is_kw(tok, "LATERAL"):
             i += 1
             tok = self.tok(i)
-        target: Optional[str] = None
+        target: str | None = None
         if _is_p(tok, "("):
             i = self.matching(i) + 1
             target = None                               # derived table
@@ -337,7 +332,7 @@ class _Reader:
             tok = self.t[i]
             if _is_kw(tok, "FROM"):
                 depth = self.depth[i]
-                prev_table: Optional[str] = None
+                prev_table: str | None = None
                 i, prev_table = self.table_ref(i + 1)
                 while _is_p(self.tok(i), ",") and self.depth[i] == depth:
                     i, t = self.table_ref(i + 1)
@@ -383,7 +378,7 @@ class _Reader:
         return j
 
     # -- columns, joins, filters ----------------------------------------
-    def resolve(self, name: Token, index: Optional[int] = None) -> Optional[str]:
+    def resolve(self, name: Token, index: int | None = None) -> str | None:
         parts = name.parts
         if len(parts) >= 2:
             qualifier, column = ".".join(parts[:-1]), parts[-1]
@@ -423,7 +418,7 @@ class _Reader:
         key = tuple(sorted((left, right)))
         self.joins.setdefault(key, set()).add(kind)  # type: ignore[arg-type]
 
-    def _value(self, j: int) -> Tuple[Optional[str], int]:
+    def _value(self, j: int) -> tuple[str | None, int]:
         tok = self.tok(j)
         if tok is None:
             return None, j
@@ -443,7 +438,7 @@ class _Reader:
             return ",".join(values) or None, close + 1
         return None, j
 
-    def read_condition(self, start: int, end: int, join_kind: Optional[str]) -> None:
+    def read_condition(self, start: int, end: int, join_kind: str | None) -> None:
         j = start
         while j < end:
             tok = self.t[j]
@@ -458,7 +453,7 @@ class _Reader:
                             self.add_join(left, right, join_kind or "inner")
                         j += 3
                         continue
-                op: Optional[str] = None
+                op: str | None = None
                 k = j + 1
                 if nxt is not None and nxt.kind == "op" and nxt.value in COMPARISON:
                     op, k = nxt.value, j + 2
@@ -487,7 +482,7 @@ class _Reader:
                 self.read_condition(i + 1, self.clause_end(i + 1, self.depth[i]), None)
 
     # -- select list ----------------------------------------------------
-    def select_items(self) -> List[Dict[str, Any]]:
+    def select_items(self) -> list[dict[str, Any]]:
         start = next((i for i, tok in enumerate(self.t) if _is_kw(tok, "SELECT") and self.depth[i] == 0), None)
         if start is None:
             return []
@@ -498,7 +493,7 @@ class _Reader:
             i += 2
         end = next((j for j in range(i, len(self.t)) if _is_kw(self.t[j], "FROM") and self.depth[j] == 0),
                    len(self.t))
-        items: List[List[Tuple[int, Token]]] = [[]]
+        items: list[list[tuple[int, Token]]] = [[]]
         for j in range(i, end):
             if _is_p(self.t[j], ",") and self.depth[j] == 0:
                 items.append([])
@@ -523,7 +518,7 @@ class _Reader:
                                  if t.kind == "name" and t.value.upper() in AGGREGATES
                                  and k + 1 < len(expr) and _is_p(expr[k + 1], "(")})
             ratio = any(t.kind == "op" and t.value == "/" for t in expr)
-            resolved: Dict[int, str] = {}
+            resolved: dict[int, str] = {}
             for k, t in enumerate(expr):
                 if t.kind == "name" and t.parts[-1] != "*" and not (k + 1 < len(expr) and _is_p(expr[k + 1], "(")):
                     column = self.resolve(t, positions[k])
@@ -540,10 +535,10 @@ class _Reader:
         return out
 
 
-def extract(sql: str, dialect: str = "sqlite") -> Dict[str, Any]:
+def extract(sql: str, dialect: str = "sqlite") -> dict[str, Any]:
     """Structure of ``sql`` as a JSON-ready dict (see module docstring)."""
     tokens = tokenize(sql, dialect)
-    statements: List[List[Token]] = [[]]
+    statements: list[list[Token]] = [[]]
     depth = 0
     for tok in tokens:
         if _is_p(tok, "("):
@@ -568,7 +563,7 @@ def extract(sql: str, dialect: str = "sqlite") -> Dict[str, Any]:
     reader.read_where_clauses()
     select = reader.select_items()
 
-    named: List[str] = []
+    named: list[str] = []
     styles = set()
     for tok in tokens:
         if tok.kind != "param":

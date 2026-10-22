@@ -423,6 +423,42 @@
    "workflows": [
     "W12"
    ]
+  },
+  {
+   "group": "data_analysis",
+   "agent": "dataset_investigator",
+   "path": "analytics/dataset_investigator",
+   "trigger": "A deep file-level investigation of a research extract is wanted (hypotheses, anomaly scoring)",
+   "evidence": "bounded extract snapshot and the research bundle",
+   "output": "0099 investigation bundle",
+   "never": "never treats an extract as the population",
+   "workflows": [
+    "W13"
+   ]
+  },
+  {
+   "group": "data_analysis",
+   "agent": "data_quality",
+   "path": "data_quality",
+   "trigger": "Research findings need a data-quality review before a dataset feeds research or production",
+   "evidence": "coverage ledger, findings, contract proposal",
+   "output": "quality review and accepted contract rules",
+   "never": "never accepts a contract rule without review",
+   "workflows": [
+    "W13"
+   ]
+  },
+  {
+   "group": "data_engineering",
+   "agent": "schema_evolution",
+   "path": "data_engineering/schema_evolution",
+   "trigger": "compare_reference reports added, removed, or retyped columns",
+   "evidence": "reference comparison evidence",
+   "output": "change classification (backward/forward)",
+   "never": "never applies a schema change",
+   "workflows": [
+    "W13"
+   ]
   }
  ]
 }

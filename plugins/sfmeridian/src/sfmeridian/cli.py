@@ -13,7 +13,7 @@ import datetime
 import json
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from . import CONTRACT_VERSION, __version__
 from .config import ConfigError, load_config
@@ -70,6 +70,7 @@ def _parser() -> argparse.ArgumentParser:
     gv = g.add_parser("validate")
     gv.add_argument("--strict", action="store_true")
 
+    sub.add_parser("research", help="research run --config C --dataset D --context X (adaptive dataset research)")
     a = sub.add_parser("agent", help="run a loop agent").add_subparsers(dest="action", required=True)
     ar = a.add_parser("run")
     ar.add_argument("name", choices=["query_librarian"])
@@ -78,18 +79,22 @@ def _parser() -> argparse.ArgumentParser:
     return p
 
 
-def _payload(text: str) -> Dict[str, Any]:
+def _payload(text: str) -> dict[str, Any]:
     if text.startswith("@"):
         text = Path(text[1:]).read_text(encoding="utf-8")
     value = json.loads(text)
     if not isinstance(value, dict):
-        raise ValueError("payload must be a JSON object")
+        raise TypeError("payload must be a JSON object")
     return value
 
 
-def main(argv: Optional[List[str]] = None) -> int:
+def main(argv: list[str] | None = None) -> int:
+    argv = list(sys.argv[1:] if argv is None else argv)
+    if argv[:2] == ["research", "run"]:
+        from .research.cli import run_main
+        return run_main(argv[2:])
     args = _parser().parse_args(argv)
-    today = args.today or datetime.date.today().isoformat()
+    today = args.today or datetime.date.today().isoformat()  # noqa: DTZ011 — the CLI is the one wall-clock read
     try:
         config = load_config(args.config, allow_placeholders=getattr(args, "allow_placeholders", False))
     except ConfigError as exc:
@@ -131,7 +136,7 @@ def main(argv: Optional[List[str]] = None) -> int:
             ("feedback", "discard"): lambda: ("feedback.discard", {"candidate_id": args.candidate_id, "reason": args.reason}),
             ("governance", "validate"): lambda: ("governance.validate", {"strict": args.strict}),
         }[(args.command, getattr(args, "action", None))]()
-    except (ValueError, json.JSONDecodeError) as exc:
+    except (ValueError, TypeError, json.JSONDecodeError) as exc:
         _print({"ok": False, "error": str(exc)})
         return 2
     result = registry.call(name, tool_args, ctx)

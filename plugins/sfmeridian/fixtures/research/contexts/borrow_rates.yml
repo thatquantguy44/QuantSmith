@@ -1,0 +1,12 @@
+# SYNTHETIC research context for the fixture borrow rates (spec 0121).
+objective: Confirm borrow rates are point-in-time usable for a short-side backtest.
+dataset_kind: borrow_rates
+viewpoint: lender
+as_of: "2026-10-22"
+timezone: America/New_York
+business_grain: [security_id, business_date]
+time_column: business_date
+segments: [borrow_category]
+feature_availability: {event_time_column: business_date, available_at_column: available_at}
+thresholds:
+  category_thresholds_bps: {gc_max_bps: 50, warm_max_bps: 200}

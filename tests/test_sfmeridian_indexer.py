@@ -21,17 +21,28 @@ ROOT = Path(__file__).resolve().parents[1]
 PLUGIN = ROOT / "plugins" / "sfmeridian"
 sys.path.insert(0, str(PLUGIN / "src"))
 
-from sfmeridian import agent as agent_mod  # noqa: E402
-from sfmeridian import cli, governance, yamlsubset  # noqa: E402
-from sfmeridian.agent import AgentManifest, Finish, ModelPolicy, ToolCall, load_manifest, run_agent  # noqa: E402
-from sfmeridian.config import ConfigError, apply_call_overrides, load_config  # noqa: E402
-from sfmeridian.feedback import FeedbackError, Inbox  # noqa: E402
-from sfmeridian.frontmatter import QueryRejected, parse_query  # noqa: E402
-from sfmeridian.index import build_index, load_index, search  # noqa: E402
-from sfmeridian.librarian import VERIFIERS, run_librarian  # noqa: E402
-from sfmeridian.repos import RepoFetchError, fetch  # noqa: E402
-from sfmeridian.sqlstructure import extract  # noqa: E402
-from sfmeridian.tools import ToolContext, default_registry  # noqa: E402
+from sfmeridian import agent as agent_mod
+from sfmeridian import cli, governance, yamlsubset
+from sfmeridian.agent import (
+    AgentManifest,
+    Finish,
+    ModelPolicy,
+    ToolCall,
+    load_manifest,
+    run_agent,
+)
+from sfmeridian.config import (
+    ConfigError,
+    apply_call_overrides,
+    load_config,
+)
+from sfmeridian.feedback import FeedbackError, Inbox
+from sfmeridian.frontmatter import QueryRejected, parse_query
+from sfmeridian.index import build_index, load_index, search
+from sfmeridian.librarian import VERIFIERS, run_librarian
+from sfmeridian.repos import RepoFetchError, fetch
+from sfmeridian.sqlstructure import extract
+from sfmeridian.tools import ToolContext, default_registry
 
 TODAY = "2026-10-22"
 FIXTURES = PLUGIN / "fixtures"
@@ -84,7 +95,7 @@ def test_ac001_config_validation_codes_hash_and_overrides(workdir):
     assert "E_CONFIG_UNKNOWN_KEY" in codes(lambda d: d.update(surprise=1))
     assert "E_CONFIG_PLACEHOLDER" in codes(lambda d: d["query_repositories"][0].update(uri="<git-remote-url>"))
     assert "E_CONFIG_CREDENTIAL" in codes(lambda d: d["query_repositories"][0].update(
-        kind="git", ref="main", uri="https://alice:hunter2@git.example/q.git"))
+        kind="git", ref="main", uri="https://alice:hunter2@git.example/q.git"))  # qf:allow-secret (deliberate fake)
     assert "E_CONFIG_CREDENTIAL" in codes(lambda d: d["databases"][0]["connection"].update(password="x"))
     assert "E_CONFIG_INVALID" in codes(lambda d: d["databases"][0].update(read_only=False))
     assert "E_CONFIG_UNSUPPORTED" in codes(lambda d: d["databases"][0].update(dialect="snowflake"))
@@ -206,7 +217,7 @@ def test_ac003_local_and_git_repos_pinned_no_hardcoded_location(workdir, tmp_pat
 
 def test_ac004_front_matter_valid_malformed_unannotated(workdir):
     """AC-004: valid files carry fields; bad files rejected with reasons; un-annotated is unreviewed."""
-    config, report, idx = _index(workdir)
+    _, _, idx = _index(workdir)
     exemplars = {e["path"]: e for e in _jsonl(idx / "exemplars.jsonl")}
     rejected = {r["path"]: r for r in _jsonl(idx / "rejected.jsonl")}
     good = exemplars["lending/utilization_by_security.sql"]
@@ -278,7 +289,7 @@ def test_ac005_sql_structure_extraction():
 
 def test_ac006_learned_artifacts_cited_and_incremental(workdir):
     """AC-006: join graph, metric candidates (utilization conflict), filters; cited; second run writes nothing."""
-    config, report, idx = _index(workdir)
+    config, _, idx = _index(workdir)
     joins = {(j["left"], j["right"]): j for j in json.loads((idx / "join_graph.json").read_text())}
     assert ("counterparties.counterparty_id", "sec_lending_book.counterparty_id") in joins
     assert ("collateral.loan_id", "sec_lending_book.loan_id") in joins
@@ -307,7 +318,7 @@ def test_ac006_learned_artifacts_cited_and_incremental(workdir):
 
 def test_ac007_search_eligibility_ranking(workdir):
     """AC-007: reviewed first, hints flagged, deprecated/rejected never, scores in [0, 1)."""
-    config, report, idx = _index(workdir)
+    _, _, idx = _index(workdir)
     index = load_index(idx)
     hits = search(index, "utilization by security", limit=10)
     assert hits[0].exemplar["query_id"] == "sl.utilization.by_security.as_of" and not hits[0].hint
@@ -329,7 +340,7 @@ def test_ac007_search_eligibility_ranking(workdir):
 
 def test_ac008_feedback_promotion_rules(workdir):
     """AC-008: staged candidates invisible; promotion refused for proposer/non-promoter/email; then served."""
-    config, report, idx = _index(workdir)
+    config, _, idx = _index(workdir)
     inbox = Inbox(config.resolve_path(config.data["feedback"]["inbox"]))
     payload = {"title": "Specials count by date", "intent": "Number of special names on a business date",
                "sql": "SELECT COUNT(*) AS specials_count FROM borrow_rates WHERE business_date = :as_of "
@@ -368,7 +379,7 @@ def test_ac009_governance_catalogs_and_imports():
     """AC-009: coverage, handoffs, tooling, manifests valid; strict lists pending admissions; mutations fail."""
     report = governance.validate_all(ROOT / "agents", registry=default_registry())
     assert report["ok"], report["errors"]
-    assert report["counts"] == {"coverage_rows": 9, "built_agents": 1, "handoffs": 34, "manifests": 1,
+    assert report["counts"] == {"coverage_rows": 10, "built_agents": 2, "handoffs": 37, "manifests": 2,
                                 "tooling_entries": report["counts"]["tooling_entries"]}
     strict = governance.validate_all(ROOT / "agents", strict=True, registry=default_registry())
     assert not strict["ok"] and "statsmodels" in strict["pending_admissions"]

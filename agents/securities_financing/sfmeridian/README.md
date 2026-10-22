@@ -20,6 +20,7 @@ agents call the same tools.
 | `sql_composer` | C-03 | planned | `0116` |
 | `sfmeridian_orchestrator` | C-04 | planned | `0116` |
 | `answer_grounding_reviewer` | C-05 | planned | `0117` |
+| `lending_data_researcher/` | C-10 | built (loop agent) | `0121` |
 | `lending_revenue_analyst` | C-08 | planned (first `0119` agent) | `0119` |
 | `utilization_specials_analyst` | C-06 | planned | `0119` |
 | `recall_buyin_risk_analyst` | C-07 | planned | `0119` |

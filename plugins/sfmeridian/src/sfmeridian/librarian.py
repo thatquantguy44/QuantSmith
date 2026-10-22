@@ -25,13 +25,23 @@ checkpoints, and ``feedback.promote``/``feedback.discard`` are ``human_only``.
 from __future__ import annotations
 
 import re
-from typing import Any, Dict, List, Mapping, Set
+from collections.abc import Mapping
+from typing import Any
 
-from .agent import (AgentManifest, AgentRun, Escalate, Finish, LoopState, ToolCall, Verdict,
-                    load_manifest, run_agent)
+from .agent import (
+    AgentManifest,
+    AgentRun,
+    Escalate,
+    Finish,
+    LoopState,
+    ToolCall,
+    Verdict,
+    load_manifest,
+    run_agent,
+)
 from .tools import ToolContext, ToolRegistry, default_registry
 
-__all__ = ["LibrarianPolicy", "VERIFIERS", "build_report", "run_librarian"]
+__all__ = ["VERIFIERS", "LibrarianPolicy", "build_report", "run_librarian"]
 
 _SEQUENCE = ("config.validate", "repos.index", "repos.status", "index.rejections", "index.findings",
              "index.metrics", "feedback.list")
@@ -42,15 +52,15 @@ def _slug(path: str) -> str:
     return re.sub(r"[^a-z0-9]+", "_", stem.lower()).strip("_") or "query"
 
 
-def build_report(state: LoopState) -> Dict[str, Any]:
+def build_report(state: LoopState) -> dict[str, Any]:
     """The curation report, built only from this run's observations."""
-    def out(tool: str) -> Dict[str, Any]:
+    def out(tool: str) -> dict[str, Any]:
         obs = state.last(tool)
         return obs.output if obs and obs.ok else {}
 
-    findings: List[Dict[str, Any]] = []
+    findings: list[dict[str, Any]] = []
 
-    def add(severity: str, kind: str, message: str, evidence: List[Dict[str, str]], action: str) -> None:
+    def add(severity: str, kind: str, message: str, evidence: list[dict[str, str]], action: str) -> None:
         findings.append({"id": f"F-{len(findings) + 1:03d}", "severity": severity, "kind": kind,
                          "message": message, "evidence": evidence, "action": action})
 
@@ -73,7 +83,7 @@ def build_report(state: LoopState) -> Dict[str, Any]:
             [{"type": "metric", "ref": m["name"]}] + [{"type": "exemplar", "ref": x}
                                                        for d in m["definitions"] for x in d["exemplar_ids"]],
             "A metric owner chooses the canonical definition (then 0115 binds it); deprecate or rename the rest.")
-    suggested: List[Dict[str, Any]] = []
+    suggested: list[dict[str, Any]] = []
     for e in out("index.findings").get("exemplars", []):
         ref = [{"type": "exemplar", "ref": e["exemplar_id"]}]
         if e["review_status"] == "unreviewed":
@@ -111,7 +121,7 @@ class LibrarianPolicy:
                             {"issues": validate.output.get("issues", [])})
         for tool in _SEQUENCE[1:]:
             if not state.called(tool):
-                args: Dict[str, Any] = {}
+                args: dict[str, Any] = {}
                 if tool == "repos.index":
                     args = {k: state.inputs[k] for k in ("repo_ids", "force") if k in state.inputs}
                 elif tool == "index.metrics":
@@ -123,7 +133,7 @@ class LibrarianPolicy:
         errors = state.last("repos.index").output.get("errors", []) if state.last("repos.index") else []
         if errors:
             return Escalate(f"{len(errors)} repository fetch(es) failed; a person must fix access", report)
-        counts: Dict[str, int] = {}
+        counts: dict[str, int] = {}
         for f in report["findings"]:
             counts[f["severity"]] = counts.get(f["severity"], 0) + 1
         summary = (f"{len(report['findings'])} finding(s) "
@@ -136,8 +146,8 @@ class LibrarianPolicy:
 # Verifiers
 # --------------------------------------------------------------------------
 
-def _observed_evidence(state: LoopState) -> Dict[str, Set[str]]:
-    seen: Dict[str, Set[str]] = {"rejected": set(), "exemplar": set(), "metric": set(), "candidate": set(),
+def _observed_evidence(state: LoopState) -> dict[str, set[str]]:
+    seen: dict[str, set[str]] = {"rejected": set(), "exemplar": set(), "metric": set(), "candidate": set(),
                                  "repository": set()}
     for obs in state.observations:
         if obs.kind != "tool" or not obs.ok:
@@ -198,8 +208,8 @@ VERIFIERS = {
 }
 
 
-def run_librarian(ctx: ToolContext, *, policy=None, registry: ToolRegistry = None,
-                  inputs: Mapping[str, Any] = None, manifest: AgentManifest = None) -> AgentRun:
+def run_librarian(ctx: ToolContext, *, policy=None, registry: ToolRegistry | None = None,
+                  inputs: Mapping[str, Any] | None = None, manifest: AgentManifest | None = None) -> AgentRun:
     registry = registry or default_registry()
     return run_agent(manifest or load_manifest("query_librarian"), policy or LibrarianPolicy(), registry, ctx,
                      inputs=inputs, verifiers=VERIFIERS)

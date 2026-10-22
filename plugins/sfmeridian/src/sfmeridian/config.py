@@ -17,9 +17,10 @@ import hashlib
 import json
 import os
 import re
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Mapping, Optional, Sequence
+from typing import Any
 
 from . import yamlsubset
 
@@ -53,7 +54,7 @@ class Issue:
     path: str
     message: str
 
-    def as_dict(self) -> Dict[str, str]:
+    def as_dict(self) -> dict[str, str]:
         return {"code": self.code, "path": self.path, "message": self.message}
 
 
@@ -67,7 +68,7 @@ class ConfigError(ValueError):
 # Defaults and schema
 # --------------------------------------------------------------------------
 
-DEFAULTS: Dict[str, Any] = {
+DEFAULTS: dict[str, Any] = {
     "schema_version": SCHEMA_VERSION,
     "enabled": True,
     "index": {"dir": ".sfmeridian/index"},
@@ -96,6 +97,8 @@ DEFAULTS: Dict[str, Any] = {
     "feedback": {"inbox": ".sfmeridian/inbox", "promoters": [], "auto_propose_accepted_answers": False},
     "eval": {"golden_sets": [], "thresholds": {}, "seeds": [1, 2, 3]},
     "per_call_overrides_allowlist": ["as_of", "row_limit", "database_profile"],
+    "datasets": [],
+    "research": {"output_dir": ".sfmeridian/research"},
 }
 
 # Field spec: (type(s), required). ``"str"`` etc. are names, checked in ``_type_ok``.
@@ -129,8 +132,9 @@ _SECTIONS = {
     "retrieval": {"mode": "str", "embedding_profile": "str?"},
     "feedback": {"inbox": "str", "promoters": "list", "auto_propose_accepted_answers": "bool"},
     "eval": {"golden_sets": "list", "thresholds": "map", "seeds": "list"},
+    "research": {"output_dir": "str"},
 }
-_TOP_LEVEL = {"schema_version", "enabled", "query_repositories", "databases", "catalog",
+_TOP_LEVEL = {"schema_version", "enabled", "query_repositories", "databases", "catalog", "datasets",
               "semantic_mapping", "per_call_overrides_allowlist", *_SECTIONS}
 _ENUMS = {
     ("query_repositories", "kind"): REPO_KINDS,
@@ -167,7 +171,7 @@ def _type_ok(value: Any, kind: str) -> bool:
 # Resolution
 # --------------------------------------------------------------------------
 
-def _deep_merge(base: Dict[str, Any], over: Mapping[str, Any]) -> Dict[str, Any]:
+def _deep_merge(base: dict[str, Any], over: Mapping[str, Any]) -> dict[str, Any]:
     out = copy.deepcopy(base)
     for key, value in over.items():
         if isinstance(value, dict) and isinstance(out.get(key), dict):
@@ -177,14 +181,14 @@ def _deep_merge(base: Dict[str, Any], over: Mapping[str, Any]) -> Dict[str, Any]
     return out
 
 
-def _env_overrides(env: Mapping[str, str]) -> Dict[str, Any]:
+def _env_overrides(env: Mapping[str, str]) -> dict[str, Any]:
     """``SFMERIDIAN__GROUNDING__MODE=retrieval_only`` -> ``{"grounding": {"mode": ...}}``.
 
     Keys are lower-cased; values are read as one YAML-subset scalar or flow
     collection. Variables are applied in sorted order, so the result does not
     depend on the environment's iteration order.
     """
-    out: Dict[str, Any] = {}
+    out: dict[str, Any] = {}
     for name in sorted(env):
         if not name.startswith(ENV_PREFIX) or name == CONFIG_ENV:
             continue
@@ -207,7 +211,7 @@ def _env_overrides(env: Mapping[str, str]) -> Dict[str, Any]:
     return out
 
 
-def resolve(file_data: Mapping[str, Any], env: Optional[Mapping[str, str]] = None) -> Dict[str, Any]:
+def resolve(file_data: Mapping[str, Any], env: Mapping[str, str] | None = None) -> dict[str, Any]:
     """Defaults -> file -> environment, with per-item defaults for lists."""
     data = _deep_merge(DEFAULTS, file_data)
     data = _deep_merge(data, _env_overrides(env or {}))
@@ -252,8 +256,8 @@ def _walk_keys(value: Any, path: str):
             yield from _walk_keys(v, f"{path}[{i}]")
 
 
-def _check_fields(item: Any, fields: Dict[str, Any], path: str, section: str,
-                  issues: List[Issue]) -> None:
+def _check_fields(item: Any, fields: dict[str, Any], path: str, section: str,
+                  issues: list[Issue]) -> None:
     if not isinstance(item, dict):
         issues.append(Issue("E_CONFIG_TYPE", path, "expected a mapping"))
         return
@@ -274,7 +278,7 @@ def _check_fields(item: Any, fields: Dict[str, Any], path: str, section: str,
                                 f"{item[key]!r} is not one of {', '.join(allowed)}"))
 
 
-def _check_dialect(value: Any, path: str, issues: List[Issue]) -> None:
+def _check_dialect(value: Any, path: str, issues: list[Issue]) -> None:
     if not isinstance(value, str) or _PLACEHOLDER_RE.search(value):
         return  # an unresolved placeholder is reported once, as E_CONFIG_PLACEHOLDER
     if value in PLANNED_DIALECTS:
@@ -286,9 +290,9 @@ def _check_dialect(value: Any, path: str, issues: List[Issue]) -> None:
                             f"dialect {value!r} is not one of {', '.join(DIALECTS)}"))
 
 
-def validate_data(data: Mapping[str, Any], *, allow_placeholders: bool = False) -> List[Issue]:
+def validate_data(data: Mapping[str, Any], *, allow_placeholders: bool = False) -> list[Issue]:
     """Every issue in resolved configuration ``data``; empty means valid."""
-    issues: List[Issue] = []
+    issues: list[Issue] = []
     if not isinstance(data, dict):
         return [Issue("E_CONFIG_TYPE", "", "configuration must be a mapping")]
 
@@ -310,7 +314,7 @@ def validate_data(data: Mapping[str, Any], *, allow_placeholders: bool = False) 
 
     # Databases (read-only profiles).
     dbs = data.get("databases")
-    profile_ids: List[str] = []
+    profile_ids: list[str] = []
     if not isinstance(dbs, list) or not dbs:
         issues.append(Issue("E_CONFIG_MISSING", "databases", "at least one database profile is required"))
         dbs = []
@@ -345,7 +349,7 @@ def validate_data(data: Mapping[str, Any], *, allow_placeholders: bool = False) 
 
     # Query repositories.
     repos = data.get("query_repositories")
-    repo_ids: List[str] = []
+    repo_ids: list[str] = []
     if not isinstance(repos, list) or not repos:
         issues.append(Issue("E_CONFIG_MISSING", "query_repositories",
                             "at least one query repository is required"))
@@ -394,6 +398,9 @@ def validate_data(data: Mapping[str, Any], *, allow_placeholders: bool = False) 
             if profile not in profile_ids and not _PLACEHOLDER_RE.search(profile):
                 issues.append(Issue("E_CONFIG_INVALID", f"{section}.{profile}",
                                     f"unknown database profile {profile!r}"))
+
+    _validate_datasets(data.get("datasets"), {d["id"]: d for d in dbs if isinstance(d, dict) and isinstance(d.get("id"), str)},
+                       issues)
 
     # Retrieval: lexical only (owner decision 2026-10-22).
     retrieval = data.get("retrieval")
@@ -459,23 +466,99 @@ def validate_data(data: Mapping[str, Any], *, allow_placeholders: bool = False) 
     return sorted(set(issues), key=lambda i: (i.path, i.code, i.message))
 
 
+_DATASET_FIELDS = {
+    "id": ("str", True), "source": ("str", True), "profile": ("str", False), "object": ("str", False),
+    "object_type": ("str", False), "path": ("str", False), "columns": ("list", True), "order_by": ("list", False),
+    "filters": ("list", False), "version": ("int", False), "dataset_kind": ("str", False),
+    "contract": ("map", False), "max_rows": ("int", False),
+}
+_SIMPLE_NAME = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+_DATASET_KINDS = ("loan_book", "lendable_inventory", "borrow_rates", "collateral", "recalls", "program_revenue",
+                  "generic")
+
+
+def _validate_datasets(datasets: Any, profiles: Mapping[str, Any], issues: list[Issue]) -> None:
+    """``datasets[]`` (spec 0121 REQ-003): every location, object, and column is declared, never free text."""
+    if datasets is None:
+        return
+    if not isinstance(datasets, list):
+        issues.append(Issue("E_CONFIG_TYPE", "datasets", "expected a list"))
+        return
+    def ph(v: Any) -> bool:
+        return isinstance(v, str) and bool(_PLACEHOLDER_RE.search(v))   # reported once as E_CONFIG_PLACEHOLDER
+
+    seen: list[str] = []
+    for i, d in enumerate(datasets):
+        path = f"datasets[{i}]"
+        _check_fields(d, _DATASET_FIELDS, path, "datasets", issues)
+        if not isinstance(d, dict):
+            continue
+        if d.get("id") in seen:
+            issues.append(Issue("E_CONFIG_INVALID", f"{path}.id", f"duplicate dataset id {d.get('id')!r}"))
+        seen.append(d.get("id"))
+        cols = d.get("columns") if isinstance(d.get("columns"), list) else []
+        if not cols or not all(isinstance(c, str) and (_SIMPLE_NAME.match(c) or ph(c)) for c in cols) \
+                or len(cols) != len(set(cols)):
+            issues.append(Issue("E_CONFIG_INVALID", f"{path}.columns",
+                                "explicit, unique, simple column names are required"))
+        source = d.get("source")
+        if source == "database":
+            prof = d.get("profile")
+            if prof not in profiles and not ph(prof):
+                issues.append(Issue("E_CONFIG_INVALID", f"{path}.profile", f"unknown database profile {prof!r}"))
+            obj = d.get("object")
+            parts = obj.split(".") if isinstance(obj, str) else []
+            if not ph(obj) and (not 1 <= len(parts) <= 3 or not all(_SIMPLE_NAME.match(x) for x in parts)):
+                issues.append(Issue("E_CONFIG_INVALID", f"{path}.object",
+                                    "object must be a simple name with up to three dotted parts (no SQL)"))
+            if not d.get("order_by"):
+                issues.append(Issue("E_CONFIG_MISSING", f"{path}.order_by",
+                                    "database datasets need an explicit ordering for extracts"))
+            if d.get("version") is not None and profiles.get(prof, {}).get("dialect") != "databricks":
+                issues.append(Issue("E_CONFIG_INVALID", f"{path}.version", "version pins are Databricks Delta only"))
+        elif source == "file":
+            if not isinstance(d.get("path"), str):
+                issues.append(Issue("E_CONFIG_MISSING", f"{path}.path", "file datasets need a path"))
+        else:
+            issues.append(Issue("E_CONFIG_INVALID", f"{path}.source", "source must be database or file"))
+        if d.get("object_type") not in (None, "table", "view"):
+            issues.append(Issue("E_CONFIG_INVALID", f"{path}.object_type", "object_type is table or view"))
+        if d.get("dataset_kind", "generic") not in _DATASET_KINDS:
+            issues.append(Issue("E_CONFIG_INVALID", f"{path}.dataset_kind",
+                                f"dataset_kind must be one of {', '.join(_DATASET_KINDS)}"))
+        for key in ("order_by",):
+            for c in d.get(key) or []:
+                if c not in cols and not ph(c):
+                    issues.append(Issue("E_CONFIG_INVALID", f"{path}.{key}", f"{c!r} is not a declared column"))
+        for j, f in enumerate(d.get("filters") or []):
+            ok = (isinstance(f, dict) and set(f) == {"column", "op", "value"}
+                  and (f.get("column") in cols or ph(f.get("column")))
+                  and f.get("op") in ("=", ">=", ">", "<=", "<", "<>")
+                  and isinstance(f.get("value"), (str, int, float)) and not isinstance(f.get("value"), bool))
+            if not ok:
+                issues.append(Issue("E_CONFIG_INVALID", f"{path}.filters[{j}]",
+                                    "filters are {column, op, value} on a declared column with a scalar value"))
+        if isinstance(d.get("max_rows"), int) and not 1 <= d["max_rows"] <= 50000:
+            issues.append(Issue("E_CONFIG_INVALID", f"{path}.max_rows", "max_rows must be 1..50000"))
+
+
 # --------------------------------------------------------------------------
 # Loading
 # --------------------------------------------------------------------------
 
 @dataclass(frozen=True)
 class Config:
-    data: Dict[str, Any]
+    data: dict[str, Any]
     hash: str
     source: str
 
-    def repository(self, repo_id: str) -> Dict[str, Any]:
+    def repository(self, repo_id: str) -> dict[str, Any]:
         for repo in self.data["query_repositories"]:
             if repo["id"] == repo_id:
                 return repo
         raise KeyError(repo_id)
 
-    def profile(self, profile_id: str) -> Dict[str, Any]:
+    def profile(self, profile_id: str) -> dict[str, Any]:
         for db in self.data["databases"]:
             if db["id"] == profile_id:
                 return db
@@ -489,7 +572,7 @@ class Config:
         return Path(self.source).parent / path
 
 
-def read_file(path: Path) -> Dict[str, Any]:
+def read_file(path: Path) -> dict[str, Any]:
     text = path.read_text(encoding="utf-8")
     if path.suffix == ".json":
         data = json.loads(text)
@@ -500,8 +583,8 @@ def read_file(path: Path) -> Dict[str, Any]:
     return data
 
 
-def load_config(path: Optional[str | os.PathLike] = None, *, env: Optional[Mapping[str, str]] = None,
-                data: Optional[Mapping[str, Any]] = None, allow_placeholders: bool = False) -> Config:
+def load_config(path: str | os.PathLike | None = None, *, env: Mapping[str, str] | None = None,
+                data: Mapping[str, Any] | None = None, allow_placeholders: bool = False) -> Config:
     """Load, resolve, and validate; raise :class:`ConfigError` listing every issue."""
     env = dict(os.environ if env is None else env)
     if data is not None:
@@ -528,7 +611,7 @@ def load_config(path: Optional[str | os.PathLike] = None, *, env: Optional[Mappi
     return Config(data=resolved, hash=config_hash(resolved), source=source)
 
 
-def apply_call_overrides(config: Config, overrides: Mapping[str, Any]) -> Dict[str, Any]:
+def apply_call_overrides(config: Config, overrides: Mapping[str, Any]) -> dict[str, Any]:
     """Validate per-call overrides; return the effective call settings.
 
     Only fields in ``per_call_overrides_allowlist`` may be set, and safety
@@ -536,8 +619,8 @@ def apply_call_overrides(config: Config, overrides: Mapping[str, Any]) -> Dict[s
     ``database_profile`` must name a configured profile.
     """
     allow = set(config.data["per_call_overrides_allowlist"])
-    issues: List[Issue] = []
-    effective: Dict[str, Any] = {}
+    issues: list[Issue] = []
+    effective: dict[str, Any] = {}
     profiles = {db["id"]: db for db in config.data["databases"]}
     profile_id = overrides.get("database_profile", config.data["databases"][0]["id"])
     for key, value in overrides.items():

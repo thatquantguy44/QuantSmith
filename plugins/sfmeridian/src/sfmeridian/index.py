@@ -22,10 +22,11 @@ import hashlib
 import json
 import math
 import re
-from collections import Counter, defaultdict
+from collections import Counter
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple
+from typing import Any
 
 from . import feedback as feedback_mod
 from .config import Config
@@ -64,7 +65,7 @@ def _eligibility(status: str, trust_tier: str, policy: str) -> str:
 
 
 def _exemplar(repo: Mapping[str, Any], snapshot_ref: str, path: str, sql_sha: str,
-              parsed, provenance: str = "repository") -> Dict[str, Any]:
+              parsed, provenance: str = "repository") -> dict[str, Any]:
     meta = parsed.meta or {}
     status = parsed.review_status
     exemplar_id = hashlib.sha256(f"{repo['id']}\0{path}\0{sql_sha}".encode()).hexdigest()[:16]
@@ -103,20 +104,20 @@ def _exemplar(repo: Mapping[str, Any], snapshot_ref: str, path: str, sql_sha: st
 
 @dataclass
 class IndexReport:
-    repositories: List[Dict[str, Any]] = field(default_factory=list)
-    written: List[str] = field(default_factory=list)
-    errors: List[Dict[str, str]] = field(default_factory=list)
+    repositories: list[dict[str, Any]] = field(default_factory=list)
+    written: list[str] = field(default_factory=list)
+    errors: list[dict[str, str]] = field(default_factory=list)
 
     @property
     def ok(self) -> bool:
         return not self.errors
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> dict[str, Any]:
         return {"ok": self.ok, "repositories": self.repositories, "written": self.written, "errors": self.errors}
 
 
-def _load_previous(index_dir: Path) -> Tuple[Dict[str, Any], Dict[Tuple[str, str], Dict[str, Any]],
-                                              Dict[Tuple[str, str], Dict[str, Any]]]:
+def _load_previous(index_dir: Path) -> tuple[dict[str, Any], dict[tuple[str, str], dict[str, Any]],
+                                              dict[tuple[str, str], dict[str, Any]]]:
     manifest = {}
     if (index_dir / "manifest.json").exists():
         manifest = json.loads((index_dir / "manifest.json").read_text(encoding="utf-8"))
@@ -125,7 +126,7 @@ def _load_previous(index_dir: Path) -> Tuple[Dict[str, Any], Dict[Tuple[str, str
     return manifest, exemplars, rejected
 
 
-def _read_jsonl(path: Path) -> List[Dict[str, Any]]:
+def _read_jsonl(path: Path) -> list[dict[str, Any]]:
     if not path.exists():
         return []
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
@@ -137,11 +138,11 @@ def _sidecar_for(snapshot: RepoSnapshot, path: str):
 
 
 def _index_repo(repo: Mapping[str, Any], snapshot: RepoSnapshot, previous_files: Mapping[str, str],
-                prev_ex: Mapping[Tuple[str, str], Dict[str, Any]],
-                prev_rej: Mapping[Tuple[str, str], Dict[str, Any]]):
-    exemplars: List[Dict[str, Any]] = []
-    rejected: List[Dict[str, Any]] = []
-    files: Dict[str, str] = {}
+                prev_ex: Mapping[tuple[str, str], dict[str, Any]],
+                prev_rej: Mapping[tuple[str, str], dict[str, Any]]):
+    exemplars: list[dict[str, Any]] = []
+    rejected: list[dict[str, Any]] = []
+    files: dict[str, str] = {}
     parsed_count = reused = 0
     sidecar_mode = repo.get("metadata_convention") == "sidecar"
     for source in snapshot.files:
@@ -178,7 +179,7 @@ def _index_repo(repo: Mapping[str, Any], snapshot: RepoSnapshot, previous_files:
     return exemplars, rejected, files, stats
 
 
-def _feedback_exemplars(config: Config) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+def _feedback_exemplars(config: Config) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     inbox = feedback_mod.Inbox(config.resolve_path(config.data["feedback"]["inbox"]))
     exemplars, rejected = [], []
     repo = {"id": FEEDBACK_REPO, "dialect": "sqlite", "database_profile": None,
@@ -213,11 +214,11 @@ def _feedback_exemplars(config: Config) -> Tuple[List[Dict[str, Any]], List[Dict
     return exemplars, rejected
 
 
-def _aggregate(exemplars: Sequence[Mapping[str, Any]]) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]],
-                                                                List[Dict[str, Any]]]:
-    joins: Dict[Tuple[str, str], Dict[str, Any]] = {}
-    metrics: Dict[str, Dict[str, Any]] = {}
-    filters: Dict[Tuple[str, str], Dict[str, Any]] = {}
+def _aggregate(exemplars: Sequence[Mapping[str, Any]]) -> tuple[list[dict[str, Any]], list[dict[str, Any]],
+                                                                list[dict[str, Any]]]:
+    joins: dict[tuple[str, str], dict[str, Any]] = {}
+    metrics: dict[str, dict[str, Any]] = {}
+    filters: dict[tuple[str, str], dict[str, Any]] = {}
     for e in exemplars:
         if e["eligibility"] == "never":
             continue
@@ -252,7 +253,7 @@ def _aggregate(exemplars: Sequence[Mapping[str, Any]]) -> Tuple[List[Dict[str, A
                 entry["support"] += 1
                 entry["exemplar_ids"].add(e["exemplar_id"])
 
-    def finish(d: Dict[str, Any]) -> Dict[str, Any]:
+    def finish(d: dict[str, Any]) -> dict[str, Any]:
         return {k: sorted(v) if isinstance(v, set) else v for k, v in d.items()}
 
     join_list = [finish(v) for _, v in sorted(joins.items())]
@@ -264,8 +265,8 @@ def _aggregate(exemplars: Sequence[Mapping[str, Any]]) -> Tuple[List[Dict[str, A
     return join_list, metric_list, filter_list
 
 
-def build_index(config: Config, *, repo_ids: Optional[Iterable[str]] = None, force: bool = False,
-                clients: Optional[Mapping[str, ObjectStoreClient]] = None) -> IndexReport:
+def build_index(config: Config, *, repo_ids: Iterable[str] | None = None, force: bool = False,
+                clients: Mapping[str, ObjectStoreClient] | None = None) -> IndexReport:
     """Index the configured repositories; return what was parsed, reused, and written."""
     index_dir = config.resolve_path(config.data["index"]["dir"])
     base_dir = config.resolve_path(".")
@@ -273,9 +274,9 @@ def build_index(config: Config, *, repo_ids: Optional[Iterable[str]] = None, for
     manifest, prev_ex, prev_rej = ({}, {}, {}) if force else _load_previous(index_dir)
     wanted = set(repo_ids) if repo_ids else None
     report = IndexReport()
-    exemplars: List[Dict[str, Any]] = []
-    rejected: List[Dict[str, Any]] = []
-    new_manifest: Dict[str, Any] = {}
+    exemplars: list[dict[str, Any]] = []
+    rejected: list[dict[str, Any]] = []
+    new_manifest: dict[str, Any] = {}
 
     for repo in config.data["query_repositories"]:
         repo_id = repo["id"]
@@ -310,8 +311,8 @@ def build_index(config: Config, *, repo_ids: Optional[Iterable[str]] = None, for
     # deprecated one; (repo, path) order breaks ties.
     rank = {"reviewed": 0, "draft": 1, "deprecated": 2}
     exemplars.sort(key=lambda e: (rank.get(e["review_status"], 3), e["repo_id"], e["path"]))
-    seen: Dict[str, str] = {}
-    unique: List[Dict[str, Any]] = []
+    seen: dict[str, str] = {}
+    unique: list[dict[str, Any]] = []
     for e in exemplars:
         qid = e["query_id"]
         if qid is not None and qid in seen:
@@ -344,13 +345,12 @@ def build_index(config: Config, *, repo_ids: Optional[Iterable[str]] = None, for
 # Search
 # --------------------------------------------------------------------------
 
-_STOP = frozenset("a an and are as at be by for from how in is it of on or per the to what which with show "
-                  "me give list get".split())
+_STOP = frozenset(["a", "an", "and", "are", "as", "at", "be", "by", "for", "from", "how", "in", "is", "it", "of", "on", "or", "per", "the", "to", "what", "which", "with", "show", "me", "give", "list", "get"])
 _K1, _B = 1.2, 0.75
 
 
-def _terms(text: str) -> List[str]:
-    out: List[str] = []
+def _terms(text: str) -> list[str]:
+    out: list[str] = []
     for word in re.findall(r"[A-Za-z0-9_.]+", text.lower()):
         pieces = [p for p in re.split(r"[._]", word) if p]
         for piece in pieces:
@@ -373,9 +373,9 @@ def _doc_text(e: Mapping[str, Any]) -> str:
 class Hit:
     score: float
     hint: bool
-    exemplar: Dict[str, Any]
+    exemplar: dict[str, Any]
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> dict[str, Any]:
         e = self.exemplar
         return {"score": round(self.score, 6), "hint": self.hint, "exemplar_id": e["exemplar_id"],
                 "query_id": e["query_id"], "title": e["title"], "review_status": e["review_status"],
@@ -384,7 +384,7 @@ class Hit:
 
 
 class Index:
-    def __init__(self, exemplars: List[Dict[str, Any]]) -> None:
+    def __init__(self, exemplars: list[dict[str, Any]]) -> None:
         self.exemplars = [e for e in exemplars if e["eligibility"] != "never"]
         self.docs = [Counter(_terms(_doc_text(e))) for e in self.exemplars]
         self.lengths = [sum(d.values()) for d in self.docs]
@@ -395,7 +395,7 @@ class Index:
         n = len(self.docs)
         self.idf = {t: math.log(1 + (n - f + 0.5) / (f + 0.5)) for t, f in df.items()}
 
-    def get(self, exemplar_id: str) -> Optional[Dict[str, Any]]:
+    def get(self, exemplar_id: str) -> dict[str, Any] | None:
         return next((e for e in self.exemplars if e["exemplar_id"] == exemplar_id), None)
 
 
@@ -403,8 +403,8 @@ def load_index(index_dir: Path) -> Index:
     return Index(_read_jsonl(Path(index_dir) / "exemplars.jsonl"))
 
 
-def search(index: Index, query: str, *, limit: int = 5, profile: Optional[str] = None,
-           tags: Sequence[str] = (), include_hints: bool = True, min_score: float = 0.0) -> List[Hit]:
+def search(index: Index, query: str, *, limit: int = 5, profile: str | None = None,
+           tags: Sequence[str] = (), include_hints: bool = True, min_score: float = 0.0) -> list[Hit]:
     """BM25 over exemplar metadata; normalized score in ``[0, 1)``.
 
     The score is BM25 divided by its supremum for the query, Σ idf·(k1+1), so
@@ -413,7 +413,7 @@ def search(index: Index, query: str, *, limit: int = 5, profile: Optional[str] =
     """
     q_terms = sorted(set(_terms(query)))
     ceiling = sum(self_idf * (_K1 + 1) for self_idf in (index.idf.get(t, 0.0) for t in q_terms))
-    hits: List[Hit] = []
+    hits: list[Hit] = []
     for e, doc, length in zip(index.exemplars, index.docs, index.lengths):
         if profile and e.get("profile") not in (profile, None):
             continue

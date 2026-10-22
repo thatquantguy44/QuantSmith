@@ -19,6 +19,7 @@
 | `0118` | Plugin packaging & app surfaces | `plugins/sfmeridian/` distributable; Python API; MCP server on `0052`; Claude Code plugin via `0110`; cross-surface contract tests; SemVer per `0047`; second-dialect fixture. | `0117`; `0052`; `0110`; `0047` | — (surfaces) | T-001 (schemas), T-020–T-023, T-025 |
 | `0119` | Securities-lending analytics agents and specialist workflows | Agents `utilization_specials_analyst`, `recall_buyin_risk_analyst`, `lending_revenue_analyst`; workflows W2–W5 and W7–W12 wiring the optimization, risk, portfolio-management, knowledge, and ML handoffs (`plan.md` handoff map); decision-support envelope producers (REQ-022). | `0118`; `0028`; `0066`; `0067`; `0013`; `0006`/`0046` | C-06, C-07, C-08 | T-026 (part) |
 | `0120` | Lending reporting completeness checks | Agent `lending_reporting_check`; field-completeness and consistency checks for SFTR / Rule 10c-1a style datasets; never submits; regulatory dates confirmed by adopter counsel. | `0119`; `0069` when written | C-09 | T-026 (part) |
+| `0121` | Adaptive securities-finance dataset research (built) | Incorporates the Dataset Intake Investigator POC and its adaptive EDA spec: research context, reviewed read-only templates with static checks, pushed-down exact aggregates, securities-finance rule pack, coverage ledger, budgets, evidence-linked recommendations, reproducible bundle; agent `lending_data_researcher`, workflow W13. | `0114`; `0063`; `0066` | C-10 | `0121` T-001–T-018 |
 
 ## Phases
 
@@ -52,6 +53,16 @@ access controls and redaction.
 are proposed and the pack review is scheduled (reviewed is preferred, not
 required, to proceed); drifted exemplars are excluded; no
 credential appears in any artifact (secret-scan clean).
+
+### Phase 2b — Dataset research (`0121`) · built
+
+Added 2026-10-22 at the owner's direction (incorporating the Dataset Intake
+Investigator POC). Gives every later phase a trusted view of each lending
+dataset before answers depend on it; its template static check is the seed
+of `0116`'s verifier.
+
+**Exit:** `0121` AC-001–AC-024 pass except AC-016 (live connectors), which
+stays open until nonproduction environments exist.
 
 ### Phase 3 — Grounded SQL (`0116`) · ~3–4 weeks · **MVP**
 

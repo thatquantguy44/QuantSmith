@@ -13,11 +13,13 @@ People are named by pseudonymous handles, never email addresses.
 
 from __future__ import annotations
 
+import builtins
 import hashlib
 import json
 import re
+from collections.abc import Mapping, Sequence
 from pathlib import Path
-from typing import Any, Dict, List, Mapping, Optional, Sequence
+from typing import Any
 
 __all__ = ["FeedbackError", "Inbox"]
 
@@ -67,11 +69,11 @@ class Inbox:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(record, sort_keys=True, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
 
-    def _read(self, path: Path) -> Dict[str, Any]:
+    def _read(self, path: Path) -> dict[str, Any]:
         return json.loads(path.read_text(encoding="utf-8"))
 
     def propose(self, *, kind: str, payload: Mapping[str, Any], proposer: str, proposed_on: str,
-                source_run_id: Optional[str] = None) -> Dict[str, Any]:
+                source_run_id: str | None = None) -> dict[str, Any]:
         """Stage a candidate; return its record. Idempotent for identical payloads."""
         if kind not in KINDS:
             raise FeedbackError("E_FEEDBACK_INVALID", f"kind must be one of {', '.join(KINDS)}")
@@ -95,18 +97,18 @@ class Inbox:
         self._write(path, record)
         return record
 
-    def list(self, status: Optional[str] = None) -> List[Dict[str, Any]]:
+    def list(self, status: str | None = None) -> builtins.list[dict[str, Any]]:
         if not self.candidates_dir.exists():
             return []
         records = [self._read(p) for p in sorted(self.candidates_dir.glob("*.json"))]
         return [r for r in records if status is None or r["status"] == status]
 
-    def promoted(self) -> List[Dict[str, Any]]:
+    def promoted(self) -> builtins.list[dict[str, Any]]:
         if not self.promoted_dir.exists():
             return []
         return [self._read(p) for p in sorted(self.promoted_dir.glob("*.json"))]
 
-    def _get(self, candidate_id: str) -> Dict[str, Any]:
+    def _get(self, candidate_id: str) -> dict[str, Any]:
         if not re.fullmatch(r"[0-9a-f]{16}", candidate_id or ""):
             raise FeedbackError("E_FEEDBACK_NOT_FOUND", f"malformed candidate id {candidate_id!r}")
         path = self.candidates_dir / f"{candidate_id}.json"
@@ -115,7 +117,7 @@ class Inbox:
         return self._read(path)
 
     def promote(self, candidate_id: str, *, promoter: str, promoters: Sequence[str], promoted_on: str,
-                note: Optional[str] = None) -> Dict[str, Any]:
+                note: str | None = None) -> dict[str, Any]:
         """Promote a staged candidate; only a configured promoter who is not the proposer may."""
         record = self._get(candidate_id)
         promoter = _handle(promoter, "promoter")
@@ -131,7 +133,7 @@ class Inbox:
         self._write(self.candidates_dir / f"{candidate_id}.json", record)
         return record
 
-    def discard(self, candidate_id: str, *, by: str, reason: str, discarded_on: str) -> Dict[str, Any]:
+    def discard(self, candidate_id: str, *, by: str, reason: str, discarded_on: str) -> dict[str, Any]:
         record = self._get(candidate_id)
         if record["status"] != "staged":
             raise FeedbackError("E_FEEDBACK_STATE", f"candidate is {record['status']}, not staged")

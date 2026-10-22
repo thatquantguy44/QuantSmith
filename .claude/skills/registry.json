@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "generator": "quantsmith-skills/1",
-  "generation": 4,
+  "generation": 5,
   "updated": "2026-10-22",
   "targets": {},
   "skills": [
@@ -2580,6 +2580,22 @@
       "updated_generation": 1,
       "source_hash": "sha256:fb60b432b89cc54b7e38d88d933782d5931042495a19f8b9533892d56be484da",
       "skill_hash": "sha256:bd7a7f659cb3b03429dc7e5edb8103e47577a1d5e54939ecbacb1fcfa7450cc8"
+    },
+    {
+      "name": "securities-financing-sfmeridian-lending-data-researcher",
+      "agent": "securities_financing/sfmeridian/lending_data_researcher",
+      "category": "securities_financing",
+      "description": "The Lending Data Researcher establishes what a securities-lending dataset is, what can be trusted, what remains uncertain, and which executable check to run next. Use when a new lending feed or table is onboarded and needs to be trusted before use, or a desk, monitor, or backtest is about to depend on borrow rates, utilization, collateral, or revenue data.",
+      "status": "active",
+      "project": false,
+      "path": null,
+      "revision": 1,
+      "introduced": "2026-10-22",
+      "updated": "2026-10-22",
+      "removed": null,
+      "updated_generation": 5,
+      "source_hash": "sha256:3e67609bfea27bcfb3228157897929aeddcb005fcd8597760f46355255b2d463",
+      "skill_hash": "sha256:b7f1b2f9db08049e57461ad4efb7754645f972436b1a57f41b5506a55f3f304a"
     },
     {
       "name": "securities-financing-sfmeridian-query-librarian",

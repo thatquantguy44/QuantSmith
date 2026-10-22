@@ -24,7 +24,7 @@ stay strings; callers that need a date validate the string.
 from __future__ import annotations
 
 import re
-from typing import Any, List, Optional, Tuple
+from typing import Any
 
 __all__ = ["YamlSubsetError", "parse", "parse_scalar"]
 
@@ -47,8 +47,8 @@ _FORBIDDEN_START = ("&", "*", "!", "%", "@", "`", "?")
 
 def _strip_comment(text: str) -> str:
     """Drop a ``#`` comment that is outside quotes and starts a token."""
-    out: List[str] = []
-    quote: Optional[str] = None
+    out: list[str] = []
+    quote: str | None = None
     prev = " "
     for ch in text:
         if quote:
@@ -74,7 +74,7 @@ def _unquote(text: str, source: str, line: int) -> str:
     if len(text) < 2 or text[-1] != '"':
         raise YamlSubsetError(source, line, f"unterminated quoted string {text!r}")
     body = text[1:-1]
-    out: List[str] = []
+    out: list[str] = []
     i = 0
     escapes = {"n": "\n", "t": "\t", '"': '"', "\\": "\\", "/": "/"}
     while i < len(body):
@@ -166,9 +166,9 @@ class _Flow:
             self.pos += 1
         return parse_scalar(self.text[start:self.pos], self.source, self.line)
 
-    def seq(self) -> List[Any]:
+    def seq(self) -> list[Any]:
         self.pos += 1
-        items: List[Any] = []
+        items: list[Any] = []
         self.ws()
         if self.text[self.pos:self.pos + 1] == "]":
             self.pos += 1
@@ -228,11 +228,11 @@ def _flow(text: str, source: str, line: int) -> Any:
 # Block structure
 # --------------------------------------------------------------------------
 
-_Line = Tuple[int, str, int]  # indent, content, line number
+_Line = tuple[int, str, int]  # indent, content, line number
 
 
-def _lines(text: str, source: str) -> Tuple[List[_Line], List[str]]:
-    out: List[_Line] = []
+def _lines(text: str, source: str) -> tuple[list[_Line], list[str]]:
+    out: list[_Line] = []
     raw_lines = text.splitlines()
     for number, raw in enumerate(raw_lines, start=1):
         leading = raw[: len(raw) - len(raw.lstrip(" \t"))]
@@ -249,7 +249,7 @@ def _lines(text: str, source: str) -> Tuple[List[_Line], List[str]]:
 
 
 class _Block:
-    def __init__(self, lines: List[_Line], raw: List[str], source: str) -> None:
+    def __init__(self, lines: list[_Line], raw: list[str], source: str) -> None:
         self.lines = lines
         self.raw = raw
         self.source = source
@@ -324,10 +324,10 @@ class _Block:
         return out
 
     def block_scalar(self, style: str, indent: int, line: int) -> str:
-        parts: List[str] = []
+        parts: list[str] = []
         first = line  # raw line numbers are 1-based; the header is ``line``
         number = first + 1
-        block_indent: Optional[int] = None
+        block_indent: int | None = None
         while number <= len(self.raw):
             raw = self.raw[number - 1]
             if raw.strip() == "":

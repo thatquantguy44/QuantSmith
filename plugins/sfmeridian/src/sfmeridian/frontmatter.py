@@ -19,7 +19,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from . import yamlsubset
 from .sqlstructure import SqlStructureError, extract
@@ -52,18 +52,18 @@ class QueryRejected(ValueError):
 
 @dataclass
 class ParsedQuery:
-    meta: Optional[Dict[str, Any]]      # None when the file has no front-matter
+    meta: dict[str, Any] | None      # None when the file has no front-matter
     sql: str
-    line_span: Tuple[int, int]          # 1-based, inclusive, of the SQL body
-    structure: Dict[str, Any]
-    findings: List[str] = field(default_factory=list)
+    line_span: tuple[int, int]          # 1-based, inclusive, of the SQL body
+    structure: dict[str, Any]
+    findings: list[str] = field(default_factory=list)
 
     @property
     def review_status(self) -> str:
         return "unreviewed" if self.meta is None else self.meta["review_status"]
 
 
-def split_front_matter(text: str, source: str) -> Tuple[Optional[Dict[str, Any]], str, int]:
+def split_front_matter(text: str, source: str) -> tuple[dict[str, Any] | None, str, int]:
     """Return (front-matter or None, SQL body, 1-based first line of the body)."""
     lines = text.splitlines()
     first = next((i for i, line in enumerate(lines) if line.strip()), None)
@@ -73,7 +73,7 @@ def split_front_matter(text: str, source: str) -> Tuple[Optional[Dict[str, Any]]
     if end is None:
         raise QueryRejected("E_FRONTMATTER_INVALID", "front-matter opened with '-- ---' but never closed",
                             first + 1)
-    body: List[str] = []
+    body: list[str] = []
     for i in range(first + 1, end):
         line = lines[i]
         stripped = line.lstrip()
@@ -83,7 +83,7 @@ def split_front_matter(text: str, source: str) -> Tuple[Optional[Dict[str, Any]]
         if not stripped.startswith("--"):
             raise QueryRejected("E_FRONTMATTER_INVALID", "every front-matter line must start with '--'", i + 1)
         content = stripped[2:]
-        body.append(content[1:] if content.startswith(" ") else content)
+        body.append(content.removeprefix(" "))
     # Line numbers inside the YAML are offset by the header line.
     padded = "\n" * (first + 1) + "\n".join(body)
     try:
@@ -96,7 +96,7 @@ def split_front_matter(text: str, source: str) -> Tuple[Optional[Dict[str, Any]]
     return meta, sql, end + 2
 
 
-def validate_meta(meta: Dict[str, Any], structure: Dict[str, Any]) -> List[str]:
+def validate_meta(meta: dict[str, Any], structure: dict[str, Any]) -> list[str]:
     """Raise on invalid front-matter; return non-fatal findings."""
     for key in meta:
         if key not in KNOWN and not str(key).startswith("x_"):
@@ -120,7 +120,7 @@ def validate_meta(meta: Dict[str, Any], structure: Dict[str, Any]) -> List[str]:
     params = meta.get("params") or []
     if not isinstance(params, list):
         raise QueryRejected("E_FRONTMATTER_INVALID", "params must be a list")
-    declared: List[str] = []
+    declared: list[str] = []
     for p in params:
         if not isinstance(p, dict) or not isinstance(p.get("name"), str):
             raise QueryRejected("E_FRONTMATTER_INVALID", "each param needs a name")
@@ -134,7 +134,7 @@ def validate_meta(meta: Dict[str, Any], structure: Dict[str, Any]) -> List[str]:
     if len(set(declared)) != len(declared):
         raise QueryRejected("E_FRONTMATTER_INVALID", "duplicate parameter names")
 
-    findings: List[str] = []
+    findings: list[str] = []
     if status == "reviewed":
         for key in REQUIRED_REVIEWED:
             if key not in meta or meta[key] in (None, ""):
@@ -186,7 +186,7 @@ def _strings(value: Any, path: str = ""):
             yield from _strings(v, f"{path}[{i}]")
 
 
-def parse_query(text: str, source: str, *, dialect: str, sidecar: Optional[str] = None) -> ParsedQuery:
+def parse_query(text: str, source: str, *, dialect: str, sidecar: str | None = None) -> ParsedQuery:
     """Parse one query file (raising :class:`QueryRejected` when it is invalid)."""
     if sidecar is not None:
         try:

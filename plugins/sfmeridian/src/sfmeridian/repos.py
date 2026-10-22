@@ -22,9 +22,10 @@ import hashlib
 import os
 import re
 import subprocess
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
 from pathlib import Path, PurePosixPath
-from typing import Any, Iterable, List, Mapping, Optional, Protocol, Tuple
+from typing import Any, Protocol
 
 from .globs import selected
 
@@ -43,7 +44,7 @@ class RepoFetchError(RuntimeError):
 
 
 class ObjectStoreClient(Protocol):  # pragma: no cover - interface only
-    def list_objects(self, prefix: str) -> Iterable[Tuple[str, str]]: ...
+    def list_objects(self, prefix: str) -> Iterable[tuple[str, str]]: ...
     def get_object(self, key: str) -> bytes: ...
 
 
@@ -59,9 +60,9 @@ class RepoSnapshot:
     repo_id: str
     kind: str
     ref: str
-    files: Tuple[SourceFile, ...] = field(default_factory=tuple)
+    files: tuple[SourceFile, ...] = field(default_factory=tuple)
 
-    def file(self, path: str) -> Optional[SourceFile]:
+    def file(self, path: str) -> SourceFile | None:
         return next((f for f in self.files if f.path == path), None)
 
 
@@ -74,7 +75,7 @@ def _digest(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
-def _content_ref(prefix: str, pairs: Iterable[Tuple[str, str]]) -> str:
+def _content_ref(prefix: str, pairs: Iterable[tuple[str, str]]) -> str:
     h = hashlib.sha256()
     for path, digest in sorted(pairs):
         h.update(path.encode("utf-8") + b"\0" + digest.encode("ascii") + b"\n")
@@ -97,7 +98,7 @@ def _fetch_local(repo: Mapping[str, Any], root: Path) -> RepoSnapshot:
     root_resolved = root.resolve()
     include = repo["paths"]["include"]
     exclude = repo["paths"].get("exclude", [])
-    files: List[SourceFile] = []
+    files: list[SourceFile] = []
     for dirpath, dirnames, filenames in os.walk(root_resolved, followlinks=False):
         dirnames.sort()
         for name in sorted(filenames):
@@ -120,7 +121,7 @@ def _fetch_local(repo: Mapping[str, Any], root: Path) -> RepoSnapshot:
 # git
 # --------------------------------------------------------------------------
 
-def _git(args: List[str], repo_id: str, uri: str, cwd: Optional[Path] = None) -> bytes:
+def _git(args: list[str], repo_id: str, uri: str, cwd: Path | None = None) -> bytes:
     env = dict(os.environ)
     env.update({"GIT_TERMINAL_PROMPT": "0", "GIT_ASKPASS": "true", "LC_ALL": "C"})
     try:
@@ -155,7 +156,7 @@ def _fetch_git(repo: Mapping[str, Any], uri: str, cache_dir: Path) -> RepoSnapsh
     listing = _git(["--git-dir", str(cache), "ls-tree", "-r", "-z", "--full-tree", commit], repo_id, uri)
     include = repo["paths"]["include"]
     exclude = repo["paths"].get("exclude", [])
-    files: List[SourceFile] = []
+    files: list[SourceFile] = []
     for entry in listing.split(b"\0"):
         if not entry:
             continue
@@ -189,11 +190,11 @@ def _fetch_object_store(repo: Mapping[str, Any], uri: str,
     prefix = prefix.rstrip("/") + "/" if prefix else ""
     include = repo["paths"]["include"]
     exclude = repo["paths"].get("exclude", [])
-    pairs: List[Tuple[str, str]] = []
-    files: List[SourceFile] = []
+    pairs: list[tuple[str, str]] = []
+    files: list[SourceFile] = []
     for key, version in sorted(client.list_objects(f"{bucket}/{prefix}" if bucket else prefix)):
         full_prefix = f"{bucket}/{prefix}" if bucket else prefix
-        rel = key[len(full_prefix):] if key.startswith(full_prefix) else key
+        rel = key.removeprefix(full_prefix)
         if not _safe_relative(rel):
             raise RepoFetchError(repo_id, f"refusing unsafe object key {key!r}")
         if not selected(rel, include, exclude):
@@ -206,7 +207,7 @@ def _fetch_object_store(repo: Mapping[str, Any], uri: str,
 
 
 def fetch(repo: Mapping[str, Any], *, base_dir: Path, cache_dir: Path,
-          clients: Optional[Mapping[str, ObjectStoreClient]] = None) -> RepoSnapshot:
+          clients: Mapping[str, ObjectStoreClient] | None = None) -> RepoSnapshot:
     """Snapshot one configured repository.
 
     ``base_dir`` resolves relative ``local`` paths (normally the config file's

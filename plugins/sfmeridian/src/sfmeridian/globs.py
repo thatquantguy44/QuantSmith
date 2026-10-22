@@ -11,14 +11,14 @@ directly inside ``<dir>``. These rules are the usual ones instead:
 from __future__ import annotations
 
 import re
+from collections.abc import Iterable
 from functools import lru_cache
-from typing import Iterable
 
 __all__ = ["compile_glob", "matches", "selected"]
 
 
 @lru_cache(maxsize=256)
-def compile_glob(pattern: str) -> "re.Pattern[str]":
+def compile_glob(pattern: str) -> re.Pattern[str]:
     out = []
     i = 0
     while i < len(pattern):

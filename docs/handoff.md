@@ -20,7 +20,7 @@ hooks/stages/run-stage.sh` clean).
 
 1. Choose next: **slice C of `0107`** (lakehouse table formats, data FinOps,
    reference-data pack — the data-engineering thread the owner has been driving) or
-   **`0103` evaluation** (next in roadmap order, What's Next #0). Next free spec: `0121` (`0113` SFMeridian foundation Approved; `0114` Phase 1 built and Approved; `0115`–`0120` reserved; next SFMeridian step is `0115`, which needs the `0081` pack reviewer named).
+   **`0103` evaluation** (next in roadmap order, What's Next #0). (`0113` SFMeridian foundation Approved; `0114` Phase 1 and `0121` dataset research built and Approved; `0115`–`0120` reserved; next SFMeridian step is `0115`, which needs the `0081` pack reviewer named). Next free spec: `0122`.
 
 **How each slice was built (repeat the pattern):** spec/plan/tasks in
 `specs/NNNN-slug/` → stdlib runtime in `src/quantsmith/pipelines/` reusing approved
@@ -36,7 +36,7 @@ by `hooks/stages/doc-counts-check.sh` → full suite + enforced gates → commit
 - **Local-only material.** The owner made the regional Asia/China venture agents and
   specs `0084`–`0086` local-only (`.gitignore`) and rewrote history. Never re-add
   them; the skills export skips gitignored agent folders automatically. Counts in
-  docs are for a clean clone (211 agents, 90 specs).
+  docs are for a clean clone (212 agents, 91 specs).
 - **Skills export.** After any agent change, rebuild and commit `.claude/skills/`
   (blocking in pre-commit and CI). Only the `project` selection in
   `config/skills_export.json` is materialized (59 skills) because Claude Code's
@@ -72,7 +72,7 @@ by `hooks/stages/doc-counts-check.sh` → full suite + enforced gates → commit
 > Next* and items 29–30.
 
 The SDK has a working v1: a **spec-driven engineering framework** over the six
-software-development stages, **211 agents** in `agents/`,
+software-development stages, **212 agents** in `agents/`,
 **37 quality gates**, **40 instruction standards**, and CI that
 enforces the deterministic gates. It remains primarily a scaffold to be copied
 into quant repos, with `src/quantsmith/pipelines/`, `src/quantsmith/orchestration/`,
@@ -97,7 +97,7 @@ it via stable IDs (`REQ`/`NFR`/`AC`/`RISK`/`T`).
 - `specs/NNNN-slug/{spec,plan,tasks}.md` from `templates/spec/`; worked example at
   `specs/0001-daily-momentum-signal/`.
 
-**Agents (211, verified by the `agent-catalog` gate — treat `agents/README.md`
+**Agents (212, verified by the `agent-catalog` gate — treat `agents/README.md`
 as the live count, not the number here)** — all on the four-file contract
 (`README`/`prompt`/`instructions`/`tasks`) with a `Spec-Driven Role`:
 
@@ -381,6 +381,7 @@ nobody noticed.
 | `0118` | **SFMeridian: packaging & app surfaces** — `plugins/sfmeridian/` distributable, Python API, MCP server (`0052`), Claude Code plugin (`0110`), SemVer (`0047`) | `0117` | `0113` roadmap |
 | `0119` | **SFMeridian: analytics agents** — utilization/specials, recall/buy-in risk, lending revenue attribution | `0118`, `0028`, `0066` | `0113` roadmap |
 | `0120` | **SFMeridian: lending reporting completeness checks** — SFTR / Rule 10c-1a style field checks; never submits | `0119`, `0069` when written | `0113` roadmap |
+| `0121` | **SFMeridian: adaptive securities-finance dataset research** — **built and Approved** (spec dir `specs/0121-sfmeridian-adaptive-dataset-research/`): Dataset Intake Investigator POC incorporated; loop agent `lending_data_researcher`; AC-016 live connectors open | `0114` | owner direction 2026-10-22 |
 
 Specs `0063-short-term-markets-domain-foundation/`,
 `0066-securities-lending-model-correction/`,
@@ -423,7 +424,7 @@ designs**: create and
 approve one only when the foundation it consumes — `0063` or `0072` — has frozen
 that contract and the prior dependency named above is satisfied. Do not add
 agents merely to fill the map; prefer a canonical knowledge artifact or tested
-runtime that an existing agent can use. **Next unreserved spec number: `0121`** (`0113`–`0120` are the SFMeridian securities finance intelligence plugin foundation and its reserved children, see `specs/0113-seclending-intelligence-plugin/roadmap.md`; `0083`–`0092` are the venture-intelligence foundation and its reserved children, item 32; `0093` is the visualization packs spec; `0094` is the Asian-language NLP foundation; `0095` is the venture predictive-model baselines; `0096` is request routing; `0097` is the test-engineering runtime; `0098` is the model testing helpers; `0099` is the Dataset Investigator; `0100` is the agent-skills upstream integration; `0101` is the concurrent pipeline fleet; `0102`–`0109` are the platform expansion roadmap, What's Next #0; `0110` is the skills export and registry; `0111` is change-safe data engineering, slice A of `0107`; `0112` is data-engineering tooling, slice B of `0107`).
+runtime that an existing agent can use. **Next unreserved spec number: `0122`** (`0113`–`0120` are the SFMeridian securities finance intelligence plugin foundation and its reserved children, `0121` its built dataset-research child, see `specs/0113-seclending-intelligence-plugin/roadmap.md`; `0083`–`0092` are the venture-intelligence foundation and its reserved children, item 32; `0093` is the visualization packs spec; `0094` is the Asian-language NLP foundation; `0095` is the venture predictive-model baselines; `0096` is request routing; `0097` is the test-engineering runtime; `0098` is the model testing helpers; `0099` is the Dataset Investigator; `0100` is the agent-skills upstream integration; `0101` is the concurrent pipeline fleet; `0102`–`0109` are the platform expansion roadmap, What's Next #0; `0110` is the skills export and registry; `0111` is change-safe data engineering, slice A of `0107`; `0112` is data-engineering tooling, slice B of `0107`).
 Reserving a number here does not create the directory; copy `templates/spec/`
 only when that slice becomes active.
 
@@ -846,7 +847,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
     to populate `sources/` as real sources come into use.
 
 14. **P1 Generalization & Team Onboarding — making QuantSmith self-serve across
-    domains.** QuantSmith is now a comprehensive framework (211 agents, 69 specs,
+    domains.** QuantSmith is now a comprehensive framework (212 agents, 69 specs,
     33 gates, 35 standards); the next phase is reducing discovery friction and
     enabling team-intuitive adoption without deep codebase reading.
     - **P0 Phase 1a: Role profiles** (`roles/{portfolio_manager,risk_manager,quant_researcher,data_engineer,compliance_officer}.md`):
@@ -1869,7 +1870,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
       `specs/0083-venture-intelligence-foundation/run_card.md` (see
       `docs/gate_runbook.md`); every `knowledge/venture_intelligence/` record is
       `draft` and most cite `unverified`; `agents/agent_registry.yaml` was incomplete (6 of
-      211 agents, with broken `skills_library/` paths); it is now generated from the
+      212 agents, with broken `skills_library/` paths); it is now generated from the
       agents by `scripts/build_agent_registry.py` and guarded by a test and the
       `agent-catalog` gate.
 
@@ -1968,7 +1969,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
 
 ## Risks
 
-- Breadth: 211 agents is useful only if each stays narrow and inspectable.
+- Breadth: 212 agents is useful only if each stays narrow and inspectable.
 - Heuristic gates (`leakage`, `backtest`, `secret-scan` fallback) can false-positive
   or miss; keep them advisory unless a repo's layout makes them reliable.
 - Docs can drift from the code; the `docs-link`, `agent-catalog`, and `spec-index` gates help, but

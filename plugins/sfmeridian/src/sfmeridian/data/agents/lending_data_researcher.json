@@ -1,0 +1,43 @@
+{
+ "name": "lending_data_researcher",
+ "version": "1.0.0",
+ "coverage_row": "C-10",
+ "spec": "0121-sfmeridian-adaptive-dataset-research",
+ "goal": "Research a securities-lending dataset in the adopter's database or a delivered file: account for every applicable analysis family, push exact aggregates down, apply the securities-finance rule pack, follow up where the evidence points, and hand people ranked, evidence-linked recommendations in a reproducible bundle.",
+ "tools": [
+  "research.start",
+  "research.intake",
+  "research.inspect_schema",
+  "research.summarize_columns",
+  "research.check_grain",
+  "research.inspect_missingness",
+  "research.inspect_time",
+  "research.check_domain_rules",
+  "research.inspect_numeric",
+  "research.inspect_categories",
+  "research.inspect_relationships",
+  "research.compare_segments",
+  "research.inspect_target",
+  "research.inspect_availability",
+  "research.compare_reference",
+  "research.render_charts",
+  "research.recommend_actions",
+  "research.finish"
+ ],
+ "verifiers": [
+  "research.findings_resolve_to_evidence",
+  "research.coverage_accounted",
+  "research.scope_honest",
+  "research.recommendations_contract"
+ ],
+ "max_steps": 60,
+ "max_tool_calls": 60,
+ "max_repairs": 1,
+ "human_checkpoints": [
+  "Answer questions the run cannot (business grain, calendar, timezone, thresholds).",
+  "Decide on every recommendation: the agent never repairs, deduplicates, imputes, or writes.",
+  "Accept or reject the dataset contract proposal.",
+  "Review limitations (extract scope, unpinned views, budget stops) before using results."
+ ],
+ "never": "Never executes model-written or repository SQL, writes to a source, repairs or deduplicates data, invents missing context, or states an extract result as a population fact."
+}

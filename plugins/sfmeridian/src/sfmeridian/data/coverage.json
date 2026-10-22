@@ -240,6 +240,49 @@
     ],
     "stop_condition": "A completeness report with every exception cited."
    }
+  },
+  {
+   "id": "C-10",
+   "agent": "lending_data_researcher",
+   "child_spec": "0121",
+   "status": "built",
+   "workflow": "Adaptive research of one securities-lending dataset (loan book, inventory, rates, collateral, recalls, revenue) in an adopter database or delivered file: coverage ledger, pushed-down exact aggregates, securities-finance rule pack, evidence-driven follow-ups, ranked recommendations, reproducible bundle.",
+   "never": "Never executes model-written or repository SQL, writes to a source, repairs or deduplicates data, invents missing context, or states an extract result as a population fact.",
+   "loop": {
+    "tools": [
+     "research.start",
+     "research.intake",
+     "research.inspect_schema",
+     "research.summarize_columns",
+     "research.check_grain",
+     "research.inspect_missingness",
+     "research.inspect_time",
+     "research.check_domain_rules",
+     "research.inspect_numeric",
+     "research.inspect_categories",
+     "research.inspect_relationships",
+     "research.compare_segments",
+     "research.inspect_target",
+     "research.inspect_availability",
+     "research.compare_reference",
+     "research.render_charts",
+     "research.recommend_actions",
+     "research.finish"
+    ],
+    "verifiers": [
+     "research.findings_resolve_to_evidence",
+     "research.coverage_accounted",
+     "research.scope_honest",
+     "research.recommendations_contract"
+    ],
+    "human_checkpoints": [
+     "Answer questions the run cannot (business grain, calendar, timezone, thresholds).",
+     "Decide on every recommendation: the agent never repairs, deduplicates, imputes, or writes.",
+     "Accept or reject the dataset contract proposal.",
+     "Review limitations (extract scope, unpinned views, budget stops) before using results."
+    ],
+    "stop_condition": "All applicable families accounted for and the bundle written; or a budget stop (budget_exhausted, never completed); or escalation when the context is invalid."
+   }
   }
  ]
 }

@@ -21,7 +21,11 @@ Guarantees, held by the harness rather than by the policy:
   run is ``completed``; a failure is fed back as an observation so the policy
   can repair, up to ``max_repairs``.
 * **Escalation** — a policy may stop and hand back to a person with a reason;
-  that is a first-class outcome, not an error.
+  that is a first-class outcome, not an error. An escalation whose outputs
+  carry ``stop_reason: budget_exhausted`` ends the run as ``budget_exhausted``.
+* **No loops on the same call** — an identical tool call (same name and
+  arguments) is refused with ``E_AGENT_DUPLICATE_ACTION``, except one retry
+  after a transient read failure (``E_SOURCE_TRANSIENT``).
 * **Trace** — every decision, call, result, and verdict is recorded with a
   deterministic run ID and the configuration hash, in a shape the ``0070``
   run envelope can carry.
@@ -36,9 +40,13 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Mapping, Optional, Protocol, Sequence, Union
+from typing import (
+    Any,
+    Protocol,
+)
 
 from .tools import ToolContext, ToolRegistry, ToolResult
 
@@ -48,6 +56,7 @@ __all__ = [
 ]
 
 DATA_DIR = Path(__file__).parent / "data" / "agents"
+TRANSIENT_CODE = "E_SOURCE_TRANSIENT"
 
 
 @dataclass(frozen=True)
@@ -65,14 +74,14 @@ class AgentManifest:
     never: str = ""
 
     @classmethod
-    def from_dict(cls, data: Mapping[str, Any]) -> "AgentManifest":
+    def from_dict(cls, data: Mapping[str, Any]) -> AgentManifest:
         return cls(name=data["name"], version=data["version"], coverage_row=data["coverage_row"],
                    goal=data["goal"], tools=tuple(data["tools"]), verifiers=tuple(data["verifiers"]),
                    max_steps=data.get("max_steps", 20), max_tool_calls=data.get("max_tool_calls", 20),
                    max_repairs=data.get("max_repairs", 2), human_checkpoints=tuple(data.get("human_checkpoints", [])),
                    never=data.get("never", ""))
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> dict[str, Any]:
         return {"name": self.name, "version": self.version, "coverage_row": self.coverage_row, "goal": self.goal,
                 "tools": list(self.tools), "verifiers": list(self.verifiers), "max_steps": self.max_steps,
                 "max_tool_calls": self.max_tool_calls, "max_repairs": self.max_repairs,
@@ -91,23 +100,23 @@ def load_manifest(name: str) -> AgentManifest:
 @dataclass(frozen=True)
 class ToolCall:
     name: str
-    args: Dict[str, Any] = field(default_factory=dict)
+    args: dict[str, Any] = field(default_factory=dict)
     why: str = ""
 
 
 @dataclass(frozen=True)
 class Finish:
     summary: str
-    outputs: Dict[str, Any] = field(default_factory=dict)
+    outputs: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
 class Escalate:
     reason: str
-    outputs: Dict[str, Any] = field(default_factory=dict)
+    outputs: dict[str, Any] = field(default_factory=dict)
 
 
-Action = Union[ToolCall, Finish, Escalate]
+Action = ToolCall | Finish | Escalate
 
 
 @dataclass(frozen=True)
@@ -116,9 +125,9 @@ class Observation:
     kind: str                       # tool | verifier | harness
     name: str
     ok: bool
-    output: Dict[str, Any]
-    error_code: Optional[str] = None
-    error: Optional[str] = None
+    output: dict[str, Any]
+    error_code: str | None = None
+    error: str | None = None
 
 
 @dataclass(frozen=True)
@@ -130,19 +139,19 @@ class Verdict:
 @dataclass
 class LoopState:
     manifest: AgentManifest
-    inputs: Dict[str, Any]
-    observations: List[Observation] = field(default_factory=list)
+    inputs: dict[str, Any]
+    observations: list[Observation] = field(default_factory=list)
     step: int = 0
     tool_calls: int = 0
     repairs: int = 0
 
-    def last(self, tool: str) -> Optional[Observation]:
+    def last(self, tool: str) -> Observation | None:
         return next((o for o in reversed(self.observations) if o.kind == "tool" and o.name == tool), None)
 
     def called(self, tool: str) -> bool:
         return self.last(tool) is not None
 
-    def pending_verifier_problems(self) -> List[str]:
+    def pending_verifier_problems(self) -> list[str]:
         last = self.observations[-1] if self.observations else None
         return list(last.output.get("problems", [])) if last and last.kind == "verifier" and not last.ok else []
 
@@ -163,18 +172,18 @@ class AgentRun:
     policy: str
     status: str                     # completed | escalated | budget_exhausted | denied | failed
     summary: str
-    outputs: Dict[str, Any]
-    trace: List[Dict[str, Any]]
+    outputs: dict[str, Any]
+    trace: list[dict[str, Any]]
     config_hash: str
     steps: int
     tool_calls: int
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> dict[str, Any]:
         return {"run_id": self.run_id, "agent": self.agent, "policy": self.policy, "status": self.status,
                 "summary": self.summary, "outputs": self.outputs, "steps": self.steps,
                 "tool_calls": self.tool_calls, "config_hash": self.config_hash, "trace": self.trace}
 
-    def envelope(self) -> Dict[str, Any]:
+    def envelope(self) -> dict[str, Any]:
         """Fields a ``0070`` run envelope carries: identity, inputs hash, audit events."""
         return {"run_id": self.run_id, "producer": f"sfmeridian.agent.{self.agent}",
                 "config_hash": self.config_hash, "status": self.status,
@@ -187,20 +196,22 @@ def _canonical(value: Any) -> str:
 
 
 def run_agent(manifest: AgentManifest, policy: Policy, registry: ToolRegistry, ctx: ToolContext, *,
-              inputs: Optional[Mapping[str, Any]] = None,
-              verifiers: Optional[Mapping[str, Verifier]] = None) -> AgentRun:
+              inputs: Mapping[str, Any] | None = None,
+              verifiers: Mapping[str, Verifier] | None = None) -> AgentRun:
     """Run one bounded loop and return its outcome and trace."""
     inputs = dict(inputs or {})
     verifiers = dict(verifiers or {})
     run_id = hashlib.sha256(_canonical({"agent": manifest.as_dict(), "inputs": inputs, "policy": policy.name,
                                         "config": ctx.config.hash, "today": ctx.today}).encode()).hexdigest()[:20]
     state = LoopState(manifest, inputs)
-    trace: List[Dict[str, Any]] = []
+    trace: list[dict[str, Any]] = []
+    seen_calls: dict[str, str | None] = {}       # canonical call -> last error code (None = succeeded)
+    retried: set = set()
     missing = [v for v in manifest.verifiers if v not in verifiers]
     if missing:
         raise ValueError(f"manifest {manifest.name} declares verifiers with no implementation: {missing}")
 
-    def finish(status: str, summary: str, outputs: Dict[str, Any]) -> AgentRun:
+    def finish(status: str, summary: str, outputs: dict[str, Any]) -> AgentRun:
         trace.append({"event": "end", "status": status})
         return AgentRun(run_id, manifest.name, policy.name, status, summary, outputs, trace,
                         ctx.config.hash, state.step, state.tool_calls)
@@ -211,7 +222,7 @@ def run_agent(manifest: AgentManifest, policy: Policy, registry: ToolRegistry, c
         state.step += 1
         try:
             action = policy.decide(state)
-        except Exception as exc:  # a policy bug is a failed run, never a crash of the host app
+        except Exception as exc:  # noqa: BLE001 — a policy bug is a failed run, never a crash of the host app
             trace.append({"event": "policy_error", "step": state.step, "error": f"{type(exc).__name__}: {exc}"})
             return finish("failed", f"policy error: {exc}", {})
 
@@ -226,15 +237,27 @@ def run_agent(manifest: AgentManifest, policy: Policy, registry: ToolRegistry, c
                 return finish("denied", obs.error or "", {})
             try:
                 effect = registry.get(action.name).effect
-            except Exception:
+            except Exception:  # noqa: BLE001 — an unknown tool is refused by the registry call below
                 effect = "unknown"
             if effect == "human_only":
                 trace.append({"event": "denied", "step": state.step, "name": action.name, "ok": False})
                 return finish("denied", f"{action.name} is reserved for a person", {})
+            call_key = _canonical({"name": action.name, "args": action.args})
+            if call_key in seen_calls:
+                transient = seen_calls[call_key] == TRANSIENT_CODE and call_key not in retried
+                if not transient:
+                    state.observations.append(Observation(state.step, "harness", action.name, False, {},
+                                                          "E_AGENT_DUPLICATE_ACTION",
+                                                          f"{action.name} was already called with these arguments"))
+                    trace.append({"event": "duplicate_rejected", "step": state.step, "name": action.name, "ok": False})
+                    continue
+                retried.add(call_key)
+                trace.append({"event": "retry", "step": state.step, "name": action.name})
             if state.tool_calls >= manifest.max_tool_calls:
                 return finish("budget_exhausted", f"stopped after {manifest.max_tool_calls} tool calls", {})
             state.tool_calls += 1
             result: ToolResult = registry.call(action.name, action.args, ctx)
+            seen_calls[call_key] = None if result.ok else result.error_code
             state.observations.append(Observation(state.step, "tool", action.name, result.ok, result.output,
                                                   result.error_code, result.error))
             trace.append({"event": "observe", "step": state.step, "name": action.name, "ok": result.ok,
@@ -244,11 +267,12 @@ def run_agent(manifest: AgentManifest, policy: Policy, registry: ToolRegistry, c
 
         if isinstance(action, Escalate):
             trace.append({"event": "escalate", "step": state.step, "reason": action.reason})
-            return finish("escalated", action.reason, action.outputs)
+            status = "budget_exhausted" if action.outputs.get("stop_reason") == "budget_exhausted" else "escalated"
+            return finish(status, action.reason, action.outputs)
 
         if isinstance(action, Finish):
             trace.append({"event": "finish_proposed", "step": state.step})
-            problems: List[str] = []
+            problems: list[str] = []
             for name in manifest.verifiers:
                 verdict = verifiers[name](state, action)
                 trace.append({"event": "verify", "step": state.step, "name": name, "ok": verdict.ok,
@@ -287,11 +311,13 @@ class ModelPolicy:
     """
 
     def __init__(self, complete: Completer, registry: ToolRegistry, *, name: str = "model",
-                 max_observation_chars: int = 4000) -> None:
+                 max_observation_chars: int = 4000, token_limit: int | None = None) -> None:
         self.complete = complete
         self.registry = registry
         self.name = name
         self.max_observation_chars = max_observation_chars
+        self.token_limit = token_limit
+        self.tokens_used = 0
         self._malformed = 0
 
     def prompt(self, state: LoopState) -> str:
@@ -311,11 +337,17 @@ class ModelPolicy:
         return "\n".join(lines)
 
     def decide(self, state: LoopState) -> Action:
-        raw = self.complete(self.prompt(state))
+        prompt = self.prompt(state)
+        estimate = len(prompt) // 4 + 1          # conservative character-based estimate; no tokenizer dependency
+        if self.token_limit is not None and self.tokens_used + estimate > self.token_limit:
+            return Escalate(f"model token budget of {self.token_limit} would be exceeded",
+                            {"stop_reason": "budget_exhausted"})
+        self.tokens_used += estimate
+        raw = self.complete(prompt)
         try:
             data = json.loads(raw.strip())
             if not isinstance(data, dict):
-                raise ValueError("not an object")
+                raise TypeError("not an object")
             kind = data.get("action")
             if kind == "tool" and isinstance(data.get("name"), str):
                 action: Action = ToolCall(data["name"], dict(data.get("args") or {}), str(data.get("why", "")))

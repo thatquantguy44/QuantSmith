@@ -1,0 +1,19 @@
+# SYNTHETIC research context for the fixture loan book (spec 0121).
+objective: Assess the loan book's suitability as the source for lending revenue attribution.
+dataset_kind: loan_book
+viewpoint: lender
+as_of: "2026-10-22"
+timezone: America/New_York
+business_grain: [loan_id, business_date]
+grain_probe_columns: [account]
+time_column: business_date
+expected_frequency: business_day
+calendar_dates: ["2026-10-12", "2026-10-13", "2026-10-14", "2026-10-15", "2026-10-16", "2026-10-19", "2026-10-20", "2026-10-21", "2026-10-22", "2026-10-23"]
+segments: [region]
+exclude_columns: [client_note]
+sensitive_columns: [account]
+change_column: change_seq
+thresholds:
+  fee_band_bps: {min: 0, max: 5000}
+  status_values: [OPEN, CLOSED]
+  materiality_missing_rate: 0.02
