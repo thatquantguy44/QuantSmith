@@ -1,4 +1,4 @@
-# Plan: Securities Lending Intelligence Plugin (Foundation)
+# Plan: SFMeridian — Securities Finance Intelligence Plugin (Foundation)
 
 - **Spec:** 0113-seclending-intelligence-plugin (`spec.md`)
 - **Status:** Draft
@@ -55,10 +55,10 @@ replay, `0071` the LLM evidence boundary, `0110` the plugin packaging, and
                                tool contract v1 (REQ-001)
                                                │
   ┌────────────── config (REQ-003/004) ────────┼───────────────────────────────┐
-  │ seclending_plugin.yml → schema validate → layered resolve → frozen Config │
+  │ sfmeridian.yml → schema validate → layered resolve → frozen Config │
   └────────────────────────────────────────────┼───────────────────────────────┘
                                                ▼
-   ask(question, as_of, caller)  ── orchestrator (seclending_orchestrator) ──┐
+   ask(question, as_of, caller)  ── orchestrator (sfmeridian_orchestrator) ──┐
      1 classify intent + resolve terms ── glossary / 0063 pack (REQ-012/013) │
      G governed tier ──────────────────── 0080 answer() (REQ-023)            │
          interpret → QueryPlan over 0008 metrics (0081 pack-aware)           │
@@ -89,9 +89,9 @@ replay, `0071` the LLM evidence boundary, `0110` the plugin packaging, and
 ### Package layout (delivered by `0114`–`0118`)
 
 ```text
-plugins/seclending/
-  pyproject.toml                    # distributable: quantsmith-seclending (SemVer, NFR-007)
-  src/quantsmith_seclending/
+plugins/sfmeridian/
+  pyproject.toml                    # distributable: sfmeridian (SemVer, NFR-007)
+  src/sfmeridian/
     contract/                       # tool schemas (JSON Schema), error codes, version
     config/                         # schema, loader, layered resolution, validate-only
     repos/                          # git/local/object_store fetchers, pinned refs
@@ -113,6 +113,11 @@ plugins/seclending/
   fixtures/                         # synthetic DB seed, synthetic query repo, golden set (0025-flagged)
   tests/
 ```
+
+Optional extras are drawn only from the governed tooling catalog
+(`tooling_catalog.md`, REQ-027): `[data]`, `[conventions]`, `[calendars]`,
+`[timeseries]`, `[validation]`, `[optimization]`, `[sources]`, `[excel]`, plus
+the database-driver and `[sqlparse]` extras below.
 
 The core depends on the standard library plus a SemVer-pinned `quantsmith`
 dependency used only by `governed/` (the stdlib-only `nl_analytics`,
@@ -163,9 +168,9 @@ interface, not of agent discipline.
 
 ### Configuration (REQ-003, REQ-004, REQ-017, REQ-020)
 
-Template: `templates/seclending_plugin/seclending_plugin.yml` (placeholders
-only). Real file: repo-root `seclending_plugin.yml` (gitignored) or the path in
-`QS_SECLENDING_CONFIG`. Top-level sections:
+Template: `templates/sfmeridian/sfmeridian.yml` (placeholders
+only). Real file: repo-root `sfmeridian.yml` (gitignored) or the path in
+`SFMERIDIAN_CONFIG`. Top-level sections:
 
 | Section | Holds |
 | --- | --- |
@@ -183,7 +188,7 @@ only). Real file: repo-root `seclending_plugin.yml` (gitignored) or the path in
 | `eval` | Golden set path(s) (repo synthetic + optional adopter-private), thresholds (NFR-002). |
 | `per_call_overrides_allowlist` | Fields a caller may override per call (e.g. `as_of`, `row_limit` lower only). |
 
-Resolution order: built-in defaults → file → `QS_SECLENDING__*` environment
+Resolution order: built-in defaults → file → `SFMERIDIAN__*` environment
 variables → per-call overrides (allowlisted, and only in the restrictive
 direction for safety fields). The resolved config is frozen and hashed; the
 hash is in every run envelope.
@@ -192,7 +197,7 @@ hash is in every run envelope.
 
 Front-matter in the leading comment block of each `.sql` file (sidecar
 `<name>.yml` alternative). Template:
-`templates/seclending_plugin/query_front_matter.sql`. Required for `reviewed`:
+`templates/sfmeridian/query_front_matter.sql`. Required for `reviewed`:
 `id`, `title`, `intent`, `owner`, `dialect`, `profile`, `params[]` (name, type,
 required), `tables[]`, `pit_columns[]`, `grain`, `review_status`, `reviewed_by`,
 `reviewed_on`. Optional: `tags[]`, `concepts[]` (`0063` IDs), `viewpoint`,
@@ -312,14 +317,14 @@ proposes no agent for any workflow below.
 | `ranking_recommendation` | Exemplar ranking for `queries.search` if lexical retrieval underperforms on the golden set | golden-set retrieval logs | ranker with offline metrics | never ranks unreviewed exemplars above reviewed | W1 |
 | `mlops_monitoring` | Drift and decay of deployed borrow models | live predictions vs outcomes | drift and decay alerts | never retrains silently | W12 |
 
-**Proposed new agents** (group folder `agents/securities_financing/seclending_intelligence/`; each created only by its child spec):
+**Proposed new agents** (group folder `agents/securities_financing/sfmeridian/`; each created only by its child spec):
 
 | Row | Agent | Distinct workflow | Never does | Child |
 | --- | --- | --- | --- | --- |
 | C-01 | `query_librarian` | Onboard and index query repositories; front-matter hygiene; dedup; drift triage; review queue for candidates. | Never promotes a candidate or edits query SQL without a named human reviewer. | `0114` |
 | C-02 | `semantic_mapping_steward` | Bind `0081` pack metrics and `0063` concepts to physical columns and metric source queries per profile; declare grain, PIT column, viewpoint, unit; draft `0081` pack amendments for missing concepts. | Never invents a mapping without a catalog object and an exemplar or owner confirmation; never edits a pack's `review` block or defines a concept privately. | `0115` |
 | C-03 | `sql_composer` | Retrieval-first SQL composition (reuse → adapt → generate) under the catalog and mapping, **only for questions `0080` reports as outside the governed metrics** — the workflow `nl_analytics` deliberately does not hold. | Never executes SQL and never bypasses `sql.verify`. | `0116` |
-| C-04 | `seclending_orchestrator` | Route desk questions through the governed tier, then the 11-step pipeline; pick analytics agents; manage retries and abstention. | Never answers from model memory; never returns a number without a run citation. | `0116`/`0117` |
+| C-04 | `sfmeridian_orchestrator` | Route desk questions through the governed tier, then the 11-step pipeline; pick analytics agents; manage retries and abstention. | Never answers from model memory; never returns a number without a run citation. | `0116`/`0117` |
 | C-05 | `answer_grounding_reviewer` | Claim-level citation, recompute, term, and viewpoint checks on draft answers. | Never adds new facts; can only cite, correct to the cited value, remove, or abstain. | `0117` |
 | C-06 | `utilization_specials_analyst` | Desk-facing interpretation of utilization, demand/supply, fee trends, GC→warm→special migration, days-to-cover; consumes `time_series_forecasting` and `unsupervised_anomaly` outputs rather than building models. | Never builds or trains a model itself; never uses non-PIT rates for history. | `0119` |
 | C-07 | `recall_buyin_risk_analyst` | Recall pressure (dividends, votes, sales), buy-in and fail exposure on open loans/borrows; consumes `supervised_learning` recall scores and hands events to `operational_risk`. | Never sends or recommends sending a recall; outputs risk indicators only. | `0119` |
@@ -415,6 +420,7 @@ in the handoff map above.
 | REQ-020 | Multi-dialect profiles | T-016, T-025 |
 | REQ-021 | Specialist handoff map; workflows W7–W12 | T-028, T-029 |
 | REQ-022 | Decision-support output envelope for optimizer and model results | T-029, T-030 |
+| REQ-027 | Tooling catalog, admission review, catalog-only recommendations | T-036, T-037 |
 | REQ-023 | Governed-first tier routing through `0080` (`governed/`) | T-031, T-035 |
 | REQ-024 | `Reader` over verified metric source queries | T-032 |
 | REQ-025 | Concept vocabulary seeded from `0081`; pack amendments; unreviewed-pack caveat | T-033 |
@@ -436,7 +442,8 @@ in the handoff map above.
 | Question → SQL path | Governed-first through `0080`, query repository for the tail | A second, independent NL→SQL path | `0080` already plans over governed metrics with clarification, clearance, and grounding; two paths would answer the same question two ways (RISK-012). |
 | `0080` dependency | Pinned `quantsmith` import isolated in `governed/` | Vendor a copy of `0080` | A vendored copy forks the governed path and its fixes; pinning plus one adapter keeps a single source of truth. |
 | Missing pack concepts | Propose `0081` amendments | Plugin-private concept list | Private definitions would fork the domain vocabulary `0080` and reviewers rely on. |
-| Packaging | Separate distributable under `plugins/seclending/` | Module inside `src/quantsmith/` | Apps must install it without the SDK (NFR-003); `0110` already packages Claude plugins. |
+| Third-party libraries | Governed catalog screened from community lists; optional extras only | Adopt a curated list wholesale | Most entries are trading, crypto, or pricing tools outside scope or against the read-only boundary; unvetted packages are a supply-chain risk (RISK-014). |
+| Packaging | Separate distributable under `plugins/sfmeridian/` | Module inside `src/quantsmith/` | Apps must install it without the SDK (NFR-003); `0110` already packages Claude plugins. |
 | "Learning" | Indexed retrieval + structure extraction + reviewed promotion | Fine-tuning on the query repo | Auditable, reversible, no training data leaves the adopter; fine-tune deferred until eval shows a gap (roadmap Phase 6). |
 | Verification | Deterministic verifier with fail-closed tokenizer; optional strict parser | LLM self-check of SQL | A model cannot reliably check its own invented identifiers; determinism makes the fabrication-rate threshold of 0 achievable. |
 | Execute interface | Verification token required | Execute raw SQL with a guard flag | Makes verify-before-execute an interface property, not discipline. |
@@ -481,6 +488,6 @@ in the handoff map above.
 - Which viewpoint and dialect the first adopter needs (see `spec.md`).
 - Who reviews the `0081` `securities_financing_prime` pack and its amendments.
 - Whether the MCP server should also expose the query index as `0052`
-  resources (`knowledge://seclending/...`) or tools only.
+  resources (`knowledge://sfmeridian/...`) or tools only.
 - Whether `0120` (regulatory completeness) should be scheduled ahead of
   `0119` for an adopter under a near-term reporting obligation.

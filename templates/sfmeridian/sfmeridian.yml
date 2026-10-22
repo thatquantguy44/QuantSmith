@@ -1,12 +1,12 @@
-# Securities Lending Intelligence Plugin configuration (spec 0113).
+# SFMeridian — Securities Finance Intelligence Plugin configuration (spec 0113).
 #
 # TEMPLATE — placeholders only. Copy to the repository root as
-# `seclending_plugin.yml` (gitignored) or point QS_SECLENDING_CONFIG at a copy
+# `sfmeridian.yml` (gitignored) or point SFMERIDIAN_CONFIG at a copy
 # outside the repo. Never commit real repository URLs, hosts, schemas, table
 # names, or credentials. Secrets are pointers resolved at runtime through
 # `secrets_management/`, never values.
 #
-# Resolution order: built-in defaults -> this file -> QS_SECLENDING__* env vars
+# Resolution order: built-in defaults -> this file -> SFMERIDIAN__* env vars
 # -> per-call overrides (only fields in per_call_overrides_allowlist, and only
 # in the restrictive direction for safety fields).
 
@@ -135,7 +135,7 @@ feedback:
 # --- Evaluation and release gate (REQ-016, NFR-002) --------------------------
 eval:
   golden_sets:
-    - plugins/seclending/fixtures/golden_questions.jsonl   # synthetic, in repo
+    - plugins/sfmeridian/fixtures/golden_questions.jsonl   # synthetic, in repo
     - <adopter-private-golden-set-path>                      # optional, local only
   thresholds:
     identifier_fabrication_rate: 0.0

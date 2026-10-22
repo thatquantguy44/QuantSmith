@@ -124,6 +124,6 @@ src/quantsmith/_bundled/
 
 # Local securities-lending plugin config (spec 0113) -- names real query
 # repositories, database profiles, and semantic mappings; never commit it.
-# Anchored to the repo root so templates/seclending_plugin/ stays tracked.
-/seclending_plugin.yml
-/seclending_plugin.yaml
+# Anchored to the repo root so templates/sfmeridian/ stays tracked.
+/sfmeridian.yml
+/sfmeridian.yaml

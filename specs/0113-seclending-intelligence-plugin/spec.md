@@ -1,10 +1,13 @@
-# Spec: Securities Lending Intelligence Plugin (Foundation)
+# Spec: SFMeridian — Securities Finance Intelligence Plugin (Foundation)
 
 - **ID:** 0113-seclending-intelligence-plugin
 - **Status:** Draft
 - **Author:** Joshua Lutkemuller, CFA
 - **Approver:**
-- **Last updated:** 2026-10-22 (REQ-021/REQ-022 handoffs; REQ-023–REQ-026 governed-first tier on `0080`/`0081`)
+- **Last updated:** 2026-10-22 (REQ-021/REQ-022 handoffs; REQ-023–REQ-026 governed-first tier on `0080`/`0081`; REQ-027 tooling catalog; named SFMeridian)
+- **Product name:** SFMeridian (distributable `sfmeridian`). Only the plugin
+  carries this name; QuantSmith is unchanged. The spec directory keeps its
+  original slug so existing links stay stable.
 
 > WHAT and WHY only. Implementation lives in `plan.md`; the phased delivery
 > order lives in `roadmap.md`. This is an **umbrella foundation spec** in the
@@ -83,7 +86,7 @@ Why it needs its own foundation rather than a prompt on top of
 
 ## Goals
 
-- Define a **self-contained, versioned plugin** (`quantsmith-seclending`)
+- Define a **self-contained, versioned plugin** (`sfmeridian`)
   with one tool contract exposed through three surfaces: a Python API, an MCP
   server, and a Claude Code plugin — usable by an app without the rest of the
   SDK.
@@ -117,7 +120,7 @@ Why it needs its own foundation rather than a prompt on top of
 - **No real data, firm schemas, real query text, counterparty names, or
   positions in this repository.** The repo is a public scaffold. Real query
   repositories, connection profiles, and semantic mappings live in a
-  gitignored adopter-local `seclending_plugin.yml` and adopter-controlled
+  gitignored adopter-local `sfmeridian.yml` and adopter-controlled
   storage (same rule as `role_context.yml` and `model_plugins.yml`).
 - **No writes to any lending, trading, or books-and-records system.** The
   plugin is read-only analytics and decision support; it does not book loans,
@@ -139,9 +142,9 @@ Why it needs its own foundation rather than a prompt on top of
 
 | ID | Requirement | Priority |
 | --- | --- | --- |
-| REQ-001 | The SDK shall define the plugin boundary: a single distributable (`quantsmith-seclending`) with a versioned tool contract (named tools, JSON-schema inputs/outputs, error codes) that is the only interface apps depend on. | must |
+| REQ-001 | The SDK shall define the plugin boundary: a single distributable (`sfmeridian`) with a versioned tool contract (named tools, JSON-schema inputs/outputs, error codes) that is the only interface apps depend on. | must |
 | REQ-002 | The tool contract shall be exposed through three surfaces with identical semantics: an importable Python API, an MCP server conforming to the `0052` adapter contract, and a Claude Code plugin (skills plus MCP configuration) packaged with `0110`'s plugin tooling. | must |
-| REQ-003 | The plugin shall be configured by one declarative file (`seclending_plugin.yml`) with a published schema, layered resolution (defaults → file → environment overrides → per-call overrides limited to an allowlist), and a validate-only mode; a tracked template contains placeholders only and the real file is gitignored. | must |
+| REQ-003 | The plugin shall be configured by one declarative file (`sfmeridian.yml`) with a published schema, layered resolution (defaults → file → environment overrides → per-call overrides limited to an allowlist), and a validate-only mode; a tracked template contains placeholders only and the real file is gitignored. | must |
 | REQ-004 | The configuration shall declare one or more **query repositories**, each with: kind (`git`, `local`, `object_store`), location, ref/branch or snapshot, include/exclude paths, SQL dialect, metadata convention, trust tier, and review policy. No repository location is hard-coded anywhere in the plugin. | must |
 | REQ-005 | The SDK shall define a **query metadata convention** (front-matter in a leading SQL comment block, or a sidecar file) carrying at least: stable ID, title, intent description, owner, dialect, target database profile, parameters with types, referenced tables, point-in-time columns, grain, review status, and tags; files without metadata are indexable but marked `unreviewed`. | must |
 | REQ-006 | The plugin shall **learn from the query repository** by indexing it into: retrievable exemplars (intent ↔ SQL), an observed join graph (table pairs and join keys), metric definitions (named expressions), common filters, and parameter templates; every derived artifact cites the source file, commit/snapshot, and line span. | must |
@@ -164,6 +167,7 @@ Why it needs its own foundation rather than a prompt on top of
 | REQ-024 | The plugin shall supply `0080`'s read-only `Reader`: each governed metric's base measures are bound in configuration to a reviewed **metric source query** from the query repository, run through `sql.verify`/`sql.execute` with the plan's as-of and filters bound as parameters, and returned as `0008` `Fact` rows with provenance; a metric whose source query is missing, unreviewed, or drifted is unavailable to the governed tier, never silently served. | must |
 | REQ-025 | The concept vocabulary shall be **seeded from `0081`'s `securities_financing_prime` pack** (metrics, dimensions, units, additivity, conventions, insight-suppression rules), resolved through `0081`'s `resolve_packs` so adopter-local pack overlays apply. Concepts the pack lacks (for example rebate rate, lendable value, on-loan quantity, recall quantity, collateral value, days-to-cover) shall be proposed as pack amendments through `0081`'s review flow, never defined privately in the plugin; answers that use an unreviewed pack carry `0080`'s unreviewed-pack caveat. | must |
 | REQ-026 | `0080` insight write-back shall be **disabled by default** in the plugin; enabling it requires explicit configuration, `0080`'s write-back contract and approval rules, and reviewed packs (`0080` REQ-016), and its target may never be a lending, trading, or books-and-records system. | must |
+| REQ-027 | SFMeridian shall keep a governed **third-party tooling catalog** (`tooling_catalog.md`, machine-readable form in `0114`) listing every library a component may depend on or an agent may recommend, each with ring (`adopt`/`trial`/`assess`/`hold`/`exclude`), SFMeridian use, owning component or agent, extra, license, maintenance and supply-chain review, and reviewer. Community curated lists are discovery inputs only; no library is depended on or recommended without an admission review, and an agent never recommends a package absent from the catalog. | must |
 | REQ-022 | Every optimization or ML output that reaches a plugin answer shall stay **decision support**: optimizers return proposed allocations with solver diagnostics and sensitivities (via `solver_diagnostics_sensitivity`), and models return forecasts or scores with a baseline, an interval or calibration, and a point-in-time feature attestation; neither books, recalls, reprices, or trades. | must |
 
 ## Non-Functional Requirements
@@ -213,6 +217,7 @@ Why it needs its own foundation rather than a prompt on top of
 | AC-028 | Given governed metrics bound to reviewed metric source queries, when `0080` executes a plan through the plugin's `Reader`, then the `Fact` rows reproduce the source queries' totals for the plan's as-of and filters, every row batch carries run provenance, and a metric bound to an unreviewed or drifted source query is reported unavailable. | REQ-024 |
 | AC-029 | Given the resolved pack catalog, when the semantic mapping is validated, then all five `securities_financing_prime` metrics are present with the pack's units and additivity, each concept the pack lacks appears only as a proposed pack amendment (not a plugin-private definition), and an answer built on the draft pack carries the unreviewed-pack caveat. | REQ-025, REQ-008 |
 | AC-030 | Given the default configuration, when a request asks to publish insights, then write-back is refused with a stated reason; and a configuration naming a lending or books-and-records target is rejected by validation. | REQ-026 |
+| AC-031 | Given the tooling catalog, when validated, then every `adopt`/`trial` entry names an SFMeridian component or agent, an optional extra, and a completed admission review (license, maintenance, pinned hash, advisory scan); no core module imports a non-stdlib library; and an agent answer recommending a package not in the catalog is rejected by the grounding check. | REQ-027, NFR-003 |
 | AC-024 | Given the full repository after this spec lands, when `run-stage.sh spec`, spec-index, handoff-sync, agent-catalog, and skills-export run, then they pass with no new findings, and the diff modifies no existing agent's behaviour or runtime. | NFR-008, NFR-009 |
 
 ## Data & Dependencies
@@ -264,6 +269,7 @@ Why it needs its own foundation rather than a prompt on top of
 | RISK-011 | Demand, specials, or recall models leak future borrow data or overfit short histories, or an optimizer's proposed allocation is read as an instruction. | False signals; unreviewed inventory or pricing actions. | REQ-022; `problem_framing_labeling` and `model_selection_validation` own labels and purged validation; `feature_store_engineering` enforces PIT features; `solver_diagnostics_sensitivity` reviews every solve; outputs labelled decision support. |
 | RISK-012 | The governed tier and a reviewed query disagree on the same number (e.g. utilization computed two ways). | Contradictory answers erode trust. | Tier-agreement check in the golden set: governed questions are also answered through the reuse tier and must match; a disagreement flags the exemplar or the binding for review. |
 | RISK-013 | `0080` and `0081` are still Draft; their interfaces may change, and every pack is unreviewed. | Plugin breakage; caveated answers indefinitely. | Pin the `quantsmith` version (`0047`); isolate the dependency in one `governed/` adapter with contract tests; make naming the pack reviewer a Phase 0 exit criterion. |
+| RISK-014 | A third-party library is abandoned, relicensed, typosquatted, or compromised, or an agent recommends a package that does not exist. | Supply-chain compromise; license exposure; broken installs. | REQ-027 admission rules; pinned hashes; optional extras only; catalog-only recommendations checked by grounding; periodic re-review. |
 | RISK-010 | Evaluation set is too easy or drifts from real usage. | False confidence in hallucination metrics. | Versioned golden set with unanswerable and adversarial questions; adopter-local private golden set overlay; periodic refresh from promoted feedback. |
 
 ## Assumptions & Open Questions

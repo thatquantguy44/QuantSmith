@@ -1,4 +1,4 @@
-# Roadmap: Securities Lending Intelligence Plugin
+# Roadmap: SFMeridian — Securities Finance Intelligence Plugin
 
 - **Spec:** 0113-seclending-intelligence-plugin (`spec.md`, `plan.md`, `tasks.md`)
 - **Last updated:** 2026-10-22
@@ -14,9 +14,9 @@
 | --- | --- | --- | --- | --- | --- |
 | `0114` | Query repository connector & indexer | Config loader and schema; `local`/`git`/`object_store` fetchers at pinned refs; front-matter parser; exemplar store, join graph, metric/filter extraction; lexical index; feedback inbox; `coverage.json`; agent `query_librarian`. | `0113`; `0049` pattern; `0027` source catalog | C-01 | T-005–T-009, T-017 (C-01) |
 | `0115` | Schema catalog, semantic mapping & access | Catalog snapshots (introspect/file), drift reconciliation, concept mapping seeded from `0081` `securities_financing_prime` on `0008` rules (plus drafted pack amendments) and governed-metric source-query bindings, viewpoint/unit declarations, secret pointers, allowlists, redaction, clearance; agent `semantic_mapping_steward`. | `0114`; `0063`; `0008`; `0081`; `0058`; `secrets_management` | C-02 | T-010–T-013, T-032 (binding), T-033 |
-| `0116` | Governed tier, grounded SQL composition, verification & execution | Governed-first routing through `0080` and the `Reader` over metric source queries; retrieval-first composer for the tail; deterministic verifier with tokens and cost guard; read-only execution seam over `0023`; provenance and `0070` envelope; agents `sql_composer`, `seclending_orchestrator`. | `0115`; `0080`; `0070`; `0023`; `adapters/llm_runtime/` | C-03, C-04 | T-014–T-017, T-031, T-032, T-034 |
+| `0116` | Governed tier, grounded SQL composition, verification & execution | Governed-first routing through `0080` and the `Reader` over metric source queries; retrieval-first composer for the tail; deterministic verifier with tokens and cost guard; read-only execution seam over `0023`; provenance and `0070` envelope; agents `sql_composer`, `sfmeridian_orchestrator`. | `0115`; `0080`; `0070`; `0023`; `adapters/llm_runtime/` | C-03, C-04 | T-014–T-017, T-031, T-032, T-034 |
 | `0117` | Grounded answering & hallucination evaluation | Grounding check, recompute, viewpoint enforcement, abstention; synthetic fixture DB and query repo; golden-question set, metrics, thresholds, release gate; agent `answer_grounding_reviewer`. | `0116`; `0063`; `0025`; coordinates with `0103` | C-05 | T-018, T-019, T-035 |
-| `0118` | Plugin packaging & app surfaces | `plugins/seclending/` distributable; Python API; MCP server on `0052`; Claude Code plugin via `0110`; cross-surface contract tests; SemVer per `0047`; second-dialect fixture. | `0117`; `0052`; `0110`; `0047` | — (surfaces) | T-001 (schemas), T-020–T-023, T-025 |
+| `0118` | Plugin packaging & app surfaces | `plugins/sfmeridian/` distributable; Python API; MCP server on `0052`; Claude Code plugin via `0110`; cross-surface contract tests; SemVer per `0047`; second-dialect fixture. | `0117`; `0052`; `0110`; `0047` | — (surfaces) | T-001 (schemas), T-020–T-023, T-025 |
 | `0119` | Securities-lending analytics agents and specialist workflows | Agents `utilization_specials_analyst`, `recall_buyin_risk_analyst`, `lending_revenue_analyst`; workflows W2–W5 and W7–W12 wiring the optimization, risk, portfolio-management, knowledge, and ML handoffs (`plan.md` handoff map); decision-support envelope producers (REQ-022). | `0118`; `0028`; `0066`; `0067`; `0013`; `0006`/`0046` | C-06, C-07, C-08 | T-026 (part) |
 | `0120` | Lending reporting completeness checks | Agent `lending_reporting_check`; field-completeness and consistency checks for SFTR / Rule 10c-1a style datasets; never submits; regulatory dates confirmed by adopter counsel. | `0119`; `0069` when written | C-09 | T-026 (part) |
 
@@ -28,7 +28,8 @@ Spec, plan, tasks, roadmap, configuration template, front-matter convention,
 roster and coverage matrix, evaluation protocol, and the governed-first design
 on `0080`/`0081`. Ships documents only.
 
-**Exit:** `0113` approved; the open questions in `spec.md` answered (first
+**Exit:** `0113` approved; `tooling_catalog.md` screened (done) with
+admission reviews scheduled for the `adopt` entries; the open questions in `spec.md` answered (first
 viewpoint, first dialect, embeddings permission, `0119`/`0120` order) and a
 named reviewer assigned for the `0081` `securities_financing_prime` pack; `spec`,
 `spec-index`, and `handoff-sync` gates clean.
@@ -76,7 +77,7 @@ synthetic golden set over three seeds; the eval report is reproducible.
 Distributable package; Python API, MCP server, Claude Code plugin; contract
 tests; second dialect.
 
-**Exit:** AC-001, AC-002, AC-020, AC-023 pass; `quantsmith-seclending 1.0.0`
+**Exit:** AC-001, AC-002, AC-020, AC-023 pass; `sfmeridian 1.0.0`
 tagged with a release note; a reference app (a minimal CLI chat over the MCP
 server) answers the golden set with identical results to the Python API.
 
