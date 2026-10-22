@@ -216,6 +216,73 @@ incremental and diffable (NFR-001, NFR-005).
 | `risk`, `backtest_review` | Downstream consumers of borrow cost and recall risk. |
 | `workflow_orchestrator` | Drives the SDD flow for each child spec. |
 
+### Specialist Handoff Map (REQ-021, REQ-022)
+
+The plugin supplies *grounded evidence* (cited runs, point-in-time panels,
+`0063` terms); these existing agents supply *specialist judgement* on it. Each
+handoff passes run IDs and citations, never raw credentials or unredacted
+restricted columns, and each agent keeps its own never-boundary. The plugin
+proposes no agent for any workflow below.
+
+**Optimization** (`agents/optimization/`, routed by `optimization_orchestrator`)
+
+| Agent | Trigger | Plugin evidence in | Output | Never | Workflow |
+| --- | --- | --- | --- | --- | --- |
+| `problem_formulation` | Any allocation, pricing, or capacity question that needs an optimizer | inventory, demand, constraints panels | formal objective, variables, constraints, data map | never solves with undeclared constraints | W7, W8, W9 |
+| `linear_programming` | Inventory-to-demand allocation (extends `0023`'s LP) | lendable inventory, borrow demand, fees, caps | proposed allocation | never ignores the balance-sheet cap (`0023` AC) | W7 |
+| `mixed_integer_optimization` | Allocation with minimum lot sizes, counterparty count limits, or all-or-nothing loans | same as LP plus lot/limit data | proposed allocation | never reports a MIP gap as optimal | W7 |
+| `collateral_margin_optimization` | Cheapest-to-deliver collateral, substitutions, margin under schedules (`0067` contract) | collateral holdings, eligibility, haircuts, margin calls | proposed collateral allocation | never breaches eligibility or concentration schedules | W8 |
+| `pricing_revenue_optimization` | Fee-setting for warm/special names, tiered counterparty pricing | PIT fee history, utilization, demand elasticity estimates | proposed fee grid with expected revenue range | never reprices; proposals only | W9 |
+| `resource_capacity_optimization` | Balance-sheet, RWA, or lending-capacity budgeting across programs | capacity limits, balances, returns on capacity | proposed capacity split | never exceeds declared limits | W7, W9 |
+| `robust_optimization` | Allocations that must survive recall or demand uncertainty | demand/recall forecast intervals (W10) | robust allocation and cost of robustness | never hides the uncertainty set | W7 |
+| `solver_diagnostics_sensitivity` | **Every** solve above | solver output | status, binding constraints, duals, sensitivities | never certifies a solve it cannot reproduce | W7, W8, W9 |
+| `model_plugin_registration` | Adopter's in-house allocation or collateral engine | `0026` manifest | understanding brief and routing | never inspects proprietary logic | W7, W8 |
+
+**Risk** (`agents/risk/`, `agents/enterprise_risk/`)
+
+| Agent | Trigger | Plugin evidence in | Output | Never | Workflow |
+| --- | --- | --- | --- | --- | --- |
+| `risk` | Short-side or lending-program risk profile | borrow cost, recall, concentration panels | risk profile, stress cases | never states return without the risk story | W3, W11 |
+| `counterparty_credit_risk` | Exposure to borrowers net of collateral and indemnification | loans, collateral marks, netting sets, limits | netted, collateralized exposure, PFE with horizon | never lets gross exposure stand for net | W11 |
+| `liquidity_treasury_risk` | Cash-collateral reinvestment, recall-driven liquidity needs | cash collateral balances, reinvestment holdings, recall forecasts | liquidity gap and stress with stated basis | never reports a liquidity number without its basis | W11 |
+| `operational_risk` | Fails, buy-ins, late returns, booking breaks | fails and buy-in records, recall timelines | classified events vs near-misses | never classifies a developing event as a loss | W3 |
+| `model_risk_management` | The plugin's own models and the grounding pipeline once used for decisions | eval reports (REQ-016), model cards | inventory entry, validation cadence, findings | never approves its own validation | W12 |
+
+**Portfolio management** (`agents/portfolio_management/`, routed by `pm_orchestrator`)
+
+| Agent | Trigger | Plugin evidence in | Output | Never | Workflow |
+| --- | --- | --- | --- | --- | --- |
+| `universe_selection` | Shortable universe for a strategy | PIT availability, HTB status, fees | eligible, PIT short universe | never uses today's borrow status historically | W5, W10 |
+| `compliance_constraints` | Locate, Reg SHO, restricted-list, and lending-guideline checks | locates, restricted lists, client lending guidelines | pre/post-trade constraint checks, exceptions | never waives a constraint | W10 |
+| `liquidity_cash_management` | Short-side implementability under borrow and funding | availability, recall risk, funding | implementability verdict and constraints | never assumes free borrow | W10 |
+| `risk_budgeting` | Borrow-cost and recall risk inside the portfolio risk budget | borrow-cost panel, recall indicators | budget usage and breaches | never reallocates budget itself | W10 |
+| `rebalance_trade_implementation` | Rebalances that open or cover shorts | locate status, availability, fees | implementation plan with borrow checks | never sends orders | W10 |
+| `performance_attribution` | Borrow cost and lending income in portfolio results; reviews C-08's revenue attribution | revenue and borrow-cost runs | attribution incl. financing effect | never omits costs | W4, W10 |
+| `data_signal_intake` | Borrow-derived signals (utilization, fee moves, short interest) entering PM decisions | plugin panels with run citations | readiness verdict | never admits a signal without PIT proof | W5, W10 |
+
+**Knowledge** (`agents/knowledge/`)
+
+| Agent | Trigger | Plugin evidence in | Output | Never | Workflow |
+| --- | --- | --- | --- | --- | --- |
+| `knowledge_retrieval` | Domain term or desk-procedure lookup | — | cited `0063`/glossary records | never answers without a source | W1 |
+| `knowledge_ingestion` | Onboarding desk runbooks, data dictionaries, and schema docs that explain the query repository | documents (adopter-local) | provenance-tagged, access-aware chunks; PII/secret flags | never ingests restricted material into a lower tier | W6 |
+| `knowledge_curation` | Dedup, conflict, and staleness across exemplars, metric definitions, and glossary terms | index, drift findings, candidate inbox | canonical choices, conflict and gap list | never resolves a conflict without a canonical source | W6, W12 |
+| `institutional_memory` | Accepted answers, corrections, and recurring desk questions | promoted feedback, decisions | durable records feeding the index (`0049`) | never persists unreviewed claims | W12 |
+
+**Machine learning** (`agents/machine_learning/`, routed by `ml_orchestrator`)
+
+| Agent | Trigger | Plugin evidence in | Output | Never | Workflow |
+| --- | --- | --- | --- | --- | --- |
+| `problem_framing_labeling` | Defining targets: "goes special within h days", "recalled within h days", demand level | PIT event history | label spec with horizon and leakage review | never labels with information after the decision time | W10 |
+| `feature_store_engineering` | Reusable PIT borrow features (utilization, fee momentum, days-to-cover, recall rate) | plugin panels with as-of | feature definitions with as-of joins | never serves a feature without its as-of | W10 |
+| `time_series_forecasting` | Borrow demand, utilization, fee forecasts | PIT panels | forecasts with baseline and intervals | never reports a forecast without a naive baseline | W2, W10 |
+| `supervised_learning` | Specials and recall classifiers | features and labels above | calibrated scores | never reports uncalibrated probabilities | W3, W10 |
+| `unsupervised_anomaly` | Unusual fee, utilization, or recall patterns; unusual query-rejection patterns | PIT panels, verifier logs | ranked anomalies with explanations | never treats an anomaly as a confirmed event | W2, W12 |
+| `model_selection_validation` | Every model above | candidate models | purged/walk-forward validation (`0006`/`0046`) | never selects on in-sample results | W10 |
+| `causal_uplift` | Effect of a fee or recall-policy change on demand or revenue | pre/post panels, experiment design | effect estimate with identification assumptions | never presents correlation as effect | W9 |
+| `ranking_recommendation` | Exemplar ranking for `queries.search` if lexical retrieval underperforms on the golden set | golden-set retrieval logs | ranker with offline metrics | never ranks unreviewed exemplars above reviewed | W1 |
+| `mlops_monitoring` | Drift and decay of deployed borrow models | live predictions vs outcomes | drift and decay alerts | never retrains silently | W12 |
+
 **Proposed new agents** (group folder `agents/securities_financing/seclending_intelligence/`; each created only by its child spec):
 
 | Row | Agent | Distinct workflow | Never does | Child |
@@ -225,26 +292,34 @@ incremental and diffable (NFR-001, NFR-005).
 | C-03 | `sql_composer` | Retrieval-first SQL composition (reuse → adapt → generate) under the catalog and mapping. | Never executes SQL and never bypasses `sql.verify`. | `0116` |
 | C-04 | `seclending_orchestrator` | Route desk questions through the 11-step pipeline; pick analytics agents; manage retries and abstention. | Never answers from model memory; never returns a number without a run citation. | `0116`/`0117` |
 | C-05 | `answer_grounding_reviewer` | Claim-level citation, recompute, term, and viewpoint checks on draft answers. | Never adds new facts; can only cite, correct to the cited value, remove, or abstain. | `0117` |
-| C-06 | `utilization_specials_analyst` | Utilization, demand/supply, fee trends, GC→warm→special migration, days-to-cover. | Never forecasts without a stated baseline and interval; never uses non-PIT rates for history. | `0119` |
-| C-07 | `recall_buyin_risk_analyst` | Recall pressure (dividends, votes, sales), buy-in and fail exposure on open loans/borrows. | Never sends or recommends sending a recall; outputs risk indicators only. | `0119` |
-| C-08 | `lending_revenue_analyst` | Program revenue attribution: by security, counterparty tier, GC vs specials, agent/beneficial-owner split, intrinsic vs reinvestment. | Never restates booked revenue; reconciles to the book and reports differences. | `0119` |
+| C-06 | `utilization_specials_analyst` | Desk-facing interpretation of utilization, demand/supply, fee trends, GC→warm→special migration, days-to-cover; consumes `time_series_forecasting` and `unsupervised_anomaly` outputs rather than building models. | Never builds or trains a model itself; never uses non-PIT rates for history. | `0119` |
+| C-07 | `recall_buyin_risk_analyst` | Recall pressure (dividends, votes, sales), buy-in and fail exposure on open loans/borrows; consumes `supervised_learning` recall scores and hands events to `operational_risk`. | Never sends or recommends sending a recall; outputs risk indicators only. | `0119` |
+| C-08 | `lending_revenue_analyst` | Program revenue attribution: by security, counterparty tier, GC vs specials, agent/beneficial-owner split, intrinsic vs reinvestment; method reviewed by `performance_attribution`. | Never restates booked revenue; reconciles to the book and reports differences. | `0119` |
 | C-09 | `lending_reporting_check` | Field completeness and consistency checks for SFTR / Rule 10c-1a style datasets. | Never submits, certifies, or interprets regulation. | `0120` |
 
 `sql.verify` and grounding checks are **tools, not agents**: they are
 deterministic and model-independent by design, so they get no prompt. The
-counterparty/collateral exposure workflow is held by `collateral_management` +
-`risk` and gets no new agent (RISK-009).
+counterparty/collateral exposure workflow is held by `collateral_management`,
+`counterparty_credit_risk`, and `risk` (W11) and gets no new agent (RISK-009);
+likewise every optimization, portfolio-management, knowledge, and ML workflow
+in the handoff map above.
 
 ## Canonical Workflows (REQ-019)
 
 | Workflow | Agents | Tools | Inputs → outputs | Review gate | Must cite |
 | --- | --- | --- | --- | --- | --- |
 | W1 Desk question → cited answer | C-04, C-03, C-05, `securities_lending` | `ask` (all steps) | question, as_of → answer + citations or abstention | grounding check | run IDs, query IDs, `0063` terms |
-| W2 Daily utilization & specials monitor | C-06, `alert_policy`, `alert_router` | `queries.search`, `sql.*`, `answer.ground` | as_of → movers, migrations, alerts | `data_quality` on inputs | runs per metric, PIT predicate |
-| W3 Recall & buy-in risk review | C-07, `collateral_management`, `risk` | `sql.*`, `answer.ground` | book as_of, corporate-action calendar → risk list | named human review | runs, corporate-action source |
-| W4 Lending revenue attribution | C-08, `financing_cost_analysis` | `sql.*`, `0008` metrics | period → attribution reconciled to book | reconciliation to book total | runs, reconciliation diff |
-| W5 Borrow cost → backtests | `financing_cost_analysis`, `backtest_review` | `sql.*` (PIT) | universe, dates → PIT borrow-cost panel | `leakage` + `backtest` gates | runs with `as_of` per date |
-| W6 Query-repository onboarding | C-01, C-02, `schema_evolution` | `repos.index`, `catalog.snapshot`, `feedback.propose` | config → index, drift report, review queue | human promotion | repo refs, snapshot IDs |
+| W2 Daily utilization & specials monitor | C-06, `time_series_forecasting`, `unsupervised_anomaly`, `alert_policy`, `alert_router` | `queries.search`, `sql.*`, `answer.ground` | as_of → movers, migrations, alerts | `data_quality` on inputs | runs per metric, PIT predicate |
+| W3 Recall & buy-in risk review | C-07, `supervised_learning`, `operational_risk`, `collateral_management`, `risk` | `sql.*`, `answer.ground` | book as_of, corporate-action calendar → risk list | named human review | runs, corporate-action source |
+| W4 Lending revenue attribution | C-08, `performance_attribution`, `financing_cost_analysis` | `sql.*`, `0008` metrics | period → attribution reconciled to book | reconciliation to book total | runs, reconciliation diff |
+| W5 Borrow cost → backtests | `financing_cost_analysis`, `universe_selection`, `data_signal_intake`, `backtest_review` | `sql.*` (PIT) | universe, dates → PIT borrow-cost panel | `leakage` + `backtest` gates | runs with `as_of` per date |
+| W6 Query-repository onboarding | C-01, C-02, `schema_evolution`, `knowledge_ingestion`, `knowledge_curation` | `repos.index`, `catalog.snapshot`, `feedback.propose` | config, desk docs → index, drift report, review queue | human promotion | repo refs, snapshot IDs |
+| W7 Inventory allocation | `problem_formulation` → `linear_programming` / `mixed_integer_optimization` / `robust_optimization` (or a `0026` plugin) → `solver_diagnostics_sensitivity`; `resource_capacity_optimization` | `sql.*` (inventory, demand, caps) | as_of → proposed allocation, binding constraints, sensitivities | named human review | runs per input panel, solver status |
+| W8 Collateral optimization | `collateral_management`, `collateral_margin_optimization` (`0067`) → `solver_diagnostics_sensitivity` | `sql.*` (holdings, eligibility, haircuts) | as_of → proposed collateral allocation and substitutions | named human review | runs, eligibility schedule version |
+| W9 Fee and capacity pricing | `pricing_revenue_optimization`, `causal_uplift`, `resource_capacity_optimization` → `solver_diagnostics_sensitivity` | `sql.*` (PIT fees, utilization) | period → proposed fee grid, expected revenue range | named human review | runs, elasticity assumptions |
+| W10 Borrow-aware portfolio decisions | `universe_selection`, `compliance_constraints`, `liquidity_cash_management`, `risk_budgeting`, `rebalance_trade_implementation`, `data_signal_intake`; models from `problem_framing_labeling` → `feature_store_engineering` → `time_series_forecasting` / `supervised_learning` → `model_selection_validation` | `sql.*` (PIT) | strategy, dates → shortable universe, constraints, borrow-aware plan | `leakage` + `backtest` gates; PM review | runs with `as_of` per date, validation report |
+| W11 Counterparty and liquidity review | `counterparty_credit_risk`, `liquidity_treasury_risk`, `collateral_management`, `risk` | `sql.*` (loans, collateral, cash reinvestment) | as_of → netted exposure, liquidity gap, stress | named human review | runs, netting-set and basis statements |
+| W12 Plugin governance and learning | `model_risk_management`, `mlops_monitoring`, `unsupervised_anomaly`, `knowledge_curation`, `institutional_memory`, `quality-guard-agent` | `eval.run`, `repos.status`, `feedback.*` | eval reports, drift, feedback → findings, promotions, inventory entry | human promotion; MRM review | eval report version, promoted record IDs |
 
 ## Hallucination Evaluation Protocol (REQ-016, NFR-002)
 
@@ -302,6 +377,8 @@ counterparty/collateral exposure workflow is held by `collateral_management` +
 | REQ-018 | Child-spec roadmap | T-024 |
 | REQ-019 | Canonical workflows W1–W6 | T-004, T-026 |
 | REQ-020 | Multi-dialect profiles | T-016, T-025 |
+| REQ-021 | Specialist handoff map; workflows W7–W12 | T-028, T-029 |
+| REQ-022 | Decision-support output envelope for optimizer and model results | T-029, T-030 |
 | NFR-001 | Offline deterministic fixtures and harness | T-008, T-019 |
 | NFR-002 | Release thresholds | T-019 |
 | NFR-003 | Stdlib core, optional extras | T-020 |
@@ -323,6 +400,7 @@ counterparty/collateral exposure workflow is held by `collateral_management` +
 | Ground truth for eval | Expected result sets | Expected SQL text | Many correct SQL strings exist; results are what users consume. |
 | Retrieval | Lexical BM25 default, embeddings optional | Embeddings required | Air-gapped and restricted adopters; determinism of tests. |
 | Verifier/grounding as agents | Tools | Dedicated agents | No judgement to delegate; prompts add an attack surface. |
+| Optimization, risk, PM, knowledge, ML work | Handoff to existing agents with contracts | Plugin-owned optimizer/model/risk agents | Those agents already hold the workflows and review standards (RISK-009); the plugin's job is grounded evidence, not specialist judgement. |
 | Query repo location | Configuration only | Convention path in this repo | Firms keep queries in their own Git/hosts; the public repo must hold none. |
 
 ## Validation Strategy

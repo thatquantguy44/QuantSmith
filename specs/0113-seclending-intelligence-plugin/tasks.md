@@ -50,6 +50,9 @@
 | T-025 | Add a second dialect fixture (PostgreSQL or the first adopter dialect) and run the golden set against it unchanged. | REQ-020, AC-020 | `0118` | todo | Blocked on open question: first adopter dialect. |
 | T-026 | Create analytics agents C-06/C-07/C-08 and workflows W2–W5; then C-09 and the reporting-completeness workflow. | REQ-015, REQ-019 | `0119`, `0120` | todo | |
 | T-027 | Verify repo gates and disclosure: `spec`, `spec-index`, `handoff-sync`, `agent-catalog`, `skills-export`, `secret-scan`, `data-provenance`; confirm no existing agent or runtime behaviour changed. | NFR-006, NFR-008, NFR-009, AC-022, AC-024 | `0113`, then every child | in-progress | `0113` adds documents only. |
+| T-028 | Publish the specialist handoff map (optimization, risk, portfolio management, knowledge, machine learning) with trigger, evidence, output, never-boundary, and workflow per agent; add workflows W7–W12. | REQ-021, AC-025 | `0113` (`plan.md`) | done | Machine-checkable `handoffs.json` follows in `0114` alongside `coverage.json`. |
+| T-029 | Implement handoff payloads (run IDs, PIT panels, citations, redaction) for W7–W12 and wire `optimization_orchestrator`, `pm_orchestrator`, and `ml_orchestrator` routing from `seclending_orchestrator`. | REQ-021, REQ-022, AC-025 | `0116` (payload), `0119` (workflows) | todo | No change to the receiving agents' charters; add a `Related` pointer in each only. |
+| T-030 | Implement the decision-support output envelope: optimizer results carry solver status, diagnostics, sensitivities; model results carry baseline, interval/calibration, PIT feature attestation; reject action-phrased outputs in grounding. | REQ-022, AC-026 | `0117` (check), `0119` (producers) | todo | Borrow-demand models validated with `0006`/`0046` folds. |
 
 Status values: `todo` | `in-progress` | `blocked` | `done`.
 
@@ -85,6 +88,8 @@ criteria are checked by gates and review.
 | AC-022 | `data-provenance` + `secret-scan` gates over `plugins/seclending/fixtures/` (names AC-022) | `0117` | todo |
 | AC-023 | `test_contract_and_config_schema_versions_compatible` (names AC-023) | `0118` | todo |
 | AC-024 | gates: `spec`, `spec-index`, `handoff-sync`, `agent-catalog`, `skills-export` (names AC-024) | `0113` | in-progress |
+| AC-025 | `test_handoff_map_agents_exist_and_are_bounded` + review of W7–W12 (names AC-025) | `0114` | todo |
+| AC-026 | `test_decision_support_envelope_for_optimizer_and_model_outputs` (names AC-026) | `0117` | todo |
 
 ## Follow-ups
 

@@ -4,7 +4,7 @@
 - **Status:** Draft
 - **Author:** Joshua Lutkemuller, CFA
 - **Approver:**
-- **Last updated:** 2026-10-22
+- **Last updated:** 2026-10-22 (REQ-021/REQ-022 handoffs added)
 
 > WHAT and WHY only. Implementation lives in `plan.md`; the phased delivery
 > order lives in `roadmap.md`. This is an **umbrella foundation spec** in the
@@ -84,7 +84,9 @@ Why it needs its own foundation rather than a prompt on top of
 - **Measure** hallucination with a golden-question evaluation protocol and
   release thresholds, rather than asserting it.
 - Expand the existing securities-financing agent group with only the agents a
-  coverage row justifies, and route to existing agents everywhere else.
+  coverage row justifies, and route to existing agents everywhere else —
+  including the optimization, risk, portfolio-management, knowledge, and
+  machine-learning groups (REQ-021).
 
 ## Non-Goals
 
@@ -134,6 +136,8 @@ Why it needs its own foundation rather than a prompt on top of
 | REQ-018 | The SDK shall publish an ordered child-spec roadmap (`0114`–`0120`) with scope, dependencies, the coverage rows each closes, and phase exit criteria (`roadmap.md`). | must |
 | REQ-019 | The SDK shall define canonical workflows at charter level: ad-hoc desk question → cited answer; daily utilization and specials monitor; recall and buy-in risk review; lending revenue attribution; short-side borrow-cost feed into `financing_cost_analysis`/backtests; and query-repository onboarding. | should |
 | REQ-020 | The plugin shall support **multiple database profiles and dialects** (at least SQLite for tests, PostgreSQL, SQL Server, Snowflake) behind one interface, with dialect differences resolved in configuration and the execution seam, not in agents. | should |
+| REQ-021 | The plugin shall **hand off, not re-implement**, specialist work to existing agents in five groups — optimization (`optimization/`), risk (`risk`, `enterprise_risk/`), portfolio management (`portfolio_management/`), knowledge (`knowledge/`), and machine learning (`machine_learning/`) — through declared handoff contracts naming the trigger, the plugin evidence passed (run IDs, point-in-time panels, citations), the expected output, and the agent's never-boundary; no new plugin agent may hold a workflow one of these agents already holds. | must |
+| REQ-022 | Every optimization or ML output that reaches a plugin answer shall stay **decision support**: optimizers return proposed allocations with solver diagnostics and sensitivities (via `solver_diagnostics_sensitivity`), and models return forecasts or scores with a baseline, an interval or calibration, and a point-in-time feature attestation; neither books, recalls, reprices, or trades. | must |
 
 ## Non-Functional Requirements
 
@@ -176,6 +180,8 @@ Why it needs its own foundation rather than a prompt on top of
 | AC-021 | Given the plan, when read, then latency/cost budgets, incremental re-indexing, and the `EXPLAIN` cost guard are specified with configurable limits. | NFR-005 |
 | AC-022 | Given a repo-wide scan, when examples, fixtures, and golden questions are searched, then every record is flagged synthetic per `0025` and none references a real counterparty, position, or firm query. | NFR-006 |
 | AC-023 | Given the tool contract and config schema, when inspected, then both carry versions, and the plan states the SemVer and migration-note rules. | NFR-007 |
+| AC-025 | Given the handoff map in `plan.md`, when validated, then every listed optimization, risk, portfolio-management, knowledge, and ML agent exists in `agents/`, has a trigger, inputs, outputs, and never-boundary, and appears in at least one canonical workflow; and no proposed plugin agent's workflow duplicates one of them. | REQ-021 |
+| AC-026 | Given an optimizer result and a model forecast returned through a plugin answer, when inspected, then the optimizer result carries solver status, diagnostics, and sensitivities, the forecast carries a baseline comparison, an interval or calibration, and a PIT feature attestation, and neither output is phrased as an executed action. | REQ-022 |
 | AC-024 | Given the full repository after this spec lands, when `run-stage.sh spec`, spec-index, handoff-sync, agent-catalog, and skills-export run, then they pass with no new findings, and the diff modifies no existing agent's behaviour or runtime. | NFR-008, NFR-009 |
 
 ## Data & Dependencies
@@ -187,7 +193,10 @@ Why it needs its own foundation rather than a prompt on top of
   propose/stage/promote write path; `0052`–`0054` MCP adapter contract and
   access tiers; `0058` viewer access control; `0070` run envelope, assumption
   ledger, replay; `0071` LLM evidence boundary and embeddings seam; `0102`
-  lineage; `0110` plugin packaging; `0047` downstream SemVer contract; `0025`
+  lineage; `0110` plugin packaging; `0067` collateral/margin optimizer
+  contract and `0026` model plugins (adopter-owned optimizers); `0013`
+  optimization solvers; `0082` enterprise-risk agents; `0006`/`0046`
+  forecasting folds and walk-forward harness (borrow-demand models); `0047` downstream SemVer contract; `0025`
   synthetic-data disclosure; `0027` source catalog; `adapters/data_access/sql.md`
   and `adapters/llm_runtime/`.
 - **Data domains the semantic mapping must cover** (physical tables are
@@ -219,6 +228,7 @@ Why it needs its own foundation rather than a prompt on top of
 | RISK-007 | Expensive or runaway warehouse queries. | Cost incidents, contention with production. | Row limits, timeouts, `EXPLAIN` cost guard, `0101`-style concurrency limits per profile. |
 | RISK-008 | Plugin API churn breaks downstream apps. | Integration breakage. | NFR-007 SemVer, contract tests in `0118`, deprecation window. |
 | RISK-009 | Agent roster grows to fill the map. | Overlapping charters and review noise. | REQ-015 coverage gating; roster capped at the rows in `plan.md`. |
+| RISK-011 | Demand, specials, or recall models leak future borrow data or overfit short histories, or an optimizer's proposed allocation is read as an instruction. | False signals; unreviewed inventory or pricing actions. | REQ-022; `problem_framing_labeling` and `model_selection_validation` own labels and purged validation; `feature_store_engineering` enforces PIT features; `solver_diagnostics_sensitivity` reviews every solve; outputs labelled decision support. |
 | RISK-010 | Evaluation set is too easy or drifts from real usage. | False confidence in hallucination metrics. | Versioned golden set with unanswerable and adversarial questions; adopter-local private golden set overlay; periodic refresh from promoted feedback. |
 
 ## Assumptions & Open Questions

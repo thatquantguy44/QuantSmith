@@ -17,7 +17,7 @@
 | `0116` | Grounded SQL composition, verification & execution | Retrieval-first composer; deterministic verifier with tokens and cost guard; read-only execution seam over `0023`; provenance and `0070` envelope; agents `sql_composer`, `seclending_orchestrator`. | `0115`; `0070`; `0023`; `adapters/llm_runtime/` | C-03, C-04 | T-014–T-017 |
 | `0117` | Grounded answering & hallucination evaluation | Grounding check, recompute, viewpoint enforcement, abstention; synthetic fixture DB and query repo; golden-question set, metrics, thresholds, release gate; agent `answer_grounding_reviewer`. | `0116`; `0063`; `0025`; coordinates with `0103` | C-05 | T-018, T-019 |
 | `0118` | Plugin packaging & app surfaces | `plugins/seclending/` distributable; Python API; MCP server on `0052`; Claude Code plugin via `0110`; cross-surface contract tests; SemVer per `0047`; second-dialect fixture. | `0117`; `0052`; `0110`; `0047` | — (surfaces) | T-001 (schemas), T-020–T-023, T-025 |
-| `0119` | Securities-lending analytics agents | Agents `utilization_specials_analyst`, `recall_buyin_risk_analyst`, `lending_revenue_analyst`; workflows W2–W5; hand-offs to `financing_cost_analysis`, `collateral_management`, `risk`, `backtest_review`, alerts. | `0118`; `0028`; `0066` | C-06, C-07, C-08 | T-026 (part) |
+| `0119` | Securities-lending analytics agents and specialist workflows | Agents `utilization_specials_analyst`, `recall_buyin_risk_analyst`, `lending_revenue_analyst`; workflows W2–W5 and W7–W12 wiring the optimization, risk, portfolio-management, knowledge, and ML handoffs (`plan.md` handoff map); decision-support envelope producers (REQ-022). | `0118`; `0028`; `0066`; `0067`; `0013`; `0006`/`0046` | C-06, C-07, C-08 | T-026 (part) |
 | `0120` | Lending reporting completeness checks | Agent `lending_reporting_check`; field-completeness and consistency checks for SFTR / Rule 10c-1a style datasets; never submits; regulatory dates confirmed by adopter counsel. | `0119`; `0069` when written | C-09 | T-026 (part) |
 
 ## Phases
@@ -81,7 +81,11 @@ live use requires the NFR-002 thresholds on the private set as well.
 ### Phase 6 — Expand (`0119`, `0120`, options) · ongoing
 
 - `0119` analytics agents and workflows W2–W5 (utilization/specials monitor,
-  recall and buy-in risk, revenue attribution, PIT borrow-cost feed to backtests).
+  recall and buy-in risk, revenue attribution, PIT borrow-cost feed to backtests),
+  then W7–W12 in this order: W10 borrow-aware portfolio decisions (ML forecasts
+  and PM constraints), W7 inventory allocation, W8 collateral optimization, W11
+  counterparty and liquidity review, W9 fee and capacity pricing, W12 plugin
+  governance (model risk, MLOps, knowledge curation).
 - `0120` reporting completeness checks.
 - Options, each needing its own spec and evaluation evidence: fine-tuning on
   promoted exemplars; query-index resources over `0052`; integration with
