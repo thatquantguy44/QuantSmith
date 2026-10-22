@@ -1,0 +1,187 @@
+# SFMeridian — Securities Finance Intelligence Plugin configuration (spec 0113).
+#
+# TEMPLATE — placeholders only. Copy to the repository root as
+# `sfmeridian.yml` (gitignored) or point SFMERIDIAN_CONFIG at a copy
+# outside the repo. Never commit real repository URLs, hosts, schemas, table
+# names, or credentials. Secrets are pointers resolved at runtime through
+# `secrets_management/`, never values.
+#
+# Resolution order: built-in defaults -> this file -> SFMERIDIAN__* env vars
+# -> per-call overrides (only fields in per_call_overrides_allowlist, and only
+# in the restrictive direction for safety fields).
+
+schema_version: 1
+enabled: true
+
+# --- Where the SQL query repository lives (REQ-004) --------------------------
+# One or more repositories. Nothing about their location is hard-coded in the
+# plugin; this list is the only source.
+query_repositories:
+  - id: desk_queries
+    kind: git                       # git | local | object_store
+    uri: <git-remote-url>           # e.g. an internal Git remote
+    ref: <branch-tag-or-commit>     # pin a commit for reproducible indexing
+    paths:
+      include: ["<subdir>/**/*.sql"]
+      exclude: ["**/scratch/**", "**/deprecated/**"]
+    dialect: <postgres|oracle|databricks|sqlite>
+    database_profile: <profile-id>  # default profile for queries in this repo
+    metadata_convention: front_matter   # front_matter | sidecar
+    trust_tier: reviewed            # reviewed | team | personal
+    review_policy: reviewed_only    # reviewed_only | allow_unreviewed_as_hints
+    refresh: on_demand              # on_demand | "<cron expression>"
+  - id: local_scratch
+    kind: local
+    uri: <absolute-or-relative-path>
+    paths:
+      include: ["**/*.sql"]
+    dialect: <dialect>
+    database_profile: <profile-id>
+    metadata_convention: front_matter
+    trust_tier: personal
+    review_policy: allow_unreviewed_as_hints
+    refresh: on_demand
+
+# --- Databases the plugin may query, read-only (REQ-011, REQ-017, REQ-020) ---
+databases:
+  - id: <profile-id>
+    dialect: <postgres|oracle|databricks|sqlite>
+    connection:
+      secret_ref: <secret-store-pointer>   # resolved by secrets_management
+    read_only: true                        # required; false is rejected
+    schemas_allowlist: ["<schema>"]
+    tables_allowlist: []                   # empty = every table in allowed schemas
+    row_limit: 10000
+    timeout_s: 60
+    explain_cost_limit: null               # dialect-specific units; null = off
+    max_concurrency: 2
+
+# --- Datasets for adaptive research (spec 0121) ------------------------------
+# Every location, object, and column is declared here; nothing is taken from
+# free text. Filters are bound values. version pins Databricks Delta tables.
+datasets:
+  - id: <dataset-id>
+    source: database               # database | file
+    profile: <profile-id>
+    object: <catalog.schema.table_or_view>
+    object_type: table             # table | view (views get an unpinned-view limitation)
+    dataset_kind: loan_book        # loan_book | lendable_inventory | borrow_rates | collateral | recalls | program_revenue | generic
+    columns: [<column-a>, <column-b>]
+    order_by: [<column-a>]
+    filters:
+      - {column: <date-column>, op: ">=", value: "<YYYY-MM-DD>"}
+research:
+  output_dir: .sfmeridian/research # local, approved location for run bundles
+
+# --- Schema catalog snapshots (REQ-007; built in 0115) -----------------------
+# Snapshots are content-addressed under index.dir/catalog/<profile>/. Exemplars
+# that reference a missing table or column are excluded from retrieval
+# (drift_policy: exclude) or reported only (warn).
+catalog:
+  <profile-id>:
+    source: introspect              # introspect (injected read-only connection) | file
+    file: null                      # path to a declared catalog when source=file
+    refresh: daily
+    drift_policy: exclude           # exclude | warn
+    default_schema: null            # null = dialect default (main, public, default)
+
+# --- Canonical concept -> physical column mapping (REQ-008, REQ-013; 0115) --
+# Concepts are 0081 pack metric names (seeded from
+# knowledge/analytics_packs/securities_financing_prime.json), proposed pack
+# amendments (plugins/sfmeridian/src/sfmeridian/data/pack_amendments.json), or
+# 0063 IDs from knowledge/short_term_markets/taxonomy.json. A concept missing
+# from all three is proposed as a pack amendment, never defined here.
+semantic_mapping:
+  <profile-id>:
+    - concept: <pack-metric-or-0063-id>  # e.g. on_loan_value, borrow_fee, lending_revenue
+      expression: "<table>.<column>"     # one table; columns, numbers, + - * / ( ) only
+      aggregation: sum                   # sum | count | avg | min | max | none (rates are never summed)
+      dimensions: {security: "<table>.<security_column>"}   # pack (or proposed) dimensions on the same table
+      grain: "<table grain, e.g. security x counterparty x business date>"
+      pit_column: "<table>.<as_of_column>"
+      viewpoint: <lender|beneficial_owner|agent_lender|borrower>
+      unit: <pack-unit>                  # the pack's unit; declare source_unit + conversion if the column differs
+      owner: <metric-owner-handle>
+      evidence: {exemplars: [<reviewed-query-id>]}   # or {owner_confirmation: <promoter-handle>}
+    - concept: utilization               # ratio: two bound, summed measures over dimensions both support
+      kind: ratio
+      numerator: on_loan_value
+      denominator: lendable_value
+      dimensions: [security]
+      viewpoint: lender
+      unit: pct
+      source_unit: ratio
+      conversion: multiply by 100
+      owner: <metric-owner-handle>
+    # borrow_fee / rebate_rate bindings also declare quote: fee|rebate and day_count: ACT/360 (0066)
+
+# --- Governed-first tier on 0080 / 0081 (REQ-023 to REQ-026) ---------------
+# Questions that map to a governed metric are answered by 0080 over rows the
+# plugin reads with reviewed metric source queries; everything else falls
+# through to the reviewed-query tiers below.
+governed_tier:
+  enabled: true
+  interpreter: keyword              # keyword | llm (llm uses the llm section)
+  packs_root: null                  # null = bundled packs; or a local overlay root
+  domain_tags: [securities_lending] # selects knowledge/analytics_packs/securities_financing_prime.json
+  metric_sources:                   # governed metric -> reviewed exemplar + Fact column map
+    - metric: utilization           # name from the 0081 pack
+      exemplar_id: <reviewed-query-id>
+      period_column: <as_of_column>
+      dimension_columns: {security: <column>, borrow_category: <column>, client: <column>}
+      measure_columns: {<base_measure>: <column>}
+  writeback:
+    enabled: false                  # REQ-026; never a lending or books-and-records system
+
+# --- Anti-hallucination policy (REQ-009, REQ-010, REQ-012) -------------------
+grounding:
+  mode: full                        # full | retrieval_only (kill switch: no generate path)
+  retrieval_min_score: 0.35
+  max_compose_retries: 2
+  require_citation_per_number: true
+  numeric_tolerance: 1.0e-9
+  require_pit_predicate_for_as_of: true
+  abstain_message: "Not enough verified evidence to answer; missing: {missing}."
+
+# --- Access and redaction (REQ-017) ------------------------------------------
+access:
+  clearance_source: access/roster.yml      # 0058 roster
+  redaction_classes:
+    counterparty_identity: restricted
+    account: restricted
+    client_position: restricted
+  column_classes: {}                        # "<table>.<column>": <class>
+
+# --- Model runtime (via adapters/llm_runtime/; no keys here) -----------------
+llm:
+  runtime_profile: <llm-runtime-profile>
+  temperature: 0.0
+  max_output_tokens: 2000
+
+retrieval:
+  mode: lexical                     # lexical | lexical+embeddings
+  embedding_profile: null           # 0071 embedding profile when enabled
+
+# --- Reviewed learning loop (REQ-014) ----------------------------------------
+feedback:
+  inbox: <path-to-staging-inbox>
+  promoters: ["<reviewer-handle>"]
+  auto_propose_accepted_answers: false
+
+# --- Evaluation and release gate (REQ-016, NFR-002) --------------------------
+eval:
+  golden_sets:
+    - plugins/sfmeridian/fixtures/golden_questions.jsonl   # synthetic, in repo
+    - <adopter-private-golden-set-path>                      # optional, local only
+  thresholds:
+    identifier_fabrication_rate: 0.0
+    unsupported_claim_rate: 0.01
+    viewpoint_error_rate: 0.0
+    execution_accuracy: 0.90
+    abstention_recall: 0.95
+  seeds: [1, 2, 3]
+
+per_call_overrides_allowlist:
+  - as_of
+  - row_limit          # may only be lowered
+  - database_profile   # must be a configured profile

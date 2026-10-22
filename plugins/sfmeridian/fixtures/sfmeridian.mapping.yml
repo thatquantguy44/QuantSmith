@@ -1,0 +1,155 @@
+# SFMeridian semantic-mapping fixture configuration (spec 0115). SYNTHETIC:
+# every value is a test fixture; see README.md for the disclosure. Paths are
+# relative to this file. Tests copy the fixtures into a temporary directory.
+schema_version: 1
+index:
+  dir: .sfmeridian/index
+query_repositories:
+  - id: fixture_queries
+    kind: local
+    uri: query_repo
+    paths:
+      include: ["**/*.sql"]
+      exclude: ["**/scratch/**"]
+    dialect: sqlite
+    database_profile: fixture_db
+    metadata_convention: front_matter
+    trust_tier: reviewed
+    review_policy: allow_unreviewed_as_hints
+databases:
+  - id: fixture_db
+    dialect: sqlite
+    connection:
+      secret_ref: fixture/sqlite-in-memory
+    read_only: true
+    row_limit: 10000
+    timeout_s: 30
+catalog:
+  fixture_db:
+    source: file
+    file: catalog/fixture_db.catalog.json
+    drift_policy: exclude
+semantic_mapping:
+  fixture_db:
+    - concept: on_loan_value
+      expression: sec_lending_book.on_loan_value
+      aggregation: sum
+      dimensions: {security: sec_lending_book.security_id, counterparty: sec_lending_book.counterparty_id}
+      grain: security x counterparty x business_date
+      pit_column: sec_lending_book.business_date
+      viewpoint: lender
+      unit: currency
+      owner: lending-lead
+      evidence: {exemplars: [sl.on_loan_value.by_counterparty.as_of]}
+    - concept: lendable_value
+      expression: lendable_inventory.lendable_value
+      aggregation: sum
+      dimensions: {security: lendable_inventory.security_id}
+      grain: security x business_date
+      pit_column: lendable_inventory.business_date
+      viewpoint: lender
+      unit: currency
+      owner: lending-lead
+      evidence: {owner_confirmation: lending-lead}
+    - concept: utilization
+      kind: ratio
+      numerator: on_loan_value
+      denominator: lendable_value
+      dimensions: [security]
+      grain: security x business_date
+      viewpoint: lender
+      unit: pct
+      source_unit: ratio
+      conversion: multiply by 100
+      owner: lending-lead
+    - concept: on_loan_quantity
+      expression: sec_lending_book.on_loan_qty
+      aggregation: sum
+      dimensions: {security: sec_lending_book.security_id, counterparty: sec_lending_book.counterparty_id}
+      grain: security x counterparty x business_date
+      pit_column: sec_lending_book.business_date
+      viewpoint: lender
+      unit: quantity
+      owner: lending-lead
+      evidence: {exemplars: [sl.utilization.by_security.as_of]}
+    - concept: lendable_quantity
+      expression: lendable_inventory.lendable_qty
+      aggregation: sum
+      dimensions: {security: lendable_inventory.security_id}
+      grain: security x business_date
+      pit_column: lendable_inventory.business_date
+      viewpoint: lender
+      unit: quantity
+      owner: lending-lead
+      evidence: {exemplars: [sl.utilization.by_security.as_of]}
+    - concept: borrow_fee
+      expression: borrow_rates.fee_bps
+      aggregation: none
+      dimensions: {security: borrow_rates.security_id, borrow_category: borrow_rates.borrow_category}
+      grain: security x business_date
+      pit_column: borrow_rates.business_date
+      viewpoint: lender
+      unit: bps
+      quote: fee
+      day_count: ACT/360
+      owner: lending-lead
+      evidence: {exemplars: [sl.rates.specials_migration]}
+    - concept: lending_revenue
+      expression: program_revenue.fee_income
+      aggregation: sum
+      dimensions: {security: program_revenue.security_id}
+      grain: loan x business_date
+      pit_column: program_revenue.business_date
+      viewpoint: lender
+      unit: currency
+      owner: program-finance
+      evidence: {exemplars: [sl.revenue.by_security.period]}
+    - concept: recall_quantity
+      expression: lending.recalls.recall_qty
+      aggregation: sum
+      dimensions: {counterparty: lending.recalls.counterparty_id}
+      grain: recall
+      pit_column: lending.recalls.recall_date
+      viewpoint: lender
+      unit: quantity
+      owner: lending-lead
+      evidence: {exemplars: [sl.recalls.open.by_counterparty]}
+    - concept: collateral_value
+      expression: collateral.collateral_value
+      aggregation: sum
+      grain: loan x business_date
+      pit_column: collateral.business_date
+      viewpoint: lender
+      unit: currency
+      owner: lending-lead
+      evidence: {exemplars: [sl.collateral.coverage.by_loan]}
+governed_tier:
+  domain_tags: [securities_lending]
+  metric_sources:
+    - metric: lending_revenue
+      exemplar_id: sl.revenue.by_security.period
+      period_column: business_date
+      dimension_columns: {security: security_id, borrow_category: borrow_category}
+      measure_columns: {lending_revenue: lending_revenue}
+    - metric: on_loan_value
+      exemplar_id: sl.on_loan_value.by_counterparty.as_of
+      period_column: business_date
+      dimension_columns: {counterparty: counterparty_id}
+      measure_columns: {on_loan_value: on_loan_value}
+access:
+  clearance_source: access/roster.yml
+  redaction_classes:
+    counterparty_identity: restricted
+    account: restricted
+    client_position: restricted
+  column_classes:
+    sec_lending_book.counterparty_id: counterparty_identity
+    counterparties.counterparty_id: counterparty_identity
+    lending.recalls.counterparty_id: counterparty_identity
+retrieval:
+  mode: lexical
+grounding:
+  retrieval_min_score: 0.05
+feedback:
+  inbox: .sfmeridian/inbox
+  promoters: [lending-lead, program-finance]

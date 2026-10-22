@@ -1,0 +1,274 @@
+{
+ "_comment": "SYNTHETIC v2 of the fixture_db catalog (spec 0115 drift tests): sec_lending_book.status dropped, borrow_rates.fee_bps retyped, lendable_inventory.region added. See ../README.md.",
+ "default_schema": "main",
+ "tables": [
+  {
+   "schema": "main",
+   "name": "sec_lending_book",
+   "kind": "table",
+   "primary_key": [
+    "loan_id",
+    "business_date"
+   ],
+   "row_count_estimate": 1200,
+   "columns": [
+    {
+     "name": "loan_id",
+     "type": "TEXT",
+     "nullable": false
+    },
+    {
+     "name": "security_id",
+     "type": "TEXT",
+     "nullable": false
+    },
+    {
+     "name": "counterparty_id",
+     "type": "TEXT",
+     "nullable": false
+    },
+    {
+     "name": "business_date",
+     "type": "DATE",
+     "nullable": false
+    },
+    {
+     "name": "on_loan_qty",
+     "type": "INTEGER",
+     "nullable": false
+    },
+    {
+     "name": "on_loan_value",
+     "type": "NUMERIC",
+     "nullable": false
+    }
+   ]
+  },
+  {
+   "schema": "main",
+   "name": "lendable_inventory",
+   "kind": "table",
+   "primary_key": [
+    "security_id",
+    "business_date"
+   ],
+   "row_count_estimate": 300,
+   "columns": [
+    {
+     "name": "security_id",
+     "type": "TEXT",
+     "nullable": false
+    },
+    {
+     "name": "business_date",
+     "type": "DATE",
+     "nullable": false
+    },
+    {
+     "name": "lendable_qty",
+     "type": "INTEGER",
+     "nullable": false
+    },
+    {
+     "name": "lendable_value",
+     "type": "NUMERIC",
+     "nullable": false
+    },
+    {
+     "name": "region",
+     "type": "TEXT",
+     "nullable": true
+    }
+   ]
+  },
+  {
+   "schema": "main",
+   "name": "borrow_rates",
+   "kind": "table",
+   "primary_key": [
+    "security_id",
+    "business_date"
+   ],
+   "row_count_estimate": 300,
+   "columns": [
+    {
+     "name": "security_id",
+     "type": "TEXT",
+     "nullable": false
+    },
+    {
+     "name": "business_date",
+     "type": "DATE",
+     "nullable": false
+    },
+    {
+     "name": "fee_bps",
+     "type": "TEXT",
+     "nullable": true
+    },
+    {
+     "name": "borrow_category",
+     "type": "TEXT",
+     "nullable": false
+    }
+   ]
+  },
+  {
+   "schema": "main",
+   "name": "program_revenue",
+   "kind": "table",
+   "primary_key": [
+    "loan_id",
+    "business_date"
+   ],
+   "row_count_estimate": 1200,
+   "columns": [
+    {
+     "name": "loan_id",
+     "type": "TEXT",
+     "nullable": false
+    },
+    {
+     "name": "security_id",
+     "type": "TEXT",
+     "nullable": false
+    },
+    {
+     "name": "business_date",
+     "type": "DATE",
+     "nullable": false
+    },
+    {
+     "name": "fund_id",
+     "type": "TEXT",
+     "nullable": false
+    },
+    {
+     "name": "fee_income",
+     "type": "NUMERIC",
+     "nullable": false
+    },
+    {
+     "name": "owner_split",
+     "type": "NUMERIC",
+     "nullable": false
+    }
+   ]
+  },
+  {
+   "schema": "main",
+   "name": "collateral",
+   "kind": "table",
+   "primary_key": [
+    "loan_id",
+    "business_date"
+   ],
+   "row_count_estimate": 1200,
+   "columns": [
+    {
+     "name": "loan_id",
+     "type": "TEXT",
+     "nullable": false
+    },
+    {
+     "name": "business_date",
+     "type": "DATE",
+     "nullable": false
+    },
+    {
+     "name": "collateral_value",
+     "type": "NUMERIC",
+     "nullable": false
+    }
+   ]
+  },
+  {
+   "schema": "main",
+   "name": "counterparties",
+   "kind": "table",
+   "primary_key": [
+    "counterparty_id"
+   ],
+   "row_count_estimate": 3,
+   "columns": [
+    {
+     "name": "counterparty_id",
+     "type": "TEXT",
+     "nullable": false
+    },
+    {
+     "name": "credit_tier",
+     "type": "TEXT",
+     "nullable": true
+    }
+   ]
+  },
+  {
+   "schema": "lending",
+   "name": "recalls",
+   "kind": "table",
+   "primary_key": [
+    "recall_id"
+   ],
+   "row_count_estimate": 40,
+   "columns": [
+    {
+     "name": "recall_id",
+     "type": "TEXT",
+     "nullable": false
+    },
+    {
+     "name": "counterparty_id",
+     "type": "TEXT",
+     "nullable": false
+    },
+    {
+     "name": "security_id",
+     "type": "TEXT",
+     "nullable": false
+    },
+    {
+     "name": "recall_date",
+     "type": "DATE",
+     "nullable": false
+    },
+    {
+     "name": "recall_qty",
+     "type": "INTEGER",
+     "nullable": false
+    },
+    {
+     "name": "reason",
+     "type": "TEXT",
+     "nullable": true
+    },
+    {
+     "name": "status",
+     "type": "TEXT",
+     "nullable": false
+    }
+   ]
+  },
+  {
+   "schema": "lending",
+   "name": "counterparties",
+   "kind": "table",
+   "primary_key": [
+    "counterparty_id"
+   ],
+   "row_count_estimate": 3,
+   "columns": [
+    {
+     "name": "counterparty_id",
+     "type": "TEXT",
+     "nullable": false
+    },
+    {
+     "name": "credit_tier",
+     "type": "TEXT",
+     "nullable": true
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,35 @@
+# SFMeridian fixture configuration (spec 0114). SYNTHETIC: every value here is
+# a test fixture; see README.md for the disclosure. Paths are relative to
+# this file. Tests copy this config into a temporary directory and point
+# index.dir and feedback.inbox there.
+schema_version: 1
+enabled: true
+index:
+  dir: .sfmeridian/index
+query_repositories:
+  - id: fixture_queries
+    kind: local
+    uri: query_repo
+    paths:
+      include: ["**/*.sql"]
+      exclude: ["**/scratch/**"]
+    dialect: sqlite
+    database_profile: fixture_db
+    metadata_convention: front_matter
+    trust_tier: reviewed
+    review_policy: allow_unreviewed_as_hints
+databases:
+  - id: fixture_db
+    dialect: sqlite
+    connection:
+      secret_ref: fixture/sqlite-in-memory
+    read_only: true
+    row_limit: 10000
+    timeout_s: 30
+retrieval:
+  mode: lexical
+grounding:
+  retrieval_min_score: 0.05
+feedback:
+  inbox: .sfmeridian/inbox
+  promoters: [lending-lead, program-finance]

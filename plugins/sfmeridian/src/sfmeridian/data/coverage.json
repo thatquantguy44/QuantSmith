@@ -1,0 +1,298 @@
+{
+ "schema_version": 1,
+ "source": "specs/0113-seclending-intelligence-plugin/plan.md",
+ "group_path": "securities_financing/sfmeridian",
+ "rows": [
+  {
+   "id": "C-01",
+   "agent": "query_librarian",
+   "child_spec": "0114",
+   "status": "built",
+   "workflow": "Onboard and index query repositories; front-matter hygiene; dedup; drift triage; review queue for candidates.",
+   "never": "Never promotes a candidate, edits repository files, marks anything reviewed, or chooses a canonical metric definition.",
+   "loop": {
+    "tools": [
+     "config.validate",
+     "repos.index",
+     "repos.status",
+     "index.rejections",
+     "index.findings",
+     "index.metrics",
+     "index.joins",
+     "queries.search",
+     "queries.get",
+     "feedback.list",
+     "feedback.propose"
+    ],
+    "verifiers": [
+     "librarian.findings_cite_observed_evidence",
+     "librarian.every_rejection_reported",
+     "librarian.drafts_never_reviewed"
+    ],
+    "human_checkpoints": [
+     "promote or discard candidates",
+     "fix rejected files",
+     "choose canonical metric definitions",
+     "fix unreachable repositories"
+    ],
+    "stop_condition": "Report finished with every finding cited, or escalation on invalid configuration or unreachable repositories."
+   }
+  },
+  {
+   "id": "C-02",
+   "agent": "semantic_mapping_steward",
+   "child_spec": "0115",
+   "status": "built",
+   "workflow": "Bind 0081 pack metrics and 0063 concepts to physical columns and metric source queries per profile; declare grain, PIT column, viewpoint, unit; draft 0081 pack amendments.",
+   "never": "Never invents a mapping without a catalog object and an exemplar or owner confirmation; never edits a pack's review block, defines a concept privately, or decides a breaking catalog change is safe.",
+   "loop": {
+    "tools": [
+     "config.validate",
+     "repos.index",
+     "catalog.snapshot",
+     "catalog.describe",
+     "catalog.diff",
+     "catalog.reconcile",
+     "mapping.validate",
+     "metrics.list",
+     "glossary.lookup",
+     "mapping.amendments",
+     "mapping.propose_amendment",
+     "queries.search",
+     "queries.get",
+     "access.describe"
+    ],
+    "verifiers": [
+     "mapping.every_binding_resolves_in_catalog",
+     "mapping.viewpoint_and_unit_declared",
+     "mapping.no_private_concepts",
+     "mapping.every_governed_metric_accounted"
+    ],
+    "human_checkpoints": [
+     "approve concept bindings",
+     "review pack amendments",
+     "decide breaking catalog changes (schema_evolution)",
+     "re-review drifted exemplars"
+    ],
+    "stop_condition": "Every governed metric bound or reported unbound with the missing evidence; escalation on invalid configuration or no catalog."
+   }
+  },
+  {
+   "id": "C-03",
+   "agent": "sql_composer",
+   "child_spec": "0116",
+   "status": "planned",
+   "workflow": "Retrieval-first SQL composition (reuse, adapt, generate) for questions 0080 reports as outside the governed metrics.",
+   "never": "Never executes SQL and never bypasses sql.verify.",
+   "loop": {
+    "tools": [
+     "queries.search",
+     "queries.get",
+     "catalog.describe",
+     "glossary.lookup",
+     "sql.compose",
+     "sql.verify"
+    ],
+    "verifiers": [
+     "compose.verified_before_return",
+     "compose.path_and_sources_recorded"
+    ],
+    "human_checkpoints": [
+     "approve generated (non-exemplar) SQL before it becomes an exemplar"
+    ],
+    "stop_condition": "A verified query with a verification token, or abstention after max_compose_retries."
+   }
+  },
+  {
+   "id": "C-04",
+   "agent": "sfmeridian_orchestrator",
+   "child_spec": "0116",
+   "status": "planned",
+   "workflow": "Route desk questions through the governed tier, then the reviewed-query pipeline; pick analytics agents; manage retries and abstention.",
+   "never": "Never answers from model memory; never returns a number without a run citation.",
+   "loop": {
+    "tools": [
+     "ask",
+     "metrics.list",
+     "queries.search",
+     "sql.compose",
+     "sql.verify",
+     "sql.execute",
+     "answer.ground",
+     "glossary.lookup"
+    ],
+    "verifiers": [
+     "orchestrator.answer_grounded",
+     "orchestrator.tier_recorded"
+    ],
+    "human_checkpoints": [
+     "clarification answered by the asker",
+     "escalation to the desk owner"
+    ],
+    "stop_condition": "A grounded answer, a clarification, or an abstention naming the missing evidence."
+   }
+  },
+  {
+   "id": "C-05",
+   "agent": "answer_grounding_reviewer",
+   "child_spec": "0117",
+   "status": "planned",
+   "workflow": "Claim-level citation, recompute, term, and viewpoint checks on draft answers.",
+   "never": "Never adds new facts; can only cite, correct to the cited value, remove, or abstain.",
+   "loop": {
+    "tools": [
+     "answer.ground",
+     "glossary.lookup",
+     "queries.get"
+    ],
+    "verifiers": [
+     "grounding.no_uncited_numbers",
+     "grounding.no_viewpoint_errors"
+    ],
+    "human_checkpoints": [
+     "review of abstentions that block a desk deadline"
+    ],
+    "stop_condition": "Every claim cited or removed; abstention when nothing survives."
+   }
+  },
+  {
+   "id": "C-06",
+   "agent": "utilization_specials_analyst",
+   "child_spec": "0119",
+   "status": "planned",
+   "workflow": "Desk-facing interpretation of utilization, demand/supply, fee trends, GC to warm to special migration, days-to-cover; consumes time_series_forecasting and unsupervised_anomaly outputs.",
+   "never": "Never builds or trains a model itself; never uses non-PIT rates for history.",
+   "loop": {
+    "tools": [
+     "ask",
+     "metrics.list",
+     "queries.search",
+     "sql.execute",
+     "answer.ground"
+    ],
+    "verifiers": [
+     "analytics.pit_inputs_only",
+     "analytics.baseline_stated"
+    ],
+    "human_checkpoints": [
+     "desk review of flagged specials"
+    ],
+    "stop_condition": "A cited monitor report for the as-of date."
+   }
+  },
+  {
+   "id": "C-07",
+   "agent": "recall_buyin_risk_analyst",
+   "child_spec": "0119",
+   "status": "planned",
+   "workflow": "Recall pressure (dividends, votes, sales), buy-in and fail exposure on open loans; consumes supervised_learning recall scores and hands events to operational_risk.",
+   "never": "Never sends or recommends sending a recall; outputs risk indicators only.",
+   "loop": {
+    "tools": [
+     "ask",
+     "queries.search",
+     "sql.execute",
+     "answer.ground"
+    ],
+    "verifiers": [
+     "analytics.pit_inputs_only",
+     "analytics.indicators_not_actions"
+    ],
+    "human_checkpoints": [
+     "named human review of the risk list"
+    ],
+    "stop_condition": "A cited recall-risk list for the as-of date."
+   }
+  },
+  {
+   "id": "C-08",
+   "agent": "lending_revenue_analyst",
+   "child_spec": "0119",
+   "status": "planned",
+   "workflow": "Program revenue attribution by security, counterparty tier, GC vs specials, agent/beneficial-owner split, intrinsic vs reinvestment; first 0119 agent (agency lender viewpoint).",
+   "never": "Never restates booked revenue; reconciles to the book and reports differences.",
+   "loop": {
+    "tools": [
+     "ask",
+     "metrics.list",
+     "queries.search",
+     "sql.execute",
+     "answer.ground"
+    ],
+    "verifiers": [
+     "analytics.reconciles_to_book",
+     "analytics.viewpoint_lender"
+    ],
+    "human_checkpoints": [
+     "finance sign-off on reconciliation differences"
+    ],
+    "stop_condition": "An attribution reconciled to the book total, differences reported."
+   }
+  },
+  {
+   "id": "C-09",
+   "agent": "lending_reporting_check",
+   "child_spec": "0120",
+   "status": "planned",
+   "workflow": "Field completeness and consistency checks for SFTR / Rule 10c-1a style datasets.",
+   "never": "Never submits, certifies, or interprets regulation.",
+   "loop": {
+    "tools": [
+     "queries.search",
+     "sql.execute",
+     "answer.ground"
+    ],
+    "verifiers": [
+     "reporting.checks_cite_fields"
+    ],
+    "human_checkpoints": [
+     "compliance review of every exception"
+    ],
+    "stop_condition": "A completeness report with every exception cited."
+   }
+  },
+  {
+   "id": "C-10",
+   "agent": "lending_data_researcher",
+   "child_spec": "0121",
+   "status": "built",
+   "workflow": "Adaptive research of one securities-lending dataset (loan book, inventory, rates, collateral, recalls, revenue) in an adopter database or delivered file: coverage ledger, pushed-down exact aggregates, securities-finance rule pack, evidence-driven follow-ups, ranked recommendations, reproducible bundle.",
+   "never": "Never executes model-written or repository SQL, writes to a source, repairs or deduplicates data, invents missing context, or states an extract result as a population fact.",
+   "loop": {
+    "tools": [
+     "research.start",
+     "research.intake",
+     "research.inspect_schema",
+     "research.summarize_columns",
+     "research.check_grain",
+     "research.inspect_missingness",
+     "research.inspect_time",
+     "research.check_domain_rules",
+     "research.inspect_numeric",
+     "research.inspect_categories",
+     "research.inspect_relationships",
+     "research.compare_segments",
+     "research.inspect_target",
+     "research.inspect_availability",
+     "research.compare_reference",
+     "research.render_charts",
+     "research.recommend_actions",
+     "research.finish"
+    ],
+    "verifiers": [
+     "research.findings_resolve_to_evidence",
+     "research.coverage_accounted",
+     "research.scope_honest",
+     "research.recommendations_contract"
+    ],
+    "human_checkpoints": [
+     "Answer questions the run cannot (business grain, calendar, timezone, thresholds).",
+     "Decide on every recommendation: the agent never repairs, deduplicates, imputes, or writes.",
+     "Accept or reject the dataset contract proposal.",
+     "Review limitations (extract scope, unpinned views, budget stops) before using results."
+    ],
+    "stop_condition": "All applicable families accounted for and the bundle written; or a budget stop (budget_exhausted, never completed); or escalation when the context is invalid."
+   }
+  }
+ ]
+}

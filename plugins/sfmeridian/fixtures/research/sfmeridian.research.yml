@@ -1,0 +1,83 @@
+# SFMeridian research fixture configuration (spec 0121). SYNTHETIC: see
+# plugins/sfmeridian/fixtures/README.md. Tests build lending.sqlite next to
+# this file with fixture_db.py; "sqlite-file:" is a location pointer, not a
+# secret.
+schema_version: 1
+index:
+  dir: .sfmeridian/index
+query_repositories:
+  - id: fixture_queries
+    kind: local
+    uri: ../query_repo
+    paths:
+      include: ["**/*.sql"]
+      exclude: ["**/scratch/**"]
+    dialect: sqlite
+    database_profile: fixture_lending
+databases:
+  - id: fixture_lending
+    dialect: sqlite
+    connection:
+      secret_ref: sqlite-file:lending.sqlite
+    read_only: true
+    row_limit: 5000
+    timeout_s: 30
+research:
+  output_dir: .sfmeridian/research
+datasets:
+  - id: loan_book
+    source: database
+    profile: fixture_lending
+    object: loan_book
+    object_type: table
+    dataset_kind: loan_book
+    columns: [loan_id, security_id, counterparty_id, account, region, business_date, quantity, on_loan_value, fee_bps, status, client_note, change_seq]
+    order_by: [business_date, loan_id]
+    filters:
+      - {column: business_date, op: ">=", value: "2026-10-01"}
+  - id: loan_book_view
+    source: database
+    profile: fixture_lending
+    object: loan_book_v
+    object_type: view
+    dataset_kind: loan_book
+    columns: [loan_id, security_id, counterparty_id, account, region, business_date, quantity, on_loan_value, fee_bps, status, client_note, change_seq]
+    order_by: [business_date, loan_id]
+  - id: lendable_inventory
+    source: database
+    profile: fixture_lending
+    object: lendable_inventory
+    dataset_kind: lendable_inventory
+    columns: [security_id, business_date, region, lendable_qty, on_loan_qty]
+    order_by: [business_date, security_id]
+  - id: borrow_rates
+    source: database
+    profile: fixture_lending
+    object: borrow_rates
+    dataset_kind: borrow_rates
+    columns: [security_id, business_date, fee_bps, borrow_category, available_at, published_local]
+    order_by: [business_date, security_id]
+  - id: collateral
+    source: database
+    profile: fixture_lending
+    object: collateral
+    dataset_kind: collateral
+    columns: [loan_id, business_date, region, collateral_value, on_loan_value]
+    order_by: [business_date, loan_id]
+  - id: program_revenue
+    source: database
+    profile: fixture_lending
+    object: program_revenue
+    dataset_kind: program_revenue
+    columns: [loan_id, business_date, fund_id, region, on_loan_value, fee_bps, fee_income, owner_split]
+    order_by: [business_date, loan_id]
+  - id: poc_positions
+    source: file
+    path: poc_synthetic_positions.csv
+    dataset_kind: generic
+    columns: [security, as_of_date, balance, fee]
+    contract:
+      columns: {security: text_or_mixed, balance: numeric, fee: numeric}
+      key: [security, as_of_date]
+      date_columns: [as_of_date]
+      ranges: {balance: {min: 0}, fee: {min: 0, max: 1}}

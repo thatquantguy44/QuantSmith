@@ -121,3 +121,12 @@ src/quantsmith/_bundled/
 /specs/0086-venture-regional-agents-central-asia/
 /tests/test_venture_central_asia.py
 /tests/test_venture_regions.py
+
+# Local securities-lending plugin config (spec 0113) -- names real query
+# repositories, database profiles, and semantic mappings; never commit it.
+# Anchored to the repo root so templates/sfmeridian/ stays tracked.
+/sfmeridian.yml
+/sfmeridian.yaml
+
+# SFMeridian local index cache and review inbox (spec 0114); rebuildable.
+.sfmeridian/

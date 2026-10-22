@@ -1,0 +1,11 @@
+# SYNTHETIC 0058-shaped roster for SFMeridian access tests (spec 0115).
+# Handles are fixture handles, not people. See ../README.md.
+default_clearance: public
+people:
+  - handle: lending-lead
+    label: "fixture-lending-lead"
+    clearance: restricted
+    roles: [desk-lead]
+  - handle: desk-analytics
+    label: "fixture-desk-analyst"
+    clearance: internal
