@@ -421,8 +421,16 @@ def _check_pit(request: VerificationRequest, structure: Mapping[str, Any], resol
                findings: list[VerificationFinding]) -> None:
     if not request.require_pit:
         return
-    if not request.as_of or request.params.get("as_of") != request.as_of:
-        findings.append(VerificationFinding("E_VERIFY_MISSING_PIT", "as-of questions require a bound :as_of"))
+    single_as_of = bool(request.as_of and request.params.get("as_of") == request.as_of)
+    bounded_range = bool(
+        request.as_of
+        and request.params.get("end_date") == request.as_of
+        and isinstance(request.params.get("start_date"), str)
+        and request.params["start_date"] <= request.params["end_date"]
+    )
+    if not single_as_of and not bounded_range:
+        findings.append(VerificationFinding(
+            "E_VERIFY_MISSING_PIT", "as-of questions require :as_of or a start_date/end_date range ending as-of"))
         return
     filters: dict[str, set[str]] = {}
     for item in structure["filters"]:
@@ -430,8 +438,14 @@ def _check_pit(request: VerificationRequest, structure: Mapping[str, Any], resol
         if resolved.ok:
             key = f"{resolved.table}.{resolved.column}".lower()
             filters.setdefault(key, set()).add(item["value"])
-    directly_bounded = {key for key, values in filters.items()
-                        if any(":as_of" in value or "%(as_of)s" in value for value in values)}
+    def is_bound(value: str) -> bool:
+        if single_as_of and (":as_of" in value or "%(as_of)s" in value):
+            return True
+        range_markers = ((":start_date", ":end_date"),
+                         ("%(start_date)s", "%(end_date)s"))
+        return bounded_range and any(all(marker in value for marker in pair) for pair in range_markers)
+
+    directly_bounded = {key for key, values in filters.items() if any(is_bound(value) for value in values)}
     adjacency: dict[str, set[str]] = {}
     for edge in structure["joins"]:
         pair = _canonical_edge(resolver, edge["left"], edge["right"])
@@ -455,7 +469,7 @@ def _check_pit(request: VerificationRequest, structure: Mapping[str, Any], resol
         key = f"{resolved.table}.{resolved.column}".lower()
         if key not in bounded:
             findings.append(VerificationFinding(
-                "E_VERIFY_MISSING_PIT", f"PIT column {key!r} is not constrained by :as_of"))
+                "E_VERIFY_MISSING_PIT", f"PIT column {key!r} is not constrained through the as-of bound"))
 
 
 def _check_limit(tokens: Sequence[Token], params: Mapping[str, Any], ceiling: int, dialect: str,

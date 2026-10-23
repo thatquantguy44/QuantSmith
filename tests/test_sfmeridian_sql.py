@@ -22,13 +22,17 @@ FIXTURES = PLUGIN / "fixtures"
 EXECUTION = FIXTURES / "execution"
 sys.path.insert(0, str(PLUGIN / "src"))
 
+from sfmeridian import catalog as catalog_mod
 from sfmeridian.access import caller as resolve_caller
 from sfmeridian.catalog import load_declared
 from sfmeridian.compose import CompositionError, CompositionRequest, compose
 from sfmeridian.config import ConfigError, apply_call_overrides, load_config, read_file
 from sfmeridian.execute import ExecutionError, adapt_query_source, execute, replay
 from sfmeridian.frontmatter import split_front_matter
+from sfmeridian.governed import packs as packs_mod
+from sfmeridian.governed.reader import MetricSourceUnavailable, Reader, fact_batch_hash
 from sfmeridian.index import build_index, load_index
+from sfmeridian.mapping import Vocabulary, validate_mapping
 from sfmeridian.verify import (
     TokenError,
     VerificationRequest,
@@ -36,6 +40,9 @@ from sfmeridian.verify import (
     validate_token,
     verify,
 )
+
+from quantsmith.nl_analytics.execute import execute as execute_plan
+from quantsmith.nl_analytics.plan import Filter, QueryPlan, TimeWindow
 
 NOW = 1_792_742_400
 SIGNING_KEY = b"0116 synthetic verification key!!"
@@ -183,6 +190,40 @@ def _execution_case(tmp_path: Path, *, clearance="public"):
     )
     assert outcome.ok and outcome.verified
     return config, snapshot, graph, fixture, db_path, request, outcome.verified
+
+
+def _reader_inputs(tmp_path: Path, *, mutate_config=None, draft_source=False):
+    fx = tmp_path / "fx"
+    shutil.copytree(FIXTURES, fx)
+    if draft_source:
+        path = fx / "query_repo" / "lending" / "on_loan_value_by_counterparty.sql"
+        path.write_text(path.read_text().replace("review_status: reviewed", "review_status: draft"))
+    if mutate_config is None:
+        config = load_config(fx / "sfmeridian.mapping.yml", env={})
+    else:
+        data = read_file(fx / "sfmeridian.mapping.yml")
+        mutate_config(data)
+        changed = fx / "changed.json"
+        changed.write_text(json.dumps(data))
+        config = load_config(changed, env={})
+    report = build_index(config)
+    assert report.errors == []
+    index_dir = config.resolve_path(config.data["index"]["dir"])
+    catalog_path = config.resolve_path(config.data["catalog"]["fixture_db"]["file"])
+    snapshot = load_declared(catalog_path, config.profile("fixture_db"))
+    catalog_mod.store(index_dir, snapshot, "2026-10-22")
+    exemplars = [json.loads(line) for line in (index_dir / "exemplars.jsonl").read_text().splitlines()]
+    repo_profiles = {item["id"]: item.get("database_profile")
+                     for item in config.data["query_repositories"]}
+    drift = catalog_mod.reconcile(
+        {"fixture_db": snapshot}, exemplars,
+        {"fixture_db": config.data["catalog"]["fixture_db"]["drift_policy"]},
+        repo_profiles,
+    )
+    catalog_mod.write_drift(index_dir, drift)
+    mapping_report = validate_mapping(config, index_dir, Vocabulary.load(config))
+    graph = json.loads((index_dir / "join_graph.json").read_text())
+    return config, snapshot, graph, load_index(index_dir), mapping_report
 
 
 def test_ac002_composition_reuse_adapt_generate_with_evidence(tmp_path: Path):
@@ -702,6 +743,124 @@ def test_ac007_execution_provenance_envelope_and_replay(tmp_path: Path):
     connection.close()
     assert changed_catalog.status == "mismatch"
     assert {"run_id", "snapshot_id"} <= set(changed_catalog.mismatches)
+
+
+def test_ac008_reader_facts_reproduce_sources_and_drift_is_unavailable(tmp_path: Path):
+    config, snapshot, graph, index, mapping_report = _reader_inputs(tmp_path / "available")
+    fixture = _fixture_module()
+    db_path = tmp_path / "reader.sqlite"
+    fixture.build(db_path)
+    connection = fixture.connect(db_path)
+    raw_source = _SQLiteQuerySource(connection)
+    source = adapt_query_source(raw_source, profile="fixture_db", dialect="sqlite")
+    reader = Reader(
+        config=config, index=index, mapping_report=mapping_report, snapshot=snapshot,
+        join_graph=graph, caller=resolve_caller(config, "lending-lead"), source=source,
+        key_id="fixture-key", signing_key=SIGNING_KEY,
+        keys={"fixture-key": SIGNING_KEY}, now=NOW,
+    )
+
+    revenue_plan = QueryPlan(
+        metric="lending_revenue", dimensions=("security",),
+        filters=(Filter("security", "eq", ("SEC-B",)),),
+        window=TimeWindow(20261021, 20261022, "day"), comparison=None, rank=None,
+        defaults_applied=(), interpreter="fixture",
+    )
+    revenue_facts = tuple(reader(revenue_plan))
+    assert sum(fact.measures["lending_revenue"] for fact in revenue_facts) == 125.0
+    assert {fact.period for fact in revenue_facts} == {20261022}
+    assert {tuple(sorted(fact.dims)) for fact in revenue_facts} == {
+        ("borrow_category", "security")}
+    assert raw_source.calls[-1]["params"] == {
+        "start_date": "2026-10-21", "end_date": "2026-10-22"}
+    layer, compiled = packs_mod.compile_layer(mapping_report["bindings"])
+    assert any(item["metric"] == "lending_revenue" and item["compiled"] for item in compiled)
+    filtered = execute_plan(revenue_plan, layer, reader=lambda _plan: revenue_facts, as_of=20261022)
+    assert filtered.total == 45.0 and filtered.row_count == 2
+
+    exposure_plan = QueryPlan(
+        metric="on_loan_value", dimensions=("counterparty",), filters=(),
+        window=TimeWindow(20261022, 20261022, "day"), comparison=None, rank=None,
+        defaults_applied=("window",), interpreter="fixture",
+    )
+    exposure_facts = tuple(reader(exposure_plan))
+    assert sum(fact.measures["on_loan_value"] for fact in exposure_facts) == 7801.5
+    assert {fact.dims["counterparty"] for fact in exposure_facts} == {"CP-A", "CP-B", "CP-C"}
+    assert raw_source.calls[-1]["params"] == {"as_of": "2026-10-22"}
+    evidence = reader.evidence.for_plan(exposure_plan)
+    assert evidence and evidence.batch_hash == fact_batch_hash(exposure_facts)
+    assert evidence.source_query_id == "sl.on_loan_value.by_counterparty.as_of"
+    assert evidence.provenance.run_id.startswith("sfm-")
+    assert evidence.provenance.snapshot_id == snapshot["snapshot_id"]
+    assert evidence.provenance.config_hash == config.hash
+    calls_before = len(raw_source.calls)
+    public_reader = Reader(
+        config=config, index=index, mapping_report=mapping_report, snapshot=snapshot,
+        join_graph=graph, caller=resolve_caller(config, "public-reader"), source=source,
+        key_id="fixture-key", signing_key=SIGNING_KEY,
+        keys={"fixture-key": SIGNING_KEY}, now=NOW,
+    )
+    with pytest.raises(MetricSourceUnavailable, match="caller-unauthorized"):
+        public_reader(exposure_plan)
+    assert len(raw_source.calls) == calls_before
+    connection.close()
+
+    def use_v2(data):
+        data["catalog"]["fixture_db"]["file"] = "catalog/fixture_db.catalog.v2.json"
+
+    v2_config, v2_snapshot, v2_graph, v2_index, v2_mapping = _reader_inputs(
+        tmp_path / "drifted", mutate_config=use_v2)
+    connection = fixture.connect(db_path)
+    v2_raw = _SQLiteQuerySource(connection)
+    v2_reader = Reader(
+        config=v2_config, index=v2_index, mapping_report=v2_mapping, snapshot=v2_snapshot,
+        join_graph=v2_graph, caller=resolve_caller(v2_config, "lending-lead"),
+        source=adapt_query_source(v2_raw, profile="fixture_db", dialect="sqlite"),
+        key_id="fixture-key", signing_key=SIGNING_KEY,
+        keys={"fixture-key": SIGNING_KEY}, now=NOW,
+    )
+    with pytest.raises(MetricSourceUnavailable) as drifted:
+        v2_reader(exposure_plan)
+    assert drifted.value.code == "E_METRIC_SOURCE_UNAVAILABLE" and v2_raw.calls == []
+    connection.close()
+
+    draft_config, draft_snapshot, draft_graph, draft_index, draft_mapping = _reader_inputs(
+        tmp_path / "draft", draft_source=True)
+    connection = fixture.connect(db_path)
+    draft_raw = _SQLiteQuerySource(connection)
+    draft_reader = Reader(
+        config=draft_config, index=draft_index, mapping_report=draft_mapping,
+        snapshot=draft_snapshot, join_graph=draft_graph,
+        caller=resolve_caller(draft_config, "lending-lead"),
+        source=adapt_query_source(draft_raw, profile="fixture_db", dialect="sqlite"),
+        key_id="fixture-key", signing_key=SIGNING_KEY,
+        keys={"fixture-key": SIGNING_KEY}, now=NOW,
+    )
+    with pytest.raises(MetricSourceUnavailable):
+        draft_reader(exposure_plan)
+    assert draft_raw.calls == []
+    connection.close()
+
+    def mismatch_source(data):
+        metric_source = next(item for item in data["governed_tier"]["metric_sources"]
+                             if item["metric"] == "on_loan_value")
+        metric_source["measure_columns"] = {"wrong_measure": "on_loan_value"}
+
+    bad_config, bad_snapshot, bad_graph, bad_index, bad_mapping = _reader_inputs(
+        tmp_path / "mismatch", mutate_config=mismatch_source)
+    connection = fixture.connect(db_path)
+    bad_raw = _SQLiteQuerySource(connection)
+    bad_reader = Reader(
+        config=bad_config, index=bad_index, mapping_report=bad_mapping, snapshot=bad_snapshot,
+        join_graph=bad_graph, caller=resolve_caller(bad_config, "lending-lead"),
+        source=adapt_query_source(bad_raw, profile="fixture_db", dialect="sqlite"),
+        key_id="fixture-key", signing_key=SIGNING_KEY,
+        keys={"fixture-key": SIGNING_KEY}, now=NOW,
+    )
+    with pytest.raises(MetricSourceUnavailable):
+        bad_reader(exposure_plan)
+    assert bad_raw.calls == []
+    connection.close()
 
 
 if __name__ == "__main__":  # pragma: no cover

@@ -26,7 +26,7 @@
 | T-003 | Add SQLite/PostgreSQL/Oracle/Databricks dialect policies, injected timeout and normalized `EXPLAIN` cost guard, configurable token TTL, and static fixtures. | REQ-004, REQ-005, NFR-004, AC-004 | done | `dialect_queries.json`; no driver extra ships. |
 | T-004 | Implement the token-only query seam, query-only adapter, redaction, scrubbed errors, provenance, deterministic run identity, `0070` envelope, and replay comparison. | REQ-006, REQ-007, NFR-002, NFR-003, NFR-005, AC-006, AC-007 | done | `execute.py`; wraps only `query`, never exposes `execute`/`transaction`. |
 | T-005 | Implement retrieval-first composition (`reuse` → `adapt` → `generate`) with eligibility, bound parameters, canonical evidence, catalog constraints, and injected completion. | REQ-002, AC-002 | done | `compose.py`; generated SQL remains outside the index. |
-| T-006 | Implement the governed `Reader`: available-source lookup, plan binding, verified execution, exact output-to-`Fact` mapping, batch provenance, and unavailable-source handling. | REQ-008, NFR-003, AC-008 | todo | Reader half of parent T-032. |
+| T-006 | Implement the governed `Reader`: available-source lookup, plan binding, verified execution, exact output-to-`Fact` mapping, batch provenance, and unavailable-source handling. | REQ-008, NFR-003, AC-008 | done | `governed/reader.py`; completes parent T-032. |
 | T-007 | Implement typed governed-first `ask` routing and the shadow-mode tail, including terminal clarification/unavailable outcomes and bounded repair. | REQ-009, REQ-010, AC-009, AC-010 | todo | No final `0117` grounding gate yet. |
 | T-008 | Register strict schemas/effects for `sql.compose`, `sql.verify`, `sql.execute`, and `ask`; add runtime write-back refusal and contract/governance checks. | REQ-011, REQ-012, AC-011, AC-012 | todo | No raw execution or write-effect tool. |
 | T-009 | Build `sql_composer` and `sfmeridian_orchestrator` policies, reports, verifiers, manifests, four-file agent contracts, catalog rows, coverage updates, and deterministic harness tests. | REQ-013, REQ-014, REQ-010, AC-013, AC-014 | todo | C-03 and C-04 become built. |
@@ -49,7 +49,7 @@ All implementation tests live in `tests/test_sfmeridian_sql.py` unless noted.
 | AC-005 | `test_ac005_token_binds_every_context_field_and_expires` | done |
 | AC-006 | `test_ac006_query_only_execution_redacts_and_scrubs` | done |
 | AC-007 | `test_ac007_execution_provenance_envelope_and_replay` | done |
-| AC-008 | `test_ac008_reader_facts_reproduce_sources_and_drift_is_unavailable` | todo |
+| AC-008 | `test_ac008_reader_facts_reproduce_sources_and_drift_is_unavailable` | done |
 | AC-009 | `test_ac009_governed_first_routing_and_terminal_clarification` | todo |
 | AC-010 | `test_ac010_tail_trace_repair_citations_and_envelope` | todo |
 | AC-011 | `test_ac011_writeback_always_refused_and_no_write_tool` | todo |
