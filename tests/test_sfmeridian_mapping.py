@@ -183,7 +183,7 @@ def test_ac002_sqlite_introspection_and_dialect_dictionary_queries(fx):
 
     class Broken:
         def cursor(self):
-            raise RuntimeError("connect failed: postgresql://svc:hunter2@db/lending")
+            raise RuntimeError("connect failed: postgresql://svc:hunter2@db/lending")  # qf:allow-secret (deliberate fake)
 
     with pytest.raises(catalog.CatalogError) as err:
         catalog.introspect(Broken(), {"id": "p", "dialect": "postgres"})
@@ -478,7 +478,7 @@ def test_ac010_research_withholds_columns_above_clearance(fx):
 
 
 def test_ac011_no_credentials_in_traces_errors_or_artifacts(fx):
-    assert access.scrub("postgresql://svc:hunter2@db/x") == "postgresql://svc:<redacted>@db/x"
+    assert access.scrub("postgresql://svc:hunter2@db/x") == "postgresql://svc:<redacted>@db/x"  # qf:allow-secret (deliberate fake)
     assert access.scrub("password=hunter2; token: abc123") == "password=<redacted>; token: <redacted>"
     assert access.scrub("Authorization: Bearer abcdefghijklmnop") == "Authorization: Bearer <redacted>"
 
@@ -581,7 +581,7 @@ def test_ac014_agent_files_catalog_and_governance():
     assert any(k["agent"] == "securities_financing/sfmeridian/semantic_mapping_steward" for k in skills)
     report = governance.validate_all(ROOT / "agents", registry=default_registry())
     assert report["ok"], report["errors"]
-    assert report["counts"]["built_agents"] == 3 and report["counts"]["manifests"] == 3
+    assert report["counts"]["built_agents"] == 5 and report["counts"]["manifests"] == 5
 
 
 def test_ac015_portability_and_fallback(fx, monkeypatch):

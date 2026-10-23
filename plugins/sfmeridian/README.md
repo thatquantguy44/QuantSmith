@@ -13,14 +13,16 @@ patterns), search, the reviewed feedback inbox, governance catalogs, the
 shared tool registry, the agent loop harness; schema catalog snapshots,
 drift exclusion, the governed semantic mapping, metric-source availability,
 pack-amendment proposals, and access controls (`0115`); adaptive dataset
-research (`0121`); three loop agents, `query_librarian`,
-`semantic_mapping_steward`, and `lending_data_researcher`; and the first eight
+research (`0121`); five loop agents, `query_librarian`,
+`semantic_mapping_steward`, `lending_data_researcher`, `sql_composer`, and
+`sfmeridian_orchestrator`; and the first nine
 `0116` slices (executable fixture, token-bound verifier, four-dialect policy,
 cost guard, query-only execution with redaction/provenance/replay, and the
 retrieval-first composer, plus the governed metric-source Reader with batch
 provenance, governed-first typed routing with a bounded shadow tail, and shared
-token-only tools with runtime write-back refusal). Not yet: the two `0116` loop agents
-(remaining `0116`), grounded answers and the evaluation gate (`0117`), the MCP
+token-only tools with runtime write-back refusal, plus the two routing agents).
+Not yet: bounded specialist handoffs and final hardening (remaining `0116`),
+grounded answers and the evaluation gate (`0117`), the MCP
 server and Claude Code plugin (`0118`).
 
 **Contributors:** current state, the next build (`0116`), open decisions, and

@@ -1,8 +1,8 @@
 {
   "schema": 1,
   "generator": "quantsmith-skills/1",
-  "generation": 6,
-  "updated": "2026-10-22",
+  "generation": 7,
+  "updated": "2026-10-23",
   "targets": {},
   "skills": [
     {
@@ -2628,6 +2628,38 @@
       "updated_generation": 6,
       "source_hash": "sha256:e5d39a348d2418ef35e24894cfed8809d7337cee1e0b0f9689bfd86f7808f2a0",
       "skill_hash": "sha256:c5d83d5e5045d2398e82451d548daa11463fe7dd29393e565f705c80e38753e7"
+    },
+    {
+      "name": "securities-financing-sfmeridian-sfmeridian-orchestrator",
+      "agent": "securities_financing/sfmeridian/sfmeridian_orchestrator",
+      "category": "securities_financing",
+      "description": "The SFMeridian Orchestrator is the single desk-question entrypoint. Use when a desk user asks a securities-lending data question, or a governed ambiguity must be returned for clarification.",
+      "status": "active",
+      "project": false,
+      "path": null,
+      "revision": 1,
+      "introduced": "2026-10-23",
+      "updated": "2026-10-23",
+      "removed": null,
+      "updated_generation": 7,
+      "source_hash": "sha256:5e56eed26b495877b3e546411e4c15b8055e7d90f653b057f9504cc4421d1f88",
+      "skill_hash": "sha256:fbe32ccbec19de655fb5f9a644f9c8d57aa8be3757edb0ed065ae7b4a7da3d99"
+    },
+    {
+      "name": "securities-financing-sfmeridian-sql-composer",
+      "agent": "securities_financing/sfmeridian/sql_composer",
+      "category": "securities_financing",
+      "description": "The SQL Composer handles only questions already recorded as outside the governed 0080 vocabulary. Use when ask has produced the typed route no_governed_match, or a reviewed query may answer a lookup or aggregate question.",
+      "status": "active",
+      "project": false,
+      "path": null,
+      "revision": 1,
+      "introduced": "2026-10-23",
+      "updated": "2026-10-23",
+      "removed": null,
+      "updated_generation": 7,
+      "source_hash": "sha256:08feb6c9ac62c86ea8c694e9b6d6cbd002c318564626f9b4992fb40d0547ab2d",
+      "skill_hash": "sha256:7ad7189942365aeedb9379d5dd298b0b8ba1e26cdaeaef9985df85abd7e94874"
     },
     {
       "name": "sql-integration-agent",

@@ -512,7 +512,7 @@ def test_ac022_agent_catalog_and_governance():
         assert (agent_dir / name).exists()
     report = governance.validate_all(ROOT / "agents", registry=default_registry())
     assert report["ok"], report["errors"]
-    assert report["counts"]["built_agents"] == 3 and report["counts"]["coverage_rows"] == 10
+    assert report["counts"]["built_agents"] == 5 and report["counts"]["coverage_rows"] == 10
     handoffs = governance.load("handoffs.json")["handoffs"]
     assert {"dataset_investigator", "data_quality", "schema_evolution"} <= {
         h["agent"] for h in handoffs if "W13" in h["workflows"]}

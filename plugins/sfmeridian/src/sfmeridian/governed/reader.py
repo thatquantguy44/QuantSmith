@@ -18,6 +18,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import time
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any
@@ -138,6 +139,7 @@ class Reader:
         keys: Mapping[str, bytes],
         now: int | Callable[[], int],
         evidence: EvidenceRegistry | None = None,
+        monotonic_ns: Callable[[], int] = time.monotonic_ns,
     ) -> None:
         self.config = config
         self.index = index
@@ -151,6 +153,7 @@ class Reader:
         self.keys = keys
         self._now = now if callable(now) else lambda: now
         self.evidence = evidence or EvidenceRegistry()
+        self.monotonic_ns = monotonic_ns
 
     def __call__(self, plan: QueryPlan) -> Sequence[Fact]:
         """Return governed facts or one typed unavailable-source refusal."""
@@ -232,6 +235,7 @@ class Reader:
             caller=self.caller,
             source=self.source,
             source_exemplars=(str(exemplar.get("query_id") or exemplar["exemplar_id"]),),
+            monotonic_ns=self.monotonic_ns,
         )
         facts = self._facts(plan, source_config, exemplar, result.rows)
         query_id = str(exemplar.get("query_id") or source_config["exemplar_id"])

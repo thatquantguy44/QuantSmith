@@ -2209,6 +2209,28 @@ agents:
       - "A drift list (`drift.json`) that removes drifted exemplars from retrieval."
       - "A stewardship report: bindings, governed-metric coverage, metric sources, amendments, caveats, handoffs, and cited findings."
       - "Pack-amendment proposals staged for the named reviewer (the pack is unchanged)."
+  - name: "securities_financing/sfmeridian/sfmeridian_orchestrator"
+    category: "securities_financing"
+    purpose: "The SFMeridian Orchestrator is the single desk-question entrypoint."
+    path: "agents/securities_financing/sfmeridian/sfmeridian_orchestrator/"
+    inputs:
+      - "Question, ISO as-of, caller handle, and database profile."
+      - "Optional exact tail parameters and PIT columns."
+    outputs:
+      - "Typed route and tier, answer or shadow result, citations, caveats, and trace."
+      - "A clarification, abstention, or coded escalation when evidence is unavailable."
+      - "`E_WRITEBACK_DISABLED` for every write intent."
+  - name: "securities_financing/sfmeridian/sql_composer"
+    category: "securities_financing"
+    purpose: "The SQL Composer handles only questions already recorded as outside the governed `0080` vocabulary."
+    path: "agents/securities_financing/sfmeridian/sql_composer/"
+    inputs:
+      - "Question, ISO as-of, database profile, exact parameters, and PIT columns."
+      - "The recorded route `no_governed_match`."
+    outputs:
+      - "Retrieval observations and source citations."
+      - "Composition path, catalog objects, limitations, and content hash."
+      - "A verification record and short-lived token; never query results."
   - name: "sql-integration-agent"
     category: "root"
     purpose: "The SQL Integration Agent connects to SQL databases, inspects schemas, and runs safe analytical queries."

@@ -24,8 +24,10 @@ sys.path.insert(0, str(PLUGIN / "src"))
 
 from sfmeridian import catalog as catalog_mod
 from sfmeridian.access import caller as resolve_caller
+from sfmeridian.agent import Finish, ToolCall
 from sfmeridian.catalog import load_declared
 from sfmeridian.compose import CompositionError, CompositionRequest, compose
+from sfmeridian.composer_agent import run_composer
 from sfmeridian.config import ConfigError, apply_call_overrides, load_config, read_file
 from sfmeridian.execute import ExecutionError, adapt_query_source, execute, replay
 from sfmeridian.frontmatter import split_front_matter
@@ -34,6 +36,7 @@ from sfmeridian.governed.ask import AskRequest, ask
 from sfmeridian.governed.reader import MetricSourceUnavailable, Reader, fact_batch_hash
 from sfmeridian.index import build_index, load_index
 from sfmeridian.mapping import Vocabulary, validate_mapping
+from sfmeridian.orchestrator import run_orchestrator
 from sfmeridian.tools import ToolContext, default_registry
 from sfmeridian.verify import (
     TokenError,
@@ -1093,6 +1096,123 @@ def test_ac012_shared_registry_schemas_effects_and_no_raw_execute(tmp_path: Path
         rejected = registry.call(tool_name, payload, context)
         assert not rejected.ok and rejected.error_code == "E_TOOL_INPUT"
     assert len(raw_source.calls) == 2
+    connection.close()
+
+
+class _AgentScript:
+    name = "scripted"
+
+    def __init__(self, actions):
+        self.actions = list(actions)
+
+    def decide(self, _state):
+        return self.actions.pop(0)
+
+
+def test_ac013_sql_composer_loop_boundaries_and_verifiers(tmp_path: Path):
+    config, _snapshot, _graph, _index, _mapping = _reader_inputs(tmp_path)
+    context = ToolContext(
+        config=config, today="2026-10-22", actor="lending-lead",
+        clients={"verification": {
+            "key_id": "fixture-key", "signing_key": SIGNING_KEY,
+            "keys": {"fixture-key": SIGNING_KEY}, "now": NOW,
+            "monotonic_ns": lambda: 0,
+        }},
+        agents_root=ROOT / "agents",
+    )
+    inputs = {
+        "question": "Collateral coverage ratio by loan", "as_of": "2026-10-22",
+        "profile": "fixture_db", "route_outcome": "no_governed_match",
+    }
+    registry = default_registry()
+    run = run_composer(context, registry=registry, inputs=inputs)
+    assert run.status == "completed", run.summary
+    assert run.outputs["composition"]["path"] == "reuse"
+    assert run.outputs["verification"]["ok"] is True
+    assert run.outputs["verification"]["token"]
+    called = [item["name"] for item in run.trace if item["event"] == "decide"]
+    assert called == ["queries.search", "sql.compose", "queries.get", "sql.verify"]
+    assert "sql.execute" not in called and "ask" not in called
+
+    wrong_route = run_composer(context, registry=registry, inputs={**inputs, "route_outcome": "governed_answer"})
+    assert wrong_route.status == "escalated" and wrong_route.tool_calls == 0
+
+    denied = run_composer(
+        context, registry=registry, inputs=inputs,
+        policy=_AgentScript([ToolCall("sql.execute", {"token": "forged", "params": {}})]),
+    )
+    assert denied.status == "denied"
+    human_only = run_composer(
+        context, registry=registry, inputs=inputs,
+        policy=_AgentScript([ToolCall("feedback.promote", {"candidate_id": "0" * 16})]),
+    )
+    assert human_only.status == "denied"
+
+    forged = Finish("forged", {
+        "route_outcome": "no_governed_match",
+        "composition": {"path": "generate", "source_exemplars": [], "query_id": None},
+        "verification": {"ok": True, "token": "forged", "query_id": None},
+    })
+    failed = run_composer(
+        context, registry=registry, inputs=inputs,
+        policy=_AgentScript([forged, forged]),
+    )
+    assert failed.status == "failed"
+    assert any(item["event"] == "verify" and not item["ok"] for item in failed.trace)
+
+
+def test_ac014_orchestrator_routes_repairs_escalates_and_replays(tmp_path: Path):
+    config, _snapshot, _graph, _index, _mapping = _reader_inputs(tmp_path)
+    fixture = _fixture_module()
+    db_path = tmp_path / "orchestrator.sqlite"
+    fixture.build(db_path)
+    connection = fixture.connect(db_path)
+    raw_source = _SQLiteQuerySource(connection)
+    context = ToolContext(
+        config=config, today="2026-10-22", actor="lending-lead",
+        clients={
+            "query_sources": {"fixture_db": raw_source},
+            "verification": {
+                "key_id": "fixture-key", "signing_key": SIGNING_KEY,
+                "keys": {"fixture-key": SIGNING_KEY}, "now": NOW,
+                "monotonic_ns": lambda: 0,
+            },
+        },
+        agents_root=ROOT / "agents",
+    )
+    registry = default_registry()
+    base = {"as_of": "2026-10-22", "caller": "lending-lead", "profile": "fixture_db"}
+
+    governed_inputs = {**base, "question": "on loan value by counterparty today"}
+    governed = run_orchestrator(context, registry=registry, inputs=governed_inputs)
+    assert governed.status == "completed" and governed.outputs["route"] == "governed_answer"
+    assert governed.outputs["tier"] == "governed"
+    assert any(item.startswith("run:") for item in governed.outputs["citations"])
+
+    replayed = run_orchestrator(context, registry=registry, inputs=governed_inputs)
+    assert replayed.run_id == governed.run_id and replayed.trace == governed.trace
+
+    ambiguous = run_orchestrator(context, registry=registry, inputs={
+        **base, "question": "on loan value and lending revenue today"})
+    assert ambiguous.status == "completed"
+    assert ambiguous.outputs["route"] == "governed_clarification"
+    assert not any(event.get("name") == "sql.compose" for event in ambiguous.trace)
+
+    tail = run_orchestrator(context, registry=registry, inputs={
+        **base, "question": "Collateral coverage ratio by loan"})
+    assert tail.status == "completed" and tail.outputs["tier"] == "reuse"
+    assert tail.outputs["execution"]["envelope"]["run_id"].startswith("sfm-")
+
+    unavailable = run_orchestrator(context, registry=registry, inputs={
+        **base, "question": "lendable value today"})
+    assert unavailable.status == "escalated"
+    assert unavailable.outputs["route"] == "governed_unavailable"
+
+    refused = run_orchestrator(context, registry=registry, inputs={
+        **base, "question": "on loan value today", "action": "publish"})
+    assert refused.status == "completed"
+    assert refused.outputs["route"] == "writeback_requested"
+    assert refused.outputs["error_code"] == "E_WRITEBACK_DISABLED"
     connection.close()
 
 

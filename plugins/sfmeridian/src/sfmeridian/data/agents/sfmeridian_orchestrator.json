@@ -1,0 +1,26 @@
+{
+ "name": "sfmeridian_orchestrator",
+ "version": "1.0.0",
+ "coverage_row": "C-04",
+ "spec": "0116-sfmeridian-governed-sql-composition",
+ "goal": "Validate configuration, route every desk question through the shared governed-first ask tool, return governed answers and clarifications without fall-through, and escalate unavailable evidence without answering from memory.",
+ "tools": [
+  "config.validate",
+  "ask"
+ ],
+ "verifiers": [
+  "orchestrator.tier_recorded",
+  "orchestrator.answer_grounded",
+  "orchestrator.no_governed_fallthrough",
+  "orchestrator.writeback_refused"
+ ],
+ "max_steps": 8,
+ "max_tool_calls": 4,
+ "max_repairs": 1,
+ "human_checkpoints": [
+  "The asker resolves a governed clarification.",
+  "A desk or data owner supplies unavailable evidence or repairs configuration.",
+  "Specialist handoffs request analysis but never delegate decisions."
+ ],
+ "never": "Never answers from model memory, bypasses ask, returns a number without a run citation, executes raw or unverified SQL, publishes an insight, or hides an unavailable source behind tail composition."
+}

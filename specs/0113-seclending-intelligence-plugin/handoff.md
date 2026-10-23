@@ -12,15 +12,16 @@ plugin.
 ## Start here (in order)
 
 **The `0116` spec was approved on 2026-10-23. Implementation is in progress;
-T-001 through T-008 are built: the synthetic execution fixture, `sql.verify`
+T-001 through T-009 are built: the synthetic execution fixture, `sql.verify`
 with exact-context tokens and adversarial checks, and four-dialect policy with
 timeout, normalized cost guard, configurable token TTL, and the token-only
 query execution seam with redaction, provenance, and replay, plus retrieval-
 first SQL composition, the governed metric-source `Reader`, and governed-first
 `ask` routing with a bounded shadow tail, the shared SQL/ask tool contracts,
-and runtime write-back refusal. Next is T-009: loop agents C-03 and C-04.**
+and runtime write-back refusal, plus loop agents C-03 and C-04. Next is T-010:
+bounded W7–W12 specialist handoff payloads.**
 
-0. **Baseline verified (2026-10-23)**: SFMeridian tests 69 passed, 1 skipped;
+0. **Baseline verified (2026-10-23)**: SFMeridian tests 71 passed, 1 skipped;
    the steward completed with 4/5 metrics bound and six amendments staged.
    The full gate has unrelated pre-existing venture catalog/index/count
    findings on `main`; the `0116` targeted spec gate has no findings.
@@ -35,8 +36,9 @@ and runtime write-back refusal. Next is T-009: loop agents C-03 and C-04.**
    6. ~~the `0080` `Reader` over `available` metric sources~~ (T-006 done);
    7. ~~governed-first routing (`ask`) through `0080` `answer()`~~ (T-007 done);
    8. ~~the shared tools and write-back runtime refusal~~ (T-008 done);
-   9. **agents `sql_composer` (C-03) and `sfmeridian_orchestrator` (C-04) (T-009 next);**
-   10. docs, counts, registry, skills export, gates, full suite, commit, push,
+   9. ~~agents `sql_composer` (C-03) and `sfmeridian_orchestrator` (C-04)~~ (T-009 done);
+   10. **bounded W7–W12 specialist handoff payloads (T-010 next);**
+   11. docs, counts, registry, skills export, gates, full suite, commit, push,
       and update this file.
 2. **Done when** `roadmap.md` Phase 3's exit criteria hold (`0113` A-009–A-011,
    A-021, A-027, A-028, A-030 pass; the adversarial suite rejects every case;
@@ -51,7 +53,7 @@ and runtime write-back refusal. Next is T-009: loop agents C-03 and C-04.**
 | [`0114`](../0114-sfmeridian-query-repository-indexer/spec.md) | Config, query-repository indexer, search, feedback inbox, tool registry, agent loop harness; agent `query_librarian` (C-01) | **Built**, Approved | `tests/test_sfmeridian_indexer.py` (17 ACs) |
 | [`0115`](../0115-sfmeridian-schema-catalog-mapping-access/spec.md) | Catalog snapshots, drift exclusion, governed semantic mapping, metric-source availability, pack amendments, access controls; agent `semantic_mapping_steward` (C-02) | **Built**, Approved | `tests/test_sfmeridian_mapping.py` (17 ACs) |
 | [`0121`](../0121-sfmeridian-adaptive-dataset-research/spec.md) | Adaptive dataset research (Dataset Intake Investigator POC); agent `lending_data_researcher` (C-10) | **Built**, Approved; AC-016 (live connectors) open | `tests/test_sfmeridian_research.py` (24 ACs, 1 skipped) |
-| [`0116`](../0116-sfmeridian-governed-sql-composition/spec.md) | Governed tier, grounded SQL composition, verification & execution; agents `sql_composer` (C-03), `sfmeridian_orchestrator` (C-04) | **Approved — implementation in progress; T-001–T-008 built** | `tests/test_sfmeridian_sql.py` (AC-001–AC-012) |
+| [`0116`](../0116-sfmeridian-governed-sql-composition/spec.md) | Governed tier, grounded SQL composition, verification & execution; agents `sql_composer` (C-03), `sfmeridian_orchestrator` (C-04) | **Approved — implementation in progress; T-001–T-009 built** | `tests/test_sfmeridian_sql.py` (AC-001–AC-014) |
 | `0117`–`0120` | Grounding & evaluation gate; packaging & surfaces; analytics agents; reporting checks | Reserved | — |
 
 Last verified state (2026-10-22, commit `a793d48`): full suite **1587 passed,
@@ -74,7 +76,7 @@ plugins/sfmeridian/                    # separate distributable "sfmeridian" 0.1
     semantic_tools.py, steward.py      # 0115 tools; C-02 semantic_mapping_steward
     governed/                        # the ONLY package that may import quantsmith (packs, Reader, ask, tools)
     research/                          # 0121 research tools, policy (C-10 lending_data_researcher), bundle
-    data/coverage.json                 # roster C-01…C-10 (C-01, C-02, C-10 built)
+    data/coverage.json                 # roster C-01…C-10 (C-01–C-04, C-10 built)
     data/handoffs.json                 # 37 existing agents SFMeridian hands work to
     data/tooling_catalog.json          # screened third-party catalog (admission reviews pending)
     data/pack_amendments.json          # 0115 proposals for the 0081 pack (status: proposed)

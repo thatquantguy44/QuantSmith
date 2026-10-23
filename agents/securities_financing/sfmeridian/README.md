@@ -17,8 +17,8 @@ agents call the same tools.
 | --- | --- | --- | --- |
 | `query_librarian/` | C-01 | built (loop agent) | `0114` |
 | `semantic_mapping_steward/` | C-02 | built (loop agent) | `0115` |
-| `sql_composer` | C-03 | planned | `0116` |
-| `sfmeridian_orchestrator` | C-04 | planned | `0116` |
+| `sql_composer/` | C-03 | built (loop agent) | `0116` |
+| `sfmeridian_orchestrator/` | C-04 | built (loop agent) | `0116` |
 | `answer_grounding_reviewer` | C-05 | planned | `0117` |
 | `lending_data_researcher/` | C-10 | built (loop agent) | `0121` |
 | `lending_revenue_analyst` | C-08 | planned (first `0119` agent) | `0119` |
@@ -31,5 +31,5 @@ checkpoints, stop condition), and the 37 existing agents SFMeridian hands work
 to are machine-readable in `plugins/sfmeridian/src/sfmeridian/data/coverage.json`
 and `handoffs.json`, validated by `python -m sfmeridian governance validate`.
 
-Current build state and the next pickup point (`0116`: `sql_composer`,
-`sfmeridian_orchestrator`) are in `specs/0113-seclending-intelligence-plugin/handoff.md`.
+Current build state and the next pickup point are in
+`specs/0113-seclending-intelligence-plugin/handoff.md`.

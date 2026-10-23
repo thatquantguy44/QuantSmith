@@ -1,0 +1,28 @@
+{
+ "name": "sql_composer",
+ "version": "1.0.0",
+ "coverage_row": "C-03",
+ "spec": "0116-sfmeridian-governed-sql-composition",
+ "goal": "After an explicit no-governed-match route, retrieve reviewed evidence, compose by reuse then adaptation then constrained generation, and return only a fully evidenced composition with a valid verification token.",
+ "tools": [
+  "queries.search",
+  "queries.get",
+  "catalog.describe",
+  "glossary.lookup",
+  "sql.compose",
+  "sql.verify"
+ ],
+ "verifiers": [
+  "compose.route_permits_composition",
+  "compose.path_and_sources_recorded",
+  "compose.verified_before_return"
+ ],
+ "max_steps": 16,
+ "max_tool_calls": 12,
+ "max_repairs": 1,
+ "human_checkpoints": [
+  "Only a person may promote generated or adapted SQL into the query repository.",
+  "A failed verification or absent governed route is escalated; the agent never weakens policy."
+ ],
+ "never": "Never executes SQL, calls ask, uses a human_only tool, promotes an exemplar, composes after a governed answer or clarification, or returns without path provenance and a verification token."
+}

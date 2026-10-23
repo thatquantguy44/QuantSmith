@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import time
 from collections.abc import Mapping
 from typing import Any
 
@@ -76,6 +77,12 @@ def _source(ctx: ToolContext, profile: str) -> QueryOnlyAdapter:
         return adapt_query_source(raw, profile=profile, dialect=str(profile_config["dialect"]))
     except ExecutionError as exc:
         raise ToolError(exc.code, exc.message) from None
+
+
+def _monotonic(ctx: ToolContext):
+    verification = ctx.clients.get("verification")
+    value = verification.get("monotonic_ns") if isinstance(verification, Mapping) else None
+    return value if callable(value) else time.monotonic_ns
 
 
 def _mapping(ctx: ToolContext) -> dict[str, Any]:
@@ -167,6 +174,7 @@ def _execute(ctx: ToolContext, args: dict[str, Any]) -> dict[str, Any]:
             caller=who,
             source=_source(ctx, query.record.profile),
             source_exemplars=tuple(item["id"] for item in record.source_exemplars),
+            monotonic_ns=_monotonic(ctx),
         )
     except ExecutionError as exc:
         raise ToolError(exc.code, exc.message) from None
@@ -199,6 +207,7 @@ def _ask(ctx: ToolContext, args: dict[str, Any]) -> dict[str, Any]:
         mapping_report=_mapping(ctx), snapshot=_snapshot(ctx, profile), join_graph=_graph(ctx),
         source=_source(ctx, profile), key_id=key_id, signing_key=signing_key,
         keys=keys, now=now, completer=ctx.clients.get("sql_completer"),
+        monotonic_ns=_monotonic(ctx),
     )
     return outcome.as_dict()
 

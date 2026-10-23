@@ -81,7 +81,7 @@
    "id": "C-03",
    "agent": "sql_composer",
    "child_spec": "0116",
-   "status": "planned",
+  "status": "built",
    "workflow": "Retrieval-first SQL composition (reuse, adapt, generate) for questions 0080 reports as outside the governed metrics.",
    "never": "Never executes SQL and never bypasses sql.verify.",
    "loop": {
@@ -94,8 +94,9 @@
      "sql.verify"
     ],
     "verifiers": [
-     "compose.verified_before_return",
-     "compose.path_and_sources_recorded"
+      "compose.route_permits_composition",
+      "compose.path_and_sources_recorded",
+      "compose.verified_before_return"
     ],
     "human_checkpoints": [
      "approve generated (non-exemplar) SQL before it becomes an exemplar"
@@ -107,23 +108,19 @@
    "id": "C-04",
    "agent": "sfmeridian_orchestrator",
    "child_spec": "0116",
-   "status": "planned",
+  "status": "built",
    "workflow": "Route desk questions through the governed tier, then the reviewed-query pipeline; pick analytics agents; manage retries and abstention.",
    "never": "Never answers from model memory; never returns a number without a run citation.",
    "loop": {
     "tools": [
-     "ask",
-     "metrics.list",
-     "queries.search",
-     "sql.compose",
-     "sql.verify",
-     "sql.execute",
-     "answer.ground",
-     "glossary.lookup"
+      "config.validate",
+      "ask"
     ],
     "verifiers": [
      "orchestrator.answer_grounded",
-     "orchestrator.tier_recorded"
+      "orchestrator.tier_recorded",
+      "orchestrator.no_governed_fallthrough",
+      "orchestrator.writeback_refused"
     ],
     "human_checkpoints": [
      "clarification answered by the asker",

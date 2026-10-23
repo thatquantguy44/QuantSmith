@@ -392,6 +392,8 @@ costs and risks.
 | `securities_financing/sfmeridian/lending_data_researcher/` | SFMeridian loop agent (`0121`): adaptive research of one lending dataset — coverage ledger, pushed-down aggregates, securities-finance rule pack, evidence-linked recommendations, reproducible bundle; never writes or repairs | Testing |
 | `securities_financing/sfmeridian/query_librarian/` | SFMeridian loop agent (`0114`): indexes configured SQL query repositories and returns a cited curation report (rejections, metric conflicts, missing front-matter, review queue); never promotes or edits | Coding / Implementation |
 | `securities_financing/sfmeridian/semantic_mapping_steward/` | SFMeridian loop agent (`0115`): catalog snapshots and drift exclusion, concept bindings validated against the catalog and the `0081`/`0063` vocabulary, governed-metric coverage and sources, pack amendments staged for the named reviewer; never invents a mapping or edits a pack | Design / Architecture |
+| `securities_financing/sfmeridian/sfmeridian_orchestrator/` | SFMeridian loop agent (`0116`): validates configuration and routes every desk question through governed-first `ask`; records the tier and run citations, returns clarifications without fall-through, and refuses write-back | Orchestration / Implementation |
+| `securities_financing/sfmeridian/sql_composer/` | SFMeridian loop agent (`0116`): after a typed no-governed-match route, retrieves reviewed evidence, composes by reuse/adapt/generate, and returns only independently verified path provenance; never executes SQL | Coding / Implementation |
 
 `securities_lending/` has a tested runtime (spec `0023-securities-lending-workflow`):
 `src/quantsmith/quant/agentic_quant/sec_lending_workflow.py` — universe

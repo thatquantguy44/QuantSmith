@@ -9,6 +9,7 @@ exact no-match clarification may enter the retrieval-first SQL tail.
 
 from __future__ import annotations
 
+import time
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import asdict, dataclass, field
 from typing import Any
@@ -146,6 +147,7 @@ def ask(
     now: int | Callable[[], int],
     completer: Callable[[Mapping[str, Any]], Mapping[str, Any]] | None = None,
     interpreter: Interpreter | None = None,
+    monotonic_ns: Callable[[], int] = time.monotonic_ns,
 ) -> AskOutcome:
     """Run one governed-first question with a bounded, verified SQL tail."""
     trace: list[RouteEvent] = [RouteEvent("governed_started", True)]
@@ -174,6 +176,7 @@ def ask(
         signing_key=signing_key,
         keys=keys,
         now=current_now,
+        monotonic_ns=monotonic_ns,
     )
     tracking = _TrackingInterpreter(interpreter or KeywordInterpreter())
     clearance = who.clearance if who.active else "restricted"
@@ -219,6 +222,7 @@ def ask(
             completer=completer,
             trace=trace,
             profile=profile,
+            monotonic_ns=monotonic_ns,
         )
 
     if governed.status == "clarification_needed":
@@ -262,6 +266,7 @@ def _tail(
     completer: Callable[[Mapping[str, Any]], Mapping[str, Any]] | None,
     trace: list[RouteEvent],
     profile: Mapping[str, Any],
+    monotonic_ns: Callable[[], int],
 ) -> AskOutcome:
     repair: dict[str, Any] | None = None
 
@@ -337,6 +342,7 @@ def _tail(
                 caller=who,
                 source=source,
                 source_exemplars=tuple(item["id"] for item in record.source_exemplars),
+                monotonic_ns=monotonic_ns,
             )
         except ExecutionError as exc:
             trace.append(RouteEvent("execution_failed", False, exc.code, exc.message))

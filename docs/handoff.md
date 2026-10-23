@@ -11,11 +11,13 @@ Start with this section; everything else in this file is background.
 and Approved: `0114` (indexer, tool registry, loop harness, `query_librarian`),
 `0115` (catalog, drift, governed mapping, access, `semantic_mapping_steward`),
 `0121` (dataset research, `lending_data_researcher`). `0116` was approved on
-2026-10-23; T-001 through T-005 are built: the synthetic execution fixture,
+2026-10-23; T-001 through T-009 are built: the synthetic execution fixture,
 `sql.verify` with exact-context tokens and adversarial checks, and four-dialect
 policy with timeout, normalized cost guard, configurable token TTL, and the
 token-only execution seam with redaction, provenance, and replay, plus the
-retrieval-first composer. **Next: T-006, the governed `Reader`.**
+retrieval-first composer, governed Reader and routing, shared tools, and loop
+agents `sql_composer` and `sfmeridian_orchestrator`. **Next: T-010, bounded
+specialist handoffs.**
 Everything a new agent needs — state, code map, the `0116` starting brief, open
 owner decisions, gotchas — is in
 [`specs/0113-seclending-intelligence-plugin/handoff.md`](../specs/0113-seclending-intelligence-plugin/handoff.md).
@@ -53,7 +55,7 @@ by `hooks/stages/doc-counts-check.sh` → full suite + enforced gates → commit
 - **Local-only material.** The owner made the regional Asia/China venture agents and
   specs `0084`–`0086` local-only (`.gitignore`) and rewrote history. Never re-add
   them; the skills export skips gitignored agent folders automatically. Counts in
-  docs are for a clean clone (213 agents, 92 specs).
+  docs are for a clean clone (215 agents, 96 specs).
 - **Skills export.** After any agent change, rebuild and commit `.claude/skills/`
   (blocking in pre-commit and CI). Only the `project` selection in
   `config/skills_export.json` is materialized (59 skills) because Claude Code's
@@ -89,7 +91,7 @@ by `hooks/stages/doc-counts-check.sh` → full suite + enforced gates → commit
 > Next* and items 29–30.
 
 The SDK has a working v1: a **spec-driven engineering framework** over the six
-software-development stages, **213 agents** in `agents/`,
+software-development stages, **215 agents** in `agents/`,
 **37 quality gates**, **40 instruction standards**, and CI that
 enforces the deterministic gates. It remains primarily a scaffold to be copied
 into quant repos, with `src/quantsmith/pipelines/`, `src/quantsmith/orchestration/`,
@@ -114,7 +116,7 @@ it via stable IDs (`REQ`/`NFR`/`AC`/`RISK`/`T`).
 - `specs/NNNN-slug/{spec,plan,tasks}.md` from `templates/spec/`; worked example at
   `specs/0001-daily-momentum-signal/`.
 
-**Agents (213, verified by the `agent-catalog` gate — treat `agents/README.md`
+**Agents (215, verified by the `agent-catalog` gate — treat `agents/README.md`
 as the live count, not the number here)** — all on the four-file contract
 (`README`/`prompt`/`instructions`/`tasks`) with a `Spec-Driven Role`:
 
@@ -393,7 +395,7 @@ nobody noticed.
 | `0109` | **Analyst workflow and delivery** — report packaging, request intake, QA sign-off, Jupyter/Python/SQL tooling | `0014`–`0018`, `0102` citations | What's Next #0 |
 | `0114` | **SFMeridian: query repository connector & indexer** — **built and Approved** (spec dir `specs/0114-sfmeridian-query-repository-indexer/`): config, repos, front-matter, exemplars, join graph, feedback inbox, tool registry, agent loop harness, loop agent `query_librarian` | `0113` approved | `0113` roadmap |
 | `0115` | **SFMeridian: schema catalog, semantic mapping & access** — **built and Approved** (spec dir `specs/0115-sfmeridian-schema-catalog-mapping-access/`): catalog snapshots, diffs, and drift exclusion; governed bindings on the `0081` pack and `0063` with `0008` ratio rules; metric-source availability; pack amendments staged for the named reviewer (Joshua Lutkemuller, CFA; pack still `draft`); `0058` clearance and redaction; loop agent `semantic_mapping_steward` | `0114` | `0113` roadmap |
-| `0116` | **SFMeridian: grounded SQL composition, verification & execution** — **Approved; implementation in progress; T-001–T-005 built** (`specs/0116-sfmeridian-governed-sql-composition/`): governed-first `0080` Reader/routing, retrieval-first composer, deterministic token-bound verifier, read-only seam over `0023`; agents `sql_composer`, `sfmeridian_orchestrator` | `0115`, `0070` | `0113` roadmap |
+| `0116` | **SFMeridian: grounded SQL composition, verification & execution** — **Approved; implementation in progress; T-001–T-009 built** (`specs/0116-sfmeridian-governed-sql-composition/`): governed-first `0080` Reader/routing, retrieval-first composer, deterministic token-bound verifier, read-only seam over `0023`; loop agents `sql_composer`, `sfmeridian_orchestrator`; next is bounded specialist handoffs | `0115`, `0070` | `0113` roadmap |
 | `0117` | **SFMeridian: grounded answering & hallucination evaluation** — grounding check, abstention, golden-question release gate; agent `answer_grounding_reviewer` | `0116` | `0113` roadmap |
 | `0118` | **SFMeridian: packaging & app surfaces** — `plugins/sfmeridian/` distributable, Python API, MCP server (`0052`), Claude Code plugin (`0110`), SemVer (`0047`) | `0117` | `0113` roadmap |
 | `0119` | **SFMeridian: analytics agents** — utilization/specials, recall/buy-in risk, lending revenue attribution | `0118`, `0028`, `0066` | `0113` roadmap |
@@ -864,7 +866,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
     to populate `sources/` as real sources come into use.
 
 14. **P1 Generalization & Team Onboarding — making QuantSmith self-serve across
-    domains.** QuantSmith is now a comprehensive framework (213 agents, 69 specs,
+    domains.** QuantSmith is now a comprehensive framework (215 agents, 69 specs,
     33 gates, 35 standards); the next phase is reducing discovery friction and
     enabling team-intuitive adoption without deep codebase reading.
     - **P0 Phase 1a: Role profiles** (`roles/{portfolio_manager,risk_manager,quant_researcher,data_engineer,compliance_officer}.md`):
@@ -1887,7 +1889,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
       `specs/0083-venture-intelligence-foundation/run_card.md` (see
       `docs/gate_runbook.md`); every `knowledge/venture_intelligence/` record is
       `draft` and most cite `unverified`; `agents/agent_registry.yaml` was incomplete (6 of
-      213 agents, with broken `skills_library/` paths); it is now generated from the
+      215 agents, with broken `skills_library/` paths); it is now generated from the
       agents by `scripts/build_agent_registry.py` and guarded by a test and the
       `agent-catalog` gate.
 
@@ -1986,7 +1988,7 @@ manual-task persistence question stays deferred until a real consumer needs it.
 
 ## Risks
 
-- Breadth: 213 agents is useful only if each stays narrow and inspectable.
+- Breadth: 215 agents is useful only if each stays narrow and inspectable.
 - Heuristic gates (`leakage`, `backtest`, `secret-scan` fallback) can false-positive
   or miss; keep them advisory unless a repo's layout makes them reliable.
 - Docs can drift from the code; the `docs-link`, `agent-catalog`, and `spec-index` gates help, but
