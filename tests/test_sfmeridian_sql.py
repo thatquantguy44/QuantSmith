@@ -8,7 +8,9 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import shutil
 import sys
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -19,7 +21,20 @@ FIXTURES = PLUGIN / "fixtures"
 EXECUTION = FIXTURES / "execution"
 sys.path.insert(0, str(PLUGIN / "src"))
 
+from sfmeridian.catalog import load_declared
+from sfmeridian.config import load_config
 from sfmeridian.frontmatter import split_front_matter
+from sfmeridian.index import build_index
+from sfmeridian.verify import (
+    TokenError,
+    VerificationRequest,
+    trusted_predicate_literals,
+    validate_token,
+    verify,
+)
+
+NOW = 1_792_742_400
+SIGNING_KEY = b"0116 synthetic verification key!!"
 
 
 def _fixture_module():
@@ -96,6 +111,168 @@ def test_ac001_fixture_matches_catalog_exemplars_and_manifest(tmp_path: Path):
     disclosure = (FIXTURES / "README.md").read_text()
     assert "execution/fixture_db.py" in disclosure and "execution/expected_results.json" in disclosure
     assert "SYNTHETIC" in (EXECUTION / "fixture_db.py").read_text()
+
+
+def _verification_inputs(tmp_path: Path):
+    fx = tmp_path / "fx"
+    shutil.copytree(FIXTURES, fx)
+    config = load_config(fx / "sfmeridian.mapping.yml", env={})
+    report = build_index(config)
+    assert report.errors == []
+    snapshot = load_declared(fx / "catalog" / "fixture_db.catalog.json", config.profile("fixture_db"))
+    graph = json.loads((fx / ".sfmeridian" / "index" / "join_graph.json").read_text())
+    return config, snapshot, graph
+
+
+def _verify(config, snapshot, graph, sql, params=None, **request):
+    return verify(
+        VerificationRequest(sql=sql, params=params or {}, profile="fixture_db", **request),
+        profile=config.profile("fixture_db"),
+        snapshot=snapshot,
+        join_graph=graph,
+        config_hash=config.hash,
+        key_id="fixture-key",
+        signing_key=SIGNING_KEY,
+        now=NOW,
+    )
+
+
+def _codes(outcome):
+    return {finding.code for finding in outcome.findings}
+
+
+def test_ac003_verifier_rejects_adversarial_queries_without_execution(tmp_path: Path):
+    config, snapshot, graph = _verification_inputs(tmp_path)
+    safe = """
+        SELECT bk.loan_id, cp.credit_tier
+        FROM sec_lending_book bk
+        JOIN counterparties cp ON cp.counterparty_id = bk.counterparty_id
+        WHERE bk.business_date = :as_of
+        LIMIT 50
+    """
+    good = _verify(config, snapshot, graph, safe, {"as_of": "2026-10-22"},
+                   as_of="2026-10-22", require_pit=True,
+                   pit_columns=("sec_lending_book.business_date",))
+    assert good.ok and good.verified and good.findings == ()
+    assert good.verified.public()["parameter_names"] == ["as_of"]
+    assert "2026-10-22" not in good.verified.token
+
+    cases = [
+        ("SELECT made_up FROM sec_lending_book LIMIT 5", {}, "E_VERIFY_UNKNOWN_IDENTIFIER"),
+        ("SELECT security_id FROM invented_table LIMIT 5", {}, "E_VERIFY_UNKNOWN_IDENTIFIER"),
+        ("DELETE FROM sec_lending_book", {}, "E_VERIFY_NOT_READ_ONLY"),
+        ("WITH gone AS (DELETE FROM sec_lending_book RETURNING loan_id) SELECT * FROM gone LIMIT 5", {},
+         "E_VERIFY_NOT_READ_ONLY"),
+        ("SELECT loan_id FROM sec_lending_book LIMIT 5; SELECT loan_id FROM collateral LIMIT 5", {},
+         "E_VERIFY_MULTI_STATEMENT"),
+        ("SELECT loan_id FROM sec_lending_book WHERE status = 'OPEN' LIMIT 5", {},
+         "E_VERIFY_UNBOUND_PARAM"),
+        ("SELECT loan_id FROM sec_lending_book WHERE business_date = :as_of LIMIT 5", {},
+         "E_VERIFY_UNBOUND_PARAM"),
+        ("SELECT loan_id FROM sec_lending_book WHERE business_date = :as_of LIMIT 5",
+         {"as_of": "2026-10-22", "extra": 1}, "E_VERIFY_UNBOUND_PARAM"),
+        ("SELECT loan_id FROM sec_lending_book", {}, "E_VERIFY_NO_LIMIT"),
+        ("SELECT loan_id FROM sec_lending_book LIMIT 10001", {}, "E_VERIFY_NO_LIMIT"),
+        ("PRAGMA table_info(sec_lending_book)", {}, "E_VERIFY_NOT_READ_ONLY"),
+        ("SELECT security_id, SUM(on_loan_value) FROM sec_lending_book GROUP BY invented LIMIT 5", {},
+         "E_VERIFY_UNKNOWN_IDENTIFIER"),
+        ("SELECT loan_id FROM sec_lending_book UNION SELECT loan_id FROM collateral LIMIT 5", {},
+         "E_VERIFY_UNKNOWN_IDENTIFIER"),
+    ]
+    for sql, params, code in cases:
+        outcome = _verify(config, snapshot, graph, sql, params)
+        assert not outcome.ok and outcome.verified is None and code in _codes(outcome), (sql, outcome.as_dict())
+
+    wrong_join = """
+        SELECT bk.loan_id, cp.credit_tier
+        FROM sec_lending_book bk
+        JOIN counterparties cp ON cp.credit_tier = bk.status
+        LIMIT 50
+    """
+    assert "E_VERIFY_JOIN_KEY" in _codes(_verify(config, snapshot, graph, wrong_join))
+
+    missing_pit = _verify(config, snapshot, graph,
+                          "SELECT loan_id FROM sec_lending_book LIMIT 5", {},
+                          as_of="2026-10-22", require_pit=True,
+                          pit_columns=("sec_lending_book.business_date",))
+    assert "E_VERIFY_MISSING_PIT" in _codes(missing_pit)
+
+    denied = dict(config.profile("fixture_db"))
+    denied["tables_allowlist"] = ["borrow_rates"]
+    outcome = verify(
+        VerificationRequest("SELECT loan_id FROM sec_lending_book LIMIT 5", {}, "fixture_db"),
+        profile=denied,
+        snapshot=snapshot,
+        join_graph=graph,
+        config_hash=config.hash,
+        key_id="fixture-key",
+        signing_key=SIGNING_KEY,
+        now=NOW,
+    )
+    assert "E_VERIFY_TABLE_NOT_ALLOWED" in _codes(outcome)
+
+    reviewed = "SELECT loan_id FROM sec_lending_book WHERE status = 'OPEN' LIMIT 5"
+    allowed = _verify(
+        config, snapshot, graph, reviewed, {},
+        trusted_literal_hashes=trusted_predicate_literals(reviewed, "sqlite"),
+    )
+    assert allowed.ok
+
+    # The two reviewed as-of exemplars used by the governed mapping pass with
+    # only their reviewed structural literals trusted.
+    reviewed_cases = [
+        ("lending/on_loan_value_by_counterparty.sql", {"as_of": "2026-10-22"},
+         ("sec_lending_book.business_date",)),
+        ("lending/utilization_by_security.sql", {"as_of": "2026-10-22", "min_lendable": 0},
+         ("lendable_inventory.business_date", "sec_lending_book.business_date")),
+    ]
+    for relative, params, pit_columns in reviewed_cases:
+        _, exemplar_sql, _ = split_front_matter(
+            (FIXTURES / "query_repo" / relative).read_text(), relative)
+        outcome = _verify(
+            config, snapshot, graph, exemplar_sql, params,
+            as_of="2026-10-22", require_pit=True, pit_columns=pit_columns,
+            trusted_literal_hashes=trusted_predicate_literals(exemplar_sql, "sqlite"),
+        )
+        assert outcome.ok, (relative, outcome.as_dict())
+
+
+def test_ac005_token_binds_every_context_field_and_expires(tmp_path: Path):
+    config, snapshot, graph = _verification_inputs(tmp_path)
+    sql = "SELECT loan_id FROM sec_lending_book WHERE business_date = :as_of LIMIT 5"
+    outcome = _verify(config, snapshot, graph, sql, {"as_of": "2026-10-22"},
+                      as_of="2026-10-22", require_pit=True,
+                      pit_columns=("sec_lending_book.business_date",), clearance="internal")
+    assert outcome.ok and outcome.verified
+    verified = outcome.verified
+    assert validate_token(verified.token, verified, keys={"fixture-key": SIGNING_KEY}, now=NOW) == verified.record
+
+    signature_tampered = verified.token[:-1] + ("A" if verified.token[-1] != "A" else "B")
+    with pytest.raises(TokenError):
+        validate_token(signature_tampered, verified, keys={"fixture-key": SIGNING_KEY}, now=NOW)
+    with pytest.raises(TokenError, match="unknown verification key"):
+        validate_token(verified.token.replace(".fixture-key.", ".missing-key."), verified,
+                       keys={"fixture-key": SIGNING_KEY}, now=NOW)
+    with pytest.raises(TokenError, match="validity window"):
+        validate_token(verified.token, verified, keys={"fixture-key": SIGNING_KEY}, now=NOW + 301)
+
+    mutations = [
+        replace(verified, sql=sql.replace("LIMIT 5", "LIMIT 4")),
+        replace(verified, params_json=json.dumps({"as_of": "2026-10-21"}, separators=(",", ":"))),
+        replace(verified, record=replace(verified.record, profile="other")),
+        replace(verified, record=replace(verified.record, snapshot_id="other")),
+        replace(verified, record=replace(verified.record, config_hash="other")),
+        replace(verified, record=replace(verified.record, policy_version="sql-verify/2")),
+        replace(verified, record=replace(verified.record, clearance="restricted")),
+        replace(verified, record=replace(verified.record, composition_path="generate")),
+    ]
+    for changed in mutations:
+        with pytest.raises(TokenError, match="context mismatch"):
+            validate_token(verified.token, changed, keys={"fixture-key": SIGNING_KEY}, now=NOW)
+
+    public = verified.public()
+    rendered = json.dumps(public, sort_keys=True)
+    assert "2026-10-22" not in rendered and SIGNING_KEY.decode() not in rendered
 
 
 if __name__ == "__main__":  # pragma: no cover

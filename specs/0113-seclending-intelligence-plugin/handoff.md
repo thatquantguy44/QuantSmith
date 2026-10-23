@@ -12,8 +12,9 @@ plugin.
 ## Start here (in order)
 
 **The `0116` spec was approved on 2026-10-23. Implementation is in progress;
-T-001 (the synthetic execution fixture) is built. Next is T-002: `sql.verify`
-and its adversarial and token-mutation suites.**
+T-001 (synthetic execution fixture) and T-002 (`sql.verify`, exact-context
+tokens, adversarial suite) are built. Next is T-003: dialect policies, timeout,
+cost guard, and configurable token TTL.**
 
 0. **Baseline verified (2026-10-23)**: SFMeridian tests 57 passed, 1 skipped;
    the steward completed with 4/5 metrics bound and six amendments staged.
@@ -23,16 +24,17 @@ and its adversarial and token-mutation suites.**
    before):
    1. ~~a synthetic SQLite fixture database matching
       `fixtures/catalog/fixture_db.catalog.json`~~ (T-001 done);
-   2. **`sql.verify` and its adversarial suite (next);**
-   3. `sql.execute` (the read-only seam; runs only verified SQL);
-   4. the `0080` `Reader` over `available` metric sources;
-   5. governed-first routing (`ask`) through `0080` `answer()`;
-   6. `sql.compose` (`reuse` → `adapt` → `generate`);
-   7. the write-back runtime refusal;
-   8. agents `sql_composer` (C-03) and `sfmeridian_orchestrator` (C-04);
-   9. docs, counts, registry, skills export, gates, full suite, commit, push,
+   2. ~~`sql.verify` and its adversarial suite~~ (T-002 done);
+   3. **dialect policies, timeout/cost guard, and token TTL (T-003 next);**
+   4. `sql.execute` (the read-only seam; runs only verified SQL);
+   5. the `0080` `Reader` over `available` metric sources;
+   6. governed-first routing (`ask`) through `0080` `answer()`;
+   7. `sql.compose` (`reuse` → `adapt` → `generate`);
+   8. the write-back runtime refusal;
+   9. agents `sql_composer` (C-03) and `sfmeridian_orchestrator` (C-04);
+   10. docs, counts, registry, skills export, gates, full suite, commit, push,
       and update this file.
-3. **Done when** `roadmap.md` Phase 3's exit criteria hold (`0113` A-009–A-011,
+2. **Done when** `roadmap.md` Phase 3's exit criteria hold (`0113` A-009–A-011,
    A-021, A-027, A-028, A-030 pass; the adversarial suite rejects every case;
    `ask` answers lookup and aggregation questions on the synthetic database with
    citations), and §1 of this file says `0116` is built.
