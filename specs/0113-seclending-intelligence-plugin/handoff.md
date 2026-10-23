@@ -1,28 +1,27 @@
 # SFMeridian — Handoff (pick up here)
 
 - **Spec family:** `0113` (foundation) and children `0114`–`0121`
-- **Last updated:** 2026-10-22
+- **Last updated:** 2026-10-23
 - **Owner / approver:** Joshua Lutkemuller, CFA
-- **Branch:** `claude/seclending-intelligence-plugin` (pushed; **not merged**, no PR
-  opened — open one only when the owner asks)
+- **Branch:** `codex/0116-sfmeridian-governed-sql-composition` (local draft;
+  the preceding SFMeridian branch merged to `main` in PR #125)
 
 This is the single entry point for the next agent working on the SFMeridian
 plugin.
 
 ## Start here (in order)
 
-**The next task is spec `0116`: governed tier, SQL verification, execution, and
-composition.** Do these steps in order:
+**The `0116` spec draft is written and its targeted gate passes. The next task
+is owner review and approval; write no runtime code before approval.**
 
-0. **Verify the baseline**: run the commands in §6 and confirm the expected
-   results before changing anything. If they fail, fix or report that first.
-1. **Read**: §1–§2 below (state, code map), `roadmap.md` Phase 3 (the `0116` exit
-   criteria), and §3 (the brief).
-2. **Write the spec, then stop**: create
-   `specs/0116-sfmeridian-governed-sql-composition/` (spec, plan, tasks) per §3
-   "First steps", run `QF_STAGE_ENFORCE=1 hooks/stages/run-stage.sh spec`, commit,
-   push, and **ask the owner to approve it. Write no `0116` code before approval.**
-3. **After approval, build in this order** (each step depends on the one before):
+0. **Baseline verified (2026-10-23)**: SFMeridian tests 57 passed, 1 skipped;
+   the steward completed with 4/5 metrics bound and six amendments staged.
+   The full gate has unrelated pre-existing venture catalog/index/count
+   findings on `main`; the `0116` targeted spec gate has no findings.
+1. **Owner review**: read `spec.md`, `plan.md`, and `tasks.md` in
+   `specs/0116-sfmeridian-governed-sql-composition/`. Approve them or request
+   changes. The draft contains no runtime code.
+2. **After approval, build in this order** (each step depends on the one before):
    1. a synthetic SQLite fixture database matching
       `fixtures/catalog/fixture_db.catalog.json` (see §3 "Inputs");
    2. `sql.verify` and its adversarial suite;
@@ -34,7 +33,7 @@ composition.** Do these steps in order:
    8. agents `sql_composer` (C-03) and `sfmeridian_orchestrator` (C-04);
    9. docs, counts, registry, skills export, gates, full suite, commit, push,
       and update this file.
-4. **Done when** `roadmap.md` Phase 3's exit criteria hold (`0113` A-009–A-011,
+3. **Done when** `roadmap.md` Phase 3's exit criteria hold (`0113` A-009–A-011,
    A-021, A-027, A-028, A-030 pass; the adversarial suite rejects every case;
    `ask` answers lookup and aggregation questions on the synthetic database with
    citations), and §1 of this file says `0116` is built.
@@ -47,7 +46,7 @@ composition.** Do these steps in order:
 | [`0114`](../0114-sfmeridian-query-repository-indexer/spec.md) | Config, query-repository indexer, search, feedback inbox, tool registry, agent loop harness; agent `query_librarian` (C-01) | **Built**, Approved | `tests/test_sfmeridian_indexer.py` (17 ACs) |
 | [`0115`](../0115-sfmeridian-schema-catalog-mapping-access/spec.md) | Catalog snapshots, drift exclusion, governed semantic mapping, metric-source availability, pack amendments, access controls; agent `semantic_mapping_steward` (C-02) | **Built**, Approved | `tests/test_sfmeridian_mapping.py` (17 ACs) |
 | [`0121`](../0121-sfmeridian-adaptive-dataset-research/spec.md) | Adaptive dataset research (Dataset Intake Investigator POC); agent `lending_data_researcher` (C-10) | **Built**, Approved; AC-016 (live connectors) open | `tests/test_sfmeridian_research.py` (24 ACs, 1 skipped) |
-| `0116` | Governed tier, grounded SQL composition, verification & execution; agents `sql_composer` (C-03), `sfmeridian_orchestrator` (C-04) | **Next — not started** (number reserved, no spec dir yet) | — |
+| [`0116`](../0116-sfmeridian-governed-sql-composition/spec.md) | Governed tier, grounded SQL composition, verification & execution; agents `sql_composer` (C-03), `sfmeridian_orchestrator` (C-04) | **Draft — awaiting owner approval; no runtime code** | targeted spec gate clean |
 | `0117`–`0120` | Grounding & evaluation gate; packaging & surfaces; analytics agents; reporting checks | Reserved | — |
 
 Last verified state (2026-10-22, commit `a793d48`): full suite **1587 passed,

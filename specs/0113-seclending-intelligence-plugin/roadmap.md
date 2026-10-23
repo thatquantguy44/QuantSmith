@@ -1,7 +1,7 @@
 # Roadmap: SFMeridian — Securities Finance Intelligence Plugin
 
 - **Spec:** 0113-seclending-intelligence-plugin (`spec.md`, `plan.md`, `tasks.md`)
-- **Last updated:** 2026-10-22
+- **Last updated:** 2026-10-23
 
 > The ordered child-spec roadmap (REQ-018). Each phase is one or more bounded
 > child specs, written and approved one at a time through the normal SDD gates.
@@ -9,7 +9,8 @@
 > are planning estimates for one engineer, not commitments.
 >
 > **Current state and where to pick up: [`handoff.md`](handoff.md).** Built:
-> Phases 0, 1, 2, 2b. Next: Phase 3 (`0116`).
+> Phases 0, 1, 2, 2b. Phase 3 (`0116`) is drafted and awaits owner approval
+> before implementation.
 
 ## Reserved Child Specs
 
@@ -74,7 +75,7 @@ of `0116`'s verifier.
 **Exit:** `0121` AC-001–AC-024 pass except AC-016 (live connectors), which
 stays open until nonproduction environments exist.
 
-### Phase 3 — Grounded SQL (`0116`) · ~3–4 weeks · **MVP** · **next (not started)**
+### Phase 3 — Grounded SQL (`0116`) · ~3–4 weeks · **MVP** · **draft; awaiting approval**
 
 Retrieval-first composition, deterministic verification, read-only execution,
 provenance and replay; the end-to-end `ask` tool in shadow mode.
