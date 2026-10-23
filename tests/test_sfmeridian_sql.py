@@ -1071,6 +1071,7 @@ def test_ac012_shared_registry_schemas_effects_and_no_raw_execute(tmp_path: Path
     assert set(execute_schema["properties"]) == {"token", "params", "caller"}
     assert "sql" not in execute_schema["properties"]
     assert "writeback" not in registry.get("ask").input_schema["properties"]
+    assert registry.get("ask").input_schema["properties"]["max_repairs"]["maximum"] == 2
 
     composed = registry.call("sql.compose", {
         "question": "Collateral coverage ratio by loan", "profile": "fixture_db",

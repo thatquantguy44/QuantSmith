@@ -2220,6 +2220,7 @@ agents:
       - "Typed route and tier, answer or shadow result, citations, caveats, and trace."
       - "A clarification, abstention, or coded escalation when evidence is unavailable."
       - "`E_WRITEBACK_DISABLED` for every write intent."
+      - "Optional inert W7–W12 specialist handoffs built from completed execution provenance; receivers are validated but never invoked."
   - name: "securities_financing/sfmeridian/sql_composer"
     category: "securities_financing"
     purpose: "The SQL Composer handles only questions already recorded as outside the governed `0080` vocabulary."

@@ -229,7 +229,9 @@ def run_mutation(root: str | Path, target: str, test_args: Sequence[str] = (), p
     if use_coverage and coverage_available(python):
         cov = run_pytest_with_coverage(root, [str(target_path.parent)], test_args, timeout_s, python, env)
         files = cov.get("files", {})
-        info = next((v for k, v in files.items() if Path(k).resolve() == target_path or k.endswith(target)), None)
+        info = next((v for k, v in files.items()
+                     if ((Path(k) if Path(k).is_absolute() else root / k).resolve() == target_path
+                         or k.endswith(target))), None)
         if info is not None:
             covered = set(info["executed"])
     sites = enumerate_mutants(source)

@@ -32,7 +32,7 @@
 | T-009 | Build `sql_composer` and `sfmeridian_orchestrator` policies, reports, verifiers, manifests, four-file agent contracts, catalog rows, coverage updates, and deterministic harness tests. | REQ-013, REQ-014, REQ-010, AC-013, AC-014 | done | C-03 and C-04 are built loop agents with least-privilege grants and verified finishes. |
 | T-010 | Implement and validate bounded W7–W12 specialist handoff payloads and `0070` evidence references without changing receiver behavior. | REQ-007, REQ-015, NFR-005, AC-015 | done | `handoff.py` plus `orchestrator.prepare_handoff`; inert payloads only, with catalog-derived receiver boundaries and no receiver changes. |
 | T-011 | Add repeatability, rejection/fabrication counters, overhead/cost assertions, import boundary, secret/redaction scans, and optional connector skips. | NFR-001, NFR-002, NFR-003, NFR-004, NFR-005, AC-016, AC-017 | done | `assurance.py` reports deterministic matches, 100% adversarial rejection, zero executed fabrication, p95 overhead, timeout/repair/cost controls; boundary scan passes. |
-| T-012 | Update configuration template, CLI/help, plugin and SDK docs, spec index, parent task status, handoff, counts, registry and skills export; run SFMeridian tests, full suite, ruff, and every enforced gate. | NFR-006, AC-018 | todo | Do not mark complete with pre-existing or new gate findings. |
+| T-012 | Update configuration template, CLI/help, plugin and SDK docs, spec index, parent task status, handoff, counts, registry and skills export; run SFMeridian tests, full suite, ruff, and every enforced gate. | NFR-006, AC-018 | done | CLI/config/docs/catalogs are synchronized; the SFMeridian and full repository suites pass, and clean-clone enforced gates have no findings. Owner-local ignored venture files remain outside the tracked gate baseline. |
 
 Status values: `todo` | `in-progress` | `blocked` | `done`.
 
@@ -59,7 +59,7 @@ All implementation tests live in `tests/test_sfmeridian_sql.py` unless noted.
 | AC-015 | `test_ac015_specialist_handoffs_are_bounded_and_redacted` | done |
 | AC-016 | `test_ac016_repeatability_rejection_fabrication_and_overhead` | done |
 | AC-017 | `test_ac017_import_fixture_secret_and_clearance_boundaries` | done |
-| AC-018 | full suite, ruff, registry/skills freshness, and enforced stage gates | todo |
+| AC-018 | full suite, ruff, registry/skills freshness, and enforced stage gates | done |
 
 ## Follow-ups
 

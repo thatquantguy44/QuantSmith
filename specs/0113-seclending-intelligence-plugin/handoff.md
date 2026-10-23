@@ -11,21 +11,23 @@ plugin.
 
 ## Start here (in order)
 
-**The `0116` spec was approved on 2026-10-23. Implementation is in progress;
-T-001 through T-011 are built: the synthetic execution fixture, `sql.verify`
+**The `0116` spec was approved and built on 2026-10-23; T-001 through T-012
+are complete: the synthetic execution fixture, `sql.verify`
 with exact-context tokens and adversarial checks, and four-dialect policy with
 timeout, normalized cost guard, configurable token TTL, and the token-only
 query execution seam with redaction, provenance, and replay, plus retrieval-
 first SQL composition, the governed metric-source `Reader`, and governed-first
 `ask` routing with a bounded shadow tail, the shared SQL/ask tool contracts,
 and runtime write-back refusal, loop agents C-03 and C-04, and bounded W7–W12
-specialist handoff payloads, and deterministic workload assurance and boundary
-hardening. Next is T-012: final documentation, complete gates, and full suite.**
+specialist handoff payloads, deterministic workload assurance and boundary
+hardening, CLI/configuration integration, synchronized documentation, and
+release verification. Next is `0117`: grounded answering and the hallucination
+evaluation gate.**
 
-0. **Baseline verified (2026-10-23)**: SFMeridian tests 74 passed, 1 skipped;
-   the steward completed with 4/5 metrics bound and six amendments staged.
-   The full gate has unrelated pre-existing venture catalog/index/count
-   findings on `main`; the `0116` targeted spec gate has no findings.
+0. **Baseline verified (2026-10-23)**: SFMeridian tests 73 passed, 2 skipped;
+   full suite 1572 passed, 18 skipped. The steward completed with 4/5 metrics
+   bound and six amendments staged. Clean-clone enforced gates have no findings;
+   owner-local ignored venture files remain outside the tracked baseline.
 1. **Continue the approved build in this order** (each step depends on the one
    before):
    1. ~~a synthetic SQLite fixture database matching
@@ -41,9 +43,8 @@ hardening. Next is T-012: final documentation, complete gates, and full suite.**
    10. ~~bounded W7–W12 specialist handoff payloads~~ (T-010 done);
    11. ~~repeatability, rejection/fabrication counters, overhead, import and
        redaction hardening~~ (T-011 done);
-   12. **docs, counts, registry, skills export, gates, full suite, commit, push,
-       and final handoff (T-012 next).**
-      and update this file.
+   12. ~~docs, counts, registry, skills export, gates, full suite, commit, push,
+       and final handoff~~ (T-012 done).
 2. **Done when** `roadmap.md` Phase 3's exit criteria hold (`0113` A-009–A-011,
    A-021, A-027, A-028, A-030 pass; the adversarial suite rejects every case;
    `ask` answers lookup and aggregation questions on the synthetic database with
@@ -57,12 +58,12 @@ hardening. Next is T-012: final documentation, complete gates, and full suite.**
 | [`0114`](../0114-sfmeridian-query-repository-indexer/spec.md) | Config, query-repository indexer, search, feedback inbox, tool registry, agent loop harness; agent `query_librarian` (C-01) | **Built**, Approved | `tests/test_sfmeridian_indexer.py` (17 ACs) |
 | [`0115`](../0115-sfmeridian-schema-catalog-mapping-access/spec.md) | Catalog snapshots, drift exclusion, governed semantic mapping, metric-source availability, pack amendments, access controls; agent `semantic_mapping_steward` (C-02) | **Built**, Approved | `tests/test_sfmeridian_mapping.py` (17 ACs) |
 | [`0121`](../0121-sfmeridian-adaptive-dataset-research/spec.md) | Adaptive dataset research (Dataset Intake Investigator POC); agent `lending_data_researcher` (C-10) | **Built**, Approved; AC-016 (live connectors) open | `tests/test_sfmeridian_research.py` (24 ACs, 1 skipped) |
-| [`0116`](../0116-sfmeridian-governed-sql-composition/spec.md) | Governed tier, grounded SQL composition, verification & execution; agents `sql_composer` (C-03), `sfmeridian_orchestrator` (C-04) | **Approved — implementation in progress; T-001–T-011 built** | `tests/test_sfmeridian_sql.py` (AC-001–AC-017) |
+| [`0116`](../0116-sfmeridian-governed-sql-composition/spec.md) | Governed tier, grounded SQL composition, verification & execution; agents `sql_composer` (C-03), `sfmeridian_orchestrator` (C-04) | **Built**, Approved | `tests/test_sfmeridian_sql.py` (17 passed; AC-001–AC-018) |
 | `0117`–`0120` | Grounding & evaluation gate; packaging & surfaces; analytics agents; reporting checks | Reserved | — |
 
-Last verified state (2026-10-22, commit `a793d48`): full suite **1587 passed,
-1 skipped**; `QF_STAGE_ENFORCE=1 hooks/stages/run-stage.sh` exit 0; ruff clean on
-`plugins/sfmeridian/src` and the three SFMeridian test modules.
+Last verified state (2026-10-23): full suite **1572 passed, 18 skipped**;
+SFMeridian suite **73 passed, 2 skipped**; clean-clone enforced gates pass;
+ruff is clean on the `0116` runtime and SFMeridian tests.
 
 ## 2. Where the code is
 
@@ -92,45 +93,43 @@ agents/securities_financing/sfmeridian/   # four-file contracts for built agents
 templates/sfmeridian/sfmeridian.yml       # adopter config template (validates with placeholders)
 ```
 
-## 3. Pick up here: build `0116`
+## 3. Pick up here: specify and build `0117`
 
-Owner decision (2026-10-22): build `0115` then `0116`. `0115` is done; `0116` is
-next. Scope comes from `roadmap.md` (row `0116`) and `0113` tasks T-014, T-015,
-T-016, T-031, T-032 (Reader half), T-034 (refusal half), and T-017 (C-04).
+`0115` and `0116` are built. The next dependency-ordered phase is `0117`,
+grounded answering and hallucination evaluation. Scope comes from `roadmap.md`
+(row `0117`) and parent tasks T-018, T-019, T-030 (grounding half), and T-035.
 
 **First steps**
 
-1. Create `specs/0116-sfmeridian-governed-sql-composition/` from
+1. Create `specs/0117-sfmeridian-grounded-answering-evaluation/` from
    `templates/spec/` (spec, plan, tasks). Write parent references as `0113`
    R-nnn / A-nnn / N-nnn / K-nnn so the spec gate does not read them as local IDs.
-   Parent ACs to realize: `0113` A-009, A-010, A-011, A-021, A-027, A-028, A-030.
-2. Get the owner's approval of the `0116` spec before building (each child so far
+   Parent ACs to realize: `0113` A-012, A-013, A-016, A-022, and the grounding
+   half of A-026; preserve the tier metrics required by T-035.
+2. Get the owner's approval of the `0117` spec before building (each child so far
    was approved before code).
 
 **What to build, and what it plugs into**
 
 | Piece | Build on | Notes |
 | --- | --- | --- |
-| `sql.verify` — deterministic static verifier with verification tokens | `sqlstructure.extract` (statement kind/count, tables, joins, params, write keywords); `catalog.Resolver` for identifier resolution; `index_dir/join_graph.json` for observed join keys | Fail closed: one read-only statement, every identifier resolves in the latest snapshot, bound parameters only, PIT predicate for as-of questions (`grounding.require_pit_predicate_for_as_of`), row limit, timeout, optional `EXPLAIN` cost guard (`databases[].explain_cost_limit`). Adversarial suite is part of the DoD. |
-| `sql.execute` — read-only execution seam | `quantsmith.quant.agentic_quant.sql_data.SQLDataSource` (wrap; expose `query` only, never `execute`/`transaction`) or an injected adopter driver (same injection shape as `catalog.connect` / `research.sources.Executor`) | Only executes SQL carrying a valid verification token. Provenance: query hash, composition path, profile, catalog `snapshot_id`, as-of, parameters (sensitive redacted), row count, `0070` run ID. Apply `access.withheld_columns`/`redact_rows` to results. |
-| `0080` `Reader` over metric sources | `mapping.validate_mapping(...)["metric_sources"]` (only `available` sources); `governed_tier.metric_sources` column maps; `quantsmith.nl_analytics.execute.Reader = Callable[[QueryPlan], Sequence[Fact]]` | Run each source query through `sql.verify` → `sql.execute` with the plan's as-of and filters as parameters; emit `0008` `Fact` rows. Unavailable metrics are reported, never served (`0113` A-028). Lives in `governed/`. |
-| Governed-first routing (`ask`) | `quantsmith.nl_analytics.respond.answer(question, AnswerContext(layer, reader, as_of, interpret_context, viewer_clearance, ...))`; `governed.packs.compile_layer(bound_bindings)` gives the `SemanticLayer` | Route: answer → return (tier `governed`); clarification among governed candidates → return, no fall-through; no governed metric → fall through to `reuse`/`adapt`/`generate`. Record the tier. Pass `access.caller(...).clearance`. Lives in `governed/`. |
-| `sql.compose` — retrieval-first composer | `queries.search` (reviewed first), `queries.get`, `catalog.describe`, `glossary.lookup`; model calls only through an injected completer (as `agent.ModelPolicy`) | `reuse` (bind parameters of a reviewed exemplar) → `adapt` → `generate` (constrained to catalog + bound concepts). Record path and source exemplars. Generated SQL never becomes an exemplar without human promotion. |
-| Write-back refusal | `config.py` already rejects lending/trading/books-and-records targets | `0116` adds the runtime refusal with a reason (`0113` A-030). |
-| Agents `sql_composer` (C-03), `sfmeridian_orchestrator` (C-04) | `data/coverage.json` rows C-03/C-04 already list their planned tools and verifiers | Same pattern as `steward.py`: deterministic policy, verifiers, manifest in `data/agents/`, four contract files, catalog rows, registry + skills export. Add the new tool names to `governance.CONTRACT_TOOLS` (they are already listed under "0116-0118"). |
+| `answer.ground` | `0116` execution provenance, cited rows, `0070` envelopes; `0063` term/viewpoint conventions; `0008` metric definitions | Deterministically extract numeric and factual claims, resolve each citation, recompute supported values within configured tolerance, reject undefined terms or mixed viewpoints, and emit only cite/correct/remove/abstain outcomes. Never add a new fact. |
+| Grounded `ask` finish | `sfmeridian_orchestrator`, governed `0080` answers, and shadow-tail results | Put every answer through `answer.ground`; preserve clarification and unavailable outcomes; strip unsupported claims or abstain. Reject action-phrased specialist output where A-026 requires a decision-support boundary. |
+| Versioned golden-question fixture | `0116` deterministic SQLite fixture, query repository, catalog, and known results | Add answerable, unanswerable, adversarial, viewpoint, tier-routing, and clearance cases. Keep every record synthetic and `0025`-disclosed; never encode a real schema, name, position, or query. |
+| `eval.run` release gate | Golden cases plus deterministic runs over three fixed seeds | Report identifier fabrication, execution accuracy, result match, unsupported claims, viewpoint errors, abstention precision/recall, exemplar reuse, governed-tier share, tier agreement, and wrong-tier rate. Block unless NFR-002 passes: fabrication 0, unsupported claims ≤1%, viewpoint errors 0, execution accuracy ≥90%, and unanswerable abstention recall ≥95%; require tier agreement 100% and wrong-tier 0 on governed cases. |
+| `answer_grounding_reviewer` (C-05) | Existing loop harness, shared tool registry, `coverage.json`, and C-04 handoff | Build the manifest, deterministic policy/verifiers, four-file agent contract, catalog/registry/skills updates, and golden runs. Its never-boundary is strict: it may cite, correct to cited evidence, remove, or abstain—never invent. |
+| Assurance and release evidence | `assurance.py`, access/redaction controls, stage gates | Prove repeatability, threshold failure blocking, no secret or restricted-value leakage, and optional connector skips. Coordinate with reserved `0103` methods but do not wait for that spec. |
 
-**Inputs 0115 already provides to 0116**
+**Inputs `0116` already provides to `0117`**
 
-- Fixture mapping config `plugins/sfmeridian/fixtures/sfmeridian.mapping.yml`:
-  9 valid bindings; metric sources `lending_revenue` and `on_loan_value` are
-  `available`; `client_debit_balance` is deliberately unbound.
-- Catalogs v1/v2 under `fixtures/catalog/` (v2 drops `sec_lending_book.status`,
-  which makes the `on_loan_value` source `unavailable` — use it for A-028's drift case).
-- The fixture query repository references tables (`sec_lending_book`,
-  `lendable_inventory`, …) that the `0121` research SQLite database does **not**
-  have. To execute metric source queries end to end, `0116` needs a synthetic
-  SQLite database matching `fixtures/catalog/fixture_db.catalog.json` (build it
-  deterministically, like `fixtures/research/fixture_db.py`, and disclose it).
+- Deterministic synthetic execution data and expected results; four-dialect
+  policies; verified, token-only execution; and replayable provenance.
+- Governed-first `ask`, the metric-source `Reader`, and typed clarification /
+  unavailable outcomes, plus recorded tier and citations.
+- Loop agents C-03/C-04, shared tool contracts, bounded repair/escalation,
+  specialist handoffs, and deterministic safety/overhead assurance.
+- The unreviewed `0081` pack caveat remains required until the named review is
+  completed; write-back remains refused.
 
 ## 4. Open decisions (owner)
 
@@ -176,12 +175,12 @@ by counterparty is refused (`0115` Exceptions).
 ## 6. Verify before you start
 
 ```sh
-git checkout claude/seclending-intelligence-plugin && git pull
-uv run --frozen python -m pytest tests/test_sfmeridian_indexer.py tests/test_sfmeridian_mapping.py tests/test_sfmeridian_research.py -q
+git checkout codex/0116-sfmeridian-governed-sql-composition && git pull
+uv run --frozen python -m pytest tests/test_sfmeridian_*.py -q
 QF_STAGE_ENFORCE=1 hooks/stages/run-stage.sh
 cd plugins/sfmeridian && PYTHONPATH=src:../../src python -m sfmeridian --config fixtures/sfmeridian.mapping.yml --today 2026-10-22 agent run semantic_mapping_steward
 ```
 
-Expected: 57 passed, 1 skipped; gates exit 0; the steward run is `completed` with
+Expected: 73 passed, 2 skipped; gates exit 0; the steward run is `completed` with
 4/5 governed metrics bound and 6 amendments staged (it writes under
 `fixtures/.sfmeridian/`, which is gitignored — delete it afterwards).

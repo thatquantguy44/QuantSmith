@@ -1,3 +1,4 @@
+# ruff: noqa: DTZ011, UP006, UP035, UP037, UP045
 """Skills export: one generated Claude skill per QuantSmith agent (spec 0110).
 
 ``agents/`` is the source of truth. This module renders each public agent (a
@@ -307,7 +308,10 @@ def agent_dirs(root: Path) -> List[Path]:
     dirs = sorted(p.parent for p in (root / "agents").rglob("prompt.md"))
     rels = [d.relative_to(root).as_posix() + "/" for d in dirs]
     ignored = _git_ignored(root, rels)
-    return [d for d, rel in zip(dirs, rels, strict=True) if rel not in ignored]
+    # ``dirs`` and ``rels`` are built together and therefore have equal
+    # lengths. Avoid ``zip(strict=...)`` because the shell gate may run under
+    # the macOS system Python 3.9 even when the project interpreter is newer.
+    return [d for d, rel in zip(dirs, rels) if rel not in ignored]
 
 
 def validate(docs: Sequence[SkillDoc]) -> List[str]:

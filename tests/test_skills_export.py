@@ -25,6 +25,7 @@ from quantsmith.skills_export import (
     render_all,
 )
 from quantsmith.skills_export.cli import main as cli_main
+from quantsmith.skills_export.core import agent_dirs
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -58,8 +59,7 @@ def repo(tmp_path: Path) -> Path:
 def test_repository_export_is_fresh_AC_001():
     assert check(ROOT) == [], "stale: run PYTHONPATH=src python3 -m quantsmith.skills_export build"
     reg = load_registry(ROOT)
-    agents = sorted(p.parent.relative_to(ROOT / "agents").as_posix()
-                    for p in (ROOT / "agents").rglob("prompt.md"))
+    agents = sorted(path.relative_to(ROOT / "agents").as_posix() for path in agent_dirs(ROOT))
     excluded = set(json.loads((ROOT / "config/skills_export.json").read_text())["exclude"])
     active = sorted(e["agent"] for e in reg["skills"] if e["status"] == "active")
     assert active == sorted(a for a in agents if a not in excluded)

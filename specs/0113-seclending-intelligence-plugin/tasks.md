@@ -49,7 +49,7 @@
 | T-024 | Publish the child-spec roadmap with scope, dependencies, closed coverage rows, and phase exit criteria; reserve `0114`–`0120` in the spec index and handoff. | REQ-018, AC-018 | `0113` | done | `roadmap.md`; `specs/README.md`; `docs/handoff.md`. |
 | T-025 | Add PostgreSQL, Oracle, and Databricks SQL dialect fixtures (identifier quoting, parameter style, `LIMIT`/`FETCH FIRST`, date functions, catalog introspection) and run the golden set against them unchanged. | REQ-020, AC-020 | `0115` (introspection), `0116` (verify/execute), `0118` (golden set) | todo | Decided 2026-10-22. PostgreSQL executes in CI; Oracle and Databricks verify statically plus adopter-side execution. |
 | T-026 | Create analytics agents C-06/C-07/C-08 and workflows W2–W5; then C-09 and the reporting-completeness workflow. | REQ-015, REQ-019 | `0119`, `0120` | todo | |
-| T-027 | Verify repo gates and disclosure: `spec`, `spec-index`, `handoff-sync`, `agent-catalog`, `skills-export`, `secret-scan`, `data-provenance`; confirm no existing agent or runtime behaviour changed. | NFR-006, NFR-008, NFR-009, AC-022, AC-024 | `0113`, then every child | in-progress | `0113` adds documents only. |
+| T-027 | Verify repo gates and disclosure: `spec`, `spec-index`, `handoff-sync`, `agent-catalog`, `skills-export`, `secret-scan`, `data-provenance`; confirm no existing agent or runtime behaviour changed. | NFR-006, NFR-008, NFR-009, AC-022, AC-024 | `0113`, then every child | in-progress | `0116` clean-clone gates pass; this remains open across later children. Owner-local ignored venture files are outside the tracked baseline. |
 | T-028 | Publish the specialist handoff map (optimization, risk, portfolio management, knowledge, machine learning) with trigger, evidence, output, never-boundary, and workflow per agent; add workflows W7–W12. | REQ-021, AC-025 | `0113` (`plan.md`) | done | Machine-checkable `handoffs.json` follows in `0114` alongside `coverage.json`. |
 | T-029 | Implement handoff payloads (run IDs, PIT panels, citations, redaction) for W7–W12 and wire `optimization_orchestrator`, `pm_orchestrator`, and `ml_orchestrator` routing from `sfmeridian_orchestrator`. | REQ-021, REQ-022, AC-025 | `0116` (payload), `0119` (workflows) | in-progress | `0116` built inert, validated W7–W12 payloads through `sfmeridian_orchestrator`; `0119` still wires downstream workflows. No receiver behavior changed. |
 | T-030 | Implement the decision-support output envelope: optimizer results carry solver status, diagnostics, sensitivities; model results carry baseline, interval/calibration, PIT feature attestation; reject action-phrased outputs in grounding. | REQ-022, AC-026 | `0117` (check), `0119` (producers) | todo | Borrow-demand models validated with `0006`/`0046` folds. |
@@ -82,9 +82,9 @@ criteria are checked by gates and review.
 | AC-006 | `test_learning_artifacts_match_golden_extraction_with_citations` (names AC-006) | `0114` | done |
 | AC-007 | `test_catalog_drift_excludes_affected_exemplars` (names AC-007) | `0115` | todo |
 | AC-008 | `test_utilization_governed_ratio_reconciles_by_counterparty` (names AC-008) | `0115` | todo |
-| AC-009 | `test_compose_records_reuse_and_generate_paths` (names AC-009) | `0116` | todo |
-| AC-010 | `test_verifier_rejects_adversarial_queries_with_codes` (names AC-010) | `0116` | todo |
-| AC-011 | `test_execution_provenance_and_replay` (names AC-011) | `0116` | todo |
+| AC-009 | `test_compose_records_reuse_and_generate_paths` (names AC-009) | `0116` | done |
+| AC-010 | `test_verifier_rejects_adversarial_queries_with_codes` (names AC-010) | `0116` | done |
+| AC-011 | `test_execution_provenance_and_replay` (names AC-011) | `0116` | done |
 | AC-012 | `test_grounding_flags_uncited_mismatched_undefined` (names AC-012) | `0117` | todo |
 | AC-013 | `test_viewpoint_error_rejected_with_0063_convention` (names AC-013) | `0117` | todo |
 | AC-014 | `test_feedback_candidate_not_retrievable_until_promoted` (names AC-014) | `0114` | done |
@@ -94,16 +94,16 @@ criteria are checked by gates and review.
 | AC-018 | review: `roadmap.md` + `spec-index` gate (names AC-018) | `0113` | done |
 | AC-019 | review: workflow charters W1–W6 in `plan.md` (names AC-019) | `0113` | done |
 | AC-020 | `test_golden_set_runs_unchanged_on_second_dialect` (names AC-020) | `0118` | todo |
-| AC-021 | `test_cost_guard_and_incremental_reindex_limits` (names AC-021) | `0116` | todo |
+| AC-021 | `test_cost_guard_and_incremental_reindex_limits` (names AC-021) | `0116` | done |
 | AC-022 | `data-provenance` + `secret-scan` gates over `plugins/sfmeridian/fixtures/` (names AC-022) | `0117` | todo |
 | AC-023 | `test_contract_and_config_schema_versions_compatible` (names AC-023) | `0118` | todo |
 | AC-024 | gates: `spec`, `spec-index`, `handoff-sync`, `agent-catalog`, `skills-export` (names AC-024) | `0113` | in-progress |
 | AC-025 | `test_handoff_map_agents_exist_and_are_bounded` + review of W7–W12 (names AC-025) | `0114` | done |
 | AC-026 | `test_decision_support_envelope_for_optimizer_and_model_outputs` (names AC-026) | `0117` | todo |
-| AC-027 | `test_governed_first_tier_routing_and_no_fallthrough_on_ambiguity` (names AC-027) | `0116` | todo |
-| AC-028 | `test_reader_facts_reproduce_metric_source_queries` (names AC-028) | `0116` | todo |
+| AC-027 | `test_governed_first_tier_routing_and_no_fallthrough_on_ambiguity` (names AC-027) | `0116` | done |
+| AC-028 | `test_reader_facts_reproduce_metric_source_queries` (names AC-028) | `0116` | done |
 | AC-029 | `test_mapping_seeded_from_0081_pack_and_amendments_not_private` (names AC-029) | `0115` | todo |
-| AC-030 | `test_writeback_refused_by_default_and_unsafe_targets_rejected` (names AC-030) | `0116` | todo |
+| AC-030 | `test_writeback_refused_by_default_and_unsafe_targets_rejected` (names AC-030) | `0116` | done |
 | AC-031 | `test_tooling_catalog_admission_and_catalog_only_recommendations` (names AC-031) | `0114`, `0117` | todo |
 | AC-032 | `test_harness_denies_budgets_repairs_and_replays` (names AC-032) | `0114` | done |
 | AC-033 | `test_tool_registry_shared_schema_and_human_only` (names AC-033) | `0114` | done |
@@ -118,7 +118,7 @@ Tracked work intentionally deferred (no silent "temporary" shortcuts — P8).
   caveat and write-back stays refused.
 - Viewpoint, dialects, retrieval mode, and `0119`/`0120` order resolved
   2026-10-22 (`spec.md`).
-- Next build: `0116` (see `handoff.md` §3 for the starting brief).
+- Next build: `0117`, the grounded-answer and hallucination-evaluation gate.
 - Fine-tuning on promoted exemplars: roadmap Phase 6, only if the evaluation
   shows a gap retrieval cannot close.
 - Expose the query index as `0052` resources (`knowledge://sfmeridian/...`):

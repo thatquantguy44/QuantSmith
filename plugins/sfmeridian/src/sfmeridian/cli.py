@@ -16,10 +16,16 @@ from pathlib import Path
 from typing import Any
 
 from . import CONTRACT_VERSION, __version__
+from .composer_agent import run_composer
 from .config import ConfigError, load_config
 from .librarian import run_librarian
+from .orchestrator import run_orchestrator
 from .steward import run_steward
 from .tools import ToolContext, default_registry
+
+AGENT_NAMES = (
+    "query_librarian", "semantic_mapping_steward", "sql_composer", "sfmeridian_orchestrator",
+)
 
 
 def _print(value: Any) -> None:
@@ -74,8 +80,14 @@ def _parser() -> argparse.ArgumentParser:
     sub.add_parser("research", help="research run --config C --dataset D --context X (adaptive dataset research)")
     a = sub.add_parser("agent", help="run a loop agent").add_subparsers(dest="action", required=True)
     ar = a.add_parser("run")
-    ar.add_argument("name", choices=["query_librarian", "semantic_mapping_steward"])
+    ar.add_argument("name", choices=AGENT_NAMES)
     ar.add_argument("--repo", action="append", dest="repo_ids")
+    ar.add_argument("--question", help="desk question (required for SQL routing agents)")
+    ar.add_argument("--as-of", help="ISO as-of date (required for the orchestrator)")
+    ar.add_argument("--profile", help="database profile (required for SQL routing agents)")
+    ar.add_argument("--params", default="{}", help="JSON object of bound parameters")
+    ar.add_argument("--pit-column", action="append", dest="pit_columns")
+    ar.add_argument("--max-repairs", type=int, choices=[0, 1, 2])
     ar.add_argument("--save", action="store_true", help="write the run record under <index.dir>/runs/")
     return p
 
@@ -108,8 +120,31 @@ def main(argv: list[str] | None = None) -> int:
     registry = default_registry()
 
     if args.command == "agent":
+        try:
+            params = _payload(args.params)
+        except (ValueError, TypeError, json.JSONDecodeError) as exc:
+            _print({"ok": False, "error": str(exc)})
+            return 2
         inputs = {"repo_ids": args.repo_ids} if args.repo_ids else {}
-        if args.name == "semantic_mapping_steward":
+        sql_agent = args.name in ("sql_composer", "sfmeridian_orchestrator")
+        required = [name for name in ("question", "profile") if sql_agent and not getattr(args, name)]
+        if args.name == "sfmeridian_orchestrator" and not args.as_of:
+            required.append("as_of")
+        if required:
+            _print({"ok": False, "error": f"{args.name} requires: {', '.join(required)}"})
+            return 2
+        if sql_agent:
+            inputs.update({"question": args.question, "profile": args.profile, "params": params,
+                           "pit_columns": args.pit_columns or (), "caller": args.actor})
+        if args.name == "sql_composer":
+            inputs.update({"route_outcome": "no_governed_match", "as_of": args.as_of})
+            run = run_composer(ctx, registry=registry, inputs=inputs)
+        elif args.name == "sfmeridian_orchestrator":
+            inputs["as_of"] = args.as_of
+            if args.max_repairs is not None:
+                inputs["max_repairs"] = args.max_repairs
+            run = run_orchestrator(ctx, registry=registry, inputs=inputs)
+        elif args.name == "semantic_mapping_steward":
             run = run_steward(ctx, registry=registry, inputs=inputs)
         else:
             run = run_librarian(ctx, registry=registry, inputs=inputs)

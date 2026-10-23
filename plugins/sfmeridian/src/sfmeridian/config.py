@@ -372,6 +372,13 @@ def validate_data(data: Mapping[str, Any], *, allow_placeholders: bool = False) 
                 and not 1 <= token_ttl_s <= 3600):
             issues.append(Issue(
                 "E_CONFIG_INVALID", "verification.token_ttl_s", "must be between 1 and 3600 seconds"))
+    grounding = data.get("grounding")
+    if isinstance(grounding, dict):
+        max_retries = grounding.get("max_compose_retries")
+        if (isinstance(max_retries, int) and not isinstance(max_retries, bool)
+                and not 0 <= max_retries <= 2):
+            issues.append(Issue(
+                "E_CONFIG_INVALID", "grounding.max_compose_retries", "must be between 0 and 2"))
 
     # Query repositories.
     repos = data.get("query_repositories")
@@ -578,10 +585,13 @@ def _validate_datasets(datasets: Any, profiles: Mapping[str, Any], issues: list[
         _check_fields(d, _DATASET_FIELDS, path, "datasets", issues)
         if not isinstance(d, dict):
             continue
-        if d.get("id") in seen:
-            issues.append(Issue("E_CONFIG_INVALID", f"{path}.id", f"duplicate dataset id {d.get('id')!r}"))
-        seen.append(d.get("id"))
-        cols = d.get("columns") if isinstance(d.get("columns"), list) else []
+        dataset_id = d.get("id")
+        if isinstance(dataset_id, str):
+            if dataset_id in seen:
+                issues.append(Issue("E_CONFIG_INVALID", f"{path}.id", f"duplicate dataset id {dataset_id!r}"))
+            seen.append(dataset_id)
+        raw_cols = d.get("columns")
+        cols: list[Any] = raw_cols if isinstance(raw_cols, list) else []
         if not cols or not all(isinstance(c, str) and (_SIMPLE_NAME.match(c) or ph(c)) for c in cols) \
                 or len(cols) != len(set(cols)):
             issues.append(Issue("E_CONFIG_INVALID", f"{path}.columns",
@@ -599,7 +609,8 @@ def _validate_datasets(datasets: Any, profiles: Mapping[str, Any], issues: list[
             if not d.get("order_by"):
                 issues.append(Issue("E_CONFIG_MISSING", f"{path}.order_by",
                                     "database datasets need an explicit ordering for extracts"))
-            if d.get("version") is not None and profiles.get(prof, {}).get("dialect") != "databricks":
+            if (d.get("version") is not None and isinstance(prof, str)
+                    and profiles.get(prof, {}).get("dialect") != "databricks"):
                 issues.append(Issue("E_CONFIG_INVALID", f"{path}.version", "version pins are Databricks Delta only"))
         elif source == "file":
             if not isinstance(d.get("path"), str):
@@ -612,7 +623,8 @@ def _validate_datasets(datasets: Any, profiles: Mapping[str, Any], issues: list[
             issues.append(Issue("E_CONFIG_INVALID", f"{path}.dataset_kind",
                                 f"dataset_kind must be one of {', '.join(_DATASET_KINDS)}"))
         for key in ("order_by",):
-            for c in d.get(key) or []:
+            values = d.get(key)
+            for c in values if isinstance(values, list) else []:
                 if c not in cols and not ph(c):
                     issues.append(Issue("E_CONFIG_INVALID", f"{path}.{key}", f"{c!r} is not a declared column"))
         for j, f in enumerate(d.get("filters") or []):

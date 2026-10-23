@@ -198,7 +198,7 @@ def _ask(ctx: ToolContext, args: dict[str, Any]) -> dict[str, Any]:
             caller=args.get("caller", ctx.actor), profile=profile,
             params=args.get("params", {}), pit_columns=tuple(args.get("pit_columns", ())),
             default_window_periods=args.get("default_window_periods", 1),
-            max_repairs=args.get("max_repairs", 1),
+            max_repairs=args.get("max_repairs", ctx.config.data["grounding"]["max_compose_retries"]),
         )
     except ValueError as exc:
         raise ToolError("E_TOOL_INPUT", str(exc)) from None
@@ -258,7 +258,7 @@ def register(reg: ToolRegistry) -> None:
             "params": _PARAMS,
             "pit_columns": {"type": "array", "items": {"type": "string", "maxLength": 300}},
             "default_window_periods": {"type": "integer", "minimum": 1},
-            "max_repairs": {"type": "integer", "minimum": 0},
+            "max_repairs": {"type": "integer", "minimum": 0, "maximum": 2},
             "action": {"type": "string", "enum": ["read", "publish", "persist", "submit", "reverse"]},
         }, ("question", "as_of", "profile")),
         "execute_read",

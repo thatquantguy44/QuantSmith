@@ -438,6 +438,9 @@ def test_ac011_cli(workdir, capsys):
     bad.write_text("schema_version: 1\nsurprise: true\n")
     assert cli.main(["--config", str(bad), "status"]) == 2
     assert "E_CONFIG" in capsys.readouterr().out
+    assert cli.main(base + ["agent", "run", "sql_composer"]) == 2
+    assert "question, profile" in capsys.readouterr().out
+    assert {"sql_composer", "sfmeridian_orchestrator"} <= set(cli.AGENT_NAMES)
 
 
 # --------------------------------------------------------------------------

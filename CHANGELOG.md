@@ -30,7 +30,10 @@ patterns locally rather than expecting them to update in place.
   `0081` `securities_financing_prime` pack and `0063` with `0008` ratio rules, metric-source
   availability, pack-amendment proposals for the named reviewer, `0058` clearance and column
   redaction, and `semantic_mapping_steward`. `0121` adds adaptive dataset research (the
-  Dataset Intake Investigator POC) and `lending_data_researcher`. Handoff:
+  Dataset Intake Investigator POC) and `lending_data_researcher`. `0116` adds governed-first
+  routing, retrieval-first SQL composition, fail-closed verification with exact-context tokens,
+  query-only redacted execution and replay, bounded specialist handoffs, deterministic assurance,
+  and loop agents `sql_composer` and `sfmeridian_orchestrator`. Handoff:
   `specs/0113-seclending-intelligence-plugin/handoff.md`.
 - Data-engineering tooling (spec `0112`, slice B of `0107`): `pipeline_fleet.to_airflow` / `to_prefect` exporters
   for `0101` fleets with warnings for every non-native limit; `dbt_review.review_manifest` for dbt `manifest.json`

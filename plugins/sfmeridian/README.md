@@ -6,7 +6,7 @@ learned from a configurable repository of reviewed SQL queries, with
 structural limits on hallucination. A separate distributable (`sfmeridian`)
 that apps embed without the rest of QuantSmith.
 
-**Status: 0.1.0 — Phases 1, 2, and 2b (`0114`, `0115`, `0121`).** Shipped:
+**Status: 0.1.0 — Phases 1, 2, 2b, and 3 (`0114`, `0115`, `0121`, `0116`).** Shipped:
 configuration, query-repository indexing (local, pinned Git, object store),
 cited exemplars and learned structure (join graph, metric candidates, filter
 patterns), search, the reviewed feedback inbox, governance catalogs, the
@@ -15,19 +15,19 @@ drift exclusion, the governed semantic mapping, metric-source availability,
 pack-amendment proposals, and access controls (`0115`); adaptive dataset
 research (`0121`); five loop agents, `query_librarian`,
 `semantic_mapping_steward`, `lending_data_researcher`, `sql_composer`, and
-`sfmeridian_orchestrator`; and the first eleven
+`sfmeridian_orchestrator`; and all twelve
 `0116` slices (executable fixture, token-bound verifier, four-dialect policy,
 cost guard, query-only execution with redaction/provenance/replay, and the
 retrieval-first composer, plus the governed metric-source Reader with batch
 provenance, governed-first typed routing with a bounded shadow tail, and shared
 token-only tools with runtime write-back refusal, the two routing agents, and
 bounded, redacted W7–W12 specialist handoffs with `0070` evidence references,
-plus deterministic safety/overhead assurance counters and boundary scans).
-Not yet: final documentation and release verification (remaining `0116`),
-grounded answers and the evaluation gate (`0117`), the MCP
+plus deterministic safety/overhead assurance counters, boundary scans, CLI,
+configuration, documentation, and release verification).
+Not yet: grounded answers and the evaluation gate (`0117`), the MCP
 server and Claude Code plugin (`0118`).
 
-**Contributors:** current state, the next build (`0116`), open decisions, and
+**Contributors:** current state, the next build (`0117`), open decisions, and
 repo conventions are in `specs/0113-seclending-intelligence-plugin/handoff.md`.
 
 Standard library only (Python 3.11+); no runtime dependencies. The governed
@@ -47,6 +47,13 @@ python -m sfmeridian --config sfmeridian.yml agent run query_librarian --save
 python -m sfmeridian --config sfmeridian.yml agent run semantic_mapping_steward --save
 python -m sfmeridian --config sfmeridian.yml tool list
 ```
+
+The CLI also exposes `sql_composer` and `sfmeridian_orchestrator` under
+`agent run` with `--question`, `--profile`, and `--as-of`. Their verification
+keys, clock, and query-only database adapters are host-injected capabilities;
+without them, the CLI returns a typed escalation and does not execute. Embedded
+apps normally call `run_composer`, `run_orchestrator`, `prepare_handoff`, and
+`assess_workload` with a populated `ToolContext`.
 
 Try it on the synthetic fixtures: `--config fixtures/sfmeridian.fixture.yml`
 (indexing), `--config fixtures/sfmeridian.mapping.yml` (catalog, mapping,

@@ -1,6 +1,6 @@
 # QuantSmith Handoff
 
-## Resume Here (last session: 2026-10-10)
+## Resume Here (last session: 2026-10-23)
 
 Start with this section; everything else in this file is background.
 
@@ -10,16 +10,18 @@ Start with this section; everything else in this file is background.
 `codex/0116-sfmeridian-governed-sql-composition`. Built
 and Approved: `0114` (indexer, tool registry, loop harness, `query_librarian`),
 `0115` (catalog, drift, governed mapping, access, `semantic_mapping_steward`),
-`0121` (dataset research, `lending_data_researcher`). `0116` was approved on
-2026-10-23; T-001 through T-011 are built: the synthetic execution fixture,
+`0121` (dataset research, `lending_data_researcher`). `0116` was approved and
+built on 2026-10-23; T-001 through T-012 are complete: the synthetic execution
+fixture,
 `sql.verify` with exact-context tokens and adversarial checks, and four-dialect
 policy with timeout, normalized cost guard, configurable token TTL, and the
 token-only execution seam with redaction, provenance, and replay, plus the
 retrieval-first composer, governed Reader and routing, shared tools, and loop
 agents `sql_composer` and `sfmeridian_orchestrator`, plus bounded specialist
-handoffs and deterministic safety/overhead assurance. **Next: T-012, final
-documentation, complete gates, and full suite.**
-Everything a new agent needs — state, code map, the `0116` starting brief, open
+handoffs, deterministic safety/overhead assurance, CLI/configuration support,
+and release verification. **Next: `0117`, grounded answering and the
+hallucination-evaluation gate.**
+Everything a new agent needs — state, code map, the `0117` starting brief, open
 owner decisions, gotchas — is in
 [`specs/0113-seclending-intelligence-plugin/handoff.md`](../specs/0113-seclending-intelligence-plugin/handoff.md).
 The rest of this section describes `main`.
@@ -38,9 +40,12 @@ hooks/stages/run-stage.sh` clean).
 
 **Waiting on the owner (ask before building further):**
 
-1. Choose next: **slice C of `0107`** (lakehouse table formats, data FinOps,
-   reference-data pack — the data-engineering thread the owner has been driving) or
-   **`0103` evaluation** (next in roadmap order, What's Next #0). (`0113` SFMeridian foundation Approved; `0114` Phase 1, `0115` schema catalog/mapping/access, and `0121` dataset research built and Approved; `0116`–`0120` reserved; next SFMeridian step is `0116`; the `0081` `securities_financing_prime` pack reviewer is named, review pending). Next free spec: `0122`.
+1. Choose next: **`0117` grounded answering and hallucination evaluation**
+   (the dependency-ordered SFMeridian continuation), **slice C of `0107`**
+   (lakehouse table formats, data FinOps, reference-data pack), or **`0103`
+   evaluation** (the platform roadmap). `0114`, `0115`, `0116`, and `0121` are
+   built and Approved; the `0081` `securities_financing_prime` pack review is
+   still pending. Next free spec: `0122`.
 
 **How each slice was built (repeat the pattern):** spec/plan/tasks in
 `specs/NNNN-slug/` → stdlib runtime in `src/quantsmith/pipelines/` reusing approved
@@ -56,7 +61,7 @@ by `hooks/stages/doc-counts-check.sh` → full suite + enforced gates → commit
 - **Local-only material.** The owner made the regional Asia/China venture agents and
   specs `0084`–`0086` local-only (`.gitignore`) and rewrote history. Never re-add
   them; the skills export skips gitignored agent folders automatically. Counts in
-  docs are for a clean clone (215 agents, 96 specs).
+  docs are for a clean clone (215 agents, 93 specs).
 - **Skills export.** After any agent change, rebuild and commit `.claude/skills/`
   (blocking in pre-commit and CI). Only the `project` selection in
   `config/skills_export.json` is materialized (59 skills) because Claude Code's
@@ -396,7 +401,7 @@ nobody noticed.
 | `0109` | **Analyst workflow and delivery** — report packaging, request intake, QA sign-off, Jupyter/Python/SQL tooling | `0014`–`0018`, `0102` citations | What's Next #0 |
 | `0114` | **SFMeridian: query repository connector & indexer** — **built and Approved** (spec dir `specs/0114-sfmeridian-query-repository-indexer/`): config, repos, front-matter, exemplars, join graph, feedback inbox, tool registry, agent loop harness, loop agent `query_librarian` | `0113` approved | `0113` roadmap |
 | `0115` | **SFMeridian: schema catalog, semantic mapping & access** — **built and Approved** (spec dir `specs/0115-sfmeridian-schema-catalog-mapping-access/`): catalog snapshots, diffs, and drift exclusion; governed bindings on the `0081` pack and `0063` with `0008` ratio rules; metric-source availability; pack amendments staged for the named reviewer (Joshua Lutkemuller, CFA; pack still `draft`); `0058` clearance and redaction; loop agent `semantic_mapping_steward` | `0114` | `0113` roadmap |
-| `0116` | **SFMeridian: grounded SQL composition, verification & execution** — **Approved; implementation in progress; T-001–T-011 built** (`specs/0116-sfmeridian-governed-sql-composition/`): governed-first `0080` Reader/routing, retrieval-first composer, deterministic token-bound verifier, read-only seam over `0023`; loop agents `sql_composer`, `sfmeridian_orchestrator`; bounded specialist handoffs; deterministic assurance; next is final verification | `0115`, `0070` | `0113` roadmap |
+| `0116` | **SFMeridian: grounded SQL composition, verification & execution** — **Built, Approved; T-001–T-012 complete** (`specs/0116-sfmeridian-governed-sql-composition/`): governed-first `0080` Reader/routing, retrieval-first composer, deterministic token-bound verifier, read-only seam over `0023`; loop agents `sql_composer`, `sfmeridian_orchestrator`; bounded specialist handoffs; deterministic assurance; CLI/config/docs and release verification complete | `0115`, `0070` | `0113` roadmap |
 | `0117` | **SFMeridian: grounded answering & hallucination evaluation** — grounding check, abstention, golden-question release gate; agent `answer_grounding_reviewer` | `0116` | `0113` roadmap |
 | `0118` | **SFMeridian: packaging & app surfaces** — `plugins/sfmeridian/` distributable, Python API, MCP server (`0052`), Claude Code plugin (`0110`), SemVer (`0047`) | `0117` | `0113` roadmap |
 | `0119` | **SFMeridian: analytics agents** — utilization/specials, recall/buy-in risk, lending revenue attribution | `0118`, `0028`, `0066` | `0113` roadmap |

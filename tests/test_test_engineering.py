@@ -7,6 +7,7 @@ without one.
 
 import json
 import os
+import shlex
 import shutil
 import stat
 import subprocess
@@ -263,7 +264,7 @@ def fake_interpreter_that_reports_a_foreign_module(tmp_path):
     fake = write(tmp_path / "fake_python", f"""\
         #!/bin/sh
         if [ "$1" = "-c" ]; then echo /somewhere/else/srcpkg/calc.py; exit 0; fi
-        exec {sys.executable} "$@"
+        exec {shlex.quote(sys.executable)} "$@"
     """)
     fake.chmod(fake.stat().st_mode | stat.S_IEXEC)
     return fake

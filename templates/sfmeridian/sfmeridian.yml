@@ -59,6 +59,9 @@ databases:
 # --- Verification authorization (0116 REQ-005) -----------------------------
 verification:
   token_ttl_s: 300                         # 1..3600 seconds; default five minutes
+# The host injects the signing key/keyring, clock, and query-only connections.
+# They never belong in this file. CLI runs of sql_composer/orchestrator without
+# those host capabilities end in a typed escalation rather than executing.
 
 # --- Datasets for adaptive research (spec 0121) ------------------------------
 # Every location, object, and column is declared here; nothing is taken from
@@ -179,6 +182,8 @@ eval:
     - <adopter-private-golden-set-path>                      # optional, local only
   thresholds:
     identifier_fabrication_rate: 0.0
+    adversarial_rejection_rate: 1.0
+    plugin_overhead_p95_ms: 15000
     unsupported_claim_rate: 0.01
     viewpoint_error_rate: 0.0
     execution_accuracy: 0.90
