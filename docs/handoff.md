@@ -11,13 +11,14 @@ Start with this section; everything else in this file is background.
 and Approved: `0114` (indexer, tool registry, loop harness, `query_librarian`),
 `0115` (catalog, drift, governed mapping, access, `semantic_mapping_steward`),
 `0121` (dataset research, `lending_data_researcher`). `0116` was approved on
-2026-10-23; T-001 through T-010 are built: the synthetic execution fixture,
+2026-10-23; T-001 through T-011 are built: the synthetic execution fixture,
 `sql.verify` with exact-context tokens and adversarial checks, and four-dialect
 policy with timeout, normalized cost guard, configurable token TTL, and the
 token-only execution seam with redaction, provenance, and replay, plus the
 retrieval-first composer, governed Reader and routing, shared tools, and loop
 agents `sql_composer` and `sfmeridian_orchestrator`, plus bounded specialist
-handoffs. **Next: T-011, final hardening and counters.**
+handoffs and deterministic safety/overhead assurance. **Next: T-012, final
+documentation, complete gates, and full suite.**
 Everything a new agent needs — state, code map, the `0116` starting brief, open
 owner decisions, gotchas — is in
 [`specs/0113-seclending-intelligence-plugin/handoff.md`](../specs/0113-seclending-intelligence-plugin/handoff.md).
@@ -395,7 +396,7 @@ nobody noticed.
 | `0109` | **Analyst workflow and delivery** — report packaging, request intake, QA sign-off, Jupyter/Python/SQL tooling | `0014`–`0018`, `0102` citations | What's Next #0 |
 | `0114` | **SFMeridian: query repository connector & indexer** — **built and Approved** (spec dir `specs/0114-sfmeridian-query-repository-indexer/`): config, repos, front-matter, exemplars, join graph, feedback inbox, tool registry, agent loop harness, loop agent `query_librarian` | `0113` approved | `0113` roadmap |
 | `0115` | **SFMeridian: schema catalog, semantic mapping & access** — **built and Approved** (spec dir `specs/0115-sfmeridian-schema-catalog-mapping-access/`): catalog snapshots, diffs, and drift exclusion; governed bindings on the `0081` pack and `0063` with `0008` ratio rules; metric-source availability; pack amendments staged for the named reviewer (Joshua Lutkemuller, CFA; pack still `draft`); `0058` clearance and redaction; loop agent `semantic_mapping_steward` | `0114` | `0113` roadmap |
-| `0116` | **SFMeridian: grounded SQL composition, verification & execution** — **Approved; implementation in progress; T-001–T-010 built** (`specs/0116-sfmeridian-governed-sql-composition/`): governed-first `0080` Reader/routing, retrieval-first composer, deterministic token-bound verifier, read-only seam over `0023`; loop agents `sql_composer`, `sfmeridian_orchestrator`; bounded specialist handoffs; next is final hardening | `0115`, `0070` | `0113` roadmap |
+| `0116` | **SFMeridian: grounded SQL composition, verification & execution** — **Approved; implementation in progress; T-001–T-011 built** (`specs/0116-sfmeridian-governed-sql-composition/`): governed-first `0080` Reader/routing, retrieval-first composer, deterministic token-bound verifier, read-only seam over `0023`; loop agents `sql_composer`, `sfmeridian_orchestrator`; bounded specialist handoffs; deterministic assurance; next is final verification | `0115`, `0070` | `0113` roadmap |
 | `0117` | **SFMeridian: grounded answering & hallucination evaluation** — grounding check, abstention, golden-question release gate; agent `answer_grounding_reviewer` | `0116` | `0113` roadmap |
 | `0118` | **SFMeridian: packaging & app surfaces** — `plugins/sfmeridian/` distributable, Python API, MCP server (`0052`), Claude Code plugin (`0110`), SemVer (`0047`) | `0117` | `0113` roadmap |
 | `0119` | **SFMeridian: analytics agents** — utilization/specials, recall/buy-in risk, lending revenue attribution | `0118`, `0028`, `0066` | `0113` roadmap |

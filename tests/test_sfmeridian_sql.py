@@ -11,6 +11,8 @@ import importlib.util
 import json
 import shutil
 import sys
+import time
+from collections import Counter
 from dataclasses import replace
 from pathlib import Path
 
@@ -23,8 +25,10 @@ EXECUTION = FIXTURES / "execution"
 sys.path.insert(0, str(PLUGIN / "src"))
 
 from sfmeridian import catalog as catalog_mod
+from sfmeridian import governance
 from sfmeridian.access import caller as resolve_caller
 from sfmeridian.agent import Finish, ToolCall
+from sfmeridian.assurance import assess_workload
 from sfmeridian.catalog import load_declared
 from sfmeridian.compose import CompositionError, CompositionRequest, compose
 from sfmeridian.composer_agent import run_composer
@@ -38,6 +42,7 @@ from sfmeridian.handoff import HandoffError, validate_handoff
 from sfmeridian.index import build_index, load_index
 from sfmeridian.mapping import Vocabulary, validate_mapping
 from sfmeridian.orchestrator import prepare_handoff, run_orchestrator
+from sfmeridian.sqlstructure import extract
 from sfmeridian.tools import ToolContext, default_registry
 from sfmeridian.verify import (
     TokenError,
@@ -1284,6 +1289,134 @@ def test_ac015_specialist_handoffs_are_bounded_and_redacted(tmp_path: Path):
             pit_basis="as-of bound",
         )
     assert err.value.code == "E_HANDOFF_RECEIVER"
+    connection.close()
+
+
+def test_ac016_repeatability_rejection_fabrication_and_overhead(tmp_path: Path):
+    config, snapshot, graph, _index, _mapping = _reader_inputs(tmp_path)
+    fixture = _fixture_module()
+    db_path = tmp_path / "assurance.sqlite"
+    fixture.build(db_path)
+    connection = fixture.connect(db_path)
+    raw_source = _SQLiteQuerySource(connection)
+    context = ToolContext(
+        config=config, today="2026-10-22", actor="lending-lead",
+        clients={
+            "query_sources": {"fixture_db": raw_source},
+            "verification": {
+                "key_id": "fixture-key", "signing_key": SIGNING_KEY,
+                "keys": {"fixture-key": SIGNING_KEY}, "now": NOW,
+                "monotonic_ns": lambda: 0,
+            },
+        },
+        agents_root=ROOT / "agents",
+    )
+    inputs = {
+        "question": "on loan value by counterparty today", "as_of": "2026-10-22",
+        "caller": "lending-lead", "profile": "fixture_db",
+    }
+    runs, overhead = [], []
+    for _ in range(5):
+        started = time.perf_counter_ns()
+        runs.append(run_orchestrator(context, registry=default_registry(), inputs=inputs))
+        overhead.append((time.perf_counter_ns() - started) / 1_000_000)
+    baseline = runs[0].as_dict()
+    deterministic_matches = sum(run.as_dict() == baseline for run in runs)
+
+    adversarial = [
+        ("SELECT fabricated FROM sec_lending_book LIMIT 5", {}),
+        ("SELECT loan_id FROM fabricated_table LIMIT 5", {}),
+        ("DELETE FROM sec_lending_book", {}),
+        ("SELECT loan_id FROM sec_lending_book; SELECT loan_id FROM collateral", {}),
+        ("SELECT loan_id FROM sec_lending_book WHERE status = 'OPEN' LIMIT 5", {}),
+        ("SELECT loan_id FROM sec_lending_book", {}),
+        ("SELECT loan_id FROM sec_lending_book LIMIT 10001", {}),
+    ]
+    rejection_by_code = Counter()
+    for sql, params in adversarial:
+        outcome = _verify(config, snapshot, graph, sql, params)
+        assert not outcome.ok and outcome.verified is None
+        rejection_by_code.update({outcome.findings[0].code: 1})
+
+    resolver = catalog_mod.Resolver(snapshot)
+    fabricated_executions = 0
+    for call in raw_source.calls:
+        structure = extract(call["sql"])
+        fabricated_executions += sum(resolver.table(table)[0] is None for table in structure["tables"])
+        references = []
+        for selected in structure["select"]:
+            references.extend(selected["columns"])
+        references.extend(item["column"] for item in structure["filters"])
+        for join in structure["joins"]:
+            references.extend((join["left"], join["right"]))
+        fabricated_executions += sum(not resolver.column(column).ok for column in references)
+
+    cost_profile = dict(config.profile("fixture_db"), explain_cost_limit=100)
+    cost = verify(
+        VerificationRequest(
+            "SELECT security_id FROM borrow_rates WHERE business_date = :as_of LIMIT 5",
+            {"as_of": "2026-10-22"}, "fixture_db", as_of="2026-10-22",
+            require_pit=True, pit_columns=("borrow_rates.business_date",),
+        ),
+        profile=cost_profile, snapshot=snapshot, join_graph=graph, config_hash=config.hash,
+        key_id="fixture-key", signing_key=SIGNING_KEY, now=NOW,
+        explainer=lambda *_args, **_kwargs: {"cost": 99},
+    )
+    assert cost.ok and cost.verified and cost.verified.record.explain_cost == 99
+    report = assess_workload(
+        repetitions=len(runs), deterministic_matches=deterministic_matches,
+        adversarial_candidates=len(adversarial), rejection_by_code=rejection_by_code,
+        executed_queries=len(raw_source.calls),
+        identifier_fabrications_executed=fabricated_executions,
+        overhead_ms=overhead, timeout_s=config.profile("fixture_db")["timeout_s"],
+        max_repairs=1, explain_cost_limit=100, observed_explain_cost=99,
+    )
+    assert report.ok, report.findings
+    assert report.rejection_rate == 1.0
+    assert report.identifier_fabrications_executed == 0
+    assert report.overhead_p95_ms <= 15_000
+    assert report.as_dict()["verifier_rejections"] == len(adversarial)
+    connection.close()
+
+
+def test_ac017_import_fixture_secret_and_clearance_boundaries(tmp_path: Path):
+    assert governance.check_imports() == []
+    disclosure = (FIXTURES / "README.md").read_text().lower()
+    assert "synthetic" in disclosure and "execution/fixture_db.py" in disclosure
+
+    config, snapshot, _graph, fixture, db_path, request, verified = _execution_case(
+        tmp_path, clearance="public")
+    who = resolve_caller(config, "public-reader")
+    connection = fixture.connect(db_path)
+    source = adapt_query_source(
+        _SQLiteQuerySource(connection), profile="fixture_db", dialect="sqlite")
+    result = execute(
+        verified, token=verified.token, params=request.params,
+        keys={"fixture-key": SIGNING_KEY}, now=NOW, config=config,
+        snapshot_id=snapshot["snapshot_id"], caller=who, source=source,
+        monotonic_ns=lambda: 0,
+    )
+    payload = result.as_dict()
+    assert {row["counterparty_id"] for row in payload["rows"]} == {"<redacted>"}
+
+    handoff = prepare_handoff(
+        type("CompletedRun", (), {
+            "status": "completed", "run_id": "origin-017",
+            "outputs": {
+                "execution": payload,
+                "citations": [f"run:{result.provenance.run_id}", f"query:{result.provenance.query_id}"],
+            },
+        })(),
+        workflow="W11", receiver="counterparty_credit_risk",
+        request="Review exposure; password=hunter2", pit_basis="as-of predicate verified",
+        metric_citations=("metric:on_loan_value",),
+    ).as_dict()
+    rendered = json.dumps({"execution": payload, "handoff": handoff}, sort_keys=True)
+    assert SIGNING_KEY.decode() not in rendered
+    assert "hunter2" not in rendered
+    assert "CP-A" not in rendered and "CP-B" not in rendered and "CP-C" not in rendered
+    assert "withheld_columns" not in handoff["redaction"]
+    assert "rows" not in handoff and "parameters" not in handoff and "sql" not in handoff
     connection.close()
 
 
