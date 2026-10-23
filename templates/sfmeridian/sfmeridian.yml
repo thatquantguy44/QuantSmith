@@ -56,6 +56,10 @@ databases:
     explain_cost_limit: null               # dialect-specific units; null = off
     max_concurrency: 2
 
+# --- Verification authorization (0116 REQ-005) -----------------------------
+verification:
+  token_ttl_s: 300                         # 1..3600 seconds; default five minutes
+
 # --- Datasets for adaptive research (spec 0121) ------------------------------
 # Every location, object, and column is declared here; nothing is taken from
 # free text. Filters are bound values. version pins Databricks Delta tables.
@@ -185,3 +189,4 @@ per_call_overrides_allowlist:
   - as_of
   - row_limit          # may only be lowered
   - database_profile   # must be a configured profile
+  - token_ttl_s        # may only be lowered from verification.token_ttl_s

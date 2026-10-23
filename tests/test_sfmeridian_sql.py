@@ -22,7 +22,7 @@ EXECUTION = FIXTURES / "execution"
 sys.path.insert(0, str(PLUGIN / "src"))
 
 from sfmeridian.catalog import load_declared
-from sfmeridian.config import load_config
+from sfmeridian.config import ConfigError, apply_call_overrides, load_config, read_file
 from sfmeridian.frontmatter import split_front_matter
 from sfmeridian.index import build_index
 from sfmeridian.verify import (
@@ -109,7 +109,8 @@ def test_ac001_fixture_matches_catalog_exemplars_and_manifest(tmp_path: Path):
     conn.close()
 
     disclosure = (FIXTURES / "README.md").read_text()
-    assert "execution/fixture_db.py" in disclosure and "execution/expected_results.json" in disclosure
+    assert all(name in disclosure for name in (
+        "execution/fixture_db.py", "execution/expected_results.json", "execution/dialect_queries.json"))
     assert "SYNTHETIC" in (EXECUTION / "fixture_db.py").read_text()
 
 
@@ -134,6 +135,7 @@ def _verify(config, snapshot, graph, sql, params=None, **request):
         key_id="fixture-key",
         signing_key=SIGNING_KEY,
         now=NOW,
+        ttl_s=config.data["verification"]["token_ttl_s"],
     )
 
 
@@ -237,6 +239,111 @@ def test_ac003_verifier_rejects_adversarial_queries_without_execution(tmp_path: 
         assert outcome.ok, (relative, outcome.as_dict())
 
 
+def test_ac004_dialect_limits_pit_timeout_and_cost_guard(tmp_path: Path):
+    config, snapshot, graph = _verification_inputs(tmp_path)
+    fixtures = json.loads((EXECUTION / "dialect_queries.json").read_text())
+    assert fixtures["synthetic"] is True
+    assert {case["dialect"] for case in fixtures["queries"]} == {
+        "sqlite", "postgres", "oracle", "databricks"}
+
+    calls = []
+
+    def explain(sql, params, *, timeout_s):
+        calls.append((sql, params, timeout_s))
+        return {"cost": 99, "notes": ["synthetic normalized fixture cost"]}
+
+    for case in fixtures["queries"]:
+        profile = dict(config.profile("fixture_db"))
+        profile.update(dialect=case["dialect"], explain_cost_limit=100)
+        outcome = verify(
+            VerificationRequest(
+                sql=case["sql"], params={"as_of": "2026-10-22"}, profile="fixture_db",
+                as_of="2026-10-22", require_pit=True,
+                pit_columns=("borrow_rates.business_date",),
+            ),
+            profile=profile,
+            snapshot=snapshot,
+            join_graph=graph,
+            config_hash=config.hash,
+            key_id="fixture-key",
+            signing_key=SIGNING_KEY,
+            now=NOW,
+            ttl_s=config.data["verification"]["token_ttl_s"],
+            explainer=explain,
+        )
+        assert outcome.ok and outcome.verified, (case["dialect"], outcome.as_dict())
+        assert outcome.verified.record.timeout_s == 30
+        assert outcome.verified.record.explain_cost == 99.0
+        assert "notes" not in outcome.verified.public()
+    assert len(calls) == 4
+    assert all(params == {"as_of": "2026-10-22"} and timeout == 30
+               for _, params, timeout in calls)
+
+    by_dialect = {case["dialect"]: case["sql"] for case in fixtures["queries"]}
+    invalid = [
+        ("postgres", by_dialect["postgres"].replace("%(as_of)s", ":as_of"),
+         "E_VERIFY_UNBOUND_PARAM"),
+        ("oracle", by_dialect["oracle"].replace("FETCH FIRST 5 ROWS ONLY", "LIMIT 5"),
+         "E_VERIFY_NO_LIMIT"),
+        ("databricks", by_dialect["databricks"].replace("`", '"'),
+         "E_VERIFY_UNKNOWN_IDENTIFIER"),
+    ]
+    for dialect, sql, code in invalid:
+        profile = dict(config.profile("fixture_db"))
+        profile["dialect"] = dialect
+        outcome = verify(
+            VerificationRequest(sql, {"as_of": "2026-10-22"}, "fixture_db"),
+            profile=profile, snapshot=snapshot, join_graph=graph, config_hash=config.hash,
+            key_id="fixture-key", signing_key=SIGNING_KEY, now=NOW,
+        )
+        assert not outcome.ok and code in _codes(outcome)
+
+    guarded = dict(config.profile("fixture_db"))
+    guarded["explain_cost_limit"] = 100
+    request = VerificationRequest(
+        by_dialect["sqlite"], {"as_of": "2026-10-22"}, "fixture_db",
+        as_of="2026-10-22", require_pit=True, pit_columns=("borrow_rates.business_date",),
+    )
+    missing = verify(
+        request, profile=guarded, snapshot=snapshot, join_graph=graph, config_hash=config.hash,
+        key_id="fixture-key", signing_key=SIGNING_KEY, now=NOW,
+    )
+    assert not missing.ok and missing.verified is None and _codes(missing) == {"E_VERIFY_COST"}
+    over = verify(
+        request, profile=guarded, snapshot=snapshot, join_graph=graph, config_hash=config.hash,
+        key_id="fixture-key", signing_key=SIGNING_KEY, now=NOW,
+        explainer=lambda *_args, **_kwargs: {"cost": 101, "notes": []},
+    )
+    assert not over.ok and over.verified is None and _codes(over) == {"E_VERIFY_COST"}
+
+    def failed_explain(*_args, **_kwargs):
+        raise RuntimeError("credential=synthetic-secret-must-not-leak")
+
+    failed = verify(
+        request, profile=guarded, snapshot=snapshot, join_graph=graph, config_hash=config.hash,
+        key_id="fixture-key", signing_key=SIGNING_KEY, now=NOW, explainer=failed_explain,
+    )
+    assert not failed.ok and _codes(failed) == {"E_VERIFY_COST"}
+    assert "synthetic-secret-must-not-leak" not in json.dumps(failed.as_dict())
+
+    source = read_file(FIXTURES / "sfmeridian.mapping.yml")
+    source["verification"] = {"token_ttl_s": 45}
+    short = load_config(data=source, env={})
+    assert short.data["verification"]["token_ttl_s"] == 45
+    assert apply_call_overrides(short, {"token_ttl_s": 20}) == {"token_ttl_s": 20}
+    with pytest.raises(ConfigError, match="may only be lowered"):
+        apply_call_overrides(short, {"token_ttl_s": 46})
+    for invalid_ttl in (0, 3601):
+        source["verification"] = {"token_ttl_s": invalid_ttl}
+        with pytest.raises(ConfigError, match="verification.token_ttl_s"):
+            load_config(data=source, env={})
+
+    source = read_file(FIXTURES / "sfmeridian.mapping.yml")
+    source["databases"][0]["explain_cost_limit"] = 0
+    with pytest.raises(ConfigError, match="explain_cost_limit"):
+        load_config(data=source, env={})
+
+
 def test_ac005_token_binds_every_context_field_and_expires(tmp_path: Path):
     config, snapshot, graph = _verification_inputs(tmp_path)
     sql = "SELECT loan_id FROM sec_lending_book WHERE business_date = :as_of LIMIT 5"
@@ -265,6 +372,8 @@ def test_ac005_token_binds_every_context_field_and_expires(tmp_path: Path):
         replace(verified, record=replace(verified.record, policy_version="sql-verify/2")),
         replace(verified, record=replace(verified.record, clearance="restricted")),
         replace(verified, record=replace(verified.record, composition_path="generate")),
+        replace(verified, record=replace(verified.record, timeout_s=29)),
+        replace(verified, record=replace(verified.record, explain_cost=1.0)),
     ]
     for changed in mutations:
         with pytest.raises(TokenError, match="context mismatch"):

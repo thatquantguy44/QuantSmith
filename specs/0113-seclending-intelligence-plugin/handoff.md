@@ -12,11 +12,12 @@ plugin.
 ## Start here (in order)
 
 **The `0116` spec was approved on 2026-10-23. Implementation is in progress;
-T-001 (synthetic execution fixture) and T-002 (`sql.verify`, exact-context
-tokens, adversarial suite) are built. Next is T-003: dialect policies, timeout,
-cost guard, and configurable token TTL.**
+T-001 through T-003 are built: the synthetic execution fixture, `sql.verify`
+with exact-context tokens and adversarial checks, and four-dialect policy with
+timeout, normalized cost guard, and configurable token TTL. Next is T-004: the
+token-only query execution seam.**
 
-0. **Baseline verified (2026-10-23)**: SFMeridian tests 57 passed, 1 skipped;
+0. **Baseline verified (2026-10-23)**: SFMeridian tests 61 passed, 1 skipped;
    the steward completed with 4/5 metrics bound and six amendments staged.
    The full gate has unrelated pre-existing venture catalog/index/count
    findings on `main`; the `0116` targeted spec gate has no findings.
@@ -25,8 +26,8 @@ cost guard, and configurable token TTL.**
    1. ~~a synthetic SQLite fixture database matching
       `fixtures/catalog/fixture_db.catalog.json`~~ (T-001 done);
    2. ~~`sql.verify` and its adversarial suite~~ (T-002 done);
-   3. **dialect policies, timeout/cost guard, and token TTL (T-003 next);**
-   4. `sql.execute` (the read-only seam; runs only verified SQL);
+   3. ~~dialect policies, timeout/cost guard, and token TTL~~ (T-003 done);
+   4. **`sql.execute` (T-004 next; the read-only seam, runs only verified SQL);**
    5. the `0080` `Reader` over `available` metric sources;
    6. governed-first routing (`ask`) through `0080` `answer()`;
    7. `sql.compose` (`reuse` → `adapt` → `generate`);

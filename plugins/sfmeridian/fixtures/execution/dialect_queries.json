@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "synthetic": true,
+  "queries": [
+    {
+      "dialect": "sqlite",
+      "sql": "SELECT \"br\".\"security_id\" FROM \"borrow_rates\" AS \"br\" WHERE \"br\".\"business_date\" = :as_of LIMIT 5"
+    },
+    {
+      "dialect": "postgres",
+      "sql": "SELECT \"br\".\"security_id\" FROM \"borrow_rates\" AS \"br\" WHERE \"br\".\"business_date\" = %(as_of)s LIMIT 5"
+    },
+    {
+      "dialect": "oracle",
+      "sql": "SELECT \"BR\".\"SECURITY_ID\" FROM \"BORROW_RATES\" \"BR\" WHERE \"BR\".\"BUSINESS_DATE\" = :as_of FETCH FIRST 5 ROWS ONLY"
+    },
+    {
+      "dialect": "databricks",
+      "sql": "SELECT `br`.`security_id` FROM `borrow_rates` AS `br` WHERE `br`.`business_date` = :as_of LIMIT 5"
+    }
+  ]
+}

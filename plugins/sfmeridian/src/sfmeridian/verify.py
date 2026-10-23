@@ -13,8 +13,9 @@ import base64
 import hashlib
 import hmac
 import json
+import math
 import re
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import asdict, dataclass
 from typing import Any
 
@@ -37,6 +38,12 @@ _FORBIDDEN_WORDS = frozenset({
 })
 _SAFE_JOIN_TYPES = frozenset({"inner", "left", "right", "full"})
 _UNSUPPORTED_WORDS = frozenset({"EXCEPT", "INTERSECT", "MINUS", "QUALIFY", "RECURSIVE", "UNION", "WINDOW"})
+_DIALECT_POLICIES = {
+    "sqlite": {"parameter_style": "named_colon", "limit": "LIMIT", "quotes": frozenset({'"', "["})},
+    "postgres": {"parameter_style": "pyformat", "limit": "LIMIT", "quotes": frozenset({'"'})},
+    "oracle": {"parameter_style": "named_colon", "limit": "FETCH", "quotes": frozenset({'"'})},
+    "databricks": {"parameter_style": "named_colon", "limit": "LIMIT", "quotes": frozenset({"`"})},
+}
 
 
 @dataclass(frozen=True)
@@ -79,6 +86,7 @@ class VerificationRecord:
     expires_at: int
     row_limit: int
     timeout_s: int
+    explain_cost: float | None
 
     def as_dict(self) -> dict[str, Any]:
         value = asdict(self)
@@ -137,6 +145,7 @@ def verify(
     signing_key: bytes,
     now: int,
     ttl_s: int = 300,
+    explainer: Callable[..., Mapping[str, Any]] | None = None,
 ) -> VerificationOutcome:
     """Verify ``request`` and issue an exact-context token, or findings."""
     _validate_signing_inputs(key_id, signing_key, now, ttl_s)
@@ -146,6 +155,8 @@ def verify(
         findings.append(VerificationFinding("E_VERIFY_TABLE_NOT_ALLOWED", "request profile does not match"))
     if not bool(profile.get("read_only")):
         findings.append(VerificationFinding("E_VERIFY_NOT_READ_ONLY", "database profile is not read-only"))
+    if dialect not in _DIALECT_POLICIES:
+        findings.append(VerificationFinding("E_VERIFY_UNKNOWN_IDENTIFIER", "unsupported SQL dialect"))
 
     try:
         structure = extract(request.sql, dialect)
@@ -201,11 +212,17 @@ def verify(
     _check_clause_identifiers(tokens, structure, resolver, findings)
 
     _check_joins(structure, resolver, join_graph, findings)
+    _check_dialect(dialect, structure, tokens, findings)
     _check_parameters(request, structure, tokens, findings)
     _check_pit(request, structure, resolver, findings)
-    row_limit = _check_limit(tokens, request.params, int(profile.get("row_limit", 0)), findings)
+    row_limit = _check_limit(
+        tokens, request.params, int(profile.get("row_limit", 0)), dialect, findings)
 
     findings = _dedupe(findings)
+    if findings:
+        return VerificationOutcome(False, None, tuple(findings))
+
+    explain_cost = _check_cost(request, profile, explainer, findings)
     if findings:
         return VerificationOutcome(False, None, tuple(findings))
 
@@ -226,6 +243,7 @@ def verify(
         expires_at=now + ttl_s,
         row_limit=row_limit,
         timeout_s=int(profile.get("timeout_s", 0)),
+        explain_cost=explain_cost,
     )
     token = _issue(record, key_id, signing_key)
     return VerificationOutcome(True, VerifiedQuery(request.sql, params_json, record, token), ())
@@ -364,6 +382,22 @@ def _depths(tokens: Sequence[Token]) -> list[int]:
     return out
 
 
+def _check_dialect(dialect: str, structure: Mapping[str, Any], tokens: Sequence[Token],
+                   findings: list[VerificationFinding]) -> None:
+    policy = _DIALECT_POLICIES.get(dialect)
+    if policy is None:
+        return
+    if structure["params"] and structure["param_style"] != policy["parameter_style"]:
+        findings.append(VerificationFinding(
+            "E_VERIFY_UNBOUND_PARAM", f"{dialect} requires {policy['parameter_style']} parameters"))
+    quote_chars = {'"', "`", "["}
+    used_quotes = {char for token in tokens if token.kind == "name"
+                   for char in quote_chars if char in token.raw}
+    if not used_quotes <= policy["quotes"]:
+        findings.append(VerificationFinding(
+            "E_VERIFY_UNKNOWN_IDENTIFIER", f"identifier quoting is not valid for {dialect}"))
+
+
 def _check_parameters(request: VerificationRequest, structure: Mapping[str, Any], tokens: Sequence[Token],
                       findings: list[VerificationFinding]) -> None:
     if structure["positional_params"] or structure["param_style"] in ("mixed", "numeric", "qmark"):
@@ -424,23 +458,72 @@ def _check_pit(request: VerificationRequest, structure: Mapping[str, Any], resol
                 "E_VERIFY_MISSING_PIT", f"PIT column {key!r} is not constrained by :as_of"))
 
 
-def _check_limit(tokens: Sequence[Token], params: Mapping[str, Any], ceiling: int,
+def _check_limit(tokens: Sequence[Token], params: Mapping[str, Any], ceiling: int, dialect: str,
                  findings: list[VerificationFinding]) -> int:
     value: Any = None
+    form: str | None = None
     for i, token in enumerate(tokens):
         if token.kind == "kw" and token.value == "LIMIT":
+            form = "LIMIT"
             value = _limit_token(tokens[i + 1] if i + 1 < len(tokens) else None, params)
             break
         if token.kind == "kw" and token.value == "FETCH":
             j = i + 1
             if j < len(tokens) and tokens[j].value in ("FIRST", "NEXT"):
+                form = "FETCH"
                 value = _limit_token(tokens[j + 1] if j + 1 < len(tokens) else None, params)
                 break
-    if not isinstance(value, int) or isinstance(value, bool) or value <= 0 or ceiling <= 0 or value > ceiling:
+    expected = _DIALECT_POLICIES.get(dialect, {}).get("limit")
+    if (form != expected or not isinstance(value, int) or isinstance(value, bool)
+            or value <= 0 or ceiling <= 0 or value > ceiling):
         findings.append(VerificationFinding(
-            "E_VERIFY_NO_LIMIT", f"row limit must be a positive integer at or below {ceiling}"))
+            "E_VERIFY_NO_LIMIT",
+            f"row limit must use {expected or 'a supported form'} with a positive integer at or below {ceiling}"))
         return 0
     return value
+
+
+def _check_cost(request: VerificationRequest, profile: Mapping[str, Any],
+                explainer: Callable[..., Mapping[str, Any]] | None,
+                findings: list[VerificationFinding]) -> float | None:
+    limit = profile.get("explain_cost_limit")
+    if limit is None:
+        return None
+    try:
+        normalized_limit = float(limit)
+    except (TypeError, ValueError, OverflowError):
+        normalized_limit = math.nan
+    if (isinstance(limit, bool) or not math.isfinite(normalized_limit) or normalized_limit <= 0):
+        findings.append(VerificationFinding("E_VERIFY_COST", "configured explain cost limit is invalid"))
+        return None
+    if explainer is None:
+        findings.append(VerificationFinding("E_VERIFY_COST", "cost guard requires an injected explainer"))
+        return None
+    try:
+        result = explainer(
+            request.sql, dict(request.params), timeout_s=int(profile.get("timeout_s", 0)))
+    except Exception as exc:  # noqa: BLE001 — driver details and values must never escape
+        findings.append(VerificationFinding(
+            "E_VERIFY_COST", f"cost explanation failed: {type(exc).__name__}"))
+        return None
+    if not isinstance(result, Mapping) or not set(result) <= {"cost", "notes"}:
+        findings.append(VerificationFinding("E_VERIFY_COST", "explainer returned an invalid normalized result"))
+        return None
+    cost = result.get("cost")
+    notes = result.get("notes", ())
+    try:
+        normalized = float(cost)
+    except (TypeError, ValueError, OverflowError):
+        normalized = math.nan
+    if (isinstance(cost, bool) or not math.isfinite(normalized) or normalized < 0
+            or not isinstance(notes, (list, tuple))
+            or not all(isinstance(note, str) for note in notes)):
+        findings.append(VerificationFinding("E_VERIFY_COST", "explainer returned an invalid normalized result"))
+        return None
+    if normalized > normalized_limit:
+        findings.append(VerificationFinding("E_VERIFY_COST", "normalized explain cost exceeds the configured limit"))
+        return None
+    return normalized
 
 
 def _limit_token(token: Token | None, params: Mapping[str, Any]) -> Any:

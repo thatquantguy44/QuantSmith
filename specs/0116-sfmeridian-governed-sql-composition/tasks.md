@@ -23,7 +23,7 @@
 | --- | --- | --- | --- | --- |
 | T-001 | Build the deterministic synthetic SQLite fixture and known-result manifest matching the declared v1 catalog; add disclosure and catalog/exemplar consistency tests. | REQ-001, NFR-001, NFR-005, AC-001 | done | `fixtures/execution/fixture_db.py`, `expected_results.json`; all end-to-end work builds on it. |
 | T-002 | Implement fail-closed structural verification, catalog/allowlist resolution, exact join-key validation, parameter matching, PIT proof, limit enforcement, canonical records, and token issuance; add the adversarial and token-mutation suites. | REQ-003, REQ-005, NFR-002, AC-003, AC-005 | done | `verify.py`; builds before execution. |
-| T-003 | Add SQLite/PostgreSQL/Oracle/Databricks dialect policies, injected timeout and normalized `EXPLAIN` cost guard, configurable token TTL, and static fixtures. | REQ-004, REQ-005, NFR-004, AC-004 | todo | No driver extra ships. |
+| T-003 | Add SQLite/PostgreSQL/Oracle/Databricks dialect policies, injected timeout and normalized `EXPLAIN` cost guard, configurable token TTL, and static fixtures. | REQ-004, REQ-005, NFR-004, AC-004 | done | `dialect_queries.json`; no driver extra ships. |
 | T-004 | Implement the token-only query seam, query-only adapter, redaction, scrubbed errors, provenance, deterministic run identity, `0070` envelope, and replay comparison. | REQ-006, REQ-007, NFR-002, NFR-003, NFR-005, AC-006, AC-007 | todo | Wrap `SQLDataSource.query`; never expose `execute`/`transaction`. |
 | T-005 | Implement retrieval-first composition (`reuse` → `adapt` → `generate`) with eligibility, bound parameters, canonical evidence, catalog constraints, and injected completion. | REQ-002, AC-002 | todo | Generated SQL remains outside the index. |
 | T-006 | Implement the governed `Reader`: available-source lookup, plan binding, verified execution, exact output-to-`Fact` mapping, batch provenance, and unavailable-source handling. | REQ-008, NFR-003, AC-008 | todo | Reader half of parent T-032. |
@@ -45,7 +45,7 @@ All implementation tests live in `tests/test_sfmeridian_sql.py` unless noted.
 | AC-001 | `test_ac001_fixture_matches_catalog_exemplars_and_manifest` | done |
 | AC-002 | `test_ac002_composition_reuse_adapt_generate_with_evidence` | todo |
 | AC-003 | `test_ac003_verifier_rejects_adversarial_queries_without_execution` | done |
-| AC-004 | `test_ac004_dialect_limits_pit_timeout_and_cost_guard` | todo |
+| AC-004 | `test_ac004_dialect_limits_pit_timeout_and_cost_guard` | done |
 | AC-005 | `test_ac005_token_binds_every_context_field_and_expires` | done |
 | AC-006 | `test_ac006_query_only_execution_redacts_and_scrubs` | todo |
 | AC-007 | `test_ac007_execution_provenance_envelope_and_replay` | todo |

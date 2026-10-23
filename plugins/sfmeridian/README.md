@@ -13,10 +13,12 @@ patterns), search, the reviewed feedback inbox, governance catalogs, the
 shared tool registry, the agent loop harness; schema catalog snapshots,
 drift exclusion, the governed semantic mapping, metric-source availability,
 pack-amendment proposals, and access controls (`0115`); adaptive dataset
-research (`0121`); and three loop agents, `query_librarian`,
-`semantic_mapping_steward`, and `lending_data_researcher`. Not yet: SQL
-composition, verification, and execution (`0116`), grounded answers and the
-evaluation gate (`0117`), the MCP server and Claude Code plugin (`0118`).
+research (`0121`); three loop agents, `query_librarian`,
+`semantic_mapping_steward`, and `lending_data_researcher`; and the first three
+`0116` slices (executable fixture, token-bound verifier, four-dialect policy,
+and cost guard). Not yet: SQL composition and execution (remaining `0116`),
+grounded answers and the evaluation gate (`0117`), the MCP server and Claude
+Code plugin (`0118`).
 
 **Contributors:** current state, the next build (`0116`), open decisions, and
 repo conventions are in `specs/0113-seclending-intelligence-plugin/handoff.md`.

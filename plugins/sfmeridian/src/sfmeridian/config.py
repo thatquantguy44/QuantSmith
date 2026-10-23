@@ -15,6 +15,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import math
 import os
 import re
 from collections.abc import Mapping, Sequence
@@ -91,12 +92,13 @@ DEFAULTS: dict[str, Any] = {
         "require_pit_predicate_for_as_of": True,
         "abstain_message": "Not enough verified evidence to answer; missing: {missing}.",
     },
+    "verification": {"token_ttl_s": 300},
     "access": {"clearance_source": None, "redaction_classes": {}, "column_classes": {}},
     "llm": {"runtime_profile": None, "temperature": 0.0, "max_output_tokens": 2000},
     "retrieval": {"mode": "lexical", "embedding_profile": None},
     "feedback": {"inbox": ".sfmeridian/inbox", "promoters": [], "auto_propose_accepted_answers": False},
     "eval": {"golden_sets": [], "thresholds": {}, "seeds": [1, 2, 3]},
-    "per_call_overrides_allowlist": ["as_of", "row_limit", "database_profile"],
+    "per_call_overrides_allowlist": ["as_of", "row_limit", "database_profile", "token_ttl_s"],
     "datasets": [],
     "research": {"output_dir": ".sfmeridian/research"},
 }
@@ -127,6 +129,7 @@ _SECTIONS = {
     "grounding": {"mode": "str", "retrieval_min_score": "num", "max_compose_retries": "int",
                   "require_citation_per_number": "bool", "numeric_tolerance": "num",
                   "require_pit_predicate_for_as_of": "bool", "abstain_message": "str"},
+    "verification": {"token_ttl_s": "int"},
     "access": {"clearance_source": "str?", "redaction_classes": "map", "column_classes": "map"},
     "llm": {"runtime_profile": "str?", "temperature": "num", "max_output_tokens": "int"},
     "retrieval": {"mode": "str", "embedding_profile": "str?"},
@@ -146,7 +149,7 @@ _ENUMS = {
     ("semantic_mapping", "kind"): ("measure", "ratio"),
     ("semantic_mapping", "quote"): ("fee", "rebate"),
 }
-_OVERRIDABLE = ("as_of", "row_limit", "database_profile")
+_OVERRIDABLE = ("as_of", "row_limit", "database_profile", "token_ttl_s")
 
 
 def _type_ok(value: Any, kind: str) -> bool:
@@ -350,6 +353,25 @@ def validate_data(data: Mapping[str, Any], *, allow_placeholders: bool = False) 
         for key in ("row_limit", "timeout_s", "max_concurrency"):
             if isinstance(db.get(key), int) and db[key] <= 0:
                 issues.append(Issue("E_CONFIG_INVALID", f"{path}.{key}", "must be positive"))
+        cost_limit = db.get("explain_cost_limit")
+        finite_cost = True
+        if isinstance(cost_limit, (int, float)) and not isinstance(cost_limit, bool):
+            try:
+                finite_cost = math.isfinite(float(cost_limit))
+            except OverflowError:
+                finite_cost = False
+        if (isinstance(cost_limit, (int, float)) and not isinstance(cost_limit, bool)
+                and (not finite_cost or cost_limit <= 0)):
+            issues.append(Issue(
+                "E_CONFIG_INVALID", f"{path}.explain_cost_limit", "must be positive and finite"))
+
+    verification = data.get("verification")
+    if isinstance(verification, dict):
+        token_ttl_s = verification.get("token_ttl_s")
+        if (isinstance(token_ttl_s, int) and not isinstance(token_ttl_s, bool)
+                and not 1 <= token_ttl_s <= 3600):
+            issues.append(Issue(
+                "E_CONFIG_INVALID", "verification.token_ttl_s", "must be between 1 and 3600 seconds"))
 
     # Query repositories.
     repos = data.get("query_repositories")
@@ -678,8 +700,8 @@ def apply_call_overrides(config: Config, overrides: Mapping[str, Any]) -> dict[s
     """Validate per-call overrides; return the effective call settings.
 
     Only fields in ``per_call_overrides_allowlist`` may be set, and safety
-    fields may only tighten: ``row_limit`` can be lowered, never raised, and
-    ``database_profile`` must name a configured profile.
+    fields may only tighten: ``row_limit`` and ``token_ttl_s`` can be lowered,
+    never raised, and ``database_profile`` must name a configured profile.
     """
     allow = set(config.data["per_call_overrides_allowlist"])
     issues: list[Issue] = []
@@ -699,6 +721,13 @@ def apply_call_overrides(config: Config, overrides: Mapping[str, Any]) -> dict[s
             elif ceiling is not None and value > ceiling:
                 issues.append(Issue("E_CONFIG_OVERRIDE_DENIED", key,
                                     f"row_limit may only be lowered (profile limit {ceiling})"))
+        elif key == "token_ttl_s":
+            ceiling = config.data["verification"]["token_ttl_s"]
+            if not isinstance(value, int) or isinstance(value, bool) or value <= 0:
+                issues.append(Issue("E_CONFIG_OVERRIDE_DENIED", key, "token_ttl_s must be a positive integer"))
+            elif value > ceiling:
+                issues.append(Issue("E_CONFIG_OVERRIDE_DENIED", key,
+                                    f"token_ttl_s may only be lowered (configured TTL {ceiling})"))
         elif key == "as_of" and not (isinstance(value, str) and re.fullmatch(r"\d{4}-\d{2}-\d{2}", value)):
             issues.append(Issue("E_CONFIG_OVERRIDE_DENIED", key, "as_of must be an ISO date YYYY-MM-DD"))
         effective[key] = value
