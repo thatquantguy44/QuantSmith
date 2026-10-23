@@ -15,13 +15,14 @@ drift exclusion, the governed semantic mapping, metric-source availability,
 pack-amendment proposals, and access controls (`0115`); adaptive dataset
 research (`0121`); five loop agents, `query_librarian`,
 `semantic_mapping_steward`, `lending_data_researcher`, `sql_composer`, and
-`sfmeridian_orchestrator`; and the first nine
+`sfmeridian_orchestrator`; and the first ten
 `0116` slices (executable fixture, token-bound verifier, four-dialect policy,
 cost guard, query-only execution with redaction/provenance/replay, and the
 retrieval-first composer, plus the governed metric-source Reader with batch
 provenance, governed-first typed routing with a bounded shadow tail, and shared
-token-only tools with runtime write-back refusal, plus the two routing agents).
-Not yet: bounded specialist handoffs and final hardening (remaining `0116`),
+token-only tools with runtime write-back refusal, the two routing agents, and
+bounded, redacted W7–W12 specialist handoffs with `0070` evidence references).
+Not yet: final hardening (remaining `0116`),
 grounded answers and the evaluation gate (`0117`), the MCP
 server and Claude Code plugin (`0118`).
 

@@ -34,9 +34,10 @@ from sfmeridian.frontmatter import split_front_matter
 from sfmeridian.governed import packs as packs_mod
 from sfmeridian.governed.ask import AskRequest, ask
 from sfmeridian.governed.reader import MetricSourceUnavailable, Reader, fact_batch_hash
+from sfmeridian.handoff import HandoffError, validate_handoff
 from sfmeridian.index import build_index, load_index
 from sfmeridian.mapping import Vocabulary, validate_mapping
-from sfmeridian.orchestrator import run_orchestrator
+from sfmeridian.orchestrator import prepare_handoff, run_orchestrator
 from sfmeridian.tools import ToolContext, default_registry
 from sfmeridian.verify import (
     TokenError,
@@ -1213,6 +1214,76 @@ def test_ac014_orchestrator_routes_repairs_escalates_and_replays(tmp_path: Path)
     assert refused.status == "completed"
     assert refused.outputs["route"] == "writeback_requested"
     assert refused.outputs["error_code"] == "E_WRITEBACK_DISABLED"
+    connection.close()
+
+
+def test_ac015_specialist_handoffs_are_bounded_and_redacted(tmp_path: Path):
+    config, _snapshot, _graph, _index, _mapping = _reader_inputs(tmp_path)
+    fixture = _fixture_module()
+    db_path = tmp_path / "handoff.sqlite"
+    fixture.build(db_path)
+    connection = fixture.connect(db_path)
+    raw_source = _SQLiteQuerySource(connection)
+    context = ToolContext(
+        config=config, today="2026-10-22", actor="lending-lead",
+        clients={
+            "query_sources": {"fixture_db": raw_source},
+            "verification": {
+                "key_id": "fixture-key", "signing_key": SIGNING_KEY,
+                "keys": {"fixture-key": SIGNING_KEY}, "now": NOW,
+                "monotonic_ns": lambda: 0,
+            },
+        },
+        agents_root=ROOT / "agents",
+    )
+    run = run_orchestrator(context, registry=default_registry(), inputs={
+        "question": "on loan value by counterparty today", "as_of": "2026-10-22",
+        "caller": "lending-lead", "profile": "fixture_db",
+    })
+    assert run.status == "completed"
+    catalog = json.loads((PLUGIN / "src/sfmeridian/data/handoffs.json").read_text())
+    built = []
+    for workflow in ("W7", "W8", "W9", "W10", "W11", "W12"):
+        receiver = next(item for item in catalog["handoffs"] if workflow in item["workflows"])
+        prompt = ROOT / "agents" / receiver["path"] / "prompt.md"
+        before = prompt.read_bytes()
+        handoff = prepare_handoff(
+            run,
+            workflow=workflow,
+            receiver=receiver["agent"],
+            request="Review the cited synthetic panel; password=hunter2 must not escape.",
+            pit_basis="Every cited execution bound :as_of before the source read.",
+        )
+        payload = handoff.as_dict()
+        assert validate_handoff(payload) == ()
+        assert payload["receiver_path"] == receiver["path"]
+        assert payload["requested_output"] == receiver["output"]
+        assert payload["never"] == receiver["never"]
+        assert payload["point_in_time"] == {
+            "attested": True, "as_of": "2026-10-22",
+            "basis": "Every cited execution bound :as_of before the source read.",
+        }
+        assert payload["redaction"]["withheld_columns_included"] is False
+        assert payload["redaction"]["parameters_redacted"] is True
+        assert "hunter2" not in json.dumps(payload) and "<redacted>" in payload["request"]
+        assert {ref["role"] for ref in payload["evidence_references"]} == {"originating", "execution"}
+        assert all(ref["schema_version"] == "quantsmith.orchestration.run.v1"
+                   for ref in payload["evidence_references"])
+        assert before == prompt.read_bytes()  # the builder never invokes or mutates the receiver
+        built.append(payload["content_hash"])
+    assert len(set(built)) == 6 and len(raw_source.calls) == 1
+
+    forged = copy.deepcopy(payload)
+    forged["receiver"] = "not_an_agent"
+    forged["never"] = "may take actions"
+    assert {problem for problem in validate_handoff(forged)
+            if "receiver" in problem or "never" in problem}
+    with pytest.raises(HandoffError) as err:
+        prepare_handoff(
+            run, workflow="W7", receiver="counterparty_credit_risk", request="solve",
+            pit_basis="as-of bound",
+        )
+    assert err.value.code == "E_HANDOFF_RECEIVER"
     connection.close()
 
 

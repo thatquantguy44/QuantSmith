@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "generator": "quantsmith-skills/1",
-  "generation": 7,
+  "generation": 8,
   "updated": "2026-10-23",
   "targets": {},
   "skills": [
@@ -2637,13 +2637,13 @@
       "status": "active",
       "project": false,
       "path": null,
-      "revision": 1,
+      "revision": 2,
       "introduced": "2026-10-23",
       "updated": "2026-10-23",
       "removed": null,
-      "updated_generation": 7,
-      "source_hash": "sha256:5e56eed26b495877b3e546411e4c15b8055e7d90f653b057f9504cc4421d1f88",
-      "skill_hash": "sha256:fbe32ccbec19de655fb5f9a644f9c8d57aa8be3757edb0ed065ae7b4a7da3d99"
+      "updated_generation": 8,
+      "source_hash": "sha256:6ea67c7512e6d7b7f5029656b3e247c12277a46e2380df55a36e29ee422d5eef",
+      "skill_hash": "sha256:f1fbe7d5f0ce8096cbf91c6e9f04da87195ad1a17da694caa6245024427138e2"
     },
     {
       "name": "securities-financing-sfmeridian-sql-composer",

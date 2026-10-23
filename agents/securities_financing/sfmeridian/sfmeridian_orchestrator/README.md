@@ -24,8 +24,11 @@ requiring run citations for every numeric result.
 - Typed route and tier, answer or shadow result, citations, caveats, and trace.
 - A clarification, abstention, or coded escalation when evidence is unavailable.
 - `E_WRITEBACK_DISABLED` for every write intent.
+- Optional inert W7–W12 specialist handoffs built from completed execution
+  provenance; receivers are validated but never invoked.
 
 ## Runtime
 
-Tested loop agent (`0116`): `sfmeridian.orchestrator.run_orchestrator`. Manifest:
+Tested loop agent (`0116`): `sfmeridian.orchestrator.run_orchestrator`; bounded
+handoff builder: `sfmeridian.orchestrator.prepare_handoff`. Manifest:
 `plugins/sfmeridian/src/sfmeridian/data/agents/sfmeridian_orchestrator.json`.

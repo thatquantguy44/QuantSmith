@@ -16,9 +16,10 @@ from .agent import (
     load_manifest,
     run_agent,
 )
+from .handoff import HandoffError, HandoffRequest, SpecialistHandoff, build_handoff
 from .tools import ToolContext, ToolRegistry, default_registry
 
-__all__ = ["VERIFIERS", "OrchestratorPolicy", "run_orchestrator"]
+__all__ = ["VERIFIERS", "OrchestratorPolicy", "prepare_handoff", "run_orchestrator"]
 
 _TERMINAL = {
     "governed_answer", "governed_clarification", "governed_unavailable",
@@ -120,3 +121,54 @@ def run_orchestrator(ctx: ToolContext, *, policy=None, registry: ToolRegistry | 
                      inputs: Mapping[str, Any] | None = None, manifest: AgentManifest | None = None) -> AgentRun:
     return run_agent(manifest or load_manifest("sfmeridian_orchestrator"), policy or OrchestratorPolicy(),
                      registry or default_registry(), ctx, inputs=inputs, verifiers=VERIFIERS)
+
+
+def prepare_handoff(
+    run: AgentRun,
+    *,
+    workflow: str,
+    receiver: str,
+    request: str,
+    pit_basis: str,
+    metric_citations: tuple[str, ...] = (),
+) -> SpecialistHandoff:
+    """Create inert specialist evidence from a completed orchestrator run."""
+    if run.status != "completed":
+        raise HandoffError("E_HANDOFF_ORIGIN", "only a completed orchestrator run may produce a handoff")
+    output = run.outputs
+    evidence = output.get("execution") or output.get("governed_evidence")
+    if not isinstance(evidence, Mapping) or not isinstance(evidence.get("provenance"), Mapping):
+        raise HandoffError("E_HANDOFF_EVIDENCE", "orchestrator output has no execution provenance")
+    provenance = evidence["provenance"]
+    run_id = provenance.get("run_id")
+    as_of = provenance.get("as_of")
+    profile = provenance.get("profile")
+    snapshot_id = provenance.get("snapshot_id")
+    clearance = provenance.get("clearance")
+    required = (run_id, as_of, profile, snapshot_id, clearance)
+    if not all(isinstance(value, str) and value for value in required):
+        raise HandoffError("E_HANDOFF_EVIDENCE", "execution provenance is incomplete")
+    structured = ("run:", "query:", "metric:", "catalog:", "exemplar:", "pack:")
+    citations = tuple(str(item) for item in output.get("citations", ())
+                      if isinstance(item, str) and item.startswith(structured))
+    metric = evidence.get("metric")
+    if isinstance(metric, str) and metric:
+        citations += (f"metric:{metric}",)
+    citations += metric_citations
+    withheld = provenance.get("withheld_columns")
+    withheld_count = len(withheld) if isinstance(withheld, list) else 0
+    return build_handoff(HandoffRequest(
+        workflow=workflow,
+        receiver=receiver,
+        request=request,
+        originating_run_id=run.run_id,
+        execution_run_ids=(run_id,),
+        as_of=as_of,
+        pit_basis=pit_basis,
+        profile=profile,
+        snapshot_id=snapshot_id,
+        citations=citations,
+        clearance=clearance,
+        withheld_column_count=withheld_count,
+        parameters_redacted=True,
+    ))
