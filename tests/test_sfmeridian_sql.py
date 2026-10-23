@@ -30,6 +30,7 @@ from sfmeridian.config import ConfigError, apply_call_overrides, load_config, re
 from sfmeridian.execute import ExecutionError, adapt_query_source, execute, replay
 from sfmeridian.frontmatter import split_front_matter
 from sfmeridian.governed import packs as packs_mod
+from sfmeridian.governed.ask import AskRequest, ask
 from sfmeridian.governed.reader import MetricSourceUnavailable, Reader, fact_batch_hash
 from sfmeridian.index import build_index, load_index
 from sfmeridian.mapping import Vocabulary, validate_mapping
@@ -860,6 +861,139 @@ def test_ac008_reader_facts_reproduce_sources_and_drift_is_unavailable(tmp_path:
     with pytest.raises(MetricSourceUnavailable):
         bad_reader(exposure_plan)
     assert bad_raw.calls == []
+    connection.close()
+
+
+def test_ac009_governed_first_routing_and_terminal_clarification(tmp_path: Path):
+    config, snapshot, graph, index, mapping_report = _reader_inputs(tmp_path)
+    fixture = _fixture_module()
+    db_path = tmp_path / "ask.sqlite"
+    fixture.build(db_path)
+    connection = fixture.connect(db_path)
+    raw_source = _SQLiteQuerySource(connection)
+    source = adapt_query_source(raw_source, profile="fixture_db", dialect="sqlite")
+
+    def forbidden_completer(_context):  # pragma: no cover - must not be called
+        raise AssertionError("governed routes must not call composition")
+
+    common = {
+        "config": config, "index": index, "mapping_report": mapping_report,
+        "snapshot": snapshot, "join_graph": graph, "source": source,
+        "key_id": "fixture-key", "signing_key": SIGNING_KEY,
+        "keys": {"fixture-key": SIGNING_KEY}, "now": NOW,
+    }
+    governed = ask(
+        AskRequest(
+            question="on loan value by counterparty today", as_of="2026-10-22",
+            caller="lending-lead", profile="fixture_db",
+        ),
+        completer=forbidden_completer, **common,
+    )
+    assert governed.route == "governed_answer" and governed.tier == "governed"
+    assert governed.answer and governed.answer.status == "answered"
+    assert governed.governed_evidence
+    assert f"run:{governed.governed_evidence.provenance.run_id}" in governed.citations
+    assert [event.event for event in governed.trace] == ["governed_started", "governed_completed"]
+    calls_after_governed = len(raw_source.calls)
+
+    ambiguous = ask(
+        AskRequest(
+            question="on loan value and lending revenue today", as_of="2026-10-22",
+            caller="lending-lead", profile="fixture_db",
+        ),
+        completer=forbidden_completer, **common,
+    )
+    assert ambiguous.route == "governed_clarification" and ambiguous.tier == "governed"
+    assert ambiguous.answer and ambiguous.answer.status == "clarification_needed"
+    assert len(raw_source.calls) == calls_after_governed
+    assert [event.event for event in ambiguous.trace] == [
+        "governed_started", "governed_clarification"]
+
+    unavailable = ask(
+        AskRequest(
+            question="lendable value today", as_of="2026-10-22",
+            caller="lending-lead", profile="fixture_db",
+        ),
+        completer=forbidden_completer, **common,
+    )
+    assert unavailable.route == "governed_unavailable" and unavailable.tier == "governed"
+    assert unavailable.error_code == "E_METRIC_SOURCE_UNAVAILABLE"
+    assert len(raw_source.calls) == calls_after_governed
+
+    tail = ask(
+        AskRequest(
+            question="Collateral coverage ratio by loan", as_of="2026-10-22",
+            caller="lending-lead", profile="fixture_db",
+        ),
+        **common,
+    )
+    assert tail.route == "no_governed_match" and tail.tier == "reuse"
+    assert tail.answer is None and tail.composition and tail.execution
+    assert tail.composition.query_id == "sl.collateral.coverage.by_loan"
+    assert len(tail.execution.rows) == 4
+    assert tail.execution.envelope()["run_id"] == tail.execution.provenance.run_id
+    assert [event.event for event in tail.trace] == [
+        "governed_started", "no_governed_match", "composed", "verified", "executed"]
+    connection.close()
+
+
+def test_ac010_tail_trace_repair_citations_and_envelope(tmp_path: Path):
+    config, snapshot, graph, index, mapping_report = _reader_inputs(tmp_path)
+    fixture = _fixture_module()
+    db_path = tmp_path / "repair.sqlite"
+    fixture.build(db_path)
+    connection = fixture.connect(db_path)
+    raw_source = _SQLiteQuerySource(connection)
+    contexts = []
+
+    def scripted(context):
+        contexts.append(context)
+        if context["attempt"] == 1:
+            return {
+                "sql": (
+                    "SELECT br.security_id, br.fee_bps FROM borrow_rates br "
+                    "WHERE br.business_date = :as_of AND br.borrow_category = 'HTB' LIMIT 10"
+                ),
+                "source_exemplar_ids": [],
+                "limitations": ["First fixture candidate must fail verification."],
+            }
+        assert context["repair"] == {"stage": "verify", "code": "E_VERIFY_UNBOUND_PARAM"}
+        return {
+            "sql": (
+                "SELECT br.security_id, AVG(br.fee_bps) AS avg_fee_bps FROM borrow_rates br "
+                "WHERE br.business_date = :as_of GROUP BY br.security_id LIMIT 10"
+            ),
+            "source_exemplar_ids": [],
+            "limitations": ["Synthetic shadow-mode aggregate."],
+        }
+
+    outcome = ask(
+        AskRequest(
+            question="zeta frobnicator report", as_of="2026-10-22",
+            caller="lending-lead", profile="fixture_db",
+            pit_columns=("borrow_rates.business_date",), max_repairs=1,
+        ),
+        config=config, index=index, mapping_report=mapping_report, snapshot=snapshot,
+        join_graph=graph,
+        source=adapt_query_source(raw_source, profile="fixture_db", dialect="sqlite"),
+        key_id="fixture-key", signing_key=SIGNING_KEY,
+        keys={"fixture-key": SIGNING_KEY}, now=NOW, completer=scripted,
+    )
+    assert outcome.route == "no_governed_match" and outcome.tier == "generate"
+    assert len(contexts) == 2 and [context["attempt"] for context in contexts] == [1, 2]
+    assert [event.event for event in outcome.trace] == [
+        "governed_started", "no_governed_match", "composed", "verification_rejected",
+        "repair_started", "composed", "verified", "executed",
+    ]
+    assert len(raw_source.calls) == 1
+    assert "borrow_category = 'HTB'" not in raw_source.calls[0]["sql"]
+    assert outcome.execution and len(outcome.execution.rows) == 3
+    assert outcome.execution.envelope()["replay"]["expected_rows_hash"] == \
+        outcome.execution.provenance.rows_hash
+    assert any(citation.startswith("run:sfm-") for citation in outcome.citations)
+    assert any("Shadow-mode" in caveat for caveat in outcome.caveats)
+    rendered = json.dumps(outcome.as_dict(), sort_keys=True)
+    assert SIGNING_KEY.decode() not in rendered and "fixture/sqlite-in-memory" not in rendered
     connection.close()
 
 
