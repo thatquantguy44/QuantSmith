@@ -24,7 +24,7 @@
 | T-001 | Build the deterministic synthetic SQLite fixture and known-result manifest matching the declared v1 catalog; add disclosure and catalog/exemplar consistency tests. | REQ-001, NFR-001, NFR-005, AC-001 | done | `fixtures/execution/fixture_db.py`, `expected_results.json`; all end-to-end work builds on it. |
 | T-002 | Implement fail-closed structural verification, catalog/allowlist resolution, exact join-key validation, parameter matching, PIT proof, limit enforcement, canonical records, and token issuance; add the adversarial and token-mutation suites. | REQ-003, REQ-005, NFR-002, AC-003, AC-005 | done | `verify.py`; builds before execution. |
 | T-003 | Add SQLite/PostgreSQL/Oracle/Databricks dialect policies, injected timeout and normalized `EXPLAIN` cost guard, configurable token TTL, and static fixtures. | REQ-004, REQ-005, NFR-004, AC-004 | done | `dialect_queries.json`; no driver extra ships. |
-| T-004 | Implement the token-only query seam, query-only adapter, redaction, scrubbed errors, provenance, deterministic run identity, `0070` envelope, and replay comparison. | REQ-006, REQ-007, NFR-002, NFR-003, NFR-005, AC-006, AC-007 | todo | Wrap `SQLDataSource.query`; never expose `execute`/`transaction`. |
+| T-004 | Implement the token-only query seam, query-only adapter, redaction, scrubbed errors, provenance, deterministic run identity, `0070` envelope, and replay comparison. | REQ-006, REQ-007, NFR-002, NFR-003, NFR-005, AC-006, AC-007 | done | `execute.py`; wraps only `query`, never exposes `execute`/`transaction`. |
 | T-005 | Implement retrieval-first composition (`reuse` → `adapt` → `generate`) with eligibility, bound parameters, canonical evidence, catalog constraints, and injected completion. | REQ-002, AC-002 | todo | Generated SQL remains outside the index. |
 | T-006 | Implement the governed `Reader`: available-source lookup, plan binding, verified execution, exact output-to-`Fact` mapping, batch provenance, and unavailable-source handling. | REQ-008, NFR-003, AC-008 | todo | Reader half of parent T-032. |
 | T-007 | Implement typed governed-first `ask` routing and the shadow-mode tail, including terminal clarification/unavailable outcomes and bounded repair. | REQ-009, REQ-010, AC-009, AC-010 | todo | No final `0117` grounding gate yet. |
@@ -47,8 +47,8 @@ All implementation tests live in `tests/test_sfmeridian_sql.py` unless noted.
 | AC-003 | `test_ac003_verifier_rejects_adversarial_queries_without_execution` | done |
 | AC-004 | `test_ac004_dialect_limits_pit_timeout_and_cost_guard` | done |
 | AC-005 | `test_ac005_token_binds_every_context_field_and_expires` | done |
-| AC-006 | `test_ac006_query_only_execution_redacts_and_scrubs` | todo |
-| AC-007 | `test_ac007_execution_provenance_envelope_and_replay` | todo |
+| AC-006 | `test_ac006_query_only_execution_redacts_and_scrubs` | done |
+| AC-007 | `test_ac007_execution_provenance_envelope_and_replay` | done |
 | AC-008 | `test_ac008_reader_facts_reproduce_sources_and_drift_is_unavailable` | todo |
 | AC-009 | `test_ac009_governed_first_routing_and_terminal_clarification` | todo |
 | AC-010 | `test_ac010_tail_trace_repair_citations_and_envelope` | todo |

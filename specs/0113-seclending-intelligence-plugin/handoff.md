@@ -12,12 +12,13 @@ plugin.
 ## Start here (in order)
 
 **The `0116` spec was approved on 2026-10-23. Implementation is in progress;
-T-001 through T-003 are built: the synthetic execution fixture, `sql.verify`
+T-001 through T-004 are built: the synthetic execution fixture, `sql.verify`
 with exact-context tokens and adversarial checks, and four-dialect policy with
-timeout, normalized cost guard, and configurable token TTL. Next is T-004: the
-token-only query execution seam.**
+timeout, normalized cost guard, configurable token TTL, and the token-only
+query execution seam with redaction, provenance, and replay. Next is T-005:
+retrieval-first SQL composition.**
 
-0. **Baseline verified (2026-10-23)**: SFMeridian tests 61 passed, 1 skipped;
+0. **Baseline verified (2026-10-23)**: SFMeridian tests 63 passed, 1 skipped;
    the steward completed with 4/5 metrics bound and six amendments staged.
    The full gate has unrelated pre-existing venture catalog/index/count
    findings on `main`; the `0116` targeted spec gate has no findings.
@@ -27,10 +28,10 @@ token-only query execution seam.**
       `fixtures/catalog/fixture_db.catalog.json`~~ (T-001 done);
    2. ~~`sql.verify` and its adversarial suite~~ (T-002 done);
    3. ~~dialect policies, timeout/cost guard, and token TTL~~ (T-003 done);
-   4. **`sql.execute` (T-004 next; the read-only seam, runs only verified SQL);**
-   5. the `0080` `Reader` over `available` metric sources;
-   6. governed-first routing (`ask`) through `0080` `answer()`;
-   7. `sql.compose` (`reuse` → `adapt` → `generate`);
+   4. ~~`sql.execute` (the read-only seam, runs only verified SQL)~~ (T-004 done);
+   5. **`sql.compose` (`reuse` → `adapt` → `generate`; T-005 next);**
+   6. the `0080` `Reader` over `available` metric sources;
+   7. governed-first routing (`ask`) through `0080` `answer()`;
    8. the write-back runtime refusal;
    9. agents `sql_composer` (C-03) and `sfmeridian_orchestrator` (C-04);
    10. docs, counts, registry, skills export, gates, full suite, commit, push,
@@ -48,7 +49,7 @@ token-only query execution seam.**
 | [`0114`](../0114-sfmeridian-query-repository-indexer/spec.md) | Config, query-repository indexer, search, feedback inbox, tool registry, agent loop harness; agent `query_librarian` (C-01) | **Built**, Approved | `tests/test_sfmeridian_indexer.py` (17 ACs) |
 | [`0115`](../0115-sfmeridian-schema-catalog-mapping-access/spec.md) | Catalog snapshots, drift exclusion, governed semantic mapping, metric-source availability, pack amendments, access controls; agent `semantic_mapping_steward` (C-02) | **Built**, Approved | `tests/test_sfmeridian_mapping.py` (17 ACs) |
 | [`0121`](../0121-sfmeridian-adaptive-dataset-research/spec.md) | Adaptive dataset research (Dataset Intake Investigator POC); agent `lending_data_researcher` (C-10) | **Built**, Approved; AC-016 (live connectors) open | `tests/test_sfmeridian_research.py` (24 ACs, 1 skipped) |
-| [`0116`](../0116-sfmeridian-governed-sql-composition/spec.md) | Governed tier, grounded SQL composition, verification & execution; agents `sql_composer` (C-03), `sfmeridian_orchestrator` (C-04) | **Approved — implementation in progress; T-001 fixture built** | `tests/test_sfmeridian_sql.py` (AC-001) |
+| [`0116`](../0116-sfmeridian-governed-sql-composition/spec.md) | Governed tier, grounded SQL composition, verification & execution; agents `sql_composer` (C-03), `sfmeridian_orchestrator` (C-04) | **Approved — implementation in progress; T-001–T-004 built** | `tests/test_sfmeridian_sql.py` (AC-001, AC-003–AC-007) |
 | `0117`–`0120` | Grounding & evaluation gate; packaging & surfaces; analytics agents; reporting checks | Reserved | — |
 
 Last verified state (2026-10-22, commit `a793d48`): full suite **1587 passed,

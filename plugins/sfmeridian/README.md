@@ -16,7 +16,8 @@ pack-amendment proposals, and access controls (`0115`); adaptive dataset
 research (`0121`); three loop agents, `query_librarian`,
 `semantic_mapping_steward`, and `lending_data_researcher`; and the first three
 `0116` slices (executable fixture, token-bound verifier, four-dialect policy,
-and cost guard). Not yet: SQL composition and execution (remaining `0116`),
+cost guard, and query-only execution with redaction/provenance/replay). Not
+yet: SQL composition, governed Reader/routing, and agents (remaining `0116`),
 grounded answers and the evaluation gate (`0117`), the MCP server and Claude
 Code plugin (`0118`).
 

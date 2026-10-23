@@ -10,7 +10,7 @@
 >
 > **Current state and where to pick up: [`handoff.md`](handoff.md).** Built:
 > Phases 0, 1, 2, 2b. Phase 3 (`0116`) is approved and implementation is in
-> progress; T-001 (the synthetic execution fixture) is built.
+> progress; T-001–T-004 (fixture, verifier/dialects, and execution) are built.
 
 ## Reserved Child Specs
 

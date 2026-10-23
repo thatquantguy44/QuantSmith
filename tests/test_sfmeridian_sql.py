@@ -6,6 +6,7 @@ SQLite fixture on which the verifier, executor, Reader, and ``ask`` tests build.
 
 from __future__ import annotations
 
+import copy
 import importlib.util
 import json
 import shutil
@@ -21,8 +22,10 @@ FIXTURES = PLUGIN / "fixtures"
 EXECUTION = FIXTURES / "execution"
 sys.path.insert(0, str(PLUGIN / "src"))
 
+from sfmeridian.access import caller as resolve_caller
 from sfmeridian.catalog import load_declared
 from sfmeridian.config import ConfigError, apply_call_overrides, load_config, read_file
+from sfmeridian.execute import ExecutionError, adapt_query_source, execute, replay
 from sfmeridian.frontmatter import split_front_matter
 from sfmeridian.index import build_index
 from sfmeridian.verify import (
@@ -141,6 +144,44 @@ def _verify(config, snapshot, graph, sql, params=None, **request):
 
 def _codes(outcome):
     return {finding.code for finding in outcome.findings}
+
+
+class _SQLiteQuerySource:
+    read_only = True
+    profile = "fixture_db"
+    dialect = "sqlite"
+
+    def __init__(self, connection):
+        self.connection = connection
+        self.calls = []
+
+    def query(self, sql, params, *, timeout_s, row_limit):
+        self.calls.append({"sql": sql, "params": dict(params), "timeout_s": timeout_s,
+                           "row_limit": row_limit})
+        return [dict(row) for row in self.connection.execute(sql, params).fetchall()]
+
+
+def _execution_case(tmp_path: Path, *, clearance="public"):
+    config, snapshot, graph = _verification_inputs(tmp_path)
+    fixture = _fixture_module()
+    db_path = tmp_path / "execution.sqlite"
+    fixture.build(db_path)
+    query_path = FIXTURES / "query_repo" / "lending" / "on_loan_value_by_counterparty.sql"
+    _, sql, _ = split_front_matter(query_path.read_text(), str(query_path))
+    request = VerificationRequest(
+        sql=sql, params={"as_of": "2026-10-22"}, profile="fixture_db",
+        as_of="2026-10-22", require_pit=True,
+        pit_columns=("sec_lending_book.business_date",), clearance=clearance,
+        composition_path="reuse", query_id="sl.on_loan_value.by_counterparty.as_of",
+        trusted_literal_hashes=trusted_predicate_literals(sql, "sqlite"),
+    )
+    outcome = verify(
+        request, profile=config.profile("fixture_db"), snapshot=snapshot, join_graph=graph,
+        config_hash=config.hash, key_id="fixture-key", signing_key=SIGNING_KEY, now=NOW,
+        ttl_s=config.data["verification"]["token_ttl_s"],
+    )
+    assert outcome.ok and outcome.verified
+    return config, snapshot, graph, fixture, db_path, request, outcome.verified
 
 
 def test_ac003_verifier_rejects_adversarial_queries_without_execution(tmp_path: Path):
@@ -382,6 +423,179 @@ def test_ac005_token_binds_every_context_field_and_expires(tmp_path: Path):
     public = verified.public()
     rendered = json.dumps(public, sort_keys=True)
     assert "2026-10-22" not in rendered and SIGNING_KEY.decode() not in rendered
+
+
+def test_ac006_query_only_execution_redacts_and_scrubs(tmp_path: Path):
+    config, snapshot, _, fixture, db_path, _, verified = _execution_case(tmp_path)
+    who = resolve_caller(config, "public-reader")
+    connection = fixture.connect(db_path)
+    raw_source = _SQLiteQuerySource(connection)
+    source = adapt_query_source(raw_source, profile="fixture_db", dialect="sqlite")
+    assert not hasattr(source, "execute") and not hasattr(source, "transaction")
+
+    ticks = iter((1_000_000_000, 1_000_000_000))
+    result = execute(
+        verified, token=verified.token, params={"as_of": "2026-10-22"},
+        keys={"fixture-key": SIGNING_KEY}, now=NOW, config=config,
+        snapshot_id=snapshot["snapshot_id"], caller=who, source=source,
+        source_exemplars=("sl.on_loan_value.by_counterparty.as_of",),
+        monotonic_ns=lambda: next(ticks),
+    )
+    assert len(raw_source.calls) == 1
+    assert raw_source.calls[0]["timeout_s"] == 30 and raw_source.calls[0]["row_limit"] == 500
+    assert result.provenance.elapsed_ms == 0 and result.provenance.row_count == 3
+    assert result.provenance.withheld_columns == ("counterparty_id",)
+    assert {row["counterparty_id"] for row in result.rows} == {"<redacted>"}
+    assert result.provenance.parameters == {"as_of": "2026-10-22"}
+    assert result.provenance.source_exemplars == ("sl.on_loan_value.by_counterparty.as_of",)
+    connection.close()
+
+    calls_before = len(raw_source.calls)
+    with pytest.raises(ExecutionError, match="E_EXEC_TOKEN"):
+        execute(
+            verified, token=verified.token, params={"as_of": "2026-10-21"},
+            keys={"fixture-key": SIGNING_KEY}, now=NOW, config=config,
+            snapshot_id=snapshot["snapshot_id"], caller=who, source=source,
+        )
+    assert len(raw_source.calls) == calls_before
+    with pytest.raises(ExecutionError, match="query-only adapter"):
+        execute(
+            verified, token=verified.token, params=verified.params,
+            keys={"fixture-key": SIGNING_KEY}, now=NOW, config=config,
+            snapshot_id=snapshot["snapshot_id"], caller=who, source=raw_source,
+        )
+
+    class WritableSource:
+        read_only = False
+
+        def query(self, *_args, **_kwargs):  # pragma: no cover - must not be reachable
+            raise AssertionError("query should not be called")
+
+    with pytest.raises(ExecutionError, match="not declared read-only"):
+        adapt_query_source(WritableSource(), profile="fixture_db", dialect="sqlite")
+
+    class BrokenSource:
+        read_only = True
+        profile = "fixture_db"
+        dialect = "sqlite"
+
+        def query(self, *_args, **_kwargs):
+            raise RuntimeError("password=synthetic-secret-must-not-leak")
+
+    broken = adapt_query_source(BrokenSource(), profile="fixture_db", dialect="sqlite")
+    with pytest.raises(ExecutionError) as failure:
+        execute(
+            verified, token=verified.token, params=verified.params,
+            keys={"fixture-key": SIGNING_KEY}, now=NOW, config=config,
+            snapshot_id=snapshot["snapshot_id"], caller=who, source=broken,
+        )
+    assert failure.value.code == "E_EXEC_TIMEOUT"
+    assert "synthetic-secret-must-not-leak" not in str(failure.value)
+
+    # Non-as-of inputs are always redacted in provenance, even when harmless
+    # fixture values are used, and selected restricted columns stay masked.
+    sql = ("SELECT loan_id, counterparty_id FROM sec_lending_book "
+           "WHERE business_date = :as_of AND counterparty_id = :counterparty LIMIT 5")
+    request = VerificationRequest(
+        sql, {"as_of": "2026-10-22", "counterparty": "CP-A"}, "fixture_db",
+        as_of="2026-10-22", require_pit=True,
+        pit_columns=("sec_lending_book.business_date",), clearance="public",
+    )
+    outcome = verify(
+        request, profile=config.profile("fixture_db"), snapshot=snapshot, join_graph=[],
+        config_hash=config.hash, key_id="fixture-key", signing_key=SIGNING_KEY, now=NOW,
+    )
+    assert outcome.ok and outcome.verified
+    connection = fixture.connect(db_path)
+    source = adapt_query_source(_SQLiteQuerySource(connection), profile="fixture_db", dialect="sqlite")
+    sensitive = execute(
+        outcome.verified, token=outcome.verified.token, params=request.params,
+        keys={"fixture-key": SIGNING_KEY}, now=NOW, config=config,
+        snapshot_id=snapshot["snapshot_id"], caller=who, source=source,
+    )
+    rendered = json.dumps(sensitive.as_dict(), sort_keys=True)
+    assert sensitive.provenance.parameters["counterparty"] == "<redacted>"
+    assert "CP-A" not in rendered and SIGNING_KEY.decode() not in rendered
+    connection.close()
+
+
+def test_ac007_execution_provenance_envelope_and_replay(tmp_path: Path):
+    config, snapshot, graph, fixture, db_path, request, verified = _execution_case(tmp_path)
+    who = resolve_caller(config, "public-reader")
+
+    def run_source():
+        connection = fixture.connect(db_path)
+        raw = _SQLiteQuerySource(connection)
+        return connection, adapt_query_source(raw, profile="fixture_db", dialect="sqlite")
+
+    connection, source = run_source()
+    ticks = iter((2_000_000_000, 2_000_000_000))
+    first = execute(
+        verified, token=verified.token, params=request.params,
+        keys={"fixture-key": SIGNING_KEY}, now=NOW, config=config,
+        snapshot_id=snapshot["snapshot_id"], caller=who, source=source,
+        source_exemplars=(request.query_id,), monotonic_ns=lambda: next(ticks),
+    )
+    connection.close()
+    provenance = first.provenance.as_dict()
+    required = {
+        "run_id", "query_id", "sql_hash", "params_hash", "path", "source_exemplars",
+        "profile", "dialect", "snapshot_id", "config_hash", "policy_version", "as_of",
+        "parameter_names", "parameters", "row_count", "truncated", "elapsed_ms",
+        "explain_cost", "clearance", "withheld_columns", "rows_hash",
+    }
+    assert required <= set(provenance)
+    envelope = first.envelope()
+    assert envelope["schema_version"] == "quantsmith.orchestration.run.v1"
+    assert envelope["run_id"] == provenance["run_id"]
+    assert envelope["replay"]["expected_rows_hash"] == provenance["rows_hash"]
+    assert [event["event"] for event in envelope["audit_events"]] == [
+        "gate_result", "data_source_read", "run_completed"]
+
+    connection, source = run_source()
+    ticks = iter((3_000_000_000, 3_000_000_000))
+    same = replay(
+        first, request, profile=config.profile("fixture_db"), snapshot=snapshot,
+        join_graph=graph, config=config, key_id="fixture-key", signing_key=SIGNING_KEY,
+        keys={"fixture-key": SIGNING_KEY}, now=NOW, source=source, caller=who,
+        source_exemplars=(request.query_id,),
+        ttl_s=config.data["verification"]["token_ttl_s"], monotonic_ns=lambda: next(ticks),
+    )
+    connection.close()
+    assert same.status == "replayed" and same.mismatches == () and same.current
+    assert same.current.rows == first.rows and same.current.provenance.rows_hash == first.provenance.rows_hash
+
+    writer = fixture.connect(db_path, query_only=False)
+    writer.execute(
+        "UPDATE sec_lending_book SET on_loan_value = on_loan_value + 1 "
+        "WHERE loan_id = 'LOAN-A-A' AND business_date = '2026-10-22'")
+    writer.commit()
+    writer.close()
+    connection, source = run_source()
+    changed_rows = replay(
+        first, request, profile=config.profile("fixture_db"), snapshot=snapshot,
+        join_graph=graph, config=config, key_id="fixture-key", signing_key=SIGNING_KEY,
+        keys={"fixture-key": SIGNING_KEY}, now=NOW, source=source, caller=who,
+        source_exemplars=(request.query_id,),
+        ttl_s=config.data["verification"]["token_ttl_s"],
+    )
+    connection.close()
+    assert changed_rows.status == "mismatch" and "rows_hash" in changed_rows.mismatches
+
+    fixture.build(db_path)
+    changed_snapshot = copy.deepcopy(snapshot)
+    changed_snapshot["snapshot_id"] = "changed-snapshot"
+    connection, source = run_source()
+    changed_catalog = replay(
+        first, request, profile=config.profile("fixture_db"), snapshot=changed_snapshot,
+        join_graph=graph, config=config, key_id="fixture-key", signing_key=SIGNING_KEY,
+        keys={"fixture-key": SIGNING_KEY}, now=NOW, source=source, caller=who,
+        source_exemplars=(request.query_id,),
+        ttl_s=config.data["verification"]["token_ttl_s"],
+    )
+    connection.close()
+    assert changed_catalog.status == "mismatch"
+    assert {"run_id", "snapshot_id"} <= set(changed_catalog.mismatches)
 
 
 if __name__ == "__main__":  # pragma: no cover
