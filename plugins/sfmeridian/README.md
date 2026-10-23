@@ -16,10 +16,10 @@ pack-amendment proposals, and access controls (`0115`); adaptive dataset
 research (`0121`); three loop agents, `query_librarian`,
 `semantic_mapping_steward`, and `lending_data_researcher`; and the first three
 `0116` slices (executable fixture, token-bound verifier, four-dialect policy,
-cost guard, and query-only execution with redaction/provenance/replay). Not
-yet: SQL composition, governed Reader/routing, and agents (remaining `0116`),
-grounded answers and the evaluation gate (`0117`), the MCP server and Claude
-Code plugin (`0118`).
+cost guard, query-only execution with redaction/provenance/replay, and the
+retrieval-first composer). Not yet: the governed Reader/routing and agents
+(remaining `0116`), grounded answers and the evaluation gate (`0117`), the MCP
+server and Claude Code plugin (`0118`).
 
 **Contributors:** current state, the next build (`0116`), open decisions, and
 repo conventions are in `specs/0113-seclending-intelligence-plugin/handoff.md`.

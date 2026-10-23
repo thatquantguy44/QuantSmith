@@ -77,6 +77,7 @@ def _exemplar(repo: Mapping[str, Any], snapshot_ref: str, path: str, sql_sha: st
         "path": path,
         "line_span": list(parsed.line_span),
         "sql_sha256": sql_sha,
+        "sql": parsed.sql,
         "normalized_sql_hash": parsed.structure["normalized_sql_hash"],
         "title": meta.get("title"),
         "intent": " ".join(str(meta.get("intent", "")).split()) or None,

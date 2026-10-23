@@ -24,10 +24,11 @@ sys.path.insert(0, str(PLUGIN / "src"))
 
 from sfmeridian.access import caller as resolve_caller
 from sfmeridian.catalog import load_declared
+from sfmeridian.compose import CompositionError, CompositionRequest, compose
 from sfmeridian.config import ConfigError, apply_call_overrides, load_config, read_file
 from sfmeridian.execute import ExecutionError, adapt_query_source, execute, replay
 from sfmeridian.frontmatter import split_front_matter
-from sfmeridian.index import build_index
+from sfmeridian.index import build_index, load_index
 from sfmeridian.verify import (
     TokenError,
     VerificationRequest,
@@ -182,6 +183,111 @@ def _execution_case(tmp_path: Path, *, clearance="public"):
     )
     assert outcome.ok and outcome.verified
     return config, snapshot, graph, fixture, db_path, request, outcome.verified
+
+
+def test_ac002_composition_reuse_adapt_generate_with_evidence(tmp_path: Path):
+    config, snapshot, graph = _verification_inputs(tmp_path)
+    index_dir = config.resolve_path(config.data["index"]["dir"])
+    index = load_index(index_dir)
+    before = {path.name: path.read_bytes() for path in index_dir.iterdir() if path.is_file()}
+    profile = config.profile("fixture_db")
+
+    reuse_request = CompositionRequest(
+        question="on loan value by counterparty as of", profile="fixture_db", params={},
+        as_of="2026-10-22",
+    )
+    reuse = compose(reuse_request, index=index, profile=profile, snapshot=snapshot)
+    assert reuse.path == "reuse" and reuse.query_id == "sl.on_loan_value.by_counterparty.as_of"
+    assert reuse.params == {"as_of": "2026-10-22"}
+    assert reuse.as_dict()["params"] == {"as_of": "2026-10-22"}
+    assert len(reuse.source_exemplars) == 1 and reuse.catalog_objects == (
+        "main.counterparties", "main.sec_lending_book")
+    base = index.get(str(reuse.source_exemplars[0]["id"]))
+    assert base and reuse.sql == base["sql"]
+    assert compose(reuse_request, index=index, profile=profile, snapshot=snapshot).content_hash == reuse.content_hash
+
+    calls = []
+
+    def scripted(context):
+        calls.append(context)
+        if context["mode"] == "adapt":
+            return {
+                "sql": (
+                    "SELECT bk.counterparty_id, SUM(bk.on_loan_qty) AS on_loan_qty "
+                    "FROM sec_lending_book bk WHERE bk.business_date = :as_of "
+                    "GROUP BY bk.counterparty_id LIMIT 500"
+                ),
+                "source_exemplar_ids": [context["exemplars"][0]["exemplar_id"]],
+                "limitations": ["Synthetic fixture adaptation."],
+            }
+        assert context["mode"] == "generate" and context["exemplars"] == []
+        return {
+            "sql": (
+                "SELECT br.security_id, AVG(br.fee_bps) AS avg_fee_bps "
+                "FROM borrow_rates br WHERE br.business_date = :as_of "
+                "GROUP BY br.security_id LIMIT 100"
+            ),
+            "source_exemplar_ids": [],
+            "limitations": ["Generated candidate; verification is still required."],
+        }
+
+    adapt = compose(
+        CompositionRequest(
+            question="on loan totals by borrower", profile="fixture_db", params={},
+            as_of="2026-10-22",
+        ),
+        index=index, profile=profile, snapshot=snapshot, completer=scripted,
+    )
+    assert adapt.path == "adapt" and adapt.query_id is None and len(adapt.source_exemplars) == 1
+    assert adapt.limitations == ("Synthetic fixture adaptation.",)
+    adapted_verification = verify(
+        adapt.verification_request(), profile=profile, snapshot=snapshot, join_graph=graph,
+        config_hash=config.hash, key_id="fixture-key", signing_key=SIGNING_KEY, now=NOW,
+    )
+    assert adapted_verification.ok, adapted_verification.as_dict()
+
+    generated = compose(
+        CompositionRequest(
+            question="zeta frobnicator report", profile="fixture_db", params={},
+            as_of="2026-10-22", pit_columns=("borrow_rates.business_date",),
+        ),
+        index=index, profile=profile, snapshot=snapshot, completer=scripted,
+    )
+    assert generated.path == "generate" and generated.source_exemplars == ()
+    assert generated.catalog_objects == ("main.borrow_rates",)
+    generated_verification = verify(
+        generated.verification_request(), profile=profile, snapshot=snapshot, join_graph=graph,
+        config_hash=config.hash, key_id="fixture-key", signing_key=SIGNING_KEY, now=NOW,
+    )
+    assert generated_verification.ok, generated_verification.as_dict()
+    assert [call["mode"] for call in calls] == ["adapt", "generate"]
+    completion_payload = json.dumps(calls, sort_keys=True)
+    assert "secret_ref" not in completion_payload and "expected_results" not in completion_payload
+
+    after = {path.name: path.read_bytes() for path in index_dir.iterdir() if path.is_file()}
+    assert after == before
+    assert all(generated.sql not in data.decode("utf-8", errors="ignore") for data in after.values())
+
+    with pytest.raises(CompositionError, match="not in catalog"):
+        compose(
+            CompositionRequest(
+                question="omega unindexed request", profile="fixture_db", params={},
+                as_of="2026-10-22", pit_columns=("borrow_rates.business_date",),
+            ),
+            index=index, profile=profile, snapshot=snapshot,
+            completer=lambda _context: {
+                "sql": "SELECT invented FROM borrow_rates WHERE business_date = :as_of LIMIT 5",
+                "source_exemplar_ids": [], "limitations": ["fixture rejection"],
+            },
+        )
+    with pytest.raises(CompositionError, match="no-governed-match"):
+        compose(
+            CompositionRequest(
+                question="on loan value", profile="fixture_db", params={},
+                route_outcome="governed_answer",
+            ),
+            index=index, profile=profile, snapshot=snapshot,
+        )
 
 
 def test_ac003_verifier_rejects_adversarial_queries_without_execution(tmp_path: Path):
