@@ -14,11 +14,12 @@ shared tool registry, the agent loop harness; schema catalog snapshots,
 drift exclusion, the governed semantic mapping, metric-source availability,
 pack-amendment proposals, and access controls (`0115`); adaptive dataset
 research (`0121`); three loop agents, `query_librarian`,
-`semantic_mapping_steward`, and `lending_data_researcher`; and the first seven
+`semantic_mapping_steward`, and `lending_data_researcher`; and the first eight
 `0116` slices (executable fixture, token-bound verifier, four-dialect policy,
 cost guard, query-only execution with redaction/provenance/replay, and the
 retrieval-first composer, plus the governed metric-source Reader with batch
-provenance and governed-first typed routing with a bounded shadow tail). Not yet: shared tools and agents
+provenance, governed-first typed routing with a bounded shadow tail, and shared
+token-only tools with runtime write-back refusal). Not yet: the two `0116` loop agents
 (remaining `0116`), grounded answers and the evaluation gate (`0117`), the MCP
 server and Claude Code plugin (`0118`).
 

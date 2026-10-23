@@ -331,8 +331,10 @@ def default_registry() -> ToolRegistry:
     ]
     for tool in tools:
         reg.register(tool)
+    from .governed.tools import register as register_governed
     from .research.tools import register as register_research
     from .semantic_tools import register as register_semantic
     register_research(reg)
     register_semantic(reg)
+    register_governed(reg)
     return reg

@@ -34,6 +34,7 @@ from sfmeridian.governed.ask import AskRequest, ask
 from sfmeridian.governed.reader import MetricSourceUnavailable, Reader, fact_batch_hash
 from sfmeridian.index import build_index, load_index
 from sfmeridian.mapping import Vocabulary, validate_mapping
+from sfmeridian.tools import ToolContext, default_registry
 from sfmeridian.verify import (
     TokenError,
     VerificationRequest,
@@ -994,6 +995,104 @@ def test_ac010_tail_trace_repair_citations_and_envelope(tmp_path: Path):
     assert any("Shadow-mode" in caveat for caveat in outcome.caveats)
     rendered = json.dumps(outcome.as_dict(), sort_keys=True)
     assert SIGNING_KEY.decode() not in rendered and "fixture/sqlite-in-memory" not in rendered
+    connection.close()
+
+
+def test_ac011_writeback_always_refused_and_no_write_tool(tmp_path: Path):
+    def enable_writeback(data):
+        data["governed_tier"]["writeback"] = {
+            "enabled": True, "target": {"name": "fixture-insights", "class": "analytics"}}
+
+    config, _snapshot, _graph, _index, _mapping = _reader_inputs(
+        tmp_path, mutate_config=enable_writeback)
+    fixture = _fixture_module()
+    db_path = tmp_path / "writeback.sqlite"
+    fixture.build(db_path)
+    connection = fixture.connect(db_path)
+    raw_source = _SQLiteQuerySource(connection)
+    context = ToolContext(
+        config=config, today="2026-10-22", actor="lending-lead",
+        clients={
+            "query_sources": {"fixture_db": raw_source},
+            "verification": {
+                "key_id": "fixture-key", "signing_key": SIGNING_KEY,
+                "keys": {"fixture-key": SIGNING_KEY}, "now": NOW,
+            },
+        },
+    )
+    registry = default_registry()
+    assert config.data["governed_tier"]["writeback"]["enabled"] is True
+    for action in ("publish", "persist", "submit", "reverse"):
+        refused = registry.call("ask", {
+            "question": "on loan value today", "as_of": "2026-10-22",
+            "profile": "fixture_db", "action": action,
+        }, context)
+        assert not refused.ok and refused.error_code == "E_WRITEBACK_DISABLED"
+        assert refused.error
+    assert raw_source.calls == []
+    assert "write" not in {registry.get(name).effect for name in registry.names()}
+    assert not any("writeback" in name for name in registry.names())
+    connection.close()
+
+
+def test_ac012_shared_registry_schemas_effects_and_no_raw_execute(tmp_path: Path):
+    config, _snapshot, _graph, _index, _mapping = _reader_inputs(tmp_path)
+    fixture = _fixture_module()
+    db_path = tmp_path / "tools.sqlite"
+    fixture.build(db_path)
+    connection = fixture.connect(db_path)
+    raw_source = _SQLiteQuerySource(connection)
+    context = ToolContext(
+        config=config, today="2026-10-22", actor="lending-lead",
+        clients={
+            "query_sources": {"fixture_db": raw_source},
+            "verification": {
+                "key_id": "fixture-key", "signing_key": SIGNING_KEY,
+                "keys": {"fixture-key": SIGNING_KEY}, "now": NOW,
+            },
+        },
+    )
+    registry = default_registry()
+    assert {name: registry.get(name).effect for name in (
+        "sql.compose", "sql.verify", "sql.execute", "ask")} == {
+            "sql.compose": "read", "sql.verify": "read",
+            "sql.execute": "execute_read", "ask": "execute_read",
+        }
+    execute_schema = registry.get("sql.execute").input_schema
+    assert set(execute_schema["properties"]) == {"token", "params", "caller"}
+    assert "sql" not in execute_schema["properties"]
+    assert "writeback" not in registry.get("ask").input_schema["properties"]
+
+    composed = registry.call("sql.compose", {
+        "question": "Collateral coverage ratio by loan", "profile": "fixture_db",
+        "as_of": "2026-10-22", "route_outcome": "no_governed_match",
+    }, context)
+    assert composed.ok and composed.output["path"] == "reuse"
+    checked = registry.call("sql.verify", {
+        "composition_id": composed.output["composition_id"],
+    }, context)
+    assert checked.ok and checked.output["ok"] is True
+    token = checked.output["token"]
+    ran = registry.call("sql.execute", {
+        "token": token, "params": {"as_of": "2026-10-22"},
+    }, context)
+    assert ran.ok and len(ran.output["rows"]) == 4 and len(raw_source.calls) == 1
+    governed = registry.call("ask", {
+        "question": "on loan value by counterparty today", "as_of": "2026-10-22",
+        "profile": "fixture_db",
+    }, context)
+    assert governed.ok and governed.output["route"] == "governed_answer"
+    assert governed.output["tier"] == "governed" and len(raw_source.calls) == 2
+
+    for tool_name, payload in (
+        ("sql.verify", {"composition_id": composed.output["composition_id"], "sql": "SELECT 1"}),
+        ("sql.execute", {"token": token, "params": {"as_of": "2026-10-22"}, "sql": "SELECT 1"}),
+        ("ask", {"question": "x", "as_of": "2026-10-22", "profile": "fixture_db",
+                 "writeback": {"enabled": True}}),
+    ):
+        rejected = registry.call(tool_name, payload, context)
+        assert not rejected.ok and rejected.error_code == "E_TOOL_INPUT"
+    assert len(raw_source.calls) == 2
     connection.close()
 
 
