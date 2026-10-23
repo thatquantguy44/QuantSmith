@@ -9,8 +9,8 @@
 > are planning estimates for one engineer, not commitments.
 >
 > **Current state and where to pick up: [`handoff.md`](handoff.md).** Built:
-> Phases 0, 1, 2, 2b. Phase 3 (`0116`) is drafted and awaits owner approval
-> before implementation.
+> Phases 0, 1, 2, 2b. Phase 3 (`0116`) is approved and implementation is in
+> progress; T-001 (the synthetic execution fixture) is built.
 
 ## Reserved Child Specs
 
@@ -75,7 +75,7 @@ of `0116`'s verifier.
 **Exit:** `0121` AC-001–AC-024 pass except AC-016 (live connectors), which
 stays open until nonproduction environments exist.
 
-### Phase 3 — Grounded SQL (`0116`) · ~3–4 weeks · **MVP** · **draft; awaiting approval**
+### Phase 3 — Grounded SQL (`0116`) · ~3–4 weeks · **MVP** · **in progress**
 
 Retrieval-first composition, deterministic verification, read-only execution,
 provenance and replay; the end-to-end `ask` tool in shadow mode.

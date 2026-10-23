@@ -1,7 +1,7 @@
 # Plan: SFMeridian — Governed SQL Composition, Verification & Execution
 
 - **Spec:** 0116-sfmeridian-governed-sql-composition (`spec.md`)
-- **Status:** Draft
+- **Status:** Approved
 - **Author:** Joshua Lutkemuller, CFA
 - **Last updated:** 2026-10-23
 

@@ -11,20 +11,19 @@ plugin.
 
 ## Start here (in order)
 
-**The `0116` spec draft is written and its targeted gate passes. The next task
-is owner review and approval; write no runtime code before approval.**
+**The `0116` spec was approved on 2026-10-23. Implementation is in progress;
+T-001 (the synthetic execution fixture) is built. Next is T-002: `sql.verify`
+and its adversarial and token-mutation suites.**
 
 0. **Baseline verified (2026-10-23)**: SFMeridian tests 57 passed, 1 skipped;
    the steward completed with 4/5 metrics bound and six amendments staged.
    The full gate has unrelated pre-existing venture catalog/index/count
    findings on `main`; the `0116` targeted spec gate has no findings.
-1. **Owner review**: read `spec.md`, `plan.md`, and `tasks.md` in
-   `specs/0116-sfmeridian-governed-sql-composition/`. Approve them or request
-   changes. The draft contains no runtime code.
-2. **After approval, build in this order** (each step depends on the one before):
-   1. a synthetic SQLite fixture database matching
-      `fixtures/catalog/fixture_db.catalog.json` (see §3 "Inputs");
-   2. `sql.verify` and its adversarial suite;
+1. **Continue the approved build in this order** (each step depends on the one
+   before):
+   1. ~~a synthetic SQLite fixture database matching
+      `fixtures/catalog/fixture_db.catalog.json`~~ (T-001 done);
+   2. **`sql.verify` and its adversarial suite (next);**
    3. `sql.execute` (the read-only seam; runs only verified SQL);
    4. the `0080` `Reader` over `available` metric sources;
    5. governed-first routing (`ask`) through `0080` `answer()`;
@@ -46,7 +45,7 @@ is owner review and approval; write no runtime code before approval.**
 | [`0114`](../0114-sfmeridian-query-repository-indexer/spec.md) | Config, query-repository indexer, search, feedback inbox, tool registry, agent loop harness; agent `query_librarian` (C-01) | **Built**, Approved | `tests/test_sfmeridian_indexer.py` (17 ACs) |
 | [`0115`](../0115-sfmeridian-schema-catalog-mapping-access/spec.md) | Catalog snapshots, drift exclusion, governed semantic mapping, metric-source availability, pack amendments, access controls; agent `semantic_mapping_steward` (C-02) | **Built**, Approved | `tests/test_sfmeridian_mapping.py` (17 ACs) |
 | [`0121`](../0121-sfmeridian-adaptive-dataset-research/spec.md) | Adaptive dataset research (Dataset Intake Investigator POC); agent `lending_data_researcher` (C-10) | **Built**, Approved; AC-016 (live connectors) open | `tests/test_sfmeridian_research.py` (24 ACs, 1 skipped) |
-| [`0116`](../0116-sfmeridian-governed-sql-composition/spec.md) | Governed tier, grounded SQL composition, verification & execution; agents `sql_composer` (C-03), `sfmeridian_orchestrator` (C-04) | **Draft — awaiting owner approval; no runtime code** | targeted spec gate clean |
+| [`0116`](../0116-sfmeridian-governed-sql-composition/spec.md) | Governed tier, grounded SQL composition, verification & execution; agents `sql_composer` (C-03), `sfmeridian_orchestrator` (C-04) | **Approved — implementation in progress; T-001 fixture built** | `tests/test_sfmeridian_sql.py` (AC-001) |
 | `0117`–`0120` | Grounding & evaluation gate; packaging & surfaces; analytics agents; reporting checks | Reserved | — |
 
 Last verified state (2026-10-22, commit `a793d48`): full suite **1587 passed,

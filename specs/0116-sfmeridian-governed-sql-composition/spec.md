@@ -1,9 +1,9 @@
 # Spec: SFMeridian — Governed SQL Composition, Verification & Execution
 
 - **ID:** 0116-sfmeridian-governed-sql-composition
-- **Status:** Draft
+- **Status:** Approved
 - **Author:** Joshua Lutkemuller, CFA
-- **Approver:** Pending owner review
+- **Approver:** Joshua Lutkemuller, CFA (2026-10-23 — approved in chat)
 - **Last updated:** 2026-10-23
 
 > WHAT and WHY. References to the parent spec are written `0113` R-nnn /
